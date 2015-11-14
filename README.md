@@ -34,7 +34,7 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
  - I don’t know what the equivalent is on windows. 
  - Alternatively, you can import all the files one by one using the KLayout IDE.  How to use the <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
 
-I am personally using GitHub desktop to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository.
+I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository.
 
 
 ##Screenshots:
