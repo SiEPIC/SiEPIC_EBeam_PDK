@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+
+# SiEPIC_EBeam_PCells in Python
+
+"""
+This Python file implements a library called "SiEPIC_EBeam_PCells" with PCells:
+
+1) Circle: draws a circle. It demonstrates the basic implementation techniques for a PCell 
+and how to use the "guiding shape" feature to implement a handle for the circle
+radius.  from KLayout examples.
+class Circle(pya.PCellDeclarationHelper):
+
+2) Double-bus ring resonator
+class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
+class DoubleBus_Ring(pya.PCellDeclarationHelper):
+def layout_Ring(cell, layer, x, y, r, w, npoints):
+
+Also includes additional functions:
+
+1) code for waveguide bends:
+def layout_waveguide_abs(cell, layer, points, w, radius):
+def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
+
+2) function for making polygon text
+def layout_pgtext(cell, layer, x, y, text, mag):
+
+3) functions for inspecting PCell parameters
+def PCell_get_parameter_list ( cell_name, library_name ):
+def PCell_get_parameters ( pcell ):
+
+4) functions to delete extra cells
+def delete_extra_top_cells():
+
+
+NOTE: after changing the code, the macro needs to be rerun to install the new
+implementation. The macro is also set to "auto run" to install the PCell 
+when KLayout is run.
+
+Version history:
+
+Lukas Chrostowski           2015/11/05 - 2015/11/10
+ - Double-bus ring resonator
+ - waveguide bends
+ - PCell parameter functions
+ - polygon text
+
+"""
+
+import pya
+import math
+import numpy as n
+
+def layout_waveguide_abs(cell, layer, points, w, radius):
+    # create a path, then convert to a polygon waveguide with bends
+    # cell: cell into which to place the waveguide
+    # layer: layer to draw on
+    # points: array of vertices, absolute coordinates on the current cell
+    # w: waveguide width
+    
+    # example usage:
+    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    # SiLayer = pya.LayerInfo(1, 0)
+    # points = [ [15, 2.75], [30, 2.75] ]  # units of microns.
+    # layout_waveguide_abs(cell, SiLayer, points, 0.5, 10)
+
+    points=n.array(points)
+    start_point=points[0]
+    points = points - start_point
+    
+    layout_waveguide_rel(cell, layer, start_point, points, w, radius)
+
+
+def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
+    # create a path, then convert to a polygon waveguide with bends
+    # cell: cell into which to place the waveguide
+    # layer: layer to draw on
+    # start_point: starting vertex for the waveguide
+    # points: array of vertices, relative to start_point
+    # w: waveguide width
+    
+    # example usage:
+    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    # SiLayer = pya.LayerInfo(1, 0)
+    # points = [ [15, 2.75], [30, 2.75] ]  # units of microns.
+    # layout_waveguide_rel(cell, SiLayer, points, 0.5, 10)
+
+    
+    print "* layout_waveguide_rel(%s, %s, %s, %s)" % (cell.name, layer, w, radius)
+
+    ly = cell.layout() 
+    dbu = cell.layout().dbu
+
+    start_point=n.array(start_point)/dbu
+    points=n.array(points)
+
+    a1 = []
+    for p in points:
+      a1.append (pya.DPoint(p[0], p[1]))
+  
+    wg_path = pya.DPath(a1, w)
+
+    npoints = 400
+    param = { "npoints": npoints, "radius": radius, "path": wg_path, "layer": layer }
+
+    pcell = ly.create_cell("ROUND_PATH", "Basic", param )
+
+    # Configure the cell location
+    trans = pya.Trans(pya.Point(start_point[0], start_point[1]))
+
+    # Place the PCell
+    cell.insert(pya.CellInstArray(pcell.cell_index(), trans))
+
+
+
+def layout_waveguide_rel2(cell, layer, start_point, points, w, radius):
+    # create a path, then convert to a polygon waveguide with bends
+    # cell: cell into which to place the waveguide
+    # layer: layer to draw on
+    # start_point: starting vertex for the waveguide
+    # points: array of vertices, relative to start_point
+    # w: waveguide width
+    
+    # example usage:
+    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    # SiLayer = cell.layout().layer(pya.LayerInfo(1, 0))
+    # points = [ [15, 2.75], [30, 2.75] ]  # units of microns.
+    # layout_waveguide_rel(cell, SiLayer, points, 0.5, 10)
+
+    print "* layout_waveguide_rel2(%s, %s, %s, %s)" % (cell.name, layer, w, radius)
+
+    ly = cell.layout() 
+    dbu = cell.layout().dbu
+
+    start_point=n.array(start_point)/dbu
+    points=n.array(points)
+
+    a1 = []
+    for p in points:
+      a1.append (pya.DPoint(p[0], p[1]))
+  
+    wg_path = pya.DPath(a1, w)
+
+    # for the basic library
+    lib = pya.Library.library_by_name("Basic")
+    if lib == None:
+       raise Exception("Unknown lib 'Basic'")
+
+    pcell_decl = lib.layout().pcell_declaration("ROUND_PATH");
+    if pcell_decl == None:
+       raise Exception("Unknown PCell 'ROUND_PATH'")
+
+    npoints = 400
+    param = { "npoints": npoints, "radius": radius, "path": wg_path, "layer": layer }
+    pv = []
+    for p in pcell_decl.get_parameters():
+       if p.name in param:
+         pv.append(param[p.name])
+       else:
+         pv.append(p.default)
+
+    # create the layout, presumably to trigger "produce_impl"
+    pcell_index = ( ly.add_pcell_variant(lib, pcell_decl.id(), pv) )
+
+    # Configure the cell location
+    trans = pya.Trans(pya.Point(start_point[0], start_point[1]))
+
+    # Place the PCell
+    inst = cell.insert(pya.CellInstArray(pcell_index, trans))
+ 
+
+
+def layout_pgtext(cell, layer, x, y, text, mag):
+    # example usage:
+    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    # layout_pgtext(cell, pya.LayerInfo(10, 0), 0, 0, "test", 1)
+
+    # for the Text polygon:
+    textlib = pya.Library.library_by_name("Basic")
+    if textlib == None:
+      raise Exception("Unknown lib 'Basic'")
+
+    textpcell_decl = textlib.layout().pcell_declaration("TEXT");
+    if textpcell_decl == None:
+      raise Exception("Unknown PCell 'TEXT'")
+    param = { 
+      "text": text, 
+      "layer": layer, 
+      "mag": mag 
+    }
+    pv = []
+    for p in textpcell_decl.get_parameters():
+      if p.name in param:
+        pv.append(param[p.name])
+      else:
+        pv.append(p.default)
+    # "fake PCell code" 
+    text_cell = cell.layout().create_cell("Temp_text_cell")
+    textlayer_index = cell.layout().layer(layer)
+    textpcell_decl.produce(cell.layout(), [ textlayer_index ], pv, text_cell)
+
+    # fetch the database parameters
+    dbu = cell.layout().dbu
+    t = pya.Trans(pya.Trans.R0, x/dbu, y/dbu)
+    cell.insert(pya.CellInstArray(text_cell.cell_index(), t))
+    # flatten and delete polygon text cell
+    cell.flatten(True)
+
+    print "Done layout_pgtext"
+
+
+def layout_Ring(cell, layer, x, y, r, w, npoints):
+    # function to produce the layout of a ring resonator
+    # cell: layout cell to place the layout
+    # layer: which layer to use
+    # x, y: location of the origin
+    # r: radius
+    # w: waveguide width
+    # units in microns
+
+    # example usage.  Places the ring layout in the presently selected cell.
+    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    # layout_Ring(cell, cell.layout().layer(pya.LayerInfo(1, 0)), 0, 0, 10, 0.5, 400)
+
+
+    # fetch the database parameters
+    dbu = cell.layout().dbu
+    
+    # compute the circle
+    pts = []
+    da = math.pi * 2 / npoints
+    for i in range(0, npoints+1):
+      pts.append(pya.Point.from_dpoint(pya.DPoint((x+(r+w/2)*math.cos(i*da)/dbu), (y+(r+w/2)*math.sin(i*da)/dbu))))
+    for i in range(npoints, -1, -1):
+      pts.append(pya.Point.from_dpoint(pya.DPoint((x+(r-w/2)*math.cos(i*da)/dbu), (y+(r-w/2)*math.sin(i*da)/dbu))))
+    
+    # create the shape
+    cell.shapes(layer).insert(pya.Polygon(pts))
+
+    # end of layout_Ring
+
+
+class DoubleBus_Ring(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the double bus ring resonator.
+  Consists of a ring with 2 straight waveguides.
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(DoubleBus_Ring, self).__init__()
+
+    # declare the parameters
+    self.param("l", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("npoints", self.TypeInt, "Number of points", default = 500)     
+    self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
+    self.param("textl", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+    # this hidden parameter is used to determine whether the radius has changed
+    # or the "s" handle has been moved
+    self.param("ru", self.TypeDouble, "Radius", default = 0.0, hidden = True)
+    self.param("rd", self.TypeDouble, "Double radius", readonly = True)
+
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "DoubleBus_Ring(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+
+  def coerce_parameters_impl(self):
+  
+    # We employ coerce_parameters_impl to decide whether the handle or the 
+    # numeric parameter has changed (by comparing against the effective 
+    # radius ru) and set ru to the effective radius. We also update the 
+    # numerical value or the shape, depending on which on has not changed.
+    rs = None
+    if isinstance(self.s, pya.DPoint): 
+      # compute distance in micron
+      rs = self.s.distance(pya.DPoint(0, 0))
+    if rs != None and abs(self.r-self.ru) &lt; 1e-6:
+      self.ru = rs
+      self.r = rs 
+    else:
+      self.ru = self.r
+      self.s = pya.DPoint(0, 0)
+    
+    self.rd = 2*self.r
+    
+    # n must be larger or equal than 8
+    if self.npoints &lt;= 8:
+      self.npoints = 8
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+
+
+    # Create the ring resonator:
+    layout_Ring(self.cell, self.l_layer, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, self.npoints)
+
+    # Create the two waveguides
+    wg1 = pya.Box(0, -self.w/2/dbu, (self.w+2*self.r)/dbu, self.w/2/dbu)
+    self.cell.shapes(self.layer).insert(wg1)
+
+    y_offset = 2*self.r + 2*self.g + 2*self.w
+    wg2 = pya.Box(0, (y_offset-self.w/2)/dbu, (self.w+2*self.r)/dbu, (y_offset+self.w/2)/dbu)
+    self.cell.shapes(self.layer).insert(wg2)
+
+
+    # Add a polygon text description
+    if self.textpolygon:
+      layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
+
+    print "Done drawing the layout for – DoubleBus_Ring: %.3f-%g" % ( self.r, self.g)
+
+
+
+class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the DoubleBus_Ring test structure with grating couplers and waveguides
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(TestStruct_DoubleBus_Ring, self).__init__()
+
+    # declare the parameters
+    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("npoints", self.TypeInt, "Number of points", default = 500)     
+    self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
+    self.param("textlayer", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "TestStruct_DoubleBus_Ring(R=" + ('%s' % self.r) + ",g=" + ('%s' % (1000*self.g)) + ")"
+
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    cell = self.cell
+    
+    SiLayer = self.layer
+#    print SiLayer
+    
+    SiLayerN = ly.layer(self.layer)
+    TextLayerN = ly.layer(self.textlayer)
+
+    # Import cells from the SiEPIC GDS Library, and instantiate them
+
+        
+    # Ring resonator PCell
+    r = self.r
+    wg_width = self.w
+    g = self.g
+    y_ring = 127*3/2+r
+
+
+#    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "l": SiLayer})
+#    print "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) )
+#    t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
+#    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+#    print instance.cell_index
+
+
+    lib = pya.Library.library_by_name("SiEPIC")
+    if lib == None:
+      raise Exception("Unknown lib 'SiEPIC'")
+
+    pcell_decl = lib.layout().pcell_declaration("DoubleBus_Ring");
+    if pcell_decl == None:
+      raise Exception("Unknown PCell 'DoubleBus_Ring'")
+    param = { 
+      "r": r, 
+      "w": wg_width, 
+      "g": g,
+      "l": SiLayer
+    }
+    pv = []
+    for p in pcell_decl.get_parameters():
+      if p.name in param:
+        pv.append(param[p.name])
+      else:
+        pv.append(p.default)
+    # "fake PCell code" 
+    pcell = cell.layout().create_cell("Ring")
+    pcell_decl.produce(ly, [ SiLayerN ], pv, pcell)
+    t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
+    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+
+
+    # Grating couplers, Ports 1, 2, 3, 4 (top-down):
+    GC_name = "TE1550_SubGC_neg31_oxide"
+    GC_imported = ly.cell(GC_name)
+    if GC_imported == None:
+      GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
+    else:
+      GC_imported = GC_imported.cell_index()  
+    print "Cell: GC_imported: #%s" % GC_imported
+    t = pya.Trans(pya.Trans.R0, 0, 0)
+    instance = cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 4, 1))
+    print instance.cell_index
+
+    # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
+    t = pya.Trans(0, 127*2/dbu)
+    text = pya.Text ("opt_in_TE_1550_device_DoubleBusRing", t)
+    shape = cell.shapes(TextLayerN).insert(text)
+    shape.text_size = 3/dbu
+
+
+
+    # Create paths for waveguides
+    wg_bend_radius = 10
+
+    # GC3 to bottom-left of ring
+    points = [ [0, 127], [10,127], [10, y_ring-2*r-wg_width] ] 
+    layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+
+    # GC4 to bottom-right of ring
+    points = [ [0, 0], [10+2*r+2*g+2*wg_width,0], [10+2*r+2*g+2*wg_width, y_ring-2*r-wg_width]  ] 
+    layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+
+    # GC2 to top-right of ring
+    points = [ [10,y_ring], [10, 127*2], [0,127*2] ] 
+    layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+
+    # GC1 to top-left of ring
+    points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
+    layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+
+
+
+
+    print "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g)
+
+
+
+
+
+
+
+class Circle(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the circle
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Circle, self).__init__()
+
+    # declare the parameters
+    self.param("l", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 5.1)
+    self.param("n", self.TypeInt, "Number of points", default = 300)     
+    # this hidden parameter is used to determine whether the radius has changed
+    # or the "s" handle has been moved
+    self.param("ru", self.TypeDouble, "Radius", default = 0.0, hidden = True)
+    self.param("rd", self.TypeDouble, "Double radius", readonly = True)
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Circle(L=" + str(self.l) + ",R=" + ('%.3f' % self.r) + ")"
+  
+  def coerce_parameters_impl(self):
+  
+    # We employ coerce_parameters_impl to decide whether the handle or the 
+    # numeric parameter has changed (by comparing against the effective 
+    # radius ru) and set ru to the effective radius. We also update the 
+    # numerical value or the shape, depending on which on has not changed.
+    rs = None
+    if isinstance(self.s, pya.DPoint): 
+      # compute distance in micron
+      rs = self.s.distance(pya.DPoint(0, 0))
+    if rs != None and abs(self.r-self.ru) &lt; 1e-6:
+      self.ru = rs
+      self.r = rs 
+    else:
+      self.ru = self.r
+      self.s = pya.DPoint(-self.r, 0)
+    
+    self.rd = 2*self.r
+    
+    # n must be larger or equal than 4
+    if self.n &lt;= 4:
+      self.n = 4
+  
+  def can_create_from_shape_impl(self):
+    # Implement the "Create PCell from shape" protocol: we can use any shape which 
+    # has a finite bounding box
+    self.shape.is_box() or self.shape.is_polygon() or self.shape.is_path()
+  
+  def parameters_from_shape_impl(self):
+    # Implement the "Create PCell from shape" protocol: we set r and l from the shape's 
+    # bounding box width and layer
+    self.r = self.shape.bbox.width() * self.layout.dbu() / 2
+    self.l = self.layout.get_info(self.layer)
+  
+  def transformation_from_shape_impl(self):
+    # Implement the "Create PCell from shape" protocol: we use the center of the shape's
+    # bounding box to determine the transformation
+    return pya.Trans(sef.shape.bbox().center())
+  
+  def produce_impl(self):
+  
+    # This is the main part of the implementation: create the layout
+
+    # fetch the parameters
+    ru_dbu = self.ru / self.layout.dbu
+    
+    # compute the circle
+    pts = []
+    da = math.pi * 2 / self.n
+    for i in range(0, self.n):
+      pts.append(pya.Point.from_dpoint(pya.DPoint(ru_dbu * math.cos(i * da), ru_dbu * math.sin(i * da))))
+    
+    # create the shape
+    self.cell.shapes(self.l_layer).insert(pya.Polygon(pts))
+
+
+
+
+def delete_extra_top_cells():
+
+  # delete all the extra top cells; keep the one selected
+
+  # Find the currently selected layout.
+  ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+  if ly == None:
+    raise Exception("No layout")
+  # find the currently selected cell:
+  cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+  if cell == None:
+    raise Exception("No cell")
+
+
+  print "deleting cells..."
+  top_keep = cell.cell_index()
+  top_delete = []
+  for top in ly.each_top_cell():
+    if top == top_keep:
+        print "keep top cell: " + str(ly.cell(top_keep).name)
+    else:
+        print "delete top cell: " + str(ly.cell(top).name)
+        top_delete.append(top)
+  print top_delete
+  ly.delete_cells(top_delete)
+
+
+
+def PCell_get_parameter_list ( cell_name, library_name ):
+  # function to list all the parameters &amp; defaults for a PCell
+  # example usage:
+  # PCell_get_parameter_list("CIRCLE", "Basic")
+
+  print "* def PCell_get_parameter_list ( %s, %s): " % ( cell_name, library_name )
+  
+  lib = pya.Library.library_by_name(library_name)
+  if lib == None:
+    raise Exception("Unknown lib '%s'" % library_name)
+
+  pcell_decl = lib.layout().pcell_declaration(cell_name);
+  if pcell_decl == None:
+     raise Exception("Unknown PCell '%s'" % cell_name)
+
+  type2s = ['TypeBoolean', 'TypeDouble', 'TypeInt', 'TypeLayer', 'TypeList', 'TypeNone', 'TypeShape', 'TypeString']
+
+  for p in pcell_decl.get_parameters():
+    if ~p.readonly:
+      print "Name: %s, %s, unit: %s, default: %s, description: %s%s" % \
+        (p.name, type2s[p.type], p.unit, p.default, p.description, ", hidden" if p.hidden else ".")
+
+def PCell_get_parameters ( pcell ):
+  # function to list the values for all parameters for an intantiated PCell
+  # example usage:
+  # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+  # pcell = ly.create_cell("CIRCLE", "Basic", { "radius": 10, "layer": pya.LayerInfo(1, 0) } )
+  # PCell_get_parameters( pcell )
+
+  print "* def PCell_get_parameters ( %s ):" % pcell 
+  print pcell.pcell_parameters()
+
+  params = pcell.pcell_parameters_by_name()
+
+  for param in params.keys():
+    print "Parameter: %s, Value: %s" % (param, params[param])
+
+
+
+
+class SiEPIC(pya.Library):
+  """
+  The library where we will put the PCell into 
+  """
+
+  def __init__(self):
+
+    print "Initializing SiEPIC EBeam PCells library."
+  
+    # Set the description
+    self.description = "SiEPIC EBeam PCells"
+    
+    # Create the PCell declarations
+    self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
+#    self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
+    self.layout().register_pcell("Circle", Circle())
+    
+    # Register us with the name "SiEPIC_EBeam_PCells".
+    # If a library with that name already existed, it will be replaced then.
+    self.register("SiEPIC")
+ 
+# Instantiate and register the library
+SiEPIC()
+</text>
+</klayout-macro>
