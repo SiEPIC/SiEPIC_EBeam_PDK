@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+def check_point_in_segment(a, b, c):
+    """ How can you determine a point is between two other points on a line segment?
+    http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+    by Cyrille Ka.  Check if c is between a and b? """
+
+    crossproduct = (c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y)
+    if abs(crossproduct) != 0 : return False 
+
+    dotproduct = (c.x - a.x) * (b.x - a.x) + (c.y - a.y)*(b.y - a.y)
+    if dotproduct &lt; 0 : return False
+
+    squaredlengthba = (b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)
+    if dotproduct &gt; squaredlengthba: return False
+
+    return True
+
+def check_segments_colinear_overlapping( segment1, segment2 ):
+  """ 
+  we want to identify ONLY the following situation:
+        X  O  X  O
+  where XX is a segment, and OO is another segment
+  namely, colinear, but also XX overlapping OO
+  example usage: 
+    a = pya.Point(0,0)
+    b = pya.Point(50,0)
+    c = pya.Point(50,0)
+    d = pya.Point(100,0)
+    segment1 = [ a, b ]
+    segment2 = [ c, d ]
+    print check_segments_colinear_overlapping( segment1, segment2 )
+  """  
+  # check for one of the segment2 points being inside segment1
+  check_between1 = check_point_in_segment( segment1[0], segment1[1], segment2[0] ) | \
+                  check_point_in_segment( segment1[0], segment1[1], segment2[1] )
+  # check for one of the segment1 points being inside segment2
+  check_between2 = check_point_in_segment( segment2[0], segment2[1], segment1[0] ) | \
+                  check_point_in_segment( segment2[0], segment2[1], segment1[1] )
+  return check_between1 and check_between2
+
+  
+#print check_point_in_segment(a, b, c)
+</text>
+</klayout-macro>
