@@ -5,6 +5,11 @@
 - Package for KLayout, klayout.de (developed on KLayout version 0.24.3, OSX)
 - Instruction on design, layout, fabrication, test, data analysis for silicon photonics provided in the edX course: <a href="edx.org/course/silicon-photonics-design-fabrication-ubcx-phot1x">Silicon Photonics Design, Fabrication and Data Analysis</a>.
 
+##Objectives:
+ - Use open-source layout tool (KLayout) to implement a sophisticated layout design environment for silicon photonics
+ - Support for both GUI and script-based layout, or combinations of both.
+ - Whereas a typical schematic-driven design flow includes a schematic, circuit simulation, layout, and verification, the approach taken here is Layout-driven, followed by verification, then a schematic (via a netlist) and simulations.
+
 ##Package includes:
 
 - PCells: ring resonator; test structure layout with grating couplers and instantiating the ring resonator
