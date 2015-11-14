@@ -8,7 +8,7 @@
 ##Objectives:
  - Use open-source layout tool (KLayout) to implement a sophisticated layout design environment for silicon photonics
  - Support for both GUI and script-based layout, or combinations of both.
- - Whereas a typical schematic-driven design flow includes a schematic, circuit simulation, layout, and verification, the approach taken here is Layout-driven, followed by verification, then a schematic (via a netlist) and simulations.
+ - Whereas a typical schematic-driven design flow includes a schematic, circuit simulation, layout, and verification (see Chapter 10 of the <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">textbook</a>, the approach taken here is Layout-driven, followed by verification, then a schematic (via a netlist) and simulations.
 
 ##Package includes:
 
