@@ -167,7 +167,7 @@ def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
   a1 = []
   for p in dpoints:
     a1.append (pya.Point(p[0], p[1]))
-    path = pya.Path(a1, optical_waveguide.wg_width*4/dbu)
+  path = pya.Path(a1, optical_waveguide.wg_width*4/dbu)
   topcell.shapes(LayerErrorN).insert(path)
   x = numpy.array(dpoints)[:,0].mean()*dbu
   y = numpy.array(dpoints)[:,1].mean()*dbu
@@ -373,9 +373,9 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           path= iter2.shape().path.transformed(iter2.itrans())
           path= path.transformed(iter1.itrans())
           print "%s: PinRec in cell #{}: %s, path -- %s"   % (i, iter2.cell().name, path)
-        points = path_to_points(path)  
-        optical_pins.append (Optical_pin (points, component_n) )
-        optical_components[component_n-1].npins += 1
+          points = path_to_points(path)  
+          optical_pins.append (Optical_pin (points, component_n) )
+          optical_components[component_n-1].npins += 1
         iter2.next()
       iter2 = subcell.begin_shapes_rec(LayerFbrTgtN)
       while not(iter2.at_end()):
@@ -500,6 +500,7 @@ def flag_component_error(box, text, x, y):
   topcell.shapes(LayerErrorN).insert(box)
   layout_errors.append(Layout_error(text, x, y) )
   print text
+  wtext.insertHtml('%s&lt;br&gt;' %text)
 
 
 def check_connectivity(optical_components, topcell, LayerErrorN):

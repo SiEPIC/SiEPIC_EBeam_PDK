@@ -212,7 +212,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     super(DoubleBus_Ring, self).__init__()
 
     # declare the parameters
-    self.param("l", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("layer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
@@ -220,6 +220,8 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     self.param("npoints", self.TypeInt, "Number of points", default = 500)     
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textl", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -231,18 +233,44 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # fetch the parameters
     dbu = self.layout.dbu
+    ly = self.layout
+    
+    SiLayer = self.layer
+    SiLayerN = ly.layer(self.layer)
+    TextLayerN = ly.layer(self.textl)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
 
-
+    
     # Create the ring resonator:
-    layout_Ring(self.cell, self.l_layer, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, self.npoints)
+    layout_Ring(self.cell, SiLayerN, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, self.npoints)
+
+#    w = int(round(self.w/dbu))
+#    r = int(round(self.r/dbu))
 
     # Create the two waveguides
     wg1 = pya.Box(0, -self.w/2/dbu, (self.w+2*self.r)/dbu, self.w/2/dbu)
-    self.cell.shapes(self.layer).insert(wg1)
-
+    self.cell.shapes(SiLayerN).insert(wg1)
     y_offset = 2*self.r + 2*self.g + 2*self.w
-    wg2 = pya.Box(0, (y_offset-self.w/2)/dbu, (self.w+2*self.r)/dbu, (y_offset+self.w/2)/dbu)
-    self.cell.shapes(self.layer).insert(wg2)
+    wg2 = pya.Box(0, round((y_offset-self.w/2)/dbu), round((self.w+2*self.r)/dbu), round((y_offset+self.w/2)/dbu))
+    self.cell.shapes(SiLayerN).insert(wg2)
+
+    # Create the pins, as short paths:
+    pin_length = 0.2
+    pin = pya.Path([pya.Point(0, 0), pya.Point(pin_length/dbu, 0)], self.w/dbu)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    pin = pya.Path([pya.Point((self.w+2*self.r-pin_length)/dbu, 0), pya.Point((self.w+2*self.r)/dbu, 0)],self.w/dbu )
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    pin = pya.Path([pya.Point(0, (y_offset)/dbu), pya.Point(pin_length/dbu, (y_offset)/dbu)], self.w/dbu)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    pin = pya.Path([pya.Point((self.w+2*self.r-pin_length)/dbu, (y_offset)/dbu), pya.Point((self.w+2*self.r)/dbu, (y_offset)/dbu)], self.w/dbu)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+
+
+
+    # Create the device recognition layer
+    dev = pya.Box(0, -self.w*3/dbu, (self.w+2*self.r)/dbu, (y_offset+self.w*3)/dbu )
+    self.cell.shapes(LayerDevRecN).insert(dev)
 
 
     # Add a polygon text description
@@ -272,6 +300,8 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     self.param("npoints", self.TypeInt, "Number of points", default = 500)     
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textlayer", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -287,9 +317,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     cell = self.cell
     
     SiLayer = self.layer
-#    print SiLayer
-    
-    SiLayerN = ly.layer(self.layer)
+    SiLayerN = ly.layer(SiLayer)
     TextLayerN = ly.layer(self.textlayer)
 
     # Import cells from the SiEPIC GDS Library, and instantiate them
@@ -309,6 +337,8 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 #    print instance.cell_index
 
 
+
+
     lib = pya.Library.library_by_name("SiEPIC")
     if lib == None:
       raise Exception("Unknown lib 'SiEPIC'")
@@ -320,8 +350,11 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
       "r": r, 
       "w": wg_width, 
       "g": g,
-      "l": SiLayer
+      "layer": SiLayer,
+      "devrec": self.devrec, 
+      "pinrec": self.pinrec
     }
+
     pv = []
     for p in pcell_decl.get_parameters():
       if p.name in param:
@@ -329,14 +362,14 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
       else:
         pv.append(p.default)
     # "fake PCell code" 
-    pcell = cell.layout().create_cell("Ring")
+    pcell = ly.create_cell("Ring")
     pcell_decl.produce(ly, [ SiLayerN ], pv, pcell)
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
 
 
     # Grating couplers, Ports 1, 2, 3, 4 (top-down):
-    GC_name = "TE1550_SubGC_neg31_oxide"
+    GC_name = "ebeam_gc_te1550"
     GC_imported = ly.cell(GC_name)
     if GC_imported == None:
       GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
@@ -374,7 +407,12 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
     layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
 
+
+
     print "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g)
+
+
+
 
 
 
@@ -397,6 +435,8 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     self.param("npoints", self.TypeInt, "Number of points", default = 500)     
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textlayer", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -412,13 +452,10 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     cell = self.cell
     
     SiLayer = self.layer
-#    print SiLayer
-    
     SiLayerN = ly.layer(self.layer)
     TextLayerN = ly.layer(self.textlayer)
 
     # Import cells from the SiEPIC GDS Library, and instantiate them
-
         
     # Ring resonator PCell
     r = self.r
@@ -426,8 +463,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     g = self.g
     y_ring = 127*3/2+r
 
-
-    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "l": SiLayer})
+    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "layer": SiLayer, "devrec": self.devrec, "pinrec": self.pinrec })
     print "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) )
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
@@ -435,7 +471,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
 
 
     # Grating couplers, Ports 1, 2, 3, 4 (top-down):
-    GC_name = "TE1550_SubGC_neg31_oxide"
+    GC_name = "ebeam_gc_te1550"
     GC_imported = ly.cell(GC_name)
     if GC_imported == None:
       GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
@@ -451,8 +487,6 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     text = pya.Text ("opt_in_TE_1550_device_DoubleBusRing", t)
     shape = cell.shapes(TextLayerN).insert(text)
     shape.text_size = 3/dbu
-
-
 
     # Create paths for waveguides
     wg_bend_radius = 10
@@ -473,7 +507,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
     layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
 
-    print "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g)
+    print "Done drawing the layout for – TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g)
 
 
 
@@ -503,7 +537,7 @@ def PCell_get_parameters ( pcell ):
   # function to list the values for all parameters for an intantiated PCell
   # example usage:
   # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
-  # pcell = ly.create_cell("CIRCLE", "Basic", { "radius": 10, "layer": pya.LayerInfo(1, 0) } )
+  # pcell = ly.create_cell("CIRCLE", "Basic", { "actual_radius": 10, "layer": pya.LayerInfo(1, 0) } )
   # PCell_get_parameters( pcell )
 
   print "* def PCell_get_parameters ( %s ):" % pcell 
@@ -533,7 +567,6 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring2", TestStruct_DoubleBus_Ring2())
-#    self.layout().register_pcell("Circle", Circle())
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
