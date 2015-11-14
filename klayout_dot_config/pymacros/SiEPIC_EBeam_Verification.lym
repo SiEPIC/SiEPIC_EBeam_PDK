@@ -611,12 +611,6 @@ def gen_ui():
 
   wdg.show()
 
-gen_ui()
-print(wdg)
-
-wtext.insertHtml('Running SiEPIC-EBeam-PDK Verification and Netlist Generation.&lt;br&gt;')
-
-
 def make_test_layout(cell, layer):
   delete_extra_top_cells()
   cell.layout().prune_subcells(cell.cell_index(), 10)
@@ -631,42 +625,63 @@ def make_test_layout(cell, layer):
   trans = pya.Trans(pya.Point(3000,3000))
   cell1.insert(pya.CellInstArray(cell2.cell_index(), trans))
 
+
+
+# ************************************************************************
+# ************************************************************************
+#  Main script:
+# ************************************************************************
+# ************************************************************************
+
+# Create a GUI for the output:
+gen_ui()
+print(wdg)
+wtext.insertHtml('Running SiEPIC-EBeam-PDK Verification and Netlist Generation.&lt;br&gt;')
+
+# Define layers based on PDK_functions:
+SiLayerN = layout.layer(SiLayer)
+LayerTextN = layout.layer(LayerText)
+LayerPinRecN = layout.layer(LayerPinRec)
+LayerDevRecN = layout.layer(LayerDevRec)
+LayerFbrTgtN = layout.layer(LayerFbrTgt)
+LayerErrorN = layout.layer(LayerError)
+
+# Clear the previous errors:
 clear_ErrorLayer(topcell, LayerErrorN)
 
+# optional - make a test layout
 #make_test_layout(topcell, SiLayer)
 
+# initialize the arrays to keep track of layout objects
 optical_components = []
 optical_waveguides = []
 optical_pins = []
 optical_nets = []
 
-#wtext.insertHtml('&lt;br&gt;* Find_all_components – DevRec:&lt;br&gt;&lt;br&gt;')
+# Search the layout for the components and waveguides:
 print "* calling find_all_components() – DevRec"
 find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
-
-#wtext.insertHtml('&lt;br&gt;* Find_all_waveguides:&lt;br&gt;&lt;br&gt;')
 print "* calling find_all_waveguides()"
-# Array of optical waveguides:
 find_all_waveguides(topcell, SiLayerN)
 
-#wtext.insertHtml('&lt;br&gt;* Identify_all_nets:&lt;br&gt;&lt;br&gt;')
+# Search the arrays to identify all the nets:
 identify_all_nets(optical_pins, optical_waveguides, optical_components)
 
+# Check the layout for errors, using the above arrays:
 print ""
 print "Checking layout for errors: "
 wtext.insertHtml('&lt;br&gt;* Checking layout for errors:&lt;br&gt;&lt;br&gt;')
 layout_errors=[]
 # Check waveguides for waveguide-specific problems:
 check_waveguides(optical_waveguides, topcell, LayerErrorN)
-lv.add_missing_layers()
-
+# Check connectivity between components and waveguides:
 check_connectivity(optical_components, topcell, LayerErrorN)
-
+lv.add_missing_layers()
 print "*** Number of errors found: %s." % len(layout_errors)
 wtext.insertHtml('&lt;br&gt;*** Number of errors found: %s.&lt;br&gt;' % len(layout_errors) )
 
 
-
+# Output the Spice netlist:
 wtext.insertHtml('&lt;br&gt;* Spice netlist output:&lt;br&gt;&lt;br&gt;')
 print ""
 print "Spice output: "
@@ -674,9 +689,18 @@ print ""
 list_optical_components(optical_components)
 list_optical_waveguides(optical_waveguides)
 
-#find_automated_measurement_labels(topcell, LayerTextN)
+# Find the automated measurement coordinates:
+wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
+print ""
+print "Automated measurement coordinates: "
+print ""
+find_automated_measurement_labels(topcell, LayerTextN)
 
+# Done
 wtext.insertHtml('&lt;br&gt;Done.&lt;br&gt;')
+print ""
+print "Done. "
+print ""
 
 
 

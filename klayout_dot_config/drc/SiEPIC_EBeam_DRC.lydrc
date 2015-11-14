@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>drc</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>drc_scripts</group-name>
+ <menu-path>tools_menu.drc.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
+ <text># Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
+# This is a sample:
+
+report("DRC")
+## minimum feature size of 60nm
+Si=input(1,0)
+Si.width(0.06).output("Silicon_width","minimum feature size violation")
+
+## make sure the devices are within the floor plan layer region;
+#boundary=input(99)
+#Si.outside(boundary).output("Boundary","devices are out of boundary")
+</text>
+</klayout-macro>
