@@ -1,12 +1,9 @@
 # SiEPIC_EBeam_PDK
 
-SiEPIC EBeam PDK, Library
-
-Package for KLayout, klayout.de
-
-by Lukas Chrostowski, (c) 2015
-
-Developed on KLayout version 0.24.3, OSX.
+- <a href="www.siepic.ubc.ca">SiEPIC</a> EBeam PDK, Library - for silicon photonics layout, design and verification
+- by Lukas Chrostowski, (c) 2015
+- Package for KLayout, klayout.de (developed on KLayout version 0.24.3, OSX)
+- Instruction on design, layout, fabrication, test, data analysis for silicon photonics provided in the edX course: <a href="edx.org/course/silicon-photonics-design-fabrication-ubcx-phot1x">Silicon Photonics Design, Fabrication and Data Analysis</a>.
 
 ##Package includes:
 
@@ -18,6 +15,7 @@ Developed on KLayout version 0.24.3, OSX.
  - Verification: Identifying if there are missing connections, mismatched waveguides, too few points in a bend, etc. 
  - Creating a Spice netlist suitable for importing into Lumerical INTERCONNECT for circuit simulations. Including waveguide length (wg_length) for all waveguides
  - Example layout using the library for verification.
+ - Layer definition
 
 ## Download:
 
