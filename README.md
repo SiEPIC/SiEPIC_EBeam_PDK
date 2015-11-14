@@ -19,8 +19,8 @@
  - Scanning the layout. Finding waveguides, devices, pins.  
  - Verification: Identifying if there are missing connections, mismatched waveguides, too few points in a bend, etc. 
  - Creating a Spice netlist suitable for importing into Lumerical INTERCONNECT for circuit simulations. Including waveguide length (wg_length) for all waveguides
- - Example layout using the library for verification.
- - Layer definition
+- Example layout using the library for verification.
+- Layer definition
 
 ## Download:
 
