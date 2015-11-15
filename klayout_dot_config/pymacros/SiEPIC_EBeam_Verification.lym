@@ -318,6 +318,16 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
   
   # Find all the DevRec shapes; identify the component it belongs; record the instance info as an Optical_component 
   # for each component instance, also find the Pins and Fibre ports.
+  
+  # Use the pin names on layer PinRec to sort the pins in alphabetical order
+  #   Requires that a text label be in PinRec layer, co-linear inside the PinRec path.
+  # sorting the pins uses the Pin_info class:
+  class Pin_info:
+    def __init__(self, pin_text, pin_x, pin_y):
+      self.pin_text = pin_text
+      self.pin_x = pin_x
+      self.pin_y = pin_y
+
 
   # Find all the DevRec shapes
   iter1 = cell.begin_shapes_rec(LayerDevRecN)
@@ -341,6 +351,12 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
 
     # A component was found. record the instance info as an Optical_component 
     if found_component:
+      # Find text label for DevRec, to get Library name
+      iter2 = subcell.begin_shapes_rec(LayerDevRecN)
+      while not(iter2.at_end()):
+        if iter2.shape().is_text():
+          print "%s: DevRec label: %s" % (i, iter2.shape().text)
+        iter2.next()
       library = "library/EBeam"
       x = iter1.itrans().disp.x*dbu
       y = iter1.itrans().disp.y*dbu
@@ -349,20 +365,53 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       optical_components.append ( Optical_component (component, instance, x, y, flip, rotate, library) )
       component_n = optical_components[len(optical_components)-1].n
       
-      # Find the PinRec and FbrTgt, and record info as Optical_pin
+      # Find the PinRec and record info as Optical_pin
+      
+      # Use the pin names on layer PinRec to sort the pins in alphabetical order
+      # read; sort; save data.
       iter2 = subcell.begin_shapes_rec(LayerPinRecN)
+      pin_info1 = []  # array for Pin_info
+      path_points=[]
+      path_shape=[]
       while not(iter2.at_end()):
+        # Find text label for PinRec, to get the port numbers
+        if iter2.shape().is_text():
+          texto= iter2.shape().text.transformed(iter2.itrans())
+          texto= texto.transformed(iter1.itrans())
+          x = texto.x
+          y = texto.y
+          #print "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y)
+          pin_info1.append(Pin_info(iter2.shape().text.string, x, y))
         if iter2.shape().is_path():
           path= iter2.shape().path.transformed(iter2.itrans())
           path= path.transformed(iter1.itrans())
           points = path_to_points(path)  
           x = points[0][0]
           y = points[0][1]
-          optical_pins.append (Optical_pin (points, component_n, x, y) )
-          optical_components[component_n-1].npins += 1
-          optical_components[component_n-1].pins.append(len(optical_pins)-1)
-          print "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path)
+          #print "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path)
+          path_points.append(points)
+          path_shape.append(iter2.shape())
         iter2.next()
+      # Sort pin text labels
+      pin_info2 = sorted(pin_info1, key=lambda  pin_info0: pin_info0.pin_text)
+
+      # find pins that are inside the path:
+      for p1 in range(0,len(pin_info2)):
+        for p2 in range(0,len(path_shape)):
+          check_text_in_pin = check_point_in_segment( \
+            pya.Point( *path_points[p2][0] ), \
+            pya.Point( *path_points[p2][1] ), \
+            pya.Point( pin_info2[p1].pin_x, pin_info2[p1].pin_y ) )
+          if check_text_in_pin:
+            points = path_points[p2]  
+            x = points[0][0]
+            y = points[0][1]
+            optical_pins.append (Optical_pin (points, component_n, x, y) )
+            optical_components[component_n-1].npins += 1
+            optical_components[component_n-1].pins.append(len(optical_pins)-1)
+            print "%s: PinRec (text=%s) in cell {%s}, path -- %s"   % (i, pin_info2[p1].pin_text, iter2.cell().name, path_shape[p2].path)
+
+      # Find the FbrTgt, and record info as Optical_pin
       iter2 = subcell.begin_shapes_rec(LayerFbrTgtN)
       while not(iter2.at_end()):
         if iter2.shape().is_polygon():
@@ -390,6 +439,7 @@ def check_point_in_segment(a, b, c):
     """ How can you determine a point is between two other points on a line segment?
     http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
     by Cyrille Ka.  Check if c is between a and b? """
+    # print "%s, %s; %s, %s; %s, %s" % (a.x, a.y, b.x, b.y, c.x, c.y)
     crossproduct = (c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y)
     if abs(crossproduct) != 0 : return False 
     dotproduct = (c.x - a.x) * (b.x - a.x) + (c.y - a.y)*(b.y - a.y)
