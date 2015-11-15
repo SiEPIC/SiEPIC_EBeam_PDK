@@ -66,7 +66,8 @@ class Optical_component:
         self.library = library     # compact model library
         self.nets = []             # nets connected to component
         self.npins = 0             # number of pin
-
+        self.pins = []             # an array of all the pins
+        
 # definition for the optical waveguide class
 class Optical_waveguide:
     n = 0
@@ -87,12 +88,14 @@ class Optical_waveguide:
 
 class Optical_pin:
     n = 0
-    def __init__(self, points, component_n):
+    def __init__(self, points, component_n, x, y):
         Optical_pin.n += 1
         self.n = Optical_pin.n          # pin number, must be unique
         self.points = points            # array of vertices, in database units
         self.component_n = component_n  # which component this pin belongs to
         self.net = 0                    # which net this pin is connected to
+        self.x = x                      # x coordinate, in database units
+        self.y = y                      # y coordinate, in database units
 
 class Optical_net:
     net = 0
@@ -329,11 +332,11 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
     # DevRec must be either a Box or a Polygon:
     if iter1.shape().is_box():
       box= iter1.shape().box.transformed(iter1.itrans())
-      print "%s: DevRec in cell #{} %s, box -- %s; %s"   % (i, subcell.basic_name(), box.p1, box.p2)
+      print "%s: DevRec in cell {%s}, box -- %s; %s"   % (i, subcell.basic_name(), box.p1, box.p2)
       found_component = True
     if iter1.shape().is_polygon():
       polygon = iter1.shape().polygon.transformed(iter1.itrans())
-      print "%s: DevRec in cell #{}: %s, polygon -- %s"   % (i, subcell.basic_name(), polygon)
+      print "%s: DevRec in cell {%s}, polygon -- %s"   % (i, subcell.basic_name(), polygon)
       found_component = True
 
     # A component was found. record the instance info as an Optical_component 
@@ -352,10 +355,13 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
         if iter2.shape().is_path():
           path= iter2.shape().path.transformed(iter2.itrans())
           path= path.transformed(iter1.itrans())
-          print "%s: PinRec in cell #{}: %s, path -- %s"   % (i, iter2.cell().name, path)
           points = path_to_points(path)  
-          optical_pins.append (Optical_pin (points, component_n) )
+          x = points[0][0]
+          y = points[0][1]
+          optical_pins.append (Optical_pin (points, component_n, x, y) )
           optical_components[component_n-1].npins += 1
+          optical_components[component_n-1].pins.append(len(optical_pins)-1)
+          print "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path)
         iter2.next()
       iter2 = subcell.begin_shapes_rec(LayerFbrTgtN)
       while not(iter2.at_end()):
@@ -421,12 +427,14 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
   # use the data in Optical_pin, Optical_waveguide to find overlaps
   # and save results in Optical_component
 
+  # Make sure that there are exactly 2 pins for each net (not like in electronics!)
+
   # Loop through all the pins (p1)
   # - find other overlapping pins (p2)
   # - find overlapping waveguide ends
   for p1 in optical_pins:
     segment1 = [ pya.Point(*p1.points[0]), pya.Point(*p1.points[1]) ] 
-    for p2 in optical_pins[ p1.n : len(optical_pins)-1 ]:
+    for p2 in optical_pins[ p1.n: len(optical_pins) ]:
       #print "%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points)
       segment2 = [ pya.Point(*p2.points[0]), pya.Point(*p2.points[1]) ] 
       check = check_segments_colinear_overlapping( segment1, segment2 )
@@ -437,6 +445,10 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         # assign this net number to the components
         optical_components[p1.component_n-1].nets.append (net)
         optical_components[p2.component_n-1].nets.append (net)
+        # assign this net number to the pins
+        p1.net = net
+        p2.net = net
+        #print "connected pin, net: %s, component #: %s, %s" % (net, p1.component_n, p2.component_n)
     for w1 in optical_waveguides:
       # examine the beginning of the waveguide:
       segment2 = [ pya.Point(*w1.points[0]), pya.Point(*w1.points[1]) ] 
@@ -449,9 +461,11 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         optical_components[p1.component_n-1].nets.append (net)
         if optical_waveguides[w1.n-1].net1 &lt;&gt; 0:
           # problem. Net is already assigned.
-          text = "  *** Connectivity error.  Net is already assigned. Overwriting."
+          text = "  *** Connectivity error.  Net is already assigned (pin to waveguide). Overwriting."
           flag_waveguide_error( [w1.points[0], w1.points[1]], text, optical_waveguides[w1.n-1], topcell)
         optical_waveguides[w1.n-1].net1 = net
+        # assign this net number to the pin
+        p1.net = net
         
       # examine the end of the waveguide:
       np = len(w1.points)
@@ -465,10 +479,56 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         optical_components[p1.component_n-1].nets.append (net)
         if optical_waveguides[w1.n-1].net2 &lt;&gt; 0:
           # problem. Net is already assigned.
-          text = "  *** Connectivity error.  Net is already assigned. Overwriting."
-          flag_waveguide_error([w1.points[0], w1.points[1]], text, optical_waveguides[w1.n-1], topcell)
+          text = "  *** Connectivity error.  Net is already assigned (pin to waveguide). Overwriting."
+          flag_waveguide_error([w1.points[len(w1.points)-1], w1.points[len(w1.points)-2]], \
+                  text, optical_waveguides[w1.n-1], topcell)
         optical_waveguides[w1.n-1].net2 = net
-          
+        # assign this net number to the pin
+        p1.net = net
+     
+
+  # Check for waveguide to waveguide connections, make net
+  # Loop through all waveguides, and compare to all other waveguides
+  for w1 in optical_waveguides:
+    # the beginning of waveguide 1:
+    w1_segment1 = [ pya.Point(*w1.points[0]), pya.Point(*w1.points[1]) ] 
+    # the end of waveguide 2:
+    np = len(w1.points)
+    w1_segment2 = [ pya.Point(*w1.points[np-2]), pya.Point(*w1.points[np-1]) ] 
+    for w2 in optical_waveguides[ w1.n: len(optical_waveguides) ]:
+      # the beginning of waveguide 2:
+      w2_segment1 = [ pya.Point(*w2.points[0]), pya.Point(*w2.points[1]) ] 
+      # the end of waveguide 2:
+      np = len(w2.points)
+      w2_segment2 = [ pya.Point(*w2.points[np-2]), pya.Point(*w2.points[np-1]) ] 
+
+      # check 4 possibilities:
+      for j in range(0,2):
+        if j==0:
+          w1_seg=w1_segment1
+        else:
+          w1_seg=w1_segment2
+        for k in range(0,2):
+          if k==0:
+            w2_seg=w2_segment1
+          else:
+            w2_seg=w2_segment2
+            
+          # perform comparison between each of the waveguide ends:
+          check = check_segments_colinear_overlapping( w1_seg, w2_seg )
+          if check:  # found connected pins:
+            # make a new optical net
+            optical_nets.append ( Optical_net (0, w1.n, 0, w2.n) )
+            net = len(optical_nets)
+            if j==0:
+              optical_waveguides[w1.n-1].net1 = net
+            else:
+              optical_waveguides[w1.n-1].net2 = net
+            if k==0:
+              optical_waveguides[w2.n-1].net1 = net
+            else:
+              optical_waveguides[w2.n-1].net2 = net
+
 
 
 # end def identify_all_nets
@@ -485,7 +545,8 @@ def flag_component_error(box, text, x, y):
 
 def check_connectivity(optical_components, topcell, LayerErrorN):
   # Make sure that all pins/waveguides are connected, i.e., dangling pins/waveguides.
-  # Make sure that there are exactly 2 pins for each net (not like in electronics!)
+  # Flag disconnected pins
+  # Flag disconnected waveguides
 
   for k in range(0,len(optical_components)):
     if optical_components[k].npins &lt;&gt; len(optical_components[k].nets):
@@ -496,6 +557,34 @@ def check_connectivity(optical_components, topcell, LayerErrorN):
       box = bbox.transformed(pya.Trans(optical_components[k].rotate, optical_components[k].flip, \
                 optical_components[k].x/dbu,optical_components[k].y/dbu))
       flag_component_error(box, text, optical_components[k].x, optical_components[k].y)
+
+      # go through all the pins in the component, and check if they aren't assigned to a net
+      for m in range(0,optical_components[k].npins):
+        pin = optical_pins[optical_components[k].pins[m]]
+        if pin.net == 0:
+          text = "  *** Found disconnected pin at (%s, %s)" % (pin.x*dbu, pin.y*dbu)
+          box = pya.Box(pin.x-3000, pin.y-3000, pin.x+3000, pin.y+3000)
+#          flag_component_error(box, text, pin.x*dbu, pin.y*dbu)
+
+  for pin in optical_pins:
+    if pin.net == 0:
+      text = "  *** Found disconnected pin at (%s, %s)" % (pin.x*dbu, pin.y*dbu)
+      box = pya.Box(pin.x-3000, pin.y-3000, pin.x+3000, pin.y+3000)
+      flag_component_error(box, text, pin.x*dbu, pin.y*dbu)
+
+  for w1 in optical_waveguides:
+    # examine the beginning of the waveguide:
+    if w1.net1 == 0:
+      text = "  *** Found disconnected waveguide at (%s, %s)" \
+          % (w1.points[0][0]*dbu, w1.points[0][1]*dbu)
+      flag_waveguide_error( [w1.points[0], w1.points[1]], text, optical_waveguides[w1.n-1], topcell)
+    # examine the end of the waveguide:
+    if w1.net2 == 0:
+      text = "  *** Found disconnected waveguide at (%s, %s)" \
+          % (w1.points[len(w1.points)-1][0]*dbu, w1.points[len(w1.points)-1][1]*dbu)
+      flag_waveguide_error([w1.points[len(w1.points)-1], w1.points[len(w1.points)-2]], \
+               text, optical_waveguides[w1.n-1], topcell)
+
 
 
 def list_optical_components(optical_components):
