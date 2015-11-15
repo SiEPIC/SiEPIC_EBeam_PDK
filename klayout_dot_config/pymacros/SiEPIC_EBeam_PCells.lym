@@ -212,7 +212,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     super(DoubleBus_Ring, self).__init__()
 
     # declare the parameters
-    self.param("layer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
@@ -227,6 +227,8 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "DoubleBus_Ring(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
 
+  def can_create_from_shape_impl(self):
+    return False
     
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
@@ -235,8 +237,8 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     dbu = self.layout.dbu
     ly = self.layout
     
-    SiLayer = self.layer
-    SiLayerN = ly.layer(self.layer)
+    SiLayer = self.silayer
+    SiLayerN = ly.layer(SiLayer)
     TextLayerN = ly.layer(self.textl)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
@@ -258,15 +260,34 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
+    
     pin = pya.Path([pya.Point(0, 0), pya.Point(pin_length, 0)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(0, 0)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
     pin = pya.Path([pya.Point(w+2*r-pin_length, 0), pya.Point(w+2*r, 0)],w )
     self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(w+2*r-pin_length, 0)
+    text = pya.Text ("pin2", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
     pin = pya.Path([pya.Point(0, y_offset), pya.Point(pin_length, y_offset)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(0, y_offset)
+    text = pya.Text ("pin3", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
     pin = pya.Path([pya.Point(w+2*r-pin_length, y_offset), pya.Point(w+2*r, y_offset)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-
+    t = pya.Trans(w+2*r-pin_length, y_offset)
+    text = pya.Text ("pin4", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.1/dbu
 
 
     # Create the device recognition layer
@@ -293,7 +314,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     super(TestStruct_DoubleBus_Ring, self).__init__()
 
     # declare the parameters
-    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
@@ -308,6 +329,9 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "TestStruct_DoubleBus_Ring(R=" + ('%s' % self.r) + ",g=" + ('%s' % (1000*self.g)) + ")"
 
+  def can_create_from_shape_impl(self):
+    return False
+
     
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
@@ -317,7 +341,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     ly = self.layout
     cell = self.cell
     
-    SiLayer = self.layer
+    SiLayer = self.silayer
     SiLayerN = ly.layer(SiLayer)
     TextLayerN = ly.layer(self.textlayer)
 
@@ -351,7 +375,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
       "r": r, 
       "w": wg_width, 
       "g": g,
-      "layer": SiLayer,
+      "silayer": SiLayer,
       "devrec": self.devrec, 
       "pinrec": self.pinrec
     }
@@ -428,7 +452,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     super(TestStruct_DoubleBus_Ring2, self).__init__()
 
     # declare the parameters
-    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
@@ -443,6 +467,9 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "TestStruct_DoubleBus_Ring2(R=" + ('%s' % self.r) + ",g=" + ('%s' % (1000*self.g)) + ")"
 
+  def can_create_from_shape_impl(self):
+    return False
+
     
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
@@ -452,8 +479,8 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     ly = self.layout
     cell = self.cell
     
-    SiLayer = self.layer
-    SiLayerN = ly.layer(self.layer)
+    SiLayer = self.silayer
+    SiLayerN = ly.layer(SiLayer)
     TextLayerN = ly.layer(self.textlayer)
 
     # Import cells from the SiEPIC GDS Library, and instantiate them
@@ -464,7 +491,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     g = self.g
     y_ring = 127*3/2+r
 
-    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "layer": SiLayer, "devrec": self.devrec, "pinrec": self.pinrec })
+    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "silayer": SiLayer, "devrec": self.devrec, "pinrec": self.pinrec })
     print "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) )
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
