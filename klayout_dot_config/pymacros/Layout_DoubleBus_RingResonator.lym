@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>Layout_DoubleBus_RingResonator</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,12 +9,13 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text># Python script to create a layout for testing a double-bus ring resonator.
+ <text># Layout_DoubleBus_RingResonator
+# Python script to create a layout for testing a double-bus ring resonator.
 # uses:
 #  - the SiEPIC EBeam GDS Library
 #  - the SiEPIC EBeam PCell Library
@@ -64,7 +65,7 @@ top_cell.insert(pya.CellInstArray(cell.cell_index(), t))
 # Import cells from the SiEPIC GDS Library, and instantiate them
 
 # Grating couplers, Ports 1, 2, 3, 4 (top-down):
-GC_imported = ly.create_cell("TE1550_SubGC_neg31_oxide", "SiEPIC-EBeam").cell_index()
+GC_imported = ly.create_cell("ebeam_gc_te1550", "SiEPIC-EBeam").cell_index()
 print "Cell: GC_imported: #%s" % GC_imported
 t = pya.Trans(pya.Trans.R0, 0, 0)
 cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127*dbu), pya.Point(0,0), 4, 1))

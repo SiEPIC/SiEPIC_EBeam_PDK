@@ -36,6 +36,7 @@ Lukas Chrostowski           2015/11/13
  - delete_extra_top_cells
  - function to delete extra cells
     def delete_extra_top_cells():
+ - find all the automated measurement labels
 
 """
 import pya
@@ -91,5 +92,28 @@ def delete_extra_top_cells():
   print top_delete
   ly.delete_cells(top_delete)
 
-</text>
+
+
+import string
+def find_automated_measurement_labels(topcell, LayerTextN):
+  # example usage:
+  # topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+  # LayerText = pya.LayerInfo(10, 0)
+  # LayerTextN = topcell.layout().layer(LayerText)
+  # find_automated_measurement_labels(topcell, LayerTextN)
+  t = ''
+  dbu = topcell.layout().dbu
+  iter = topcell.begin_shapes_rec(LayerTextN)
+  i=0
+  while not(iter.at_end()):
+    if iter.shape().is_text():
+      text = iter.shape().text
+      if string.find(text.string,"opt_in") &gt; -1:
+        i+=1
+        text2 = iter.shape().text.transformed(iter.itrans())
+        t += "label: %s, location: (%s, %s) &lt;br&gt;" %(text.string, text2.x*dbu, text2.y*dbu )
+    iter.next()
+  t += "&lt;br&gt;*** Number of automated measurement labels: %s.&lt;br&gt;" % i
+  return t
+  </text>
 </klayout-macro>
