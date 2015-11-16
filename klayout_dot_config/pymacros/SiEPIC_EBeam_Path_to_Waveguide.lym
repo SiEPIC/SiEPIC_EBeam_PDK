@@ -159,7 +159,7 @@ for o in object_selection:
         for p in points:
           a1.append (pya.Point(p[0], p[1]))
         # Update the path in the layout
-        path_obj = pya.Path(a1, path.width)
+        path_obj = pya.Path(a1, path_obj.width)
 
       print ("updated path (adjusted endpoints): %s" % path_obj )
 

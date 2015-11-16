@@ -94,9 +94,13 @@ for o in object_selection:
 #        # http://www.klayout.de/doc/code/class_ObjectInstPath.html#method9
 #        append_path(const InstElement element)
 #        lv.object_selection = ObjectInstPath
-        to_delete.append(oinst.cell)
+
+#        to_delete.append(oinst.cell) # deleting this removes the cell entirely (which may be used elsewhere!)
+        to_delete.append(oinst) # leaves behind the cell if it's not used
+        
 #        oinst.cell.delete()
 #        oinst.delete()
+
 for t in to_delete:
   t.delete()
         

@@ -561,7 +561,7 @@ print ("Checking layout for errors: ")
 wtext.insertHtml('&lt;br&gt;* Checking layout for errors:&lt;br&gt;&lt;br&gt;')
 layout_errors=[]
 # Check components - overlapping
-check_components(cell, LayerDevRecN)
+check_components(topcell, LayerDevRecN)
 # Check waveguides for waveguide-specific problems:
 check_waveguides(optical_waveguides, topcell, LayerErrorN)
 # Check connectivity between components and waveguides:
