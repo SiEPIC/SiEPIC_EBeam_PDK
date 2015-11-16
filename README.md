@@ -36,6 +36,13 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
 
 I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository.
 
+##Contributing to this project:
+
+ - On the GitHub web page, Fork a copy of the project into your own account.
+ - Clone to your Desktop
+ - Make edits/contributions
+ - "Commit to master" (your own master)
+ - Create a Pull Request -- this will notify me of your contribution, which I can merge into the main project
 
 ##Screenshots:
 
