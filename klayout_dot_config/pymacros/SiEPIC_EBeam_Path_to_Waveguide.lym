@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Path to Waveguide</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut>W</shortcut>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# SiEPIC_EBeam_Path_to_Waveguide
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2015
+
+This Python file implements the creation of waveguides, 
+searches for closest component pins and snaps to them, and 
+registers this for future heal operations.
+
+
+Version history:
+
+Lukas Chrostowski           2015/11/15
+ - 
+
+"""
+import pya
+
+
+# Configure variables to draw structures in the presently selected cell:
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+# find the currently selected cell:
+cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if cell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = ly.dbu
+
+# Define layers based on PDK_functions:
+SiLayerN = ly.layer(SiLayer)
+#LayerTextN = ly.layer(LayerText)
+LayerPinRecN = ly.layer(LayerPinRec)
+LayerDevRecN = ly.layer(LayerDevRec)
+LayerFbrTgtN = ly.layer(LayerFbrTgt)
+LayerErrorN = ly.layer(LayerError)
+
+# find all pins
+
+# initialize the arrays to keep track of layout objects
+optical_components = []
+optical_waveguides = []
+optical_pins = []
+optical_nets = []
+reset_Optical_classes()
+
+
+radius = 10
+
+# How close must a waveguide be to a pin for it to snap:
+waveguide_snap_dist = 10
+
+# Find the selected paths
+object_selection = lv.object_selection
+for o in object_selection:
+  if o.is_cell_inst():
+    print "Selected object is a cell, rather than a path.  Please select a path."
+  else:
+    print "Selected object is a shape"
+    if o.shape.is_path():
+      # Search the layout for the components and waveguides:
+      print "* calling find_all_components() – DevRec"
+      find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
+      shape_obj = o.shape
+      path_obj = o.shape.path
+      num_points = path.num_points()
+      points = path_to_points(path_obj)
+      if num_points == 2:
+        # insert a mid-point in the path, so that it can later be split into two nets
+        a1 = []
+        count =0
+        for p in points:
+          a1.append (pya.Point(p[0], p[1]))
+          count += 1
+          if count == 1:
+            # add a point:
+            a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
+# ???? how to ???
+        # Update the path in the layout
+        path_obj = pya.Path(a1, path_obj.width)
+        print "updated path (inserted mid-point): %s" % path_obj
+      # Waveguide parameters
+      length =  path_obj.length()*dbu
+      wg_type = 0
+      bend_pts = 0
+      wg_width = path_obj.width*dbu
+      # print "Waveguide:  num_points: %s, length: %s, radius: %s, path: %s"   % (num_points, length, radius, path_obj)
+
+      # For both the beginning and end of the path:
+      for pin in optical_pins:
+        pin.dist = []
+      for path_endpoint in [ points[0], points[len(points)-1] ]:
+        # Calculate the distnace between every pin and each path endpoint
+        for pin in optical_pins:
+          # this updates "optical_pins" via the "pin" pointer  
+          # print "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] )
+          pin.dist.append ( distance_xy ( path_endpoint, [pin.x, pin.y] ) ) 
+        # Find the closest pin for each path endpoint
+      optical_pins_sorted0 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[0])
+      optical_pins_sorted1 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[1])
+      optical_pins_sorted0[0] # pin that is closest to the beginning of path
+      if optical_pins_sorted0[0].dist[0] &lt; waveguide_snap_dist:
+        # Update the path beginning endpoint to match pin
+        points = path_to_points(path_obj)
+        # Is this a horizontal or vertical segment; move the whole segment
+        if points[0][0] == points[1][0]: 
+          # Vertical
+          points[1][0] = optical_pins_sorted0[0].x
+        if points[0][1] == points[1][1]: 
+          # Horizontal
+          points[1][1] = optical_pins_sorted0[0].y
+        points[0] = [optical_pins_sorted0[0].x, optical_pins_sorted0[0].y]
+        a1 = []
+        for p in points:
+          a1.append (pya.Point(p[0], p[1]))
+        # Update the path in the layout
+        path_obj = pya.Path(a1, path.width)
+      optical_pins_sorted1[0] # pin that is closest to the end of path
+      if optical_pins_sorted1[0].dist[1] &lt; waveguide_snap_dist:
+        # Update the path end endpoint to match pin
+        points = path_to_points(path_obj)
+        # Is this a horizontal or vertical segment; move the whole segment
+        if points[len(points)-1][0] == points[len(points)-2][0]: 
+          # Vertical
+          points[len(points)-2][0] = optical_pins_sorted1[0].x
+        if points[len(points)-1][1] == points[len(points)-2][1]: 
+          # Horizontal
+          points[len(points)-2][1] = optical_pins_sorted1[0].y
+        points[len(points)-1] = [optical_pins_sorted1[0].x, optical_pins_sorted1[0].y]
+        a1 = []
+        for p in points:
+          a1.append (pya.Point(p[0], p[1]))
+        # Update the path in the layout
+        path_obj = pya.Path(a1, path.width)
+      shape_obj.path = path_obj
+      print "updated path (adjusted endpoints): %s" % path_obj
+
+      # Convert the path to a waveguide
+
+# Save the optical_waveguides for future heal operations
+optical_waveguides_registered = [] # check if this exists...
+optical_waveguides_registered.append(optical_waveguides)
+
+
+
+
+
+
+
+
+
+</text>
+</klayout-macro>

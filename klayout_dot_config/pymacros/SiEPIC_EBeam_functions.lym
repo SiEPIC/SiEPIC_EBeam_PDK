@@ -115,5 +115,240 @@ def find_automated_measurement_labels(topcell, LayerTextN):
     iter.next()
   t += "&lt;br&gt;*** Number of automated measurement labels: %s.&lt;br&gt;" % i
   return t
-  </text>
+  
+  
+# definition of classes for Verification, Waveguide making, Waveguide Healing
+# one for each instance of the components
+class Optical_component:
+    n = 0
+    def __init__(self, component, instance, x, y, flip, rotate, library):
+        Optical_component.n += 1
+        self.n = Optical_component.n # component number, should be unique  
+        self.component = component # which component (name) this pin belongs to
+        self.instance = instance   # which component (instance) this pin belongs to
+        self.x = x                 # instance location
+        self.y = y                 # instance location
+        self.flip = flip           # instance flip, True / False
+        self.rotate = rotate       # instance rotation, 0, 90, 180, 270
+        self.library = library     # compact model library
+        self.nets = []             # nets connected to component
+        self.npins = 0             # number of pin
+        self.pins = []             # an array of all the pins
+        
+# definition for the optical waveguide class
+class Optical_waveguide:
+    n = 0
+    def __init__(self, points, radius, length, wg_type, num_points, wg_width, bend_pts):
+        Optical_waveguide.n += 1
+        self.n = Optical_waveguide.n   # waveguide number, needs to be unique
+        self.points = points      # array of vertices, in database units
+        self.radius = radius      # radius, in microns
+        self.length = length      # length, in microns
+        self.wg_type = wg_type    # wg_type: 0: path, 1: ROUND_PATH
+        self.num_points = num_points # number of vertices in the path
+        self.wg_width = wg_width  # waveguide width
+        self.bend_pts = bend_pts  # number of points in a bend, per circle
+        self.net1 = 0             # nets; one at each end of the waveguide
+        self.net2 = 0             # nets; one at each end of the waveguide
+        self.component = "ebeam_wg_strip_1550"  # waveguide model name
+        self.library = "custom/EBeam"           # compact model library
+        self.connected_pin = 0      # which pin the waveguide is connected to
+
+class Optical_pin:
+    n = 0
+    def __init__(self, points, component_n, x, y):
+        Optical_pin.n += 1
+        self.n = Optical_pin.n          # pin number, must be unique
+        self.points = points            # array of vertices, in database units
+        self.component_n = component_n  # which component this pin belongs to
+        self.net = 0                    # which net this pin is connected to
+        self.x = x                      # x coordinate, in database units
+        self.y = y                      # y coordinate, in database units
+
+class Optical_net:
+    net = 0
+    def __init__(self, pin1_type, pin1_n, pin2_type, pin2_n):
+        Optical_net.net += 1
+        self.net = Optical_net.net      # net number, needs to be unique
+        # an optical net can only connect to two pins. 
+        # the pin variables point to either Optical_waveguide or Optical_component classes
+        self.pin1_type = pin1_type      # pin type: 0 = waveguide, 1 = component, 2 = opticalIO
+        self.pin1_n = pin1_n            # pin n: component or waveguide number
+        self.pin2_type = pin2_type
+        self.pin2_n =pin2_n
+
+class Layout_error:
+    # for keeeping track of layout errors
+    n = 0
+    def __init__(self, text, x, y):
+        Layout_error.n += 1
+        self.text = text              # error text
+        self.x = x                    # error location
+        self.y = y                    # error location
+
+def reset_Optical_classes():
+  Optical_component.n = 0 
+  Optical_waveguide.n = 0 
+  Optical_pin.n = 0 
+  Optical_net.n = 0 
+  Layout_error.n = 0
+
+def distance_xy ( p1, p2 ):
+  # calculate the distance between two points
+  # input in dbu
+  # output in microns
+  distance = math.sqrt ( (p1[0]-p2[0])**2 + (p1[1]-p2[1])**2 ) * dbu  
+  return distance
+  
+def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
+  # function to traverse the entire layout hierarchy and find all the components
+  # returns list of components, location, orientation
+  # use the DevRec shapes.  One DevRec shape per component.
+  
+  # Find all the DevRec shapes; identify the component it belongs; record the instance info as an Optical_component 
+  # for each component instance, also find the Pins and Fibre ports.
+  
+  # Use the pin names on layer PinRec to sort the pins in alphabetical order
+  #   Requires that a text label be in PinRec layer, co-linear inside the PinRec path.
+  # sorting the pins uses the Pin_info class:
+  class Pin_info:
+    def __init__(self, pin_text, pin_x, pin_y):
+      self.pin_text = pin_text
+      self.pin_x = pin_x
+      self.pin_y = pin_y
+
+
+  # Find all the DevRec shapes
+  iter1 = cell.begin_shapes_rec(LayerDevRecN)
+  i=0
+  while not(iter1.at_end()):
+    i+=1
+    subcell = iter1.cell()                     # cell (component) to which this shape belongs
+    component = subcell.basic_name()   # name library component
+    instance = subcell.name      
+    subcell.name                # name of the cell; for PCells, different from basic_name
+    found_component = False
+    # DevRec must be either a Box or a Polygon:
+    if iter1.shape().is_box():
+      box= iter1.shape().box.transformed(iter1.itrans())
+      print "%s: DevRec in cell {%s}, box -- %s; %s"   % (i, subcell.basic_name(), box.p1, box.p2)
+      found_component = True
+    if iter1.shape().is_polygon():
+      polygon = iter1.shape().polygon.transformed(iter1.itrans())
+      print "%s: DevRec in cell {%s}, polygon -- %s"   % (i, subcell.basic_name(), polygon)
+      found_component = True
+
+    # A component was found. record the instance info as an Optical_component 
+    if found_component:
+      # Find text label for DevRec, to get Library name
+      iter2 = subcell.begin_shapes_rec(LayerDevRecN)
+      while not(iter2.at_end()):
+        if iter2.shape().is_text():
+          print "%s: DevRec label: %s" % (i, iter2.shape().text)
+        iter2.next()
+      library = "library/EBeam"
+      x = iter1.itrans().disp.x*dbu
+      y = iter1.itrans().disp.y*dbu
+      flip = iter1.trans().is_mirror()
+      rotate = iter1.trans().rot()
+      optical_components.append ( Optical_component (component, instance, x, y, flip, rotate, library) )
+      component_n = optical_components[len(optical_components)-1].n
+      
+      # Find the PinRec and record info as Optical_pin
+      
+      # Use the pin names on layer PinRec to sort the pins in alphabetical order
+      # read; sort; save data.
+      iter2 = subcell.begin_shapes_rec(LayerPinRecN)
+      pin_info1 = []  # array for Pin_info
+      path_points=[]
+      path_shape=[]
+      while not(iter2.at_end()):
+        # Find text label for PinRec, to get the port numbers
+        if iter2.shape().is_text():
+          texto= iter2.shape().text.transformed(iter2.itrans())
+          texto= texto.transformed(iter1.itrans())
+          x = texto.x
+          y = texto.y
+          #print "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y)
+          pin_info1.append(Pin_info(iter2.shape().text.string, x, y))
+        if iter2.shape().is_path():
+          path= iter2.shape().path.transformed(iter2.itrans())
+          path= path.transformed(iter1.itrans())
+          points = path_to_points(path)  
+          x = points[0][0]
+          y = points[0][1]
+          #print "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path)
+          path_points.append(points)
+          path_shape.append(iter2.shape())
+        iter2.next()
+      # Sort pin text labels
+      pin_info2 = sorted(pin_info1, key=lambda  pin_info0: pin_info0.pin_text)
+
+      # find pins that are inside the path:
+      for p1 in range(0,len(pin_info2)):
+        for p2 in range(0,len(path_shape)):
+          check_text_in_pin = check_point_in_segment( \
+            pya.Point( *path_points[p2][0] ), \
+            pya.Point( *path_points[p2][1] ), \
+            pya.Point( pin_info2[p1].pin_x, pin_info2[p1].pin_y ) )
+          if check_text_in_pin:
+            points = path_points[p2]  
+            x = points[0][0]
+            y = points[0][1]
+            optical_pins.append (Optical_pin (points, component_n, x, y) )
+            optical_components[component_n-1].npins += 1
+            optical_components[component_n-1].pins.append(len(optical_pins)-1)
+            print "%s: PinRec (text=%s) in cell {%s}, path -- %s"   % (i, pin_info2[p1].pin_text, iter2.cell().name, path_shape[p2].path)
+
+      # Find the FbrTgt, and record info as Optical_pin
+      iter2 = subcell.begin_shapes_rec(LayerFbrTgtN)
+      while not(iter2.at_end()):
+        if iter2.shape().is_polygon():
+          polygon = iter2.shape().polygon.transformed(iter2.itrans())
+          polygon = polygon.transformed(iter1.itrans())
+          # What do we want to do with the Fibre ports?
+          # create a net (with only 1 member = the optical IO)
+          optical_nets.append ( Optical_net (2, component_n, -1, -1) )
+          optical_components[component_n-1].nets.append( len(optical_nets) )
+          optical_components[component_n-1].npins += 1
+        iter2.next()
+        
+    # end if found_component   
+     
+    iter1.next()
+ 
+  # end while iter1
+  
+# end def find_all_components
+
+
+
+def path_to_points(path):
+  # function to convert a KLayout Path object to an array of points
+  # iterate through all the points in the path, and 
+  p_iter = path.each_point()
+  points = []
+  try:
+    while True:
+       p = p_iter.next()
+       points.append( [int(p.x), int(p.y)] )
+  except StopIteration:
+    pass    
+  return points
+  
+  
+
+def check_point_in_segment(a, b, c):
+    """ How can you determine a point is between two other points on a line segment?
+    http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+    by Cyrille Ka.  Check if c is between a and b? """
+    # print "%s, %s; %s, %s; %s, %s" % (a.x, a.y, b.x, b.y, c.x, c.y)
+    crossproduct = (c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y)
+    if abs(crossproduct) != 0 : return False 
+    dotproduct = (c.x - a.x) * (b.x - a.x) + (c.y - a.y)*(b.y - a.y)
+    if dotproduct &lt; 0 : return False
+    squaredlengthba = (b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)
+    if dotproduct &gt; squaredlengthba: return False
+    return True
+</text>
 </klayout-macro>
