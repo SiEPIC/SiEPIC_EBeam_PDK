@@ -45,8 +45,17 @@ LayerFbrTgtN = ly.layer(LayerFbrTgt)
 LayerErrorN = ly.layer(LayerError)
 
 
+object_selection = lv.object_selection
+for o in object_selection:
+  if o.is_cell_inst():
+    print ("Selected object is a cell.")
+    oinst = o.inst()
+    print oinst
+    
 # Find the selected paths
 object_selection = lv.object_selection
+# objects to delete:
+to_delete = []
 for o in object_selection:
   if o.is_cell_inst():
     print ("Selected object is a cell.")
@@ -54,7 +63,29 @@ for o in object_selection:
     if oinst.is_pcell():
       pcell_decl = oinst.pcell_declaration()
       c = oinst.cell
-      if c.basic_name() == 'ROUND_PATH':
-        print ("ROUND_PATH.")
-        PCell_get_parameters ( c )</text>
+      if c.basic_name() == 'ROUND_PATH' and c.pcell_parameters_by_name()['layer'] == SiLayer:
+        print ("ROUND_PATH on SiLayer.")
+        path_obj = c.pcell_parameters_by_name()['path']
+        print ( path_obj ) 
+        wg_width = path_obj.width/dbu
+        # convert wg_path (in microns) to database numbers
+        wg_path = points_to_path(numpy.array(path_to_Dpoints(path_obj))/dbu, wg_width)
+        print ( wg_path ) 
+        new_wg = cell.shapes(SiLayerN).insert(wg_path)
+
+# It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
+#        # http://www.klayout.de/doc/code/class_ObjectInstPath.html#method9
+#        append_path(const InstElement element)
+#        lv.object_selection = ObjectInstPath
+        to_delete.append(oinst.cell)
+#        oinst.cell.delete()
+#        oinst.delete()
+for t in to_delete:
+  t.delete()
+        
+# Clear the layout view selection, since we deleted some objects (but others may be selected still):
+lv.clear_object_selection()
+     
+        
+        </text>
 </klayout-macro>

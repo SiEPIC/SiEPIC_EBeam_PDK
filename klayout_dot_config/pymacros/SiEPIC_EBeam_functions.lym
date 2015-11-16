@@ -347,6 +347,19 @@ def path_to_points(path):
   except StopIteration:
     pass    
   return points
+
+def path_to_Dpoints(path):
+  # function to convert a KLayout Path object to an array of points
+  # iterate through all the points in the path, and 
+  p_iter = path.each_point()
+  points = []
+  try:
+    while True:
+       p = p_iter.next()
+       points.append( [(p.x), (p.y)] )
+  except StopIteration:
+    pass    
+  return points
   
 def points_to_Dpath(points, w):
   a1 = []
@@ -415,7 +428,9 @@ def PCell_get_parameters ( pcell ):
 
   for param in params.keys():
     print ("Parameter: %s, Value: %s") % (param, params[param])
-
+  return params
+  
+  
 
 </text>
 </klayout-macro>

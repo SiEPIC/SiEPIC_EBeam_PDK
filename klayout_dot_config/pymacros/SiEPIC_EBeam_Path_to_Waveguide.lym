@@ -76,6 +76,8 @@ waveguide_snap_dist = 10
 
 # Find the selected paths
 object_selection = lv.object_selection
+# objects to delete:
+to_delete = []
 for o in object_selection:
   if o.is_cell_inst():
     print ("Selected object is a cell, rather than a path.  Please select a path.")
@@ -157,8 +159,6 @@ for o in object_selection:
         # Update the path in the layout
         path_obj = pya.Path(a1, path.width)
 
-#      shape_obj.path = path_obj
-      shape_obj.delete()
       print ("updated path (adjusted endpoints): %s" % path_obj )
 
       # Convert the path to a waveguide
@@ -167,7 +167,19 @@ for o in object_selection:
       pcell = ly.create_cell("ROUND_PATH", "Basic", param )
       t = pya.Trans(0, 0)
       cell.insert(pya.CellInstArray(pcell.cell_index(), t))
-      PCell_get_parameters ( pcell )
+
+# It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
+      
+      # Mark the path for deletion:
+      #shape_obj.delete()
+      to_delete.append(shape_obj)
+
+for t in to_delete:
+  t.delete()
+        
+# Clear the layout view selection, since we deleted some objects (but others may be selected still):
+lv.clear_object_selection()
+
 
 # Save the optical_waveguides for future heal operations
 optical_waveguides_registered = [] # check if this exists...
