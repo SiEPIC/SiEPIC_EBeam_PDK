@@ -52,15 +52,6 @@ import math
 import string
 
 
-def points_per_circle(radius):
-  # Calculate the recommended number of points in a circle, based on 
-  # http://stackoverflow.com/questions/11774038/how-to-render-a-circle-with-as-few-vertices-as-possible
-  # radius in microns
-  import numpy as n
-  error=0.5e-3 # 0.5 nm
-  th = n.arccos(2 * (1 - error / radius)**2 - 1)
-  num_vertices = n.ceil(2*n.pi/th)
-  return num_vertices
 
 def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
   # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
@@ -72,7 +63,7 @@ def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
   x = numpy.array(dpoints)[:,0].mean()*dbu
   y = numpy.array(dpoints)[:,1].mean()*dbu
   layout_errors.append(Layout_error(text, x, y) )
-  print text
+  print (text)
   wtext.insertHtml('%s&lt;br&gt;' %text)
 
 
@@ -170,7 +161,8 @@ def find_all_waveguides(cell, layer):
       wg_type = 0
       bend_pts = 0
       wg_width = path.width*dbu
-      print "Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s"   % (i, iter.cell().name, num_points, length, radius, path)
+      print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s"  \
+           % (i, iter.cell().name, num_points, length, radius, path) )
       found_wg = True
       
     if iter.shape().is_polygon():
@@ -195,7 +187,8 @@ def find_all_waveguides(cell, layer):
         num_points = path.num_points()
         wg_type = 1
         wg_width = 0.5  # no way to get it from the ROUND_PATH PCell yet  # in microns
-        print "Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s"   % (i, subcell.name, num_points, length, radius, path)
+        print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s" \
+            % (i, subcell.name, num_points, length, radius, path) )
         found_wg = True
 
     if found_wg:
@@ -205,7 +198,7 @@ def find_all_waveguides(cell, layer):
 
 
     iter.next()
-  print " "
+  print (" ")
 
 def check_components(cell, LayerDevRecN):
   # function to go through all the cells
@@ -251,7 +244,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
   for p1 in optical_pins:
     segment1 = [ pya.Point(*p1.points[0]), pya.Point(*p1.points[1]) ] 
     for p2 in optical_pins[ p1.n: len(optical_pins) ]:
-      #print "%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points)
+      #print ("%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points) )
       segment2 = [ pya.Point(*p2.points[0]), pya.Point(*p2.points[1]) ] 
       check = check_segments_colinear_overlapping( segment1, segment2 )
       if check:  # found connected pins:
@@ -264,7 +257,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         # assign this net number to the pins
         p1.net = net
         p2.net = net
-        #print "connected pin, net: %s, component #: %s, %s" % (net, p1.component_n, p2.component_n)
+        #print ( "connected pin, net: %s, component #: %s, %s" % (net, p1.component_n, p2.component_n) )
     for w1 in optical_waveguides:
       # examine the beginning of the waveguide:
       segment2 = [ pya.Point(*w1.points[0]), pya.Point(*w1.points[1]) ] 
@@ -372,7 +365,7 @@ def check_connectivity(optical_components, topcell, LayerErrorN):
       bbox = layout.cell(optical_components[k].instance).bbox()
       box = bbox.transformed(pya.Trans(optical_components[k].rotate, optical_components[k].flip, \
                 optical_components[k].x/dbu,optical_components[k].y/dbu))
-      flag_component_error(box, text, optical_components[k].x, optical_components[k].y)
+#      flag_component_error(box, text, optical_components[k].x, optical_components[k].y)
 
       # go through all the pins in the component, and check if they aren't assigned to a net
       for m in range(0,optical_components[k].npins):
@@ -417,7 +410,7 @@ def list_optical_components(optical_components):
     rotate = str(o.rotate)
     t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s sch_r=%s sch_f=%s'  % \
          ( "X"+o.component+"_"+str(o.n), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
-    print t
+    print (t)
     wtext.insertHtml('%s&lt;br&gt;' %t)
 
 def list_optical_waveguides(list_optical_waveguides):
@@ -432,7 +425,7 @@ def list_optical_waveguides(list_optical_waveguides):
     y = numpy.array(o.points)[:,1].mean()*dbu
     t = '%s %s %s library="%s" wg_length=%s wg_width=%s lay_x=%s lay_y=%s sch_x=%s sch_y=%s'  % \
            ( "Xwg" + str(o.n), nets_str, o.component, o.library, o.length*1e-6, o.wg_width*1e-6, str (x * 1e-6), y * 1e-6, x, y)
-    print t
+    print (t)
     wtext.insertHtml('%s&lt;br&gt;' %t)
 
 
@@ -549,17 +542,17 @@ optical_pins = []
 optical_nets = []
 
 # Search the layout for the components and waveguides:
-print "* calling find_all_components() – DevRec"
+print ("* calling find_all_components() – DevRec")
 find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
-print "* calling find_all_waveguides()"
+print ("* calling find_all_waveguides()")
 find_all_waveguides(topcell, SiLayerN)
 
 # Search the arrays to identify all the nets:
 identify_all_nets(optical_pins, optical_waveguides, optical_components)
 
 # Check the layout for errors, using the above arrays:
-print ""
-print "Checking layout for errors: "
+print ("")
+print ("Checking layout for errors: ")
 wtext.insertHtml('&lt;br&gt;* Checking layout for errors:&lt;br&gt;&lt;br&gt;')
 layout_errors=[]
 # Check components - overlapping
@@ -569,31 +562,31 @@ check_waveguides(optical_waveguides, topcell, LayerErrorN)
 # Check connectivity between components and waveguides:
 check_connectivity(optical_components, topcell, LayerErrorN)
 lv.add_missing_layers()
-print "*** Number of errors found: %s." % len(layout_errors)
+print ("*** Number of errors found: %s." % len(layout_errors) )
 wtext.insertHtml('&lt;br&gt;*** Number of errors found: %s.&lt;br&gt;' % len(layout_errors) )
 
 
 # Output the Spice netlist:
 wtext.insertHtml('&lt;br&gt;* Spice netlist output:&lt;br&gt;&lt;br&gt;')
-print ""
-print "Spice output: "
-print ""
+print ("")
+print ("Spice output: ")
+print ("")
 list_optical_components(optical_components)
 list_optical_waveguides(optical_waveguides)
 
 # Find the automated measurement coordinates:
 wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
-print ""
-print "Automated measurement coordinates: "
-print ""
+print ("")
+print ("Automated measurement coordinates: ")
+print ("")
 t = find_automated_measurement_labels(topcell, LayerTextN)
 wtext.insertHtml (t)
 
 # Done
 wtext.insertHtml('&lt;br&gt;Done.&lt;br&gt;')
-print ""
-print "Done. "
-print ""
+print ("")
+print ("Done. ")
+print ("")
 
 
 

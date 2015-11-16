@@ -61,7 +61,7 @@ def clear_ErrorLayer(topcell, LayerErrorN):
       i+=1
       iter.shape().delete()
     iter.next()
-  print "*** Deleted %s errors." % i
+  print ("*** Deleted %s errors.") % i
 
 
 
@@ -80,14 +80,14 @@ def delete_extra_top_cells():
     raise Exception("No cell")
 
 
-  print "deleting cells..."
+  print ("deleting cells...")
   top_keep = cell.cell_index()
   top_delete = []
   for top in ly.each_top_cell():
     if top == top_keep:
-        print "keep top cell: " + str(ly.cell(top_keep).name)
+        print ("keep top cell: " + str(ly.cell(top_keep).name))
     else:
-        print "delete top cell: " + str(ly.cell(top).name)
+        print ("delete top cell: " + str(ly.cell(top).name))
         top_delete.append(top)
   print top_delete
   ly.delete_cells(top_delete)
@@ -231,11 +231,11 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
     # DevRec must be either a Box or a Polygon:
     if iter1.shape().is_box():
       box= iter1.shape().box.transformed(iter1.itrans())
-      print "%s: DevRec in cell {%s}, box -- %s; %s"   % (i, subcell.basic_name(), box.p1, box.p2)
+      print ("%s: DevRec in cell {%s}, box -- %s; %s"   % (i, subcell.basic_name(), box.p1, box.p2) )
       found_component = True
     if iter1.shape().is_polygon():
       polygon = iter1.shape().polygon.transformed(iter1.itrans())
-      print "%s: DevRec in cell {%s}, polygon -- %s"   % (i, subcell.basic_name(), polygon)
+      print ("%s: DevRec in cell {%s}, polygon -- %s"   % (i, subcell.basic_name(), polygon))
       found_component = True
 
     # A component was found. record the instance info as an Optical_component 
@@ -244,7 +244,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       iter2 = subcell.begin_shapes_rec(LayerDevRecN)
       while not(iter2.at_end()):
         if iter2.shape().is_text():
-          print "%s: DevRec label: %s" % (i, iter2.shape().text)
+          print ("%s: DevRec label: %s" % (i, iter2.shape().text))
         iter2.next()
       library = "library/EBeam"
       x = iter1.itrans().disp.x*dbu
@@ -269,7 +269,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           texto= texto.transformed(iter1.itrans())
           x = texto.x
           y = texto.y
-          #print "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y)
+          #print ( "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y) )
           pin_info1.append(Pin_info(iter2.shape().text.string, x, y))
         if iter2.shape().is_path():
           path= iter2.shape().path.transformed(iter2.itrans())
@@ -277,7 +277,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           points = path_to_points(path)  
           x = points[0][0]
           y = points[0][1]
-          #print "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path)
+          #print ( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
           path_points.append(points)
           path_shape.append(iter2.shape())
         iter2.next()
@@ -298,7 +298,8 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
             optical_pins.append (Optical_pin (points, component_n, x, y) )
             optical_components[component_n-1].npins += 1
             optical_components[component_n-1].pins.append(len(optical_pins)-1)
-            print "%s: PinRec (text=%s) in cell {%s}, path -- %s"   % (i, pin_info2[p1].pin_text, iter2.cell().name, path_shape[p2].path)
+            print ("%s: PinRec (text=%s) in cell {%s}, path -- %s"   \
+                % (i, pin_info2[p1].pin_text, iter2.cell().name, path_shape[p2].path) )
 
       # Find the FbrTgt, and record info as Optical_pin
       iter2 = subcell.begin_shapes_rec(LayerFbrTgtN)
@@ -322,6 +323,17 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
 # end def find_all_components
 
 
+def points_per_circle(radius):
+  # Calculate the recommended number of points in a circle, based on 
+  # http://stackoverflow.com/questions/11774038/how-to-render-a-circle-with-as-few-vertices-as-possible
+  # radius in microns
+  import numpy as n
+  error=0.5e-3 # 0.5 nm
+  th = n.arccos(2 * (1 - error / radius)**2 - 1)
+  num_vertices = n.ceil(2*n.pi/th)
+  return num_vertices
+
+
 
 def path_to_points(path):
   # function to convert a KLayout Path object to an array of points
@@ -336,13 +348,26 @@ def path_to_points(path):
     pass    
   return points
   
+def points_to_Dpath(points, w):
+  a1 = []
+  for p in points:
+    a1.append (pya.DPoint(p[0], p[1]))
+  wg_path = pya.DPath(a1, w)
+  return wg_path
+
+def points_to_path(points, w):
+  a1 = []
+  for p in points:
+    a1.append (pya.Point(p[0], p[1]))
+  wg_path = pya.Path(a1, w)
+  return wg_path
   
 
 def check_point_in_segment(a, b, c):
     """ How can you determine a point is between two other points on a line segment?
     http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
     by Cyrille Ka.  Check if c is between a and b? """
-    # print "%s, %s; %s, %s; %s, %s" % (a.x, a.y, b.x, b.y, c.x, c.y)
+    # print ( "%s, %s; %s, %s; %s, %s" % (a.x, a.y, b.x, b.y, c.x, c.y) )
     crossproduct = (c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y)
     if abs(crossproduct) != 0 : return False 
     dotproduct = (c.x - a.x) * (b.x - a.x) + (c.y - a.y)*(b.y - a.y)
@@ -350,5 +375,47 @@ def check_point_in_segment(a, b, c):
     squaredlengthba = (b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y)
     if dotproduct &gt; squaredlengthba: return False
     return True
+
+
+
+
+def PCell_get_parameter_list ( cell_name, library_name ):
+  # function to list all the parameters &amp; defaults for a PCell
+  # example usage:
+  # PCell_get_parameter_list("CIRCLE", "Basic")
+
+  print ("* def PCell_get_parameter_list ( %s, %s): ") % ( cell_name, library_name )
+  
+  lib = pya.Library.library_by_name(library_name)
+  if lib == None:
+    raise Exception("Unknown lib '%s'" % library_name)
+
+  pcell_decl = lib.layout().pcell_declaration(cell_name);
+  if pcell_decl == None:
+     raise Exception("Unknown PCell '%s'" % cell_name)
+
+  type2s = ['TypeBoolean', 'TypeDouble', 'TypeInt', 'TypeLayer', 'TypeList', 'TypeNone', 'TypeShape', 'TypeString']
+
+  for p in pcell_decl.get_parameters():
+    if ~p.readonly:
+      print ( "Name: %s, %s, unit: %s, default: %s, description: %s%s" % \
+        (p.name, type2s[p.type], p.unit, p.default, p.description, ", hidden" if p.hidden else ".") )
+
+def PCell_get_parameters ( pcell ):
+  # function to list the values for all parameters for an intantiated PCell
+  # example usage:
+  # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+  # pcell = ly.create_cell("CIRCLE", "Basic", { "actual_radius": 10, "layer": pya.LayerInfo(1, 0) } )
+  # PCell_get_parameters( pcell )
+
+  print ("* def PCell_get_parameters ( %s ):") % pcell 
+  print pcell.pcell_parameters()
+
+  params = pcell.pcell_parameters_by_name()
+
+  for param in params.keys():
+    print ("Parameter: %s, Value: %s") % (param, params[param])
+
+
 </text>
 </klayout-macro>

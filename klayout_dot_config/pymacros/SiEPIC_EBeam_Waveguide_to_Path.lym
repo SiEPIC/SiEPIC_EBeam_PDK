@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Waveguide to Path</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut>Shift+W</shortcut>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+
+import pya
+import numpy as numpy
+
+
+# Configure variables to draw structures in the presently selected cell:
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+# find the currently selected cell:
+cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if cell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = ly.dbu
+
+# Define layers based on PDK_functions:
+SiLayerN = ly.layer(SiLayer)
+#LayerTextN = ly.layer(LayerText)
+LayerPinRecN = ly.layer(LayerPinRec)
+LayerDevRecN = ly.layer(LayerDevRec)
+LayerFbrTgtN = ly.layer(LayerFbrTgt)
+LayerErrorN = ly.layer(LayerError)
+
+
+# Find the selected paths
+object_selection = lv.object_selection
+for o in object_selection:
+  if o.is_cell_inst():
+    print ("Selected object is a cell.")
+    oinst = o.inst()
+    if oinst.is_pcell():
+      pcell_decl = oinst.pcell_declaration()
+      c = oinst.cell
+      if c.basic_name() == 'ROUND_PATH':
+        print ("ROUND_PATH.")
+        PCell_get_parameters ( c )</text>
+</klayout-macro>

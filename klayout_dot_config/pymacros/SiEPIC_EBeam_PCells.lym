@@ -102,7 +102,7 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
     # layout_waveguide_rel(cell, SiLayer, points, 0.5, 10)
 
     
-    print "* layout_waveguide_rel(%s, %s, %s, %s)" % (cell.name, layer, w, radius)
+    print ("* layout_waveguide_rel(%s, %s, %s, %s)" % (cell.name, layer, w, radius) )
 
     ly = cell.layout() 
     dbu = cell.layout().dbu
@@ -166,7 +166,7 @@ def layout_pgtext(cell, layer, x, y, text, mag):
     # flatten and delete polygon text cell
     cell.flatten(True)
 
-    print "Done layout_pgtext"
+    print ("Done layout_pgtext")
 
 
 def layout_Ring(cell, layer, x, y, r, w, npoints):
@@ -299,7 +299,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     if self.textpolygon:
       layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
 
-    print "Done drawing the layout for – DoubleBus_Ring: %.3f-%g" % ( self.r, self.g)
+    print ("Done drawing the layout for – DoubleBus_Ring: %.3f-%g" % ( self.r, self.g) )
 
 
 
@@ -356,7 +356,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 #    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "l": SiLayer})
-#    print "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) )
+#    print ( "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
 #    t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
 #    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
 #    print instance.cell_index
@@ -400,7 +400,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
       GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
     else:
       GC_imported = GC_imported.cell_index()  
-    print "Cell: GC_imported: #%s" % GC_imported
+    print ( "Cell: GC_imported: #%s" % GC_imported )
     t = pya.Trans(pya.Trans.R0, 0, 0)
     instance = cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 4, 1))
     print instance.cell_index
@@ -434,7 +434,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 
-    print "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g)
+    print ( "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g) )
 
 
 
@@ -492,7 +492,8 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     y_ring = 127*3/2+r
 
     pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "silayer": SiLayer, "devrec": self.devrec, "pinrec": self.pinrec })
-    print "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) )
+    print ( "pcell: %s, %s" \
+        % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
     print instance.cell_index
@@ -505,7 +506,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
       GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
     else:
       GC_imported = GC_imported.cell_index()  
-    print "Cell: GC_imported: #%s" % GC_imported
+    print ("Cell: GC_imported: #%s" % GC_imported )
     t = pya.Trans(pya.Trans.R0, 0, 0)
     instance = cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 4, 1))
     print instance.cell_index
@@ -535,47 +536,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
     layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
 
-    print "Done drawing the layout for – TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g)
-
-
-
-def PCell_get_parameter_list ( cell_name, library_name ):
-  # function to list all the parameters &amp; defaults for a PCell
-  # example usage:
-  # PCell_get_parameter_list("CIRCLE", "Basic")
-
-  print "* def PCell_get_parameter_list ( %s, %s): " % ( cell_name, library_name )
-  
-  lib = pya.Library.library_by_name(library_name)
-  if lib == None:
-    raise Exception("Unknown lib '%s'" % library_name)
-
-  pcell_decl = lib.layout().pcell_declaration(cell_name);
-  if pcell_decl == None:
-     raise Exception("Unknown PCell '%s'" % cell_name)
-
-  type2s = ['TypeBoolean', 'TypeDouble', 'TypeInt', 'TypeLayer', 'TypeList', 'TypeNone', 'TypeShape', 'TypeString']
-
-  for p in pcell_decl.get_parameters():
-    if ~p.readonly:
-      print "Name: %s, %s, unit: %s, default: %s, description: %s%s" % \
-        (p.name, type2s[p.type], p.unit, p.default, p.description, ", hidden" if p.hidden else ".")
-
-def PCell_get_parameters ( pcell ):
-  # function to list the values for all parameters for an intantiated PCell
-  # example usage:
-  # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
-  # pcell = ly.create_cell("CIRCLE", "Basic", { "actual_radius": 10, "layer": pya.LayerInfo(1, 0) } )
-  # PCell_get_parameters( pcell )
-
-  print "* def PCell_get_parameters ( %s ):" % pcell 
-  print pcell.pcell_parameters()
-
-  params = pcell.pcell_parameters_by_name()
-
-  for param in params.keys():
-    print "Parameter: %s, Value: %s" % (param, params[param])
-
+    print ( "Done drawing the layout for – TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g) )
 
 
 
@@ -586,7 +547,7 @@ class SiEPIC(pya.Library):
 
   def __init__(self):
 
-    print "Initializing SiEPIC EBeam PCells library."
+    print ("Initializing SiEPIC EBeam PCells library.")
   
     # Set the description
     self.description = "SiEPIC EBeam PCells"
