@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Automated measurement coordinate extraction</description>
+ <description>SiEPIC: Automated measurement coordinate extraction</description>
  <version/>
  <category>pymacros</category>
  <prolog/>

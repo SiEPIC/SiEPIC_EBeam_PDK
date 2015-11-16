@@ -61,6 +61,9 @@ Lukas Chrostowski           2015/11/05 - 2015/11/10
  - polygon text
  - PCell calling another PCell - TestStruct_DoubleBus_Ring
 
+Lukas Chrostowski           2015/11/15
+ - fix for Python 3.4: print ("xxx")
+
 """
 
 import pya
@@ -550,7 +553,7 @@ class SiEPIC(pya.Library):
     print ("Initializing SiEPIC EBeam PCells library.")
   
     # Set the description
-    self.description = "SiEPIC EBeam PCells"
+    self.description = "EBeam PCells"
     
     # Create the PCell declarations
     self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>SiEPIC: Heal waveguides</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,7 +9,7 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
  <menu-path/>
  <interpreter>python</interpreter>
@@ -24,15 +24,28 @@ by Lukas Chrostowski (c) 2015
 This Python file implements the healing of waveguides, if components have been moved
 
 
+- User selects a waveguide that needs healing
+- Function will:
+ - See if this waveguide is in the waveguide database "optical_waveguides_registered"
+  - If not, run the function to search for closest component pins and snaps to them, and 
+     registers it for future heal operations.
+  - If yes, move the beginning/end waveguide segments to match the original pin.
+
+- Develop a Heal All Waveguides.
+ - requires the "optical_waveguides_registered" database to be generated (by the user, 
+   via SiEPIC_EBeam_Register_waveguides) when the layout is loaded
+
+ 
 Version history:
 
 Lukas Chrostowski           2015/11/15
- - 
+ - initial concept
+
+
 
 """
 
 
-import pya
 
 
 

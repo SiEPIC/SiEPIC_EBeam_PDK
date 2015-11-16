@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Path to Waveguide</description>
+ <description>SiEPIC: 1-Path to Waveguide</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -29,9 +29,11 @@ registers this for future heal operations.
 Version history:
 
 Lukas Chrostowski           2015/11/15
- - 
+ - Initial version
+ - Selected paths are first snapped to the nearest pins, then converted to ROUND_PATH waveguides
 
 """
+
 import pya
 import numpy as numpy
 

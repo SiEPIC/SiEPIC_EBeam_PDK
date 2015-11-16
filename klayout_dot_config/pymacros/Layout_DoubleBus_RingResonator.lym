@@ -14,7 +14,33 @@
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text># Layout_DoubleBus_RingResonator
+ <text># Python script
+# Layout_DoubleBus_RingResonator
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2015
+
+This Python file creates a layout for testing a double-bus ring resonator.
+
+uses:
+ - the SiEPIC EBeam GDS Library
+ - the SiEPIC EBeam PCell Library
+it does:
+ - creates the layout in the presently selected cell
+ - deletes everything first
+
+Version history:
+
+Lukas Chrostowski           2015/11/10
+ - Initial version
+
+Lukas Chrostowski           2015/11/15
+ - fix for Python 3.4: print ("xxx")
+
+"""
+
+# 
 # Python script to create a layout for testing a double-bus ring resonator.
 # uses:
 #  - the SiEPIC EBeam GDS Library
@@ -66,7 +92,7 @@ top_cell.insert(pya.CellInstArray(cell.cell_index(), t))
 
 # Grating couplers, Ports 1, 2, 3, 4 (top-down):
 GC_imported = ly.create_cell("ebeam_gc_te1550", "SiEPIC-EBeam").cell_index()
-print "Cell: GC_imported: #%s" % GC_imported
+print ("Cell: GC_imported: #%s" % GC_imported)
 t = pya.Trans(pya.Trans.R0, 0, 0)
 cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127*dbu), pya.Point(0,0), 4, 1))
 
@@ -81,7 +107,7 @@ r = 20
 wg_width = 0.5
 g = 0.2
 pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", { "r": r, "w": wg_width, "g": g, "l": SiLayer  } )
-print "Cell: pcell: #%s" % pcell.cell_index()
+print ("Cell: pcell: #%s" % pcell.cell_index())
 y_ring = 127*3/2+r
 t = pya.Trans(pya.Trans.R270, 10 * dbu, y_ring * dbu) 
 instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
@@ -105,6 +131,6 @@ layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
 points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
 layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
 
-print "done layout..."
+print ("done layout...")
 </text>
 </klayout-macro>

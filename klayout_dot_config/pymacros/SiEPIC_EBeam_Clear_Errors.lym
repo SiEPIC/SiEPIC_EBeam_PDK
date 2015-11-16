@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>SiEPIC-EBeam: clear errors</description>
+ <description>SiEPIC: Clear errors</description>
  <version/>
  <category>pymacros</category>
  <prolog/>

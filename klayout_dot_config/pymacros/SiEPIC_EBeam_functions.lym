@@ -38,6 +38,10 @@ Lukas Chrostowski           2015/11/13
     def delete_extra_top_cells():
  - find all the automated measurement labels
 
+Lukas Chrostowski           2015/11/15
+ - fix for Python 3.4: print ("xxx")
+ - moved some functions from SiEPIC_EBeam_Verification, so they are accessible elsewhere.
+
 """
 import pya
 
