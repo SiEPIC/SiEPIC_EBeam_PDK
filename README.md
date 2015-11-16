@@ -12,15 +12,18 @@
 
 ##Package includes:
 
-- PCells: ring resonator; test structure layout with grating couplers and instantiating the ring resonator
-- Script / Macro to create a layout via script, including waveguide generation functions
-- GDS Library, updated with marker layers for the verification/netlist generation.
+- PCells: ring resonator; test structure layout with grating couplers and instantiating the ring resonator.
+- Script / Macro to create a layout, including waveguide generation functions.
+- GDS Library, updated with marker layers for verification/netlist generation.
 - Verification and Netlist generation: 
  - Scanning the layout. Finding waveguides, devices, pins.  
  - Verification: Identifying if there are missing connections, mismatched waveguides, too few points in a bend, etc. 
- - Creating a Spice netlist suitable for importing into Lumerical INTERCONNECT for circuit simulations. Including waveguide length (wg_length) for all waveguides
-- Example layout using the library for verification.
-- Layer definition
+ - Creating a Spice netlist suitable for importing into Lumerical INTERCONNECT for circuit simulations. Including waveguide length (wg_length) for all waveguides.
+ - Example layout using the library for verification (EBeam_LukasChrostowski_E_LVS.gds).
+- Waveguide functionality: 
+ - Menu item "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
+ - Menu item "Shift-W": selected waveguides are converted back to paths.
+- EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
 
 ## Download:
 
@@ -31,10 +34,11 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
 ##Installation instructions:
 
  - The files in the klayout_dot_config folder go into your KLayout configuration folder. On Linux and OSX, this is $HOME/.klayout
- - I don’t know what the equivalent is on windows. 
+  - I don’t know what the equivalent is on windows. 
  - Alternatively, you can import all the files one by one using the KLayout IDE.  How to use the <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
+ - For Linux/OSX, you need Python (which comes with the Mac); for Windows, KLayout comes with Python built-in.
 
-I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository.
+I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository. This is useful to automatically update my local KLayout installation (e.g., multiple computers), as changes are made in GitHub.
 
 ##Contributing to this project:
 
