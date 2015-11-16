@@ -42,7 +42,7 @@ I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> t
  - Clone to your Desktop
  - Make edits/contributions
  - "Commit to master" (your own master)
- - Create a Pull Request -- this will notify me of your contribution, which I can merge into the main project
+ - Create a <a href="https://help.github.com/articles/using-pull-requests/">Pull Request</a> -- this will notify me of your contribution, which I can merge into the main project
 
 ##Screenshots:
 
