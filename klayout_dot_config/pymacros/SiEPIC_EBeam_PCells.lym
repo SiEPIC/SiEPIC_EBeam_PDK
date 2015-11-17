@@ -121,7 +121,7 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
 
     a1 = []
     for p in points:
-      a1.append (pya.DPoint(p[0], p[1]))
+      a1.append (pya.DPoint(float(p[0]), float(p[1])))
   
     wg_path = pya.DPath(a1, w)
 
