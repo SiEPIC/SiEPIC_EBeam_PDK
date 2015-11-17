@@ -91,10 +91,10 @@ for o in object_selection:
         # convert wg_path (in microns) to database numbers
         wg_path = points_to_path(numpy.array(path_to_Dpoints(path_obj))/dbu, wg_width)
         # get waveguide transformation
-        # xxxxx
-        
-        print ( wg_path ) 
-        new_wg = cell.shapes(SiLayerN).insert(wg_path)
+        wg_path_trans = wg_path.transformed(oinst.trans)
+
+        print ( wg_path_trans ) 
+        new_wg = cell.shapes(SiLayerN).insert(wg_path_trans)
 
 # It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
 #        # http://www.klayout.de/doc/code/class_ObjectInstPath.html#method9
