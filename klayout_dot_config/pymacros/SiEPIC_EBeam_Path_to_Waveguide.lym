@@ -34,6 +34,9 @@ Lukas Chrostowski           2015/11/15
 
 Lukas Chrostowski           2015/11/16
  - fixes for Path_to_Waveguide ensuring it doesn't snap both waveguide ends to the same pin
+
+Lukas Chrostowski           2015/11/17
+ - Bend radius dialog, first time.
  
 """
 
@@ -74,8 +77,18 @@ optical_nets = []
 reset_Optical_classes()
 
 
-radius = 10
-
+# Waveguide radius should be specified in the cell in which the Path_to_Waveguide is called
+# using a "User Properties" defined via the Cells window.
+# if missing, a dialog is presented.
+radius_str = cell.property("radius")  
+if radius_str:
+  radius = float(radius_str)
+  print "Radius taken from cell {%s} = %s" % (cell.name, radius)
+else:
+  radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
+  print "Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name)
+  cell.set_property("radius", str(radius))
+    
 # How close must a waveguide be to a pin for it to snap:
 waveguide_snap_dist = 10
 
