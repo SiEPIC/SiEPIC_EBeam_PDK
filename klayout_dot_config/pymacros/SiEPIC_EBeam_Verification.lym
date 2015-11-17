@@ -67,7 +67,7 @@ def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
   # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
   a1 = []
   for p in dpoints:
-    a1.append (pya.Point(p[0], p[1]))
+    a1.append (pya.Point(int(p[0]), int(p[1])))
   path = pya.Path(a1, optical_waveguide.wg_width*4/dbu)
   topcell.shapes(LayerErrorN).insert(path)
   x = numpy.array(dpoints)[:,0].mean()*dbu
