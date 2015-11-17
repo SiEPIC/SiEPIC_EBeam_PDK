@@ -76,6 +76,10 @@ radius = 10
 # How close must a waveguide be to a pin for it to snap:
 waveguide_snap_dist = 10
 
+# Record a transaction, to enable "undo"
+lv.transaction("Path to Waveguide")
+
+
 # Find the selected paths
 object_selection = lv.object_selection
 # objects to delete:
@@ -126,40 +130,40 @@ for o in object_selection:
         # Find the closest pin for each path endpoint
       optical_pins_sorted0 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[0])
       optical_pins_sorted1 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[1])
-      optical_pins_sorted0[0] # pin that is closest to the beginning of path
-      if optical_pins_sorted0[0].dist[0] &lt; waveguide_snap_dist:
-        # Update the path beginning endpoint to match pin
-        points = path_to_points(path_obj)
-        # Is this a horizontal or vertical segment; move the whole segment
-        if points[0][0] == points[1][0]: 
-          # Vertical
-          points[1][0] = optical_pins_sorted0[0].x
-        if points[0][1] == points[1][1]: 
-          # Horizontal
-          points[1][1] = optical_pins_sorted0[0].y
-        points[0] = [optical_pins_sorted0[0].x, optical_pins_sorted0[0].y]
-        a1 = []
-        for p in points:
-          a1.append (pya.Point(p[0], p[1]))
-        # Update the path in the layout
-        path_obj = pya.Path(a1, path_obj.width)
-      optical_pins_sorted1[0] # pin that is closest to the end of path
-      if optical_pins_sorted1[0].dist[1] &lt; waveguide_snap_dist:
-        # Update the path end endpoint to match pin
-        points = path_to_points(path_obj)
-        # Is this a horizontal or vertical segment; move the whole segment
-        if points[len(points)-1][0] == points[len(points)-2][0]: 
-          # Vertical
-          points[len(points)-2][0] = optical_pins_sorted1[0].x
-        if points[len(points)-1][1] == points[len(points)-2][1]: 
-          # Horizontal
-          points[len(points)-2][1] = optical_pins_sorted1[0].y
-        points[len(points)-1] = [optical_pins_sorted1[0].x, optical_pins_sorted1[0].y]
-        a1 = []
-        for p in points:
-          a1.append (pya.Point(p[0], p[1]))
-        # Update the path in the layout
-        path_obj = pya.Path(a1, path_obj.width)
+      if len(optical_pins_sorted0) &gt; 0:
+        if optical_pins_sorted0[0].dist[0] &lt; waveguide_snap_dist:
+          # Update the path beginning endpoint to match pin
+          points = path_to_points(path_obj)
+          # Is this a horizontal or vertical segment; move the whole segment
+          if points[0][0] == points[1][0]: 
+            # Vertical
+            points[1][0] = optical_pins_sorted0[0].x
+          if points[0][1] == points[1][1]: 
+            # Horizontal
+            points[1][1] = optical_pins_sorted0[0].y
+          points[0] = [optical_pins_sorted0[0].x, optical_pins_sorted0[0].y]
+          a1 = []
+          for p in points:
+            a1.append (pya.Point(p[0], p[1]))
+          # Update the path in the layout
+          path_obj = pya.Path(a1, path_obj.width)
+        optical_pins_sorted1[0] # pin that is closest to the end of path
+        if optical_pins_sorted1[0].dist[1] &lt; waveguide_snap_dist:
+          # Update the path end endpoint to match pin
+          points = path_to_points(path_obj)
+          # Is this a horizontal or vertical segment; move the whole segment
+          if points[len(points)-1][0] == points[len(points)-2][0]: 
+            # Vertical
+            points[len(points)-2][0] = optical_pins_sorted1[0].x
+          if points[len(points)-1][1] == points[len(points)-2][1]: 
+            # Horizontal
+            points[len(points)-2][1] = optical_pins_sorted1[0].y
+          points[len(points)-1] = [optical_pins_sorted1[0].x, optical_pins_sorted1[0].y]
+          a1 = []
+          for p in points:
+            a1.append (pya.Point(p[0], p[1]))
+          # Update the path in the layout
+          path_obj = pya.Path(a1, path_obj.width)
 
       print ("updated path (adjusted endpoints): %s" % path_obj )
 
@@ -169,7 +173,7 @@ for o in object_selection:
       pcell = ly.create_cell("ROUND_PATH", "Basic", param )
       t = pya.Trans(0, 0)
       cell.insert(pya.CellInstArray(pcell.cell_index(), t))
-
+  
 # It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
       
       # Mark the path for deletion:
@@ -181,6 +185,9 @@ for t in to_delete:
         
 # Clear the layout view selection, since we deleted some objects (but others may be selected still):
 lv.clear_object_selection()
+
+# Record a transaction, to enable "undo"
+lv.commit()
 
 
 # Save the optical_waveguides for future heal operations

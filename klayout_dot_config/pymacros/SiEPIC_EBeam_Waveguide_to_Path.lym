@@ -68,7 +68,10 @@ for o in object_selection:
     print ("Selected object is a cell.")
     oinst = o.inst()
     print oinst
-    
+
+# Record a transaction, to enable "undo"
+lv.transaction("Waveguide to Path")
+
 # Find the selected paths
 object_selection = lv.object_selection
 # objects to delete:
@@ -87,6 +90,9 @@ for o in object_selection:
         wg_width = path_obj.width/dbu
         # convert wg_path (in microns) to database numbers
         wg_path = points_to_path(numpy.array(path_to_Dpoints(path_obj))/dbu, wg_width)
+        # get waveguide transformation
+        # xxxxx
+        
         print ( wg_path ) 
         new_wg = cell.shapes(SiLayerN).insert(wg_path)
 
@@ -103,10 +109,13 @@ for o in object_selection:
 
 for t in to_delete:
   t.delete()
-        
+
 # Clear the layout view selection, since we deleted some objects (but others may be selected still):
 lv.clear_object_selection()
      
+# Record a transaction, to enable "undo"
+lv.commit()
+
         
         </text>
 </klayout-macro>

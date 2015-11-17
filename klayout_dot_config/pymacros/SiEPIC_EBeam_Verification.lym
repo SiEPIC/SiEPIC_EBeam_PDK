@@ -10,7 +10,7 @@
  <autorun-early>false</autorun-early>
  <shortcut>V</shortcut>
  <show-in-menu>true</show-in-menu>
- <group-name>SiEPIC</group-name>
+ <group-name/>
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
