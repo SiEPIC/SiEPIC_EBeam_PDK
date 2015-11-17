@@ -30,6 +30,12 @@ Lukas Chrostowski           2015/11/15
  - Initial version
  - Selected ROUND_PATH waveguides on the silicon layer are converted to paths.
 
+Lukas Chrostowski           2015/11/16
+ - Fix bug to include waveguide_to_path transformation of the ROUND_PATH PCell
+
+to do:
+ - is the GUIDING_SHAPE is selected, it doesn't work.
+ 
 """
 
 

@@ -61,8 +61,14 @@ Lukas Chrostowski           2015/11/05 - 2015/11/10
  - polygon text
  - PCell calling another PCell - TestStruct_DoubleBus_Ring
 
+Lukas Chrostowski           2015/11/14
+ - fix for rounding error in "DoubleBus_Ring"
+
 Lukas Chrostowski           2015/11/15
  - fix for Python 3.4: print ("xxx")
+ 
+Lukas Chrostowski           2015/11/17
+ - update "layout_waveguide_rel" to use the calculated points_per_circle(radius)
 
 """
 
@@ -119,7 +125,7 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
   
     wg_path = pya.DPath(a1, w)
 
-    npoints = 400
+    npoints = points_per_circle(radius)
     param = { "npoints": npoints, "radius": radius, "path": wg_path, "layer": layer }
 
     pcell = ly.create_cell("ROUND_PATH", "Basic", param )

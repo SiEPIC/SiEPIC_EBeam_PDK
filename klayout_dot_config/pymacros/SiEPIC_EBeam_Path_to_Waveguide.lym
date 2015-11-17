@@ -32,6 +32,9 @@ Lukas Chrostowski           2015/11/15
  - Initial version
  - Selected paths are first snapped to the nearest pins, then converted to ROUND_PATH waveguides
 
+Lukas Chrostowski           2015/11/16
+ - fixes for Path_to_Waveguide ensuring it doesn't snap both waveguide ends to the same pin
+ 
 """
 
 import pya

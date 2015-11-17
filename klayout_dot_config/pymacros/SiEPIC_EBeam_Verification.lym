@@ -46,6 +46,11 @@ Lukas Chrostowski 2015/11/12
 Lukas Chrostowski           2015/11/15
  - fix for Python 3.4: print ("xxx")
  - moved some functions from here, to the common "SiEPIC_EBeam_functions file, so they are accessible elsewhere.
+ - added pin# text label on PinRec layer; sort pins in Spice output using these names.
+
+Lukas Chrostowski           2015/11/16
+ - fixes for component pin_type = Optical IO / FbrTgt being incorrectly handled; added Optical_pin.pin_type
+
  
 """
 
@@ -247,8 +252,12 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
   # - find other overlapping pins (p2)
   # - find overlapping waveguide ends
   for p1 in optical_pins:
+    if p1.pin_type != 1:
+      break # only analyze pin_type = 1, component.
     segment1 = [ pya.Point(*p1.points[0]), pya.Point(*p1.points[1]) ] 
     for p2 in optical_pins[ p1.n: len(optical_pins) ]:
+      if p2.pin_type != 1:
+        break # only analyze pin_type = 1, component.
       #print ("%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points) )
       segment2 = [ pya.Point(*p2.points[0]), pya.Point(*p2.points[1]) ] 
       check = check_segments_colinear_overlapping( segment1, segment2 )
@@ -375,13 +384,13 @@ def check_connectivity(optical_components, topcell, LayerErrorN):
       # go through all the pins in the component, and check if they aren't assigned to a net
       for m in range(0,optical_components[k].npins):
         pin = optical_pins[optical_components[k].pins[m]]
-        if pin.net == 0:
+        if pin.net == 0 and pin.pin_type == 1:  # disconnected pin on a pin_type = 1 (component)
           text = "  *** Found disconnected pin at (%s, %s)" % (pin.x*dbu, pin.y*dbu)
           box = pya.Box(pin.x-3000, pin.y-3000, pin.x+3000, pin.y+3000)
 #          flag_component_error(box, text, pin.x*dbu, pin.y*dbu)
 
   for pin in optical_pins:
-    if pin.net == 0:
+    if pin.net == 0 and pin.pin_type != 2:  # disconnected pin not on a pin_type = 2 (optical IO)
       text = "  *** Found disconnected pin at (%s, %s)" % (pin.x*dbu, pin.y*dbu)
       box = pya.Box(pin.x-3000, pin.y-3000, pin.x+3000, pin.y+3000)
       flag_component_error(box, text, pin.x*dbu, pin.y*dbu)
