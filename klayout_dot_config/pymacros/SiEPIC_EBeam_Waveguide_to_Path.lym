@@ -121,7 +121,5 @@ lv.clear_object_selection()
      
 # Record a transaction, to enable "undo"
 lv.commit()
-
-        
-        </text>
+</text>
 </klayout-macro>

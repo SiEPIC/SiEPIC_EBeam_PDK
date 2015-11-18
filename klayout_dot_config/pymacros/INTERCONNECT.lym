@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Launch Lumerical INTERCONNECT</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>import pya
+
+# Enter your Python code here ..
+
+# Launch Lumerical INTERCONNECT
+
+
+import os
+print os.name
+
+import platform
+print platform.system()
+print platform.release()
+
+import sys
+version = sys.version
+
+
+import string
+  
+if sys.platform.startswith('freebsd'):
+    # FreeBSD-specific code here...
+    pass
+elif sys.platform.startswith('linux'):
+    # Linux-specific code here...
+    pass
+elif sys.platform.startswith('darwin'):
+    # OSX specific
+    pass
+    if string.find(version,"2.7.") &gt; -1:
+      import commands
+      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app')
+
+    
+
+</text>
+</klayout-macro>
