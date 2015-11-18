@@ -44,6 +44,19 @@ Lukas Chrostowski           2015/11/15
 
 Lukas Chrostowski           2015/11/16
  - fixes for component pin_type = Optical IO / FbrTgt being incorrectly handled; added Optical_pin.pin_type
+
+Lukas Chrostowski           2015/11/17
+ - debugging &amp; fixing Verification problems
+   - Optical_*.n replaced with .index, and starting from 0. -1 for undefined/disconnected.
+   - added functions for listing:
+     print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
+     print_Optical_components(optical_components)
+     print_Optical_waveguides(optical_waveguides)
+     print_Optical_pins(optical_pins)
+     print_Optical_nets(optical_nets)
+ - improvements to Spice output, engineering format
+ - extensive testing of verification, including large test layout
+ - several floating point issues
   
 """
 import pya
@@ -59,10 +72,8 @@ LayerError = pya.LayerInfo(999,0)
 # definition of classes for Verification, Waveguide making, Waveguide Healing
 # one for each instance of the components
 class Optical_component:
-    n = 0
-    def __init__(self, component, instance, x, y, flip, rotate, library):
-        Optical_component.n += 1
-        self.n = Optical_component.n # component number, should be unique  
+    def __init__(self, index, component, instance, x, y, flip, rotate, library):
+        self.index = index         # component index, should be unique, 0, 1, 2, ...
         self.component = component # which component (name) this pin belongs to
         self.instance = instance   # which component (instance) this pin belongs to
         self.x = x                 # instance location
@@ -73,13 +84,17 @@ class Optical_component:
         self.nets = []             # nets connected to component
         self.npins = 0             # number of pin
         self.pins = []             # an array of all the pins
+
+def print_Optical_components(optical_components):
+  print ("Optical_components:")
+  for o in optical_components:
+    print ("#%s: %s / %s, (%s, %s), nets %s, npins %s, pins %s" %\
+        (o.index, o.component, o.instance, o.x, o.y, o.nets, o.npins, o.pins) )
         
 # definition for the optical waveguide class
 class Optical_waveguide:
-    n = 0
-    def __init__(self, points, radius, length, wg_type, num_points, wg_width, bend_pts):
-        Optical_waveguide.n += 1
-        self.n = Optical_waveguide.n   # waveguide number, needs to be unique
+    def __init__(self, index, points, radius, length, wg_type, num_points, wg_width, bend_pts):
+        self.index = index        # waveguide index, should be unique, 0, 1, 2, ...
         self.points = points      # array of vertices, in database units
         self.radius = radius      # radius, in microns
         self.length = length      # length, in microns
@@ -87,35 +102,66 @@ class Optical_waveguide:
         self.num_points = num_points # number of vertices in the path
         self.wg_width = wg_width  # waveguide width
         self.bend_pts = bend_pts  # number of points in a bend, per circle
-        self.net1 = 0             # nets; one at each end of the waveguide
-        self.net2 = 0             # nets; one at each end of the waveguide
+        self.net1 = -1             # nets; one at each end of the waveguide
+        self.net2 = -1             # nets; one at each end of the waveguide
         self.component = "ebeam_wg_strip_1550"  # waveguide model name
         self.library = "custom/EBeam"           # compact model library
-        self.connected_pin = 0      # which pin the waveguide is connected to
+
+def print_Optical_waveguides(optical_waveguides):
+  print ("Optical_waveguides:")
+  for o in optical_waveguides:
+    print ("#%s: length %s, type %s, net1: %s, net2: %s, points: %s" %\
+        (o.index, o.length, o.wg_type, o.net1, o.net2, o.points) )
 
 class Optical_pin:
-    n = 0
-    def __init__(self, points, component_n, x, y, pin_type):
-        Optical_pin.n += 1
-        self.n = Optical_pin.n          # pin number, must be unique
+    def __init__(self, index, points, component_n, x, y, pin_type):
+        self.index = index              # pin number, index, should be unique, 0, 1, 2, ...
         self.points = points            # array of vertices, in database units
-        self.component_n = component_n  # which component this pin belongs to
-        self.net = 0                    # which net this pin is connected to
+        self.component_n = component_n  # which component index this pin belongs to
+        self.net = -1                    # which net this pin is connected to
         self.x = x                      # x coordinate, in database units
         self.y = y                      # y coordinate, in database units
         self.pin_type = pin_type        # pin type: 0 = waveguide, 1 = component, 2 = opticalIO
 
+def print_Optical_pins(optical_pins):
+  print ("Optical_pins:")
+  for o in optical_pins:
+    if o.pin_type == 1:
+      points = o.points
+    else:
+      points = "..."
+    print ("#%s: component_n %s, pin_type %s, net: %s, (%s, %s), points: %s" %\
+        (o.index, o.component_n, o.pin_type, o.net, o.x, o.y, points) )
+
 class Optical_net:
-    net = 0
-    def __init__(self, pin1_type, pin1_n, pin2_type, pin2_n):
-        Optical_net.net += 1
-        self.net = Optical_net.net      # net number, needs to be unique
+    def __init__(self, index, pin1_type, pin1_n, pin2_type, pin2_n):
+        self.index = index              # net number, index, should be unique, 0, 1, 2, ...
         # an optical net can only connect to two pins. 
         # the pin variables point to either Optical_waveguide or Optical_component classes
         self.pin1_type = pin1_type      # pin type: 0 = waveguide, 1 = component, 2 = opticalIO
-        self.pin1_n = pin1_n            # pin n: component or waveguide number
+        self.pin1_n = pin1_n            # pin n: component or waveguide index
         self.pin2_type = pin2_type
         self.pin2_n = pin2_n
+
+def print_Optical_nets(optical_nets):
+  print ("Optical_nets:")
+  for o in optical_nets:
+    if o.pin1_type != 0:
+      name1 = optical_components[o.pin1_n].component
+    else:
+      name1 = 'waveguide'
+    if o.pin2_type != 0:
+      name2 = optical_components[o.pin2_n].component
+    else:
+      name2 = 'waveguide'
+    print ("#%s: pin1: %s (%s) pin_type1: %s; pin2: %s (%s) pin_type2: %s" %\
+        (o.index, o.pin1_n, name1, o.pin1_type, o.pin2_n, name2, o.pin2_type) )
+
+def print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets):
+  print_Optical_components(optical_components)
+  print_Optical_waveguides(optical_waveguides)
+  print_Optical_pins(optical_pins)
+  print_Optical_nets(optical_nets)
 
 class Layout_error:
     # for keeeping track of layout errors
@@ -127,10 +173,6 @@ class Layout_error:
         self.y = y                    # error location
 
 def reset_Optical_classes():
-  Optical_component.n = 0 
-  Optical_waveguide.n = 0 
-  Optical_pin.n = 0 
-  Optical_net.n = 0 
   Layout_error.n = 0
 
 
@@ -245,9 +287,10 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       x = iter1.itrans().disp.x*dbu
       y = iter1.itrans().disp.y*dbu
       flip = iter1.trans().is_mirror()
-      rotate = iter1.trans().rot()
-      optical_components.append ( Optical_component (component, instance, x, y, flip, rotate, library) )
-      component_n = optical_components[len(optical_components)-1].n
+      rotate = int(iter1.trans().rot())*90
+      component_index = len(optical_components)
+      optical_components.append ( Optical_component (component_index, \
+                  component, instance, x, y, flip, rotate, library) )
       
       # Find the PinRec and record info as Optical_pin
       
@@ -279,7 +322,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       # Sort pin text labels
       pin_info2 = sorted(pin_info1, key=lambda  pin_info0: pin_info0.pin_text)
 
-      # find pins that are inside the path:
+      # find pin labels that are inside the path:
       for p1 in range(0,len(pin_info2)):
         for p2 in range(0,len(path_shape)):
           check_text_in_pin = check_point_in_segment( \
@@ -290,11 +333,12 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
             points = path_points[p2]  
             x = points[0][0]
             y = points[0][1]
-            optical_pins.append (Optical_pin (points, component_n, x, y, 1) )
-            optical_components[component_n-1].npins += 1
-            optical_components[component_n-1].pins.append( len(optical_pins)-1 )
-            print ("%s: PinRec (text=%s) in cell {%s}, path -- %s"   \
-                % (i, pin_info2[p1].pin_text, iter2.cell().name, path_shape[p2].path) )
+            pin_index = len(optical_pins)
+            optical_pins.append (Optical_pin (pin_index, points, component_index, x, y, 1) )
+            optical_components[component_index].npins += 1
+            optical_components[component_index].pins.append( pin_index )
+            print ("%s: PinRec (text=%s) in cell {%s}, component #%s, path -- %s"   \
+              % (i, pin_info2[p1].pin_text, iter2.cell().name, component_index, path_to_points(path_shape[p2].path)) )
 
       # Find the FbrTgt, and record info as Optical_pin
       iter2 = subcell.begin_shapes_rec(LayerFbrTgtN)
@@ -304,14 +348,22 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           polygon = polygon.transformed(iter1.itrans())
           # What do we want to do with the Fibre ports?
           # create a net (with only 1 member = the optical IO)
-          optical_nets.append ( Optical_net (2, component_n, -1, -1) )
+          net_index = len(optical_nets)
+          optical_nets.append ( Optical_net (net_index, 2, component_index, -1, -1) ) #ok
+          # create a pin, optical IO
           bb = polygon.bbox()
           x, y = numpy.mean([bb.p1.x, bb.p2.x]), numpy.mean([bb.p1.y, bb.p2.y])
-          print polygon
-          optical_pins.append (Optical_pin (polygon_to_points(polygon), component_n, x, y, 2) )
-          optical_components[component_n-1].nets.append( len(optical_nets)-1 )
-          optical_components[component_n-1].npins += 1
-          optical_components[component_n-1].pins.append( len(optical_pins)-1 )
+          pin_index = len(optical_pins)
+          optical_pins.append (Optical_pin (pin_index, polygon_to_points(polygon), component_index, x, y, 2) )
+          # register the net with the pin and component
+          optical_pins[pin_index].net = net_index
+          optical_components[component_index].nets.append( net_index )
+          # register the pin with the component
+          optical_components[component_index].npins += 1
+          optical_components[component_index].pins.append( pin_index ) 
+          print ("%s: FbrTgt in cell {%s}, at (%s, %s), net %s, pins %s, component # %s, component nets %s")   \
+              % (i, iter2.cell().name, x, y, net_index, optical_components[component_index].pins, \
+              component_index, optical_components[component_index].nets  )
         iter2.next()
         
     # end if found_component   
@@ -343,13 +395,14 @@ def points_per_circle(radius):
 
 def path_to_points(path):
   # function to convert a KLayout Path object to an array of points
-  # iterate through all the points in the path, and 
+  # iterate through all the points in the path, and construct array
   p_iter = path.each_point()
   points = []
   try:
     while True:
        p = p_iter.next()
-       points.append( [int(p.x), int(p.y)] )
+       # assume input Integer type; need to round due to floating point issues.
+       points.append( [int(round(p.x)), int(round(p.y))] )
   except StopIteration:
     pass    
   return points

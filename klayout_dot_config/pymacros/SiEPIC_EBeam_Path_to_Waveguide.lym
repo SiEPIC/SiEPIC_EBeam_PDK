@@ -157,7 +157,7 @@ for o in object_selection:
         # check if both ends of the waveguide want to snap to the same vertex. If so, pick the closest waveguide end.
         go_wg_beginning = True
         go_wg_end = True
-        if optical_pins_sorted0[0].n == optical_pins_sorted1[0].n:
+        if optical_pins_sorted0[0].index == optical_pins_sorted1[0].index:
           # same pin!  find the closest one: 
           if optical_pins_sorted0[0].dist[0] &lt; optical_pins_sorted1[0].dist[1]:
             # Beginning is closest, don't touch the end
