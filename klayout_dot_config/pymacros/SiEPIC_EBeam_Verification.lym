@@ -440,8 +440,10 @@ def list_optical_components(optical_components):
       rotate = ' sch_r=%s' % str(o.rotate)
     else:
       rotate = ''
-    t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
-         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
+#    t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
+#         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
+    t = '  %s %s %s library="%s" sch_x=%s sch_y=%s %s%s'  % \
+         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, eng_str(o.x * 5e-2), eng_str(o.y * 5e-2), rotate, flip)
     print (t)
     wtext.insertHtml('%s&lt;br&gt;' %t)
 
@@ -449,39 +451,49 @@ import math
 def eng_str(x):
     # x input in meters
     # output in meters, engineering notation, rounded to 1 nm
+    print x
     x = round(x*1E9)/1E9
     y = abs(x)
+    print y
     if y == 0:
       return '0'
     else:
       exponent = int(math.floor(math.log10(y)))
       engr_exponent = exponent - exponent%3
       if engr_exponent == -3:
-        str_engr_exponent = "mm"
-      if engr_exponent == -6:
-        str_engr_exponent = "um"
-      if engr_exponent == -9:
-        str_engr_exponent = "nm"
-        z = int(round(y/10**engr_exponent))
+        str_engr_exponent = "m"
+        z = y/10**engr_exponent
+      elif engr_exponent == -6:
+        str_engr_exponent = "u"
+        z = y/10**engr_exponent
+      elif engr_exponent == -9:
+        str_engr_exponent = "n"
+        z = y/10**engr_exponent
       else:
+        str_engr_exponent = ""
         z = y/10**engr_exponent
       sign = '-' if x &lt; 0 else ''
       #return sign+str(z)+'E'+str(engr_exponent)
-      return sign+str(z)+str(str_engr_exponent)
+#      return sign+ '%3.3f' % z +str(str_engr_exponent)
+      print z
+      return sign+ str(z) +str(str_engr_exponent)
     
 def list_optical_waveguides(list_optical_waveguides):
   # list all Optical_component objects from an array
   # input array, optical_components
   # example output:         
-  # X5 9 10 ebeam_wg_strip_1550 library="custom/EBeam" wg_length=7.86299e-06 wg_width=5.085e-07 sch_x=-1.42 sch_y=-0.265
+  # X5 9 10 ebeam_wg_strip_1550 library="Design kits/ebeam_v1.0" wg_length=7.86299e-06 wg_width=5.085e-07 sch_x=-1.42 sch_y=-0.265
 
   for o in list_optical_waveguides:
     nets_str = "N$%s N$%s" %(o.net1, o.net2)
     x = numpy.array(o.points)[:,0].mean()*dbu
     y = numpy.array(o.points)[:,1].mean()*dbu
-    t = '%s %s %s library="%s" wg_length=%s wg_width=%s lay_x=%s lay_y=%s sch_x=%5.3f sch_y=%5.3f'  % \
-           ( "Xwg" + str(o.index), nets_str, o.component, o.library, eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
-             eng_str(x * 1e-6), eng_str(y * 1e-6), x, y)
+#    t = '%s %s %s library="%s" wg_length=%s wg_width=%s lay_x=%s lay_y=%s sch_x=%5.3f sch_y=%5.3f'  % \
+#           ( "Xwg" + str(o.index), nets_str, o.component, o.library, eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
+#             eng_str(x * 1e-6), eng_str(y * 1e-6), x, y)
+    t = '  %s %s %s library="%s" wg_length=%s wg_width=%s sch_x=%s sch_y=%s'  % \
+           ( "Xwg" + str(o.index), nets_str, o.component, o.library, \
+             eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), eng_str(x * 5e-2), eng_str(y * 5e-2))
     print (t)
     wtext.insertHtml('%s&lt;br&gt;' %t)
     
@@ -634,8 +646,18 @@ wtext.insertHtml('&lt;br&gt;* Spice netlist output:&lt;br&gt;&lt;br&gt;')
 print ("")
 print ("Spice output: ")
 print ("")
+
+def find_optical_IO_pins(optical_pins):
+  pins_text = ""
+  for p in optical_pins:
+    if p.pin_type == 2:
+      pins_text += " N$%s" % p.net
+  return pins_text
+      
+wtext.insertHtml('.subckt %s %s:&lt;br&gt;' % ( topcell.name, find_optical_IO_pins(optical_pins) ))
 list_optical_components(optical_components)
 list_optical_waveguides(optical_waveguides)
+wtext.insertHtml('.ends %s&lt;br&gt;' % ( topcell.name) )
 
 # Find the automated measurement coordinates:
 wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')

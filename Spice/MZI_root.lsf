@@ -1,0 +1,15 @@
+redrawoff;
+elementName = addelement;
+addport(elementName, 'n$0', 'bidirectional', 'Variant');
+setnamed(elementName + '::RELAY_1', 'name', 'n$0');
+addport(elementName, 'n$1:', 'bidirectional', 'Variant');
+setnamed(elementName + '::RELAY_1', 'name', 'n$1:');
+setnamed(elementName + '::n$0','x position',0);
+setnamed(elementName + '::n$0','y position',1410);
+setnamed(elementName + '::n$1:','x position',0);
+setnamed(elementName + '::n$1:','y position',1410);
+setnamed(elementName, 'setup script', 'deleteall;
+feval("Simple_MZI_setup.lsf");');
+autoarrange(elementName);
+setnamed(elementName, 'name', 'Simple_MZI');
+runsetup;

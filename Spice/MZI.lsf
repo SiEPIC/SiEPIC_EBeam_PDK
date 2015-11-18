@@ -1,0 +1,5 @@
+feval("/Users/lukasc/SiEPIC_EBeam_PDK/Spice/MZI_root.lsf");
+run;
+exportcsvresults( filebasename( currentfilename ) );
+switchtodesign;
+save;

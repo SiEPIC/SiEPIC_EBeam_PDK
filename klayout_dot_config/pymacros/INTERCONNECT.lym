@@ -39,7 +39,10 @@ if sys.platform.startswith('freebsd'):
     pass
 elif sys.platform.startswith('linux'):
     # Linux-specific code here...
-    pass
+    if string.find(version,"2.") &gt; -1:
+      import commands
+      commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
+
 elif sys.platform.startswith('darwin'):
     # OSX specific
     pass

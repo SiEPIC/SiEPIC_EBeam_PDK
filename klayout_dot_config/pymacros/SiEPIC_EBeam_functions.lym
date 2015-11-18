@@ -105,7 +105,7 @@ class Optical_waveguide:
         self.net1 = -1             # nets; one at each end of the waveguide
         self.net2 = -1             # nets; one at each end of the waveguide
         self.component = "ebeam_wg_strip_1550"  # waveguide model name
-        self.library = "custom/EBeam"           # compact model library
+        self.library = "Design kits/ebeam_v1.0" # compact model library
 
 def print_Optical_waveguides(optical_waveguides):
   print ("Optical_waveguides:")
@@ -283,7 +283,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
         if iter2.shape().is_text():
           print ("%s: DevRec label: %s" % (i, iter2.shape().text))
         iter2.next()
-      library = "library/EBeam"
+      library = "Design kits/ebeam_v1.0"
       x = iter1.itrans().disp.x*dbu
       y = iter1.itrans().disp.y*dbu
       flip = iter1.trans().is_mirror()
