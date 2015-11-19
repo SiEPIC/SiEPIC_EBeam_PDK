@@ -64,6 +64,9 @@ Lukas Chrostowski           2015/11/18
 """
 import pya
 import math
+#import numpy
+MODULE_NUMPY = False
+
 
 # SiEPIC-EBeam-PDK Layers:
 LayerSi = pya.LayerInfo(1, 0)
