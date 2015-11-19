@@ -417,7 +417,8 @@ def check_connectivity(optical_components, topcell, LayerErrorN):
   for pin in optical_pins:
     if pin.net == -1 and pin.pin_type != 2:  # disconnected pin not on a pin_type = 2 (optical IO)
       text = "  *** Found disconnected pin #%s, type %s, at (%s, %s), component #%s {%s}" \
-          % (pin.index, pin.pin_type, pin.x*dbu, pin.y*dbu, k, optical_components[k].component)
+          % (pin.index, pin.pin_type, pin.x*dbu, pin.y*dbu, \
+             pin.component_n, optical_components[pin.component_n].component)
       box = pya.Box(pin.x-3000, pin.y-3000, pin.x+3000, pin.y+3000)
       flag_component_error(box, text, pin.x*dbu, pin.y*dbu)
 
