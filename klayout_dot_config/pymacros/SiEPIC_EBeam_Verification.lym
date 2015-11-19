@@ -215,7 +215,7 @@ def find_all_waveguides(cell, layer):
 
     if found_wg:
       points = path_to_points(path)  
-      print "path: %s, points: %s" % (path, points)
+      print ("path: %s, points: %s" % (path, points) )
       # save waveguide info into the Optical_waveguide
       optical_waveguides.append ( Optical_waveguide (len(optical_waveguides), points, radius, \
           length, wg_type, num_points, wg_width, bend_pts ) )

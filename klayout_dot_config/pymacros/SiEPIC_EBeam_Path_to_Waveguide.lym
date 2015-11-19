@@ -86,13 +86,13 @@ reset_Optical_classes()
 radius_str = cell.property("radius")  
 if radius_str:
   radius = float(radius_str)
-  print "Radius taken from cell {%s} = %s" % (cell.name, radius)
+  print ("Radius taken from cell {%s} = %s" % (cell.name, radius) )
 else:
   radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
   if radius == None:
     radius = 10
   else:
-    print "Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name)
+    print ("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
     cell.set_property("radius", str(radius))
       
 # How close must a waveguide be to a pin for it to snap:
