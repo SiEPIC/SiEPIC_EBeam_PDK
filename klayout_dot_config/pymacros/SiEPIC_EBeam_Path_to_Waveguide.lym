@@ -37,6 +37,9 @@ Lukas Chrostowski           2015/11/16
 
 Lukas Chrostowski           2015/11/17
  - Bend radius dialog, first time.
+
+Lukas Chrostowski           2015/11/18
+ - If the GUIDING_SHAPE (a path) is selected, don't do anything. Already a waveguide.
  
 """
 
@@ -109,109 +112,115 @@ for o in object_selection:
   else:
     print ("Selected object is a shape")
     if o.shape.is_path():
-      # Search the layout for the components and waveguides:
-      print ("* calling find_all_components() – DevRec")
-      find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
-      shape_obj = o.shape
-      path_obj = o.shape.path
-      num_points = path_obj.num_points()
-      points = path_to_points(path_obj)
-      if num_points == 2:
-        # insert two mid-points in the path so that:
-        #  1) it can later be split into two nets
-        #  2) to allow for waveguide snapping, move an edge, not just endpoint.
-        a1 = []
-        count =0
-        for p in points:
-          a1.append (pya.Point(p[0], p[1]))
-          count += 1
-          if count == 1:
-            # add a point:
-            a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
-            a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
-        # Update the path
-        path_obj = pya.Path(a1, path_obj.width)
-        print ("updated path (inserted mid-point): %s" % path_obj )
-      # Waveguide parameters
-      wg_type = 0
-      bend_pts = 0
-      wg_width = path_obj.width*dbu
-      # print ( "Waveguide:  num_points: %s, length: %s, radius: %s, path: %s"   % (num_points, length, radius, path_obj) )
+      c = o.shape.cell
+      if c.name == "ROUND_PATH" and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+        # we have a waveguide GUIDING_LAYER selected
+        print ("GUIDING_LAYER in ROUND_PATH on LayerSi. We will not convert this to waveguide!")
+      else:
+        # Search the layout for the components and waveguides:
+        print ("* calling find_all_components() – DevRec")
+        find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
+        shape_obj = o.shape
+        path_obj = o.shape.path
+        num_points = path_obj.num_points()
+        points = path_to_points(path_obj)
+        if num_points == 2:
+          # insert two mid-points in the path so that:
+          #  1) it can later be split into two nets
+          #  2) to allow for waveguide snapping, move an edge, not just endpoint.
+          a1 = []
+          count =0
+          for p in points:
+            a1.append (pya.Point(p[0], p[1]))
+            count += 1
+            if count == 1:
+              # add a point:
+              a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
+              a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
+          # Update the path
+          path_obj = pya.Path(a1, path_obj.width)
+          print ("updated path (inserted mid-point): %s" % path_obj )
+        # Waveguide parameters
+        wg_type = 0
+        bend_pts = 0
+        #length =  path_obj.length()*dbu
+        wg_width = path_obj.width*dbu
+        # print ( "Waveguide:  num_points: %s, length: %s, radius: %s, path: %s"   % (num_points, length, radius, path_obj) )
 
-      # For both the beginning and end of the path:
-      for pin in optical_pins:
-        pin.dist = []
-      for path_endpoint in [ points[0], points[len(points)-1] ]:
-        # Calculate the distnace between every pin and each path endpoint
+        # For both the beginning and end of the path:
         for pin in optical_pins:
-          # this updates "optical_pins" via the "pin" pointer  
-          # print ( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )
-          pin.dist.append ( distance_xy ( path_endpoint, [pin.x, pin.y] ) ) 
-        # Find the closest pin for each path endpoint
-      # optical_pins_sorted0[0].dist[0] is the pin distance data sorted in relation to the waveguide beginning:
-      optical_pins_sorted0 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[0])
-      # optical_pins_sorted1[0].dist[1] is the pin distance data sorted in relation to the waveguide end:
-      optical_pins_sorted1 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[1])
-      if len(optical_pins_sorted0) &gt; 0:
-        # check if both ends of the waveguide want to snap to the same vertex. If so, pick the closest waveguide end.
-        go_wg_beginning = True
-        go_wg_end = True
-        if optical_pins_sorted0[0].index == optical_pins_sorted1[0].index:
-          # same pin!  find the closest one: 
-          if optical_pins_sorted0[0].dist[0] &lt; optical_pins_sorted1[0].dist[1]:
-            # Beginning is closest, don't touch the end
-            go_wg_end = False
-          else:
-            # End is closest, don't touch the beginning
-            go_wg_beginning = False
-        if optical_pins_sorted0[0].dist[0] &lt; waveguide_snap_dist and go_wg_beginning:
-          # Update the path beginning endpoint to match pin
-          points = path_to_points(path_obj)
-          # Is this a horizontal or vertical segment; move the whole segment
-          if points[0][0] == points[1][0]: 
-            # Vertical
-            points[1][0] = optical_pins_sorted0[0].x
-          if points[0][1] == points[1][1]: 
-            # Horizontal
-            points[1][1] = optical_pins_sorted0[0].y
-          points[0] = [optical_pins_sorted0[0].x, optical_pins_sorted0[0].y]
-          a1 = []
-          for p in points:
-            a1.append (pya.Point(p[0], p[1]))
-          # Update the path in the layout
-          path_obj = pya.Path(a1, path_obj.width)
-          print ("updated path (adjusted beginning point): %s" % path_obj )
-        optical_pins_sorted1[0] # pin that is closest to the end of path
-        if optical_pins_sorted1[0].dist[1] &lt; waveguide_snap_dist and go_wg_end:
-          # Update the path end endpoint to match pin
-          points = path_to_points(path_obj)
-          # Is this a horizontal or vertical segment; move the whole segment
-          if points[len(points)-1][0] == points[len(points)-2][0]: 
-            # Vertical
-            points[len(points)-2][0] = optical_pins_sorted1[0].x
-          if points[len(points)-1][1] == points[len(points)-2][1]: 
-            # Horizontal
-            points[len(points)-2][1] = optical_pins_sorted1[0].y
-          points[len(points)-1] = [optical_pins_sorted1[0].x, optical_pins_sorted1[0].y]
-          a1 = []
-          for p in points:
-            a1.append (pya.Point(p[0], p[1]))
-          # Update the path in the layout
-          path_obj = pya.Path(a1, path_obj.width)
-          print ("updated path (adjusted end point): %s" % path_obj )
+          pin.dist = []
+        for path_endpoint in [ points[0], points[len(points)-1] ]:
+          # Calculate the distnace between every pin and each path endpoint
+          for pin in optical_pins:
+            # this updates "optical_pins" via the "pin" pointer  
+            # print ( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )
+            pin.dist.append ( distance_xy ( path_endpoint, [pin.x, pin.y] ) ) 
+          # Find the closest pin for each path endpoint
+        # optical_pins_sorted0[0].dist[0] is the pin distance data sorted in relation to the waveguide beginning:
+        optical_pins_sorted0 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[0])
+        # optical_pins_sorted1[0].dist[1] is the pin distance data sorted in relation to the waveguide end:
+        optical_pins_sorted1 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[1])
+        if len(optical_pins_sorted0) &gt; 0:
+          # check if both ends of the waveguide want to snap to the same vertex. If so, pick the closest waveguide end.
+          go_wg_beginning = True
+          go_wg_end = True
+          if optical_pins_sorted0[0].index == optical_pins_sorted1[0].index:
+            # same pin!  find the closest one: 
+            if optical_pins_sorted0[0].dist[0] &lt; optical_pins_sorted1[0].dist[1]:
+              # Beginning is closest, don't touch the end
+              go_wg_end = False
+            else:
+              # End is closest, don't touch the beginning
+              go_wg_beginning = False
+          if optical_pins_sorted0[0].dist[0] &lt; waveguide_snap_dist and go_wg_beginning:
+            # Update the path beginning endpoint to match pin
+            points = path_to_points(path_obj)
+            # Is this a horizontal or vertical segment; move the whole segment
+            if points[0][0] == points[1][0]: 
+              # Vertical
+              points[1][0] = optical_pins_sorted0[0].x
+            if points[0][1] == points[1][1]: 
+              # Horizontal
+              points[1][1] = optical_pins_sorted0[0].y
+            points[0] = [optical_pins_sorted0[0].x, optical_pins_sorted0[0].y]
+            a1 = []
+            for p in points:
+              a1.append (pya.Point(p[0], p[1]))
+            # Update the path in the layout
+            path_obj = pya.Path(a1, path_obj.width)
+            print ("updated path (adjusted beginning point): %s" % path_obj )
+          optical_pins_sorted1[0] # pin that is closest to the end of path
+          if optical_pins_sorted1[0].dist[1] &lt; waveguide_snap_dist and go_wg_end:
+            # Update the path end endpoint to match pin
+            points = path_to_points(path_obj)
+            # Is this a horizontal or vertical segment; move the whole segment
+            if points[len(points)-1][0] == points[len(points)-2][0]: 
+              # Vertical
+              points[len(points)-2][0] = optical_pins_sorted1[0].x
+            if points[len(points)-1][1] == points[len(points)-2][1]: 
+              # Horizontal
+              points[len(points)-2][1] = optical_pins_sorted1[0].y
+            points[len(points)-1] = [optical_pins_sorted1[0].x, optical_pins_sorted1[0].y]
+            a1 = []
+            for p in points:
+              a1.append (pya.Point(p[0], p[1]))
+            # Update the path in the layout
+            path_obj = pya.Path(a1, path_obj.width)
+            print ("updated path (adjusted end point): %s" % path_obj )
 
-      # Convert the path to a waveguide
-      wg_path = points_to_Dpath(numpy.array(path_to_points(path_obj))*dbu, wg_width)
-      param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": LayerSi }
-      pcell = ly.create_cell("ROUND_PATH", "Basic", param )
-      t = pya.Trans(0, 0)
-      cell.insert(pya.CellInstArray(pcell.cell_index(), t))
-  
-# It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
+        # Convert the path to a waveguide
+        wg_path = points_to_Dpath(numpy.array(path_to_points(path_obj))*dbu, wg_width)
+        param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": LayerSi }
+        pcell = ly.create_cell("ROUND_PATH", "Basic", param )
+        t = pya.Trans(0, 0)
+        cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+    
+        # It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
       
-      # Mark the path for deletion:
-      #shape_obj.delete()
-      to_delete.append(shape_obj)
+        # Mark the path for deletion:
+        #shape_obj.delete()
+        to_delete.append(shape_obj)
 
 for t in to_delete:
   t.delete()
