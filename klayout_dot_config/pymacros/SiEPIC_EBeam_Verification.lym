@@ -28,7 +28,7 @@ Version history:
 
 Lukas Chrostowski 2015/11/11
  - Optical_net class
- - find all SiLayer paths and waveguides, and save optical net vertices 
+ - find all LayerSi paths and waveguides, and save optical net vertices 
  - find all PinRec paths
  - find all DevRec polygons and boxes
  - check_waveguides
@@ -143,15 +143,15 @@ def find_all_waveguides(cell, layer):
 
   dbu = cell.layout().dbu
   
-  iter = cell.begin_shapes_rec(layer)
+  iter1 = cell.begin_shapes_rec(layer)
   i=0
-  while not(iter.at_end()):
+  while not(iter1.at_end()):
     i+=1
     found_wg = False
     
-    if iter.shape().is_path():
+    if iter1.shape().is_path():
       # This is a waveguide that is a path.  It should be only a straight line with no bends
-      path_obj= iter.shape()
+      path_obj= iter1.shape()
       wg_path = path_obj.path
       num_points = path_obj.path.num_points()
       if num_points == 2:
@@ -166,38 +166,46 @@ def find_all_waveguides(cell, layer):
             # add a point:
             a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
         wg_path = pya.Path(a1, path_obj.path.width)
-      path = wg_path.transformed(iter.itrans())   # get the path description        
+      path = wg_path.transformed(iter1.itrans())   # get the path description        
       # Waveguide parameters
+      length =  path.length()*dbu 
       radius = 0
-      length =  path.length()*dbu
       wg_type = 0
       bend_pts = 0
       wg_width = path.width*dbu
       print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s"  \
-           % (i, iter.cell().name, num_points, length, radius, path) )
+           % (i, iter1.cell().name, num_points, length, radius, path) )
       found_wg = True
       
-    if iter.shape().is_polygon():
-      if iter.cell().basic_name() == "ROUND_PATH":
+    if iter1.shape().is_polygon():
+      if iter1.cell().basic_name() == "ROUND_PATH":
         # This is a waveguide implemented using a PCell ROUND_PATH
-        subcell = iter.cell()        
+        subcell = iter1.cell()        
         # Get the waveguide guiding shape path from the "ROUND_PATH" PCell 
         DPath = subcell.pcell_parameters_by_name()["path"]*(1/dbu)  # DPath object
         ipath = pya.Path.from_dpath(DPath)  # Construct an integer-coordinate path from a floating-point coordinate one
 
         # Find out the transformation that needs to be performed on the path relative to the top cell
         # and apply this on the waveguide guiding shape path
-        trans = iter.trans() # CplxTrans object of the instance 
+        trans = iter1.trans() # CplxTrans object of the instance 
         DCplxTrans = pya.DCplxTrans.from_itrans(trans) # need CplxTrans to DCplxTrans
         path = DPath.transformed(DCplxTrans)
 
         # Waveguide parameters
+        print subcell.pcell_parameters_by_name()
         radius = subcell.pcell_parameters_by_name()["radius"]  # in microns
         bend_pts = subcell.pcell_parameters_by_name()["npoints"] 
-        length =  path.length()*dbu
+        wg_width = subcell.pcell_parameters_by_name()['path'].width  # in microns
+        # calculate the length of the waveguide using the area / width
+        iter2 = cell.begin_shapes_rec(LayerSiN)
+        if iter2.shape().is_polygon():
+          area = iter2.shape().polygon.area()
+          length = area / wg_width * dbu * dbu
+        else:
+          print "## ROUND_PATH waveguide, not polygon; bug in code? ##"
+          length =  path.length()*dbu  # ignoring bends
         num_points = path.num_points()
         wg_type = 1
-        wg_width = 0.5  # no way to get it from the ROUND_PATH PCell yet  # in microns
         print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s" \
             % (i, subcell.name, num_points, length, radius, path) )
         found_wg = True
@@ -210,7 +218,7 @@ def find_all_waveguides(cell, layer):
           length, wg_type, num_points, wg_width, bend_pts ) )
 
 
-    iter.next()
+    iter1.next()
   print (" ")
 
 def check_components(cell, LayerDevRecN):
@@ -584,7 +592,7 @@ dbu = layout.dbu
 
 
 # Define layers based on PDK_functions:
-SiLayerN = layout.layer(SiLayer)
+LayerSiN = layout.layer(LayerSi)
 LayerTextN = layout.layer(LayerText)
 LayerPinRecN = layout.layer(LayerPinRec)
 LayerDevRecN = layout.layer(LayerDevRec)
@@ -595,7 +603,7 @@ LayerErrorN = layout.layer(LayerError)
 clear_ErrorLayer(topcell, LayerErrorN)
 
 # optional - make a test layout
-#make_test_layout(topcell, SiLayer)
+#make_test_layout(topcell, LayerSi)
 
 # initialize the arrays to keep track of layout objects
 reset_Optical_classes()
@@ -610,7 +618,7 @@ print ("* calling find_all_components() – DevRec:")
 find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
 print ("")
 print ("* calling find_all_waveguides():")
-find_all_waveguides(topcell, SiLayerN)
+find_all_waveguides(topcell, LayerSiN)
 
 print ("")
 print ("* print_Optical_all, after find_all_{components, waveguides}:")

@@ -62,7 +62,7 @@ Lukas Chrostowski           2015/11/17
 import pya
 
 # SiEPIC-EBeam-PDK Layers:
-SiLayer = pya.LayerInfo(1, 0)
+LayerSi = pya.LayerInfo(1, 0)
 LayerText = pya.LayerInfo(10, 0)
 LayerPinRec = pya.LayerInfo(69, 0)
 LayerDevRec = pya.LayerInfo(68, 0)

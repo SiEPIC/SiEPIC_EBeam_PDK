@@ -85,9 +85,9 @@ def layout_waveguide_abs(cell, layer, points, w, radius):
     
     # example usage:
     # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-    # SiLayer = pya.LayerInfo(1, 0)
+    # LayerSi = pya.LayerInfo(1, 0)
     # points = [ [15, 2.75], [30, 2.75] ]  # units of microns.
-    # layout_waveguide_abs(cell, SiLayer, points, 0.5, 10)
+    # layout_waveguide_abs(cell, LayerSi, points, 0.5, 10)
 
     points=n.array(points)
     start_point=points[0]
@@ -106,9 +106,9 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
     
     # example usage:
     # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-    # SiLayer = pya.LayerInfo(1, 0)
+    # LayerSi = pya.LayerInfo(1, 0)
     # points = [ [15, 2.75], [30, 2.75] ]  # units of microns.
-    # layout_waveguide_rel(cell, SiLayer, points, 0.5, 10)
+    # layout_waveguide_rel(cell, LayerSi, points, 0.5, 10)
 
     
     print ("* layout_waveguide_rel(%s, %s, %s, %s)" % (cell.name, layer, w, radius) )
@@ -246,15 +246,15 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     dbu = self.layout.dbu
     ly = self.layout
     
-    SiLayer = self.silayer
-    SiLayerN = ly.layer(SiLayer)
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
     TextLayerN = ly.layer(self.textl)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
     
     # Create the ring resonator:
-    layout_Ring(self.cell, SiLayerN, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, self.npoints)
+    layout_Ring(self.cell, LayerSiN, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, self.npoints)
 
     w = int(round(self.w/dbu))
     r = int(round(self.r/dbu))
@@ -262,10 +262,10 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # Create the two waveguides
     wg1 = pya.Box(0, -w/2, w+2*r, w/2)
-    self.cell.shapes(SiLayerN).insert(wg1)
+    self.cell.shapes(LayerSiN).insert(wg1)
     y_offset = 2*r + 2*g + 2*w
     wg2 = pya.Box(0, y_offset-w/2, w+2*r, y_offset+w/2)
-    self.cell.shapes(SiLayerN).insert(wg2)
+    self.cell.shapes(LayerSiN).insert(wg2)
 
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
@@ -350,8 +350,8 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     ly = self.layout
     cell = self.cell
     
-    SiLayer = self.silayer
-    SiLayerN = ly.layer(SiLayer)
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
     TextLayerN = ly.layer(self.textlayer)
 
     # Import cells from the SiEPIC GDS Library, and instantiate them
@@ -364,7 +364,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     y_ring = 127*3/2+r
 
 
-#    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "l": SiLayer})
+#    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "l": LayerSi})
 #    print ( "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
 #    t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
 #    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
@@ -384,7 +384,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
       "r": r, 
       "w": wg_width, 
       "g": g,
-      "silayer": SiLayer,
+      "silayer": LayerSi,
       "devrec": self.devrec, 
       "pinrec": self.pinrec
     }
@@ -397,7 +397,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
         pv.append(p.default)
     # "fake PCell code" 
     pcell = ly.create_cell("Ring")
-    pcell_decl.produce(ly, [ SiLayerN ], pv, pcell)
+    pcell_decl.produce(ly, [ LayerSiN ], pv, pcell)
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
 
@@ -427,19 +427,19 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # GC3 to bottom-left of ring
     points = [ [0, 127], [10,127], [10, y_ring-2*r-wg_width] ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
 
     # GC4 to bottom-right of ring
     points = [ [0, 0], [10+2*r+2*g+2*wg_width,0], [10+2*r+2*g+2*wg_width, y_ring-2*r-wg_width]  ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
     # GC2 to top-right of ring
     points = [ [10,y_ring], [10, 127*2], [0,127*2] ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
 
     # GC1 to top-left of ring
     points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
 
 
@@ -488,8 +488,8 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     ly = self.layout
     cell = self.cell
     
-    SiLayer = self.silayer
-    SiLayerN = ly.layer(SiLayer)
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
     TextLayerN = ly.layer(self.textlayer)
 
     # Import cells from the SiEPIC GDS Library, and instantiate them
@@ -500,7 +500,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     g = self.g
     y_ring = 127*3/2+r
 
-    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "silayer": SiLayer, "devrec": self.devrec, "pinrec": self.pinrec })
+    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "silayer": LayerSi, "devrec": self.devrec, "pinrec": self.pinrec })
     print ( "pcell: %s, %s" \
         % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
@@ -531,19 +531,19 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
 
     # GC3 to bottom-left of ring
     points = [ [0, 127], [10,127], [10, y_ring-2*r-wg_width] ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
 
     # GC4 to bottom-right of ring
     points = [ [0, 0], [10+2*r+2*g+2*wg_width,0], [10+2*r+2*g+2*wg_width, y_ring-2*r-wg_width]  ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
     # GC2 to top-right of ring
     points = [ [10,y_ring], [10, 127*2], [0,127*2] ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
 
     # GC1 to top-left of ring
     points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
-    layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+    layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
     print ( "Done drawing the layout for – TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g) )
 

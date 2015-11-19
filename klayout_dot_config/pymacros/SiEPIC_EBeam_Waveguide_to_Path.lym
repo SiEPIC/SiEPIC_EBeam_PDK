@@ -60,7 +60,7 @@ if cell == None:
 dbu = ly.dbu
 
 # Define layers based on PDK_functions:
-SiLayerN = ly.layer(SiLayer)
+LayerSiN = ly.layer(LayerSi)
 #LayerTextN = ly.layer(LayerText)
 LayerPinRecN = ly.layer(LayerPinRec)
 LayerDevRecN = ly.layer(LayerDevRec)
@@ -87,10 +87,10 @@ for o in object_selection:
     print ("Selected object is a cell.")
     oinst = o.inst()
     if oinst.is_pcell():
-      pcell_decl = oinst.pcell_declaration()
+#      pcell_decl = oinst.pcell_declaration()
       c = oinst.cell
-      if c.basic_name() == 'ROUND_PATH' and c.pcell_parameters_by_name()['layer'] == SiLayer:
-        print ("ROUND_PATH on SiLayer.")
+      if c.basic_name() == 'ROUND_PATH' and c.pcell_parameters_by_name()['layer'] == LayerSi:
+        print ("ROUND_PATH on LayerSi.")
         path_obj = c.pcell_parameters_by_name()['path']
         print ( path_obj ) 
         wg_width = path_obj.width/dbu
@@ -100,7 +100,7 @@ for o in object_selection:
         wg_path_trans = wg_path.transformed(oinst.trans)
 
         print ( wg_path_trans ) 
-        new_wg = cell.shapes(SiLayerN).insert(wg_path_trans)
+        new_wg = cell.shapes(LayerSiN).insert(wg_path_trans)
 
 # It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
 #        # http://www.klayout.de/doc/code/class_ObjectInstPath.html#method9

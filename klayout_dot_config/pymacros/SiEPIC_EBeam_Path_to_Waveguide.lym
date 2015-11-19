@@ -60,7 +60,7 @@ if cell == None:
 dbu = ly.dbu
 
 # Define layers based on PDK_functions:
-SiLayerN = ly.layer(SiLayer)
+LayerSiN = ly.layer(LayerSi)
 #LayerTextN = ly.layer(LayerText)
 LayerPinRecN = ly.layer(LayerPinRec)
 LayerDevRecN = ly.layer(LayerDevRec)
@@ -133,7 +133,6 @@ for o in object_selection:
         path_obj = pya.Path(a1, path_obj.width)
         print ("updated path (inserted mid-point): %s" % path_obj )
       # Waveguide parameters
-      length =  path_obj.length()*dbu
       wg_type = 0
       bend_pts = 0
       wg_width = path_obj.width*dbu
@@ -203,7 +202,7 @@ for o in object_selection:
 
       # Convert the path to a waveguide
       wg_path = points_to_Dpath(numpy.array(path_to_points(path_obj))*dbu, wg_width)
-      param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": SiLayer }
+      param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": LayerSi }
       pcell = ly.create_cell("ROUND_PATH", "Basic", param )
       t = pya.Trans(0, 0)
       cell.insert(pya.CellInstArray(pcell.cell_index(), t))
