@@ -54,6 +54,9 @@ Lukas Chrostowski           2015/11/16
 Lukas Chrostowski           2015/11/17
  - debugging &amp; fixing Verification problems
 
+Lukas Chrostowski           2015/11/18
+ - removed need for numpy.array
+
  
 """
 
@@ -459,10 +462,8 @@ import math
 def eng_str(x):
     # x input in meters
     # output in meters, engineering notation, rounded to 1 nm
-    print x
     x = round(x*1E9)/1E9
     y = abs(x)
-    print y
     if y == 0:
       return '0'
     else:
@@ -483,7 +484,6 @@ def eng_str(x):
       sign = '-' if x &lt; 0 else ''
       #return sign+str(z)+'E'+str(engr_exponent)
 #      return sign+ '%3.3f' % z +str(str_engr_exponent)
-      print z
       return sign+ str(z) +str(str_engr_exponent)
     
 def list_optical_waveguides(list_optical_waveguides):

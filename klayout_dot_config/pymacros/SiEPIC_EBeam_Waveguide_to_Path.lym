@@ -36,6 +36,9 @@ Lukas Chrostowski           2015/11/16
 Lukas Chrostowski           2015/11/18
  - If the GUIDING_SHAPE is selected, find out the ROUND_PATH PCell it belongs to.
    user can either select the PCell or it's ROUND_PATH.
+
+Lukas Chrostowski           2015/11/18
+ - removed need for numpy.array
  
 """
 
@@ -75,7 +78,7 @@ print ("------------------ Waveguide to Path --------------")
 # record objects to delete:
 to_delete = []
 
-# new objects will remain selected
+# new objects will become selected
 new_selection = []
 
 # Find the selected objects
@@ -138,6 +141,7 @@ for t in to_delete:
 # Clear the layout view selection, since we deleted some objects (but others may still be selected):
 lv.clear_object_selection()
 
+# Select the newly added objects
 lv.object_selection = new_selection
      
 # Record a transaction, to enable "undo"

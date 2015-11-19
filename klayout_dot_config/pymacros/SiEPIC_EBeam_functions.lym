@@ -57,6 +57,9 @@ Lukas Chrostowski           2015/11/17
  - improvements to Spice output, engineering format
  - extensive testing of verification, including large test layout
  - several floating point issues
+
+Lukas Chrostowski           2015/11/18
+ - removed need for numpy.array
   
 """
 import pya

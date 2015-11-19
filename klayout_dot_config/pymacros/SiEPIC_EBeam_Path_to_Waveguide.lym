@@ -40,6 +40,7 @@ Lukas Chrostowski           2015/11/17
 
 Lukas Chrostowski           2015/11/18
  - If the GUIDING_SHAPE (a path) is selected, don't do anything. Already a waveguide.
+ - removed need for numpy.array
  
 """
 
@@ -100,11 +101,17 @@ waveguide_snap_dist = 10
 # Record a transaction, to enable "undo"
 lv.transaction("Path to Waveguide")
 
+print ("------------------ Path to Waveguide --------------")
+
+# objects to delete:
+to_delete = []
+
+# new objects will become selected
+new_selection = []
 
 # Find the selected paths
 object_selection = lv.object_selection
-# objects to delete:
-to_delete = []
+
 for o in object_selection:
   if o.is_cell_inst():
     print ("Selected object is a cell, rather than a path.  Please select a path.")
@@ -213,9 +220,17 @@ for o in object_selection:
         param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": LayerSi }
         pcell = ly.create_cell("ROUND_PATH", "Basic", param )
         t = pya.Trans(0, 0)
-        cell.insert(pya.CellInstArray(pcell.cell_index(), t))
-    
-        # It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
+        new_cell = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+        
+        # Leave the newly created waveguide selected, to make it obvious to the user.
+        # http://klayout.de/forum/comments.php?DiscussionID=747
+        new_selectionN = len(new_selection)
+        new_selection.append( pya.ObjectInstPath() )
+        new_selection[new_selectionN].layer = LayerSiN
+#        new_selection[new_selectionN].cell_index = pcell.cell_index()
+        new_selection[new_selectionN].cell_index = new_cell
+        new_selection[new_selectionN].top = o.top
+        new_selection[new_selectionN].cv_index = o.cv_index
       
         # Mark the path for deletion:
         #shape_obj.delete()
@@ -227,6 +242,9 @@ for t in to_delete:
         
 # Clear the layout view selection, since we deleted some objects (but others may be selected still):
 lv.clear_object_selection()
+
+# Select the newly added objects
+lv.object_selection = new_selection
 
 # Record a transaction, to enable "undo"
 lv.commit()
