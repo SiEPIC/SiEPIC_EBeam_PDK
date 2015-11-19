@@ -42,7 +42,6 @@ Lukas Chrostowski           2015/11/18
 
 
 import pya
-import numpy as numpy
 
 
 # Configure variables to draw structures in the presently selected cell:
@@ -109,7 +108,7 @@ for o in object_selection:
     print ( path_obj ) 
     wg_width = path_obj.width/dbu
     # convert wg_path (in microns) to database numbers
-    wg_path = points_to_path(numpy.array(path_to_Dpoints(path_obj))/dbu, wg_width)
+    wg_path = points_to_path(points_mult(path_to_Dpoints(path_obj), 1/dbu), wg_width)
     # get waveguide transformation
     wg_path_trans = wg_path.transformed(trans)
 

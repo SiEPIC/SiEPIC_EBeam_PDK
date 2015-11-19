@@ -60,12 +60,13 @@ Lukas Chrostowski           2015/11/17
 
 import pya
 import math
-import numpy
+#import numpy
+MODULE_NUMPY = False
 import math
 import string
 
 
-
+  
 def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
   # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
   a1 = []
@@ -73,8 +74,7 @@ def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
     a1.append (pya.Point(int(p[0]), int(p[1])))
   path = pya.Path(a1, optical_waveguide.wg_width*4/dbu)
   topcell.shapes(LayerErrorN).insert(path)
-  x = numpy.array(dpoints)[:,0].mean()*dbu
-  y = numpy.array(dpoints)[:,1].mean()*dbu
+  x,y = xy_mean_mult(dpoints, dbu)
   layout_errors.append(Layout_error(text, x, y) )
   print (text)
   wtext.insertHtml('%s&lt;br&gt;' %text)
@@ -91,7 +91,7 @@ def check_waveguides(optical_waveguides, topcell, error_layer):
     if (o.wg_type == 0 and o.num_points &gt; 2):
       text = "  *** Layout error.  Waveguide path (%s, %s): Only 2 points allowed in a path. Convert to a waveguide (ROUND_PATH) if necessary. " \
             % ( o.points[0][0]*dbu, o.points[0][1]*dbu) 
-      dpoints=n.array(o.points)
+      dpoints = o.points
       found_error = True
       flag_waveguide_error(dpoints, text, o, topcell)
 
@@ -101,14 +101,14 @@ def check_waveguides(optical_waveguides, topcell, error_layer):
       segment = distance_xy ( o.points[0], o.points[1] ) 
       if segment &lt; o.radius:
         text =  "  *** Layout warning.  Not enough space (%s) to accommodate the desired bend radius (%s) for waveguide end." % (segment, o.radius)
-        dpoints=n.array([ o.points[0], o.points[1] ] )
+        dpoints=[ o.points[0], o.points[1] ] 
         found_error = True 
         flag_waveguide_error(dpoints, text, o, topcell)
       # last segment:
       segment = distance_xy ( o.points[len(o.points)-2], o.points[len(o.points)-1] ) 
       if segment &lt; o.radius:
         text =  "  *** Layout warning.  Not enough space (%s) to accommodate the desired bend radius (%s) for waveguide end." % (segment, o.radius)
-        dpoints=n.array([ o.points[len(o.points)-2], o.points[len(o.points)-1] ] )
+        dpoints=[ o.points[len(o.points)-2], o.points[len(o.points)-1] ]
         flag_waveguide_error(dpoints, text, o, topcell)
         found_error = True
       # go through each of the middle segments:
@@ -116,7 +116,7 @@ def check_waveguides(optical_waveguides, topcell, error_layer):
         segment = distance_xy ( o.points[j], o.points[j+1] ) 
         if segment &lt; 2*o.radius and segment != 0:
           text =  "  *** Layout warning.  Not enough space (%s) to accommodate the desired bend radius (%s) for a mid-segment." % (segment, o.radius)
-          dpoints=n.array([ o.points[j], o.points[j+1] ] )
+          dpoints=[ o.points[j], o.points[j+1] ] 
           flag_waveguide_error(dpoints, text, o, topcell)
           found_error = True
 
@@ -125,7 +125,7 @@ def check_waveguides(optical_waveguides, topcell, error_layer):
       if o.bend_pts &lt; 0.75 * recommended_points:
         text =  "  *** Layout warning.  Waveguide bends should have at least %s points per circle for a %s micron radius." \
                      % (int(recommended_points), o.radius)
-        dpoints=n.array(o.points)
+        dpoints=o.points
         found_error = True
         flag_waveguide_error(dpoints, text, o, topcell)
               
@@ -494,8 +494,7 @@ def list_optical_waveguides(list_optical_waveguides):
 
   for o in list_optical_waveguides:
     nets_str = "N$%s N$%s" %(o.net1, o.net2)
-    x = numpy.array(o.points)[:,0].mean()*dbu
-    y = numpy.array(o.points)[:,1].mean()*dbu
+    x,y = xy_mean_mult(o.points, dbu)
 #    t = '%s %s %s library="%s" wg_length=%s wg_width=%s lay_x=%s lay_y=%s sch_x=%5.3f sch_y=%5.3f'  % \
 #           ( "Xwg" + str(o.index), nets_str, o.component, o.library, eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
 #             eng_str(x * 1e-6), eng_str(y * 1e-6), x, y)

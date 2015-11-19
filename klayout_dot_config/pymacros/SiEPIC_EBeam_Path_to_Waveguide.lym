@@ -44,7 +44,6 @@ Lukas Chrostowski           2015/11/18
 """
 
 import pya
-import numpy as numpy
 
 
 # Configure variables to draw structures in the presently selected cell:
@@ -210,7 +209,7 @@ for o in object_selection:
             print ("updated path (adjusted end point): %s" % path_obj )
 
         # Convert the path to a waveguide
-        wg_path = points_to_Dpath(numpy.array(path_to_points(path_obj))*dbu, wg_width)
+        wg_path = points_to_Dpath( points_mult(path_to_points(path_obj),dbu), wg_width)
         param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": LayerSi }
         pcell = ly.create_cell("ROUND_PATH", "Basic", param )
         t = pya.Trans(0, 0)
@@ -220,7 +219,7 @@ for o in object_selection:
       
         # Mark the path for deletion:
         #shape_obj.delete()
-        to_delete.append(shape_obj)
+        to_delete.append(shape_obj)  
 
 for t in to_delete:
   t.delete()
