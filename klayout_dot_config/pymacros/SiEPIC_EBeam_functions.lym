@@ -60,6 +60,7 @@ Lukas Chrostowski           2015/11/17
   
 """
 import pya
+import math
 
 # SiEPIC-EBeam-PDK Layers:
 LayerSi = pya.LayerInfo(1, 0)
@@ -215,30 +216,6 @@ def clear_ErrorLayer(topcell, LayerErrorN):
   print ("*** Deleted %s errors.") % i
 
 
-def delete_extra_top_cells():
-  # delete all the extra top cells; keep the one selected
-
-  # Find the currently selected layout.
-  ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
-  if ly == None:
-    raise Exception("No layout")
-  # find the currently selected cell:
-  cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-  if cell == None:
-    raise Exception("No cell")
-
-  print ("deleting cells...")
-  top_keep = cell.cell_index()
-  top_delete = []
-  for top in ly.each_top_cell():
-    if top == top_keep:
-        print ("keep top cell: " + str(ly.cell(top_keep).name))
-    else:
-        print ("delete top cell: " + str(ly.cell(top).name))
-        top_delete.append(top)
-  print top_delete
-  ly.delete_cells(top_delete)
-
 
 import string
 def find_automated_measurement_labels(topcell, LayerTextN):
@@ -378,7 +355,8 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           optical_nets.append ( Optical_net (net_index, 2, component_index, -1, -1) ) #ok
           # create a pin, optical IO
           bb = polygon.bbox()
-          x, y = numpy.mean([bb.p1.x, bb.p2.x]), numpy.mean([bb.p1.y, bb.p2.y])
+          x, y = xy_mean_mult([[bb.p1.x, bb.p1.y], [bb.p2.x, bb.p2.y]],1)
+#          x, y = numpy.mean([bb.p1.x, bb.p2.x]), numpy.mean([bb.p1.y, bb.p2.y])
           pin_index = len(optical_pins)
           optical_pins.append (Optical_pin (pin_index, polygon_to_points(polygon), component_index, x, y, 2) )
           # register the net with the pin and component
@@ -412,10 +390,10 @@ def points_per_circle(radius):
   # Calculate the recommended number of points in a circle, based on 
   # http://stackoverflow.com/questions/11774038/how-to-render-a-circle-with-as-few-vertices-as-possible
   # radius in microns
-  import numpy as n
+#  import numpy as n
   error=0.5e-3 # 0.5 nm
-  th = n.arccos(2 * (1 - error / radius)**2 - 1)
-  num_vertices = n.ceil(2*n.pi/th)
+  th = math.acos(2 * (1 - error / radius)**2 - 1)
+  num_vertices = math.ceil(2*math.pi/th)
   return num_vertices
 
 

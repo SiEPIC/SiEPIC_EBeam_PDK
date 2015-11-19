@@ -221,6 +221,7 @@ for o in object_selection:
         #shape_obj.delete()
         to_delete.append(shape_obj)  
 
+n_deleted = len(to_delete)
 for t in to_delete:
   t.delete()
         
@@ -231,17 +232,11 @@ lv.clear_object_selection()
 lv.commit()
 
 
+if n_deleted == 0:
+  v = pya.MessageBox.warning("No path selected", "No path selected.\nPlease select a path. \nIt will get converted to a ROUND_PATH waveguide.", pya.MessageBox.Ok)
+
 # Save the optical_waveguides for future heal operations
-optical_waveguides_registered = [] # check if this exists...
-optical_waveguides_registered.append(optical_waveguides)
-
-
-
-
-
-
-
-
-
+#optical_waveguides_registered = [] # check if this exists...
+#optical_waveguides_registered.append(optical_waveguides)
 </text>
 </klayout-macro>

@@ -75,11 +75,16 @@ print ("------------------ Waveguide to Path --------------")
 # record objects to delete:
 to_delete = []
 
+# new objects will remain selected
+new_selection = []
+
 # Find the selected objects
 object_selection = lv.object_selection   # returns ObjectInstPath[].
+
+is_waveguide = False
+
 for o in object_selection:
   # Find the selected waveguides
-  is_waveguide = False
 
   if o.is_cell_inst():
     print ("Selected object is a cell.")
@@ -115,25 +120,30 @@ for o in object_selection:
     print ( "wg_path_trans: %s" % wg_path_trans ) 
     new_wg = cell.shapes(LayerSiN).insert(wg_path_trans)
 
-# It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
-#    # http://www.klayout.de/doc/code/class_ObjectInstPath.html#method9
-#    append_path(const InstElement element)
-#    lv.object_selection = ObjectInstPath
-
+    # Leave the newly created waveguide selected, to make it obvious to the user.
+    # http://klayout.de/forum/comments.php?DiscussionID=747
+    new_selectionN = len(new_selection)
+    new_selection.append( pya.ObjectInstPath() )
+    new_selection[new_selectionN].layer = LayerSiN
+    new_selection[new_selectionN].shape = new_wg
+    new_selection[new_selectionN].top = o.top
+    new_selection[new_selectionN].cv_index = o.cv_index
+   
 #    to_delete.append(oinst.cell) # deleting this removes the cell entirely (which may be used elsewhere!)
-
-    to_delete.append(oinst) # leaves behind the cell if it's not used
+    to_delete.append(oinst) # ldelete the instance; leaves behind the cell if it's not used
         
-#    oinst.cell.delete()
-#    oinst.delete()
-
 for t in to_delete:
   t.delete()
 
-# Clear the layout view selection, since we deleted some objects (but others may be selected still):
+# Clear the layout view selection, since we deleted some objects (but others may still be selected):
 lv.clear_object_selection()
+
+lv.object_selection = new_selection
      
 # Record a transaction, to enable "undo"
 lv.commit()
+
+if not(is_waveguide):
+  v = pya.MessageBox.warning("No waveguide selected", "No waveguide selected.\nPlease select a ROUND_PATH waveguide. \nIt will get converted to a path.", pya.MessageBox.Ok)
 </text>
 </klayout-macro>
