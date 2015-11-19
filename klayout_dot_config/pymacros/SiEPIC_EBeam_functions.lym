@@ -68,6 +68,7 @@ LayerPinRec = pya.LayerInfo(69, 0)
 LayerDevRec = pya.LayerInfo(68, 0)
 LayerFbrTgt = pya.LayerInfo(81, 0)
 LayerError = pya.LayerInfo(999,0)
+LayerINTERCONNECT = pya.LayerInfo(733)
     
 # definition of classes for Verification, Waveguide making, Waveguide Healing
 # one for each instance of the components
