@@ -208,13 +208,6 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
     # This is the main part of the implementation: create the layout
 
 
-    layout = pya.Application.instance().main_window().current_view().active_cellview().layout() 
-    if layout == None:
-      raise Exception("No layout")
-      
-    # fetch the database parameters
-    LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
-    
     if 0:
       # choose a unique detector number
       layout = pya.Application.instance().main_window().current_view().active_cellview().layout() 
