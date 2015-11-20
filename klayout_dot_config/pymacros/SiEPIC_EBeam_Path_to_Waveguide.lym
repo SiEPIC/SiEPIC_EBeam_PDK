@@ -230,7 +230,7 @@ for o in object_selection:
 #        new_selection[new_selectionN].cell_index = pcell.cell_index()
 #        new_selection[new_selectionN].cell_index = new_cell
         new_selection[new_selectionN].top = o.top
-        print o.top
+        print (o.top)
         new_selection[new_selectionN].append_path = pya.InstElement.new(new_cell)
         print (new_selection[new_selectionN].is_cell_inst() )
     #    op.append_path(RBA::InstElement::new(inst_to_select))   

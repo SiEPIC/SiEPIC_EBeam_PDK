@@ -14,12 +14,23 @@
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text>import pya
+ <text># Python script
+# SiEPIC_EBeam_functions
 
-# Enter your Python code here ..
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2015
 
-# Launch Lumerical INTERCONNECT
+This Python file extract the circuit netlist from the physical layout, saves it to Spice file, 
+and launches Lumerical INTERCONNECT for circuit simulations.
 
+Version history:
+
+Lukas Chrostowski           2015/11/19
+ - initial version
+ - generating a Spice netlist including Optical Network Analyzer; launch Lumerical INTERCONNECT simulation
+  
+"""
 
 import os
 print os.name
@@ -31,9 +42,82 @@ print platform.release()
 import sys
 version = sys.version
 
-
 import string
+
+
+def netlist_extraction(topcell):
+  # Collection of functions to extract the circuit netlist from the physical layout
   
+  # Search the layout for the components and waveguides:
+  print ("")
+  print ("* calling find_all_components() – DevRec:")
+  find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
+  print ("")
+  print ("* calling find_all_waveguides():")
+  find_all_waveguides(topcell, LayerSiN)
+
+  print ("")
+  print ("* print_Optical_all, after find_all_{components, waveguides}:")
+  print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
+
+  # Search the arrays to identify all the nets:
+  print ("")
+  print ("* calling identify_all_nets():")
+  identify_all_nets(optical_pins, optical_waveguides, optical_components)
+
+  return optical_waveguides, optical_components
+  
+
+
+
+# find the currently selected cell:
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if topcell == None:
+  raise Exception("No cell")
+layout = topcell.layout()
+dbu = layout.dbu
+
+# initialize the arrays to keep track of layout objects
+optical_components = []
+optical_waveguides = []
+optical_pins = []
+optical_nets = []
+
+# Define layers based on the PDK:
+LayerSiN = layout.layer(LayerSi)
+LayerTextN = layout.layer(LayerText)
+LayerPinRecN = layout.layer(LayerPinRec)
+LayerDevRecN = layout.layer(LayerDevRec)
+LayerFbrTgtN = layout.layer(LayerFbrTgt)
+LayerErrorN = layout.layer(LayerError)
+LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
+
+
+# extract the circuit netlist from the physical layout:
+optical_waveguides, optical_components = netlist_extraction(topcell)
+  
+# Output the Spice netlist:
+text_Spice = generate_Spice_file(topcell, optical_waveguides, optical_components)
+print text_Spice
+
+filename = '/tmp/%s.spi' % topcell.name
+file = open(filename, 'w')
+file.write (text_Spice)
+file.close()
+
+
+filename2 = '/tmp/%s.lsf' % topcell.name
+file = open(filename2, 'w')
+text_lsf = 'switchtolayout;\n'
+text_lsf += 'deleteall;\n'
+text_lsf += 'importnetlist("%s");\n' % filename
+text_lsf += 'run;\n'
+text_lsf += 't1 = getresult("ONA_1", "input 1/mode 1/gain");\n'
+text_lsf += 'visualize(t1);\n'
+file.write (text_lsf)
+file.close()
+
+
 if sys.platform.startswith('freebsd'):
     # FreeBSD-specific code here...
     pass
@@ -49,9 +133,8 @@ elif sys.platform.startswith('darwin'):
     if string.find(version,"2.7.") &gt; -1:
       import commands
       print ("Running INTERCONNECT")
-#      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run /Users/lukasc/SiEPIC_EBeam_PDK/Spice/test.lsf')
-      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args /Users/lukasc/SiEPIC_EBeam_PDK/Spice/MZI.spi')
-    
+#      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
+      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
 
 </text>
 </klayout-macro>

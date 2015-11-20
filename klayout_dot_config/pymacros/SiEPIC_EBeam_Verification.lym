@@ -57,6 +57,9 @@ Lukas Chrostowski           2015/11/17
 Lukas Chrostowski           2015/11/18
  - removed need for numpy.array
 
+Lukas Chrostowski           2015/11/19
+ - moved some functions to SiEPIC_EBeam_functions
+
  
 """
 
@@ -135,253 +138,13 @@ def check_waveguides(optical_waveguides, topcell, error_layer):
 
 
 
-def find_all_waveguides(cell, layer):
-  # function to traverse the entire layout hierarchy and find all the waveguides 
-  # returns array listing all paths
-  # Search for ROUND_PATH PCells and straight paths
-
-  # return data containing:
-  # - net id: unique identifier for the net
-  # - vertices: points that make up the path
-
-  dbu = cell.layout().dbu
-  
-  iter1 = cell.begin_shapes_rec(layer)
-  i=0
-  while not(iter1.at_end()):
-    i+=1
-    found_wg = False
-    
-    if iter1.shape().is_path():
-      # This is a waveguide that is a path.  It should be only a straight line with no bends
-      path_obj= iter1.shape()
-      wg_path = path_obj.path
-      num_points = path_obj.path.num_points()
-      if num_points == 2:
-        # insert a mid-point in the waveguide, so that it can later be split into two nets
-        points = path_to_points(path_obj)
-        a1 = []
-        count =0
-        for p in points:
-          a1.append (pya.Point(p[0], p[1]))
-          count += 1
-          if count == 1:
-            # add a point:
-            a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
-        wg_path = pya.Path(a1, path_obj.path.width)
-      path = wg_path.transformed(iter1.itrans())   # get the path description        
-      # Waveguide parameters
-      length =  path.length()*dbu 
-      radius = 0
-      wg_type = 0
-      bend_pts = 0
-      wg_width = path.width*dbu
-      print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s"  \
-           % (i, iter1.cell().name, num_points, length, radius, path) )
-      found_wg = True
-      
-    if iter1.shape().is_polygon():
-      if iter1.cell().basic_name() == "ROUND_PATH":
-        # This is a waveguide implemented using a PCell ROUND_PATH
-        subcell = iter1.cell()        
-        # Get the waveguide guiding shape path from the "ROUND_PATH" PCell 
-        DPath = subcell.pcell_parameters_by_name()["path"]*(1/dbu)  # DPath object
-        ipath = pya.Path.from_dpath(DPath)  # Construct an integer-coordinate path from a floating-point coordinate one
-
-        # Find out the transformation that needs to be performed on the path relative to the top cell
-        # and apply this on the waveguide guiding shape path
-        trans = iter1.trans() # CplxTrans object of the instance 
-        DCplxTrans = pya.DCplxTrans.from_itrans(trans) # need CplxTrans to DCplxTrans
-        path = DPath.transformed(DCplxTrans)
-
-        # Waveguide parameters
-        print subcell.pcell_parameters_by_name()
-        radius = subcell.pcell_parameters_by_name()["radius"]  # in microns
-        bend_pts = subcell.pcell_parameters_by_name()["npoints"] 
-        wg_width = subcell.pcell_parameters_by_name()['path'].width  # in microns
-        # calculate the length of the waveguide using the area / width
-        iter2 = cell.begin_shapes_rec(LayerSiN)
-        if iter2.shape().is_polygon():
-          area = iter2.shape().polygon.area()
-          length = area / wg_width * dbu * dbu
-        else:
-          print "## ROUND_PATH waveguide, not polygon; bug in code? ##"
-          length =  path.length()*dbu  # ignoring bends
-        num_points = path.num_points()
-        wg_type = 1
-        print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s" \
-            % (i, subcell.name, num_points, length, radius, path) )
-        found_wg = True
-
-    if found_wg:
-      points = path_to_points(path)  
-      print ("path: %s, points: %s" % (path, points) )
-      # save waveguide info into the Optical_waveguide
-      optical_waveguides.append ( Optical_waveguide (len(optical_waveguides), points, radius, \
-          length, wg_type, num_points, wg_width, bend_pts ) )
-
-
-    advance_iterator(iter1)
-  print (" ")
 
 def check_components(cell, LayerDevRecN):
   # function to go through all the cells
   # check that the cell has at most ONE DevRec shape.  
   return False
  
-  
-
-def check_segments_colinear_overlapping( segment1, segment2 ):
-  """ 
-  we want to identify ONLY the following situation:
-        X  O  X  O
-  where XX is a segment, and OO is another segment
-  namely, colinear, but also XX overlapping OO
-  example usage: 
-    a = pya.Point(0,0)
-    b = pya.Point(50,0)
-    c = pya.Point(50,0)
-    d = pya.Point(100,0)
-    segment1 = [ a, b ]
-    segment2 = [ c, d ]
-    print check_segments_colinear_overlapping( segment1, segment2 )
-  """  
-  # check for one of the segment2 points being inside segment1
-  check_between1 = check_point_in_segment( segment1[0], segment1[1], segment2[0] ) | \
-                  check_point_in_segment( segment1[0], segment1[1], segment2[1] )
-  # check for one of the segment1 points being inside segment2
-  check_between2 = check_point_in_segment( segment2[0], segment2[1], segment1[0] ) | \
-                  check_point_in_segment( segment2[0], segment2[1], segment1[1] )
-  return check_between1 and check_between2
-
-
-def identify_all_nets(optical_pins, optical_waveguides, optical_components):
-  # function to identify all the nets from the layout
-  # use the data in Optical_pin, Optical_waveguide to find overlaps
-  # and save results in Optical_component
-
-  # Make sure that there are exactly 2 pins for each net (not like in electronics!)
-
-  # Loop through all the pins (p1)
-  # - find other overlapping pins (p2)
-  # - find overlapping waveguide ends
-  for p1 in optical_pins:
-    if p1.pin_type != 1:
-      continue # only analyze pin_type = 1, component.
-    segment1 = [ pya.Point(*p1.points[0]), pya.Point(*p1.points[1]) ] 
-    
-    # Compare to all other pins:
-    for p2 in optical_pins[ p1.index+1: len(optical_pins) ]:
-      if p2.pin_type != 1:
-        break # only analyze pin_type = 1, component.
-      #print ("%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points) )
-      segment2 = [ pya.Point(*p2.points[0]), pya.Point(*p2.points[1]) ] 
-      check = check_segments_colinear_overlapping( segment1, segment2 )
-      if check:  # found connected pins:
-        # make a new optical net
-        net_index = len(optical_nets)
-        optical_nets.append ( Optical_net (net_index, 1, p1.component_n, 1, p2.component_n) )
-        # assign this net number to the components
-        optical_components[p1.component_n].nets.append (net_index)
-        optical_components[p2.component_n].nets.append (net_index)
-        # assign this net number to the pins
-        p1.net = net_index
-        p2.net = net_index
-        print ( "connected: pin-pin, net: %s, component #: %s, %s" % (net_index, p1.component_n, p2.component_n) )
-        
-    # Compare to all waveguides:
-    for w1 in optical_waveguides:
-      
-      print w1.points
-      
-      # examine the beginning of the waveguide:
-      segment2 = [ pya.Point(*w1.points[0]), pya.Point(*w1.points[1]) ] 
-      check1 = check_segments_colinear_overlapping( segment1, segment2 )
-      if check1:  # found connected pins:
-        # make a new optical net
-        net_index = len(optical_nets)
-        optical_nets.append ( Optical_net (net_index, 1, p1.component_n, 0, w1.index) )
-        # assign this net number to the components
-        optical_components[p1.component_n].nets.append (net_index)
-        if optical_waveguides[w1.index].net1 != -1:
-          # problem. Net is already assigned.
-          text = "  *** Connectivity error.  Net is already assigned (pin to waveguide). Overwriting."
-          flag_waveguide_error( [w1.points[0], w1.points[1]], text, optical_waveguides[w1.index], topcell)
-        optical_waveguides[w1.index].net1 = net_index
-        # assign this net number to the pin
-        p1.net = net_index
-        print ( "connected: pin-waveguide, net #: %s, component #: %s, pin #: %s, waveguide #: %s" \
-              % (net_index, p1.component_n, p1.index, w1.index ) )
-        
-      # examine the end of the waveguide:
-      np = len(w1.points)
-      segment2 = [ pya.Point(*w1.points[np-2]), pya.Point(*w1.points[np-1]) ] 
-      check2 = check_segments_colinear_overlapping( segment1, segment2 )
-      if check2:  # found connected pins:
-        # make a new optical net
-        net_index = len(optical_nets)
-        optical_nets.append ( Optical_net (net_index, 1, p1.component_n, 0, w1.index) )
-        # assign this net number to the components
-        optical_components[p1.component_n].nets.append (net_index)
-        if optical_waveguides[w1.index].net2 != -1:
-          # problem. Net is already assigned.
-          text = "  *** Connectivity error.  Net is already assigned (pin to waveguide). Overwriting."
-          flag_waveguide_error([w1.points[len(w1.points)-1], w1.points[len(w1.points)-2]], \
-                  text, optical_waveguides[w1.index], topcell)
-        optical_waveguides[w1.index].net2 = net_index
-        # assign this net number to the pin
-        p1.net = net_index
-        print ( "connected: pin-waveguide, net #: %s, component #: %s, pin #: %s, waveguide #: %s" \
-              % (net_index, p1.component_n, p1.index, w1.index ) )
-     
-
-  # Check for waveguide to waveguide connections, make net
-  # Loop through all waveguides, and compare to all other waveguides
-  for w1 in optical_waveguides:
-    # the beginning of waveguide 1:
-    w1_segment1 = [ pya.Point(*w1.points[0]), pya.Point(*w1.points[1]) ] 
-    # the end of waveguide 2:
-    np = len(w1.points)
-    w1_segment2 = [ pya.Point(*w1.points[np-2]), pya.Point(*w1.points[np-1]) ] 
-    for w2 in optical_waveguides[ w1.index+1: len(optical_waveguides) ]:
-      # the beginning of waveguide 2:
-      w2_segment1 = [ pya.Point(*w2.points[0]), pya.Point(*w2.points[1]) ] 
-      # the end of waveguide 2:
-      np = len(w2.points)
-      w2_segment2 = [ pya.Point(*w2.points[np-2]), pya.Point(*w2.points[np-1]) ] 
-
-      # check 4 possibilities:
-      for j in range(0,2):
-        if j==0:
-          w1_seg=w1_segment1
-        else:
-          w1_seg=w1_segment2
-        for k in range(0,2):
-          if k==0:
-            w2_seg=w2_segment1
-          else:
-            w2_seg=w2_segment2
-            
-          # perform comparison between each of the waveguide ends:
-          check = check_segments_colinear_overlapping( w1_seg, w2_seg )
-          if check:  # found connected pins:
-            # make a new optical net
-            net_index = len(optical_nets)
-            optical_nets.append ( Optical_net (net_index, 0, w1.index, 0, w2.index) )
-            if j==0:
-              optical_waveguides[w1.index].net1 = net_index
-            else:
-              optical_waveguides[w1.index].net2 = net_index
-            if k==0:
-              optical_waveguides[w2.index].net1 = net_index
-            else:
-              optical_waveguides[w2.index].net2 = net_index
-            print ("connected: waveguide-waveguide")
-
-
-# end def identify_all_nets
-
-
+ 
 
 def flag_component_error(box, text, x, y):
   # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
@@ -435,8 +198,6 @@ def check_connectivity(optical_components, topcell, LayerErrorN):
       flag_waveguide_error([w1.points[len(w1.points)-1], w1.points[len(w1.points)-2]], \
                text, optical_waveguides[w1.index], topcell)
 
-
-
 def list_optical_components(optical_components):
   # list all Optical_component objects from an array
   # input array, optical_components
@@ -459,37 +220,9 @@ def list_optical_components(optical_components):
     print (t)
     wtext.insertHtml('%s&lt;br&gt;' %t)
 
-import math
-def eng_str(x):
-    # x input in meters
-    # output in meters, engineering notation, rounded to 1 nm
-    x = round(x*1E9)/1E9
-    y = abs(x)
-    if y == 0:
-      return '0'
-    else:
-      exponent = int(math.floor(math.log10(y)))
-      engr_exponent = exponent - exponent%3
-      if engr_exponent == -3:
-        str_engr_exponent = "m"
-        z = y/10**engr_exponent
-      elif engr_exponent == -6:
-        str_engr_exponent = "u"
-        z = y/10**engr_exponent
-      elif engr_exponent == -9:
-        str_engr_exponent = "n"
-        z = y/10**engr_exponent
-      else:
-        str_engr_exponent = ""
-        z = y/10**engr_exponent
-      sign = '-' if x &lt; 0 else ''
-      #return sign+str(z)+'E'+str(engr_exponent)
-#      return sign+ '%3.3f' % z +str(str_engr_exponent)
-      return sign+ str(z) +str(str_engr_exponent)
-    
 def list_optical_waveguides(list_optical_waveguides):
-  # list all Optical_component objects from an array
-  # input array, optical_components
+  # list all Optical_waveguides objects from an array
+  # input array, optical_waveguides
   # example output:         
   # X5 9 10 ebeam_wg_strip_1550 library="Design kits/ebeam_v1.0" wg_length=7.86299e-06 wg_width=5.085e-07 sch_x=-1.42 sch_y=-0.265
 
@@ -508,6 +241,8 @@ def list_optical_waveguides(list_optical_waveguides):
 
 def gen_ui():
   global wdg
+  
+  # If the window is already here, destroy it and start over again.
   if 'wdg' in globals():
     if wdg is not None and not wdg.destroyed():
       wdg.destroy()
@@ -522,7 +257,7 @@ def gen_ui():
   wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
   wdg.setWindowTitle("SiEPIC-EBeam-PDK Verification and Netlist Generation")
 
-  wdg.resize(1000, 500)
+  wdg.resize(1200, 2500)
   wdg.move(1, 1)
 
   grid = pya.QGridLayout(wdg)
@@ -532,6 +267,7 @@ def gen_ui():
   wtext = pya.QTextEdit(wdg)
   wtext.enabled = True
   wtext.setText('')
+  wtext.LineWrapMode = pya.QTextEdit.NoWrap
 
   ok = pya.QPushButton("OK", wdg)
   ok.clicked(button_clicked)   # attach the event handler
@@ -546,20 +282,6 @@ def gen_ui():
   grid.setColumnStretch(1, 1)
 
   wdg.show()
-
-def make_test_layout(cell, layer):
-  delete_extra_top_cells()
-  cell.layout().prune_subcells(cell.cell_index(), 10)
-  points = [ [0,0], [10,0], [10,10] ]
-
-  cell1 = cell.layout().create_cell("level1")
-  trans = pya.Trans(pya.Trans.R90, 0, 0)
-  cell.insert(pya.CellInstArray(cell1.cell_index(), trans))
-  
-  cell2 = cell.layout().create_cell("level2")
-  layout_waveguide_abs(cell2, layer, points, 0.5, 3)
-  trans = pya.Trans(pya.Point(3000,3000))
-  cell1.insert(pya.CellInstArray(cell2.cell_index(), trans))
 
 
 
@@ -598,12 +320,10 @@ LayerPinRecN = layout.layer(LayerPinRec)
 LayerDevRecN = layout.layer(LayerDevRec)
 LayerFbrTgtN = layout.layer(LayerFbrTgt)
 LayerErrorN = layout.layer(LayerError)
+LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
 
 # Clear the previous errors:
 clear_ErrorLayer(topcell, LayerErrorN)
-
-# optional - make a test layout
-#make_test_layout(topcell, LayerSi)
 
 # initialize the arrays to keep track of layout objects
 reset_Optical_classes()
@@ -650,22 +370,8 @@ wtext.insertHtml('&lt;br&gt;*** Number of errors found: %s.&lt;br&gt;' % len(lay
 
 
 # Output the Spice netlist:
-wtext.insertHtml('&lt;br&gt;* Spice netlist output:&lt;br&gt;&lt;br&gt;')
-print ("")
-print ("Spice output: ")
-print ("")
-
-def find_optical_IO_pins(optical_pins):
-  pins_text = ""
-  for p in optical_pins:
-    if p.pin_type == 2:
-      pins_text += " N$%s" % p.net
-  return pins_text
-      
-wtext.insertHtml('.subckt %s %s:&lt;br&gt;' % ( topcell.name, find_optical_IO_pins(optical_pins) ))
-list_optical_components(optical_components)
-list_optical_waveguides(optical_waveguides)
-wtext.insertHtml('.ends %s&lt;br&gt;' % ( topcell.name) )
+text_Spice = generate_Spice_file(topcell, optical_waveguides, optical_components)
+wtext.insertPlainText(text_Spice)
 
 # Find the automated measurement coordinates:
 wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
