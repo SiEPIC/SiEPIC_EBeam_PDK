@@ -48,8 +48,9 @@ elif sys.platform.startswith('darwin'):
     pass
     if string.find(version,"2.7.") &gt; -1:
       import commands
-      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app')
-
+      print ("Running INTERCONNECT")
+#      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run /Users/lukasc/SiEPIC_EBeam_PDK/Spice/test.lsf')
+      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args /Users/lukasc/SiEPIC_EBeam_PDK/Spice/MZI.spi')
     
 
 </text>

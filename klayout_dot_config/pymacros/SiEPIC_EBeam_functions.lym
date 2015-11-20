@@ -76,7 +76,15 @@ LayerDevRec = pya.LayerInfo(68, 0)
 LayerFbrTgt = pya.LayerInfo(81, 0)
 LayerError = pya.LayerInfo(999,0)
 LayerINTERCONNECT = pya.LayerInfo(733,0)
-    
+
+
+mw = pya.Application.instance().main_window()
+menu = mw.menu()
+t = "siepic_menu"
+if not(menu.is_menu(t)):
+  menu.insert_menu("help_menu",t,"SiEPIC") 
+
+
 # definition of classes for Verification, Waveguide making, Waveguide Healing
 # one for each instance of the components
 class Optical_component:
