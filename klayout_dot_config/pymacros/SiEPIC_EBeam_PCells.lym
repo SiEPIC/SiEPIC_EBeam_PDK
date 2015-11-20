@@ -131,9 +131,9 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
     height = 40/dbu
     box1 = pya.Box(-width/2, -height/2, width/2, height/2)
     self.cell.shapes(LayerINTERCONNECTN).insert(box1)
-    shrink = 1000
-    box1 = pya.Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
-    self.cell.shapes(LayerINTERCONNECTN).insert(box1)
+#    shrink = 1000
+#    box1 = pya.Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
+#    self.cell.shapes(LayerINTERCONNECTN).insert(box1)
         
     t = pya.Trans(-width/2+3/dbu, height/2-4/dbu)
     text = pya.Text ("Tunable Laser", t)
@@ -259,9 +259,9 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
     height = 40/dbu
     box1 = pya.Box(-width/2, -height/2, width/2, height/2)
     self.cell.shapes(LayerINTERCONNECTN).insert(box1)
-    shrink = 1000
-    box1 = pya.Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
-    self.cell.shapes(LayerINTERCONNECTN).insert(box1)
+#    shrink = 1000
+#    box1 = pya.Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
+#    self.cell.shapes(LayerINTERCONNECTN).insert(box1)
         
     t = pya.Trans(-width/2+3/dbu, height/2-4/dbu)
     text = pya.Text ("Detector", t)
