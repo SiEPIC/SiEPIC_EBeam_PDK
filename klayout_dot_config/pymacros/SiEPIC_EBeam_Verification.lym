@@ -221,7 +221,7 @@ def find_all_waveguides(cell, layer):
           length, wg_type, num_points, wg_width, bend_pts ) )
 
 
-    iter1.next()
+    advance_iterator(iter1)
   print (" ")
 
 def check_components(cell, LayerDevRecN):

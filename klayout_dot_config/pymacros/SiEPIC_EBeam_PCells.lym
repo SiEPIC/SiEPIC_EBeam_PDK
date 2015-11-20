@@ -193,7 +193,7 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
             n = [int(s) for s in txt.split() if s.isdigit()]
             if len(n)&gt;0:
               detectors.append (n[0])
-        iter1.next()
+        advance_iterator(iter1)
       print ("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
       if detector_number in detectors:
         detector_number = 1
@@ -238,7 +238,7 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
             n = [int(s) for s in txt.split() if s.isdigit()]
             if len(n)&gt;0:
               detectors.append (n[0])
-        iter1.next()
+        advance_iterator(iter1)
       print ("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
       detector_number = 1
       while detector_number in detectors:
