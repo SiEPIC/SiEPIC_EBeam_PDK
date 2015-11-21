@@ -33,15 +33,18 @@ Lukas Chrostowski           2015/11/15
 Lukas Chrostowski           2015/11/16
  - Fix bug to include waveguide_to_path transformation of the ROUND_PATH PCell
 
-to do:
- - is the GUIDING_SHAPE is selected, it doesn't work.
+Lukas Chrostowski           2015/11/18
+ - If the GUIDING_SHAPE is selected, find out the ROUND_PATH PCell it belongs to.
+   user can either select the PCell or it's ROUND_PATH.
+
+Lukas Chrostowski           2015/11/18
+ - removed need for numpy.array
  
 """
 
 
 
 import pya
-import numpy as numpy
 
 
 # Configure variables to draw structures in the presently selected cell:
@@ -60,68 +63,91 @@ if cell == None:
 dbu = ly.dbu
 
 # Define layers based on PDK_functions:
-SiLayerN = ly.layer(SiLayer)
-#LayerTextN = ly.layer(LayerText)
+LayerSiN = ly.layer(LayerSi)
 LayerPinRecN = ly.layer(LayerPinRec)
 LayerDevRecN = ly.layer(LayerDevRec)
 LayerFbrTgtN = ly.layer(LayerFbrTgt)
 LayerErrorN = ly.layer(LayerError)
 
 
-object_selection = lv.object_selection
-for o in object_selection:
-  if o.is_cell_inst():
-    print ("Selected object is a cell.")
-    oinst = o.inst()
-    print oinst
-
 # Record a transaction, to enable "undo"
 lv.transaction("Waveguide to Path")
 
-# Find the selected paths
-object_selection = lv.object_selection
-# objects to delete:
+print ("------------------ Waveguide to Path --------------")
+
+# record objects to delete:
 to_delete = []
+
+# new objects will become selected
+new_selection = []
+
+# Find the selected objects
+object_selection = lv.object_selection   # returns ObjectInstPath[].
+
+is_waveguide = False
+
 for o in object_selection:
+  # Find the selected waveguides
+
   if o.is_cell_inst():
     print ("Selected object is a cell.")
     oinst = o.inst()
     if oinst.is_pcell():
-      pcell_decl = oinst.pcell_declaration()
       c = oinst.cell
-      if c.basic_name() == 'ROUND_PATH' and c.pcell_parameters_by_name()['layer'] == SiLayer:
-        print ("ROUND_PATH on SiLayer.")
-        path_obj = c.pcell_parameters_by_name()['path']
-        print ( path_obj ) 
-        wg_width = path_obj.width/dbu
-        # convert wg_path (in microns) to database numbers
-        wg_path = points_to_path(numpy.array(path_to_Dpoints(path_obj))/dbu, wg_width)
-        # get waveguide transformation
-        wg_path_trans = wg_path.transformed(oinst.trans)
+      if c.basic_name() == 'ROUND_PATH' and c.pcell_parameters_by_name()['layer'] == LayerSi:
+        print ("ROUND_PATH on LayerSi.")
+        is_waveguide = True
+        trans = oinst.trans
 
-        print ( wg_path_trans ) 
-        new_wg = cell.shapes(SiLayerN).insert(wg_path_trans)
+  elif o.shape:
+    print ("Selected object is a shape.")
+    c = o.shape.cell
+    if c.name == "ROUND_PATH" and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+      # we have a waveguide GUIDING_LAYER selected
+      print ("Selected object is a GUIDING_LAYER in ROUND_PATH on LayerSi.")
+      trans = o.source_trans().s_trans()
+      o_instpathlen = o.path_length()
+      oinst = o.path_nth(o_instpathlen-1).inst()
+      is_waveguide = True
 
-# It would be nice to leave the newly created waveguide selected, to make it obvious to the user.
-#        # http://www.klayout.de/doc/code/class_ObjectInstPath.html#method9
-#        append_path(const InstElement element)
-#        lv.object_selection = ObjectInstPath
+  # We now have a waveguide ROUND_PATH PCell, with variables: o (ObjectInstPath), oinst (Instance), c (Cell)
+  if is_waveguide == True:
+    path_obj = c.pcell_parameters_by_name()['path']
+    print ( path_obj ) 
+    wg_width = path_obj.width/dbu
+    # convert wg_path (in microns) to database numbers
+    wg_path = points_to_path(points_mult(path_to_Dpoints(path_obj), 1/dbu), wg_width)
+    # get waveguide transformation
+    wg_path_trans = wg_path.transformed(trans)
 
-#        to_delete.append(oinst.cell) # deleting this removes the cell entirely (which may be used elsewhere!)
-        to_delete.append(oinst) # leaves behind the cell if it's not used
+    print ( "wg_path_trans: %s" % wg_path_trans ) 
+    new_wg = cell.shapes(LayerSiN).insert(wg_path_trans)
+
+    # Leave the newly created waveguide selected, to make it obvious to the user.
+    # http://klayout.de/forum/comments.php?DiscussionID=747
+    new_selectionN = len(new_selection)
+    new_selection.append( pya.ObjectInstPath() )
+    new_selection[new_selectionN].layer = LayerSiN
+    new_selection[new_selectionN].shape = new_wg
+    new_selection[new_selectionN].top = o.top
+    new_selection[new_selectionN].cv_index = o.cv_index
+   
+#    to_delete.append(oinst.cell) # deleting this removes the cell entirely (which may be used elsewhere!)
+    to_delete.append(oinst) # ldelete the instance; leaves behind the cell if it's not used
         
-#        oinst.cell.delete()
-#        oinst.delete()
-
 for t in to_delete:
   t.delete()
 
-# Clear the layout view selection, since we deleted some objects (but others may be selected still):
+# Clear the layout view selection, since we deleted some objects (but others may still be selected):
 lv.clear_object_selection()
+
+# Select the newly added objects
+lv.object_selection = new_selection
      
 # Record a transaction, to enable "undo"
 lv.commit()
 
-        
-        </text>
+if not(is_waveguide):
+  v = pya.MessageBox.warning("No waveguide selected", "No waveguide selected.\nPlease select a ROUND_PATH waveguide. \nIt will get converted to a path.", pya.MessageBox.Ok)
+</text>
 </klayout-macro>

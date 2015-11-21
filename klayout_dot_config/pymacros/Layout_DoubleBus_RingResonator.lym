@@ -67,11 +67,11 @@ dbu = 1 / ly.dbu
 
 # clean all cells within "cell"
 ly.prune_subcells(cell.cell_index(), 10)
-delete_extra_top_cells()
+#delete_extra_top_cells(cell)
 
 # Layer mapping:
-SiLayer = pya.LayerInfo(1, 0)
-SiLayerN = cell.layout().layer(SiLayer)
+LayerSi = pya.LayerInfo(1, 0)
+LayerSiN = cell.layout().layer(LayerSi)
 fpLayer = pya.LayerInfo(99, 0)
 fpLayerN = cell.layout().layer(fpLayer)
 TextLayer = pya.LayerInfo(10, 0)
@@ -106,7 +106,7 @@ shape.text_size = 3*dbu
 r = 20
 wg_width = 0.5
 g = 0.2
-pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", { "r": r, "w": wg_width, "g": g, "l": SiLayer  } )
+pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", { "r": r, "w": wg_width, "g": g, "l": LayerSi  } )
 print ("Cell: pcell: #%s" % pcell.cell_index())
 y_ring = 127*3/2+r
 t = pya.Trans(pya.Trans.R270, 10 * dbu, y_ring * dbu) 
@@ -117,19 +117,19 @@ wg_bend_radius = 10
 
 # GC3 to bottom-left of ring
 points = [ [0, 127], [10,127], [10, y_ring-2*r-wg_width] ] 
-layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
 
 # GC4 to bottom-right of ring
 points = [ [0, 0], [10+2*r+2*g+2*wg_width,0], [10+2*r+2*g+2*wg_width, y_ring-2*r-wg_width]  ] 
-layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
 # GC2 to top-right of ring
 points = [ [10,y_ring], [10, 127*2], [0,127*2] ] 
-layout_waveguide_abs(cell, SiLayer, points, wg_width, wg_bend_radius)
+layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
 
 # GC1 to top-left of ring
 points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
-layout_waveguide_abs(cell, SiLayer, points, wg_width, 20)
+layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
 print ("done layout...")
 </text>
