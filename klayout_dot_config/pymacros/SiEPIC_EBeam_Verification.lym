@@ -158,6 +158,7 @@ def check_connectivity(optical_components, topcell, LayerErrorN):
   # Make sure that all pins/waveguides are connected, i.e., dangling pins/waveguides.
   # Flag disconnected pins
   # Flag disconnected waveguides
+  # Make sure that waveguides / pins are connected in the correct direction
 
   for k in range(0,len(optical_components)):
     if optical_components[k].npins != len(optical_components[k].nets):
@@ -197,6 +198,10 @@ def check_connectivity(optical_components, topcell, LayerErrorN):
           % (w1.points[len(w1.points)-1][0]*dbu, w1.points[len(w1.points)-1][1]*dbu)
       flag_waveguide_error([w1.points[len(w1.points)-1], w1.points[len(w1.points)-2]], \
                text, optical_waveguides[w1.index], topcell)
+
+  # Make sure that waveguides / pins are connected in the correct direction (colinear check)
+    
+
 
 def list_optical_components(optical_components):
   # list all Optical_component objects from an array
