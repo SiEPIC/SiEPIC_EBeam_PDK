@@ -734,7 +734,21 @@ def check_segments_colinear_overlapping( segment1, segment2 ):
   # check for one of the segment1 points being inside segment2
   check_between2 = check_point_in_segment( segment2[0], segment2[1], segment1[0] ) | \
                   check_point_in_segment( segment2[0], segment2[1], segment1[1] )
-  return check_between1 and check_between2
+  # check that they have the same direction
+  is_slope_equal = False
+  # check ∆x = 0 first to avoid division by 0
+  dx1 = (segment1[0].x-segment1[1].x)
+  dx2 = (segment2[0].x-segment2[1].x)
+  if dx2 == 0 and dx1 == 0:
+    is_slope_equal = True  # both vertical
+  elif dx1 != 0 and dx2 != 0:
+    # check slopes
+    slope1 = (segment1[0].y-segment1[1].y) / (segment1[0].x-segment1[1].x)
+    slope2 = (segment2[0].y-segment2[1].y) / (segment2[0].x-segment2[1].x)
+    if slope1 == slope2:
+      is_slope_equal = True  # both have the same slope
+
+  return check_between1 and check_between2 and is_slope_equal
 
 
 def identify_all_nets(optical_pins, optical_waveguides, optical_components):
@@ -750,8 +764,9 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
   for p1 in optical_pins:
     if p1.pin_type != 1:
       continue # only analyze pin_type = 1, component.
+      
     segment1 = [ pya.Point(*p1.points[0]), pya.Point(*p1.points[1]) ] 
-    
+
     # Compare to all other pins:
     for p2 in optical_pins[ p1.index+1: len(optical_pins) ]:
       if p2.pin_type != 1:
@@ -972,5 +987,10 @@ def eng_str(x):
 #      return sign+ '%3.3f' % z +str(str_engr_exponent)
       return sign+ str(z) +str(str_engr_exponent)
     
-</text>
+
+def waveguide_set_target_length():
+  # Function to move the edges of a waveguide to obtain a target length
+  # - Dialog prompts user for a target length, and to click on an edge to select shape and edge to move
+  # - Newton search: calculate length (area method) then move edge; technique is general for any waveguide curve function
+  </text>
 </klayout-macro>
