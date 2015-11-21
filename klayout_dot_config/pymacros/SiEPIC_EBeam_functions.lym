@@ -72,6 +72,19 @@ SiEPIC_Version = '0.1.6'
 
 import pya
 import math
+
+
+# SiEPIC-EBeam-PDK Layers:
+LayerSi = pya.LayerInfo(1, 0)
+LayerText = pya.LayerInfo(10, 0)
+LayerPinRec = pya.LayerInfo(69, 0)
+LayerDevRec = pya.LayerInfo(68, 0)
+LayerFbrTgt = pya.LayerInfo(81, 0)
+LayerError = pya.LayerInfo(999,0)
+LayerINTERCONNECT = pya.LayerInfo(733,0)
+
+
+
 #import numpy
 MODULE_NUMPY = False
 
@@ -94,16 +107,6 @@ except NameError:
     return it.next()
 
 
-
-
-# SiEPIC-EBeam-PDK Layers:
-LayerSi = pya.LayerInfo(1, 0)
-LayerText = pya.LayerInfo(10, 0)
-LayerPinRec = pya.LayerInfo(69, 0)
-LayerDevRec = pya.LayerInfo(68, 0)
-LayerFbrTgt = pya.LayerInfo(81, 0)
-LayerError = pya.LayerInfo(999,0)
-LayerINTERCONNECT = pya.LayerInfo(733,0)
 
 
 # definition of classes for Verification, Waveguide making, Waveguide Healing
@@ -992,5 +995,6 @@ def waveguide_set_target_length():
   # Function to move the edges of a waveguide to obtain a target length
   # - Dialog prompts user for a target length, and to click on an edge to select shape and edge to move
   # - Newton search: calculate length (area method) then move edge; technique is general for any waveguide curve function
-  </text>
+  pass
+    </text>
 </klayout-macro>
