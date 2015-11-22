@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>import pya
+
+# Experimenting with the Results database Rdb.
+
+
+
+# Configure variables to draw structures in the presently selected cell:
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+cv = pya.Application.instance().main_window().current_view().active_cellview()
+# find the currently selected cell:
+cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if cell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = ly.dbu
+
+
+rdb_i = lv.create_rdb("SiEPIC_Verification")
+rdb = lv.rdb(rdb_i)
+
+rdb_cat_id_wg = rdb.create_category("Waveguide errors")
+rdb_cat_id_wg_disc = rdb.create_category(rdb_cat_id_wg, "Disconnected Waveguides")
+rdb_cat_id_wg_disc.description = "Disconnected waveguides"
+
+rdb.top_cell_name = cell.name
+rdb_cell = rdb.create_cell(cell.name)
+
+rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_disc.rdb_id())
+rdb_item.add_value(pya.RdbItemValue(pya.DBox.new(0.0, 0.0, 100.0, 200.0)))
+
+#rdb_item.add_value(pya.RdbItemValue(DPath))
+
+
+
+#marker = pya.Marker.new(lv)
+#marker.set(pya.DBox.new(0.0, 0.0, 100.0, 200.0))
+# to hide the marker:
+
+
+lv.show_rdb(rdb_i, cv.cell_index)</text>
+</klayout-macro>
