@@ -11,7 +11,7 @@
  <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -208,7 +208,7 @@ clock_verify_layout = time.clock()
 
 
 # Output the Spice netlist:
-text_Spice = generate_Spice_file(topcell, optical_waveguides, optical_components)
+text_Spice,_ = generate_Spice_file(topcell, optical_waveguides, optical_components)
 if 'wtext' in globals():
   wtext.insertPlainText(text_Spice)
 clock_netlist = time.clock()

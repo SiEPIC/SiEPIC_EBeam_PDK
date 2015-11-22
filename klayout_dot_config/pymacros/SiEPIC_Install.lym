@@ -6,7 +6,7 @@
  <prolog/>
  <epilog/>
  <doc/>
- <autorun>false</autorun>
+ <autorun>true</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
  <show-in-menu>false</show-in-menu>
@@ -51,5 +51,9 @@ t = "siepic_menu"
 if not(menu.is_menu(t)):
   menu.insert_menu("help_menu",t,"SiEPIC") 
 
+s = "layout_submenu"
+r = "Layout Generation"
+if not(menu.is_menu(t + "." + s)):
+  menu.insert_menu(t+".end",s,r)
 </text>
 </klayout-macro>
