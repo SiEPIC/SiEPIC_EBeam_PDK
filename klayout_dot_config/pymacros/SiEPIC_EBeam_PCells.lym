@@ -626,7 +626,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     print ( "Cell: GC_imported: #%s" % GC_imported )
     t = pya.Trans(pya.Trans.R0, 0, 0)
     instance = cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 4, 1))
-    print instance.cell_index
+    print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
     t = pya.Trans(0, 127*2/dbu)
@@ -719,7 +719,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
         % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
-    print instance.cell_index
+    print(instance.cell_index)
 
 
     # Grating couplers, Ports 1, 2, 3, 4 (top-down):
@@ -732,7 +732,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     print ("Cell: GC_imported: #%s" % GC_imported )
     t = pya.Trans(pya.Trans.R0, 0, 0)
     instance = cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 4, 1))
-    print instance.cell_index
+    print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
     t = pya.Trans(0, 127*2/dbu)

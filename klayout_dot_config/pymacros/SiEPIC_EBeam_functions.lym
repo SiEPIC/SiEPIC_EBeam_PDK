@@ -87,14 +87,16 @@ else:
     # Python 2 code
     pass
 
+
 try:
   advance_iterator = next
 except NameError:
-  def advance_iterator(it):
+ def advance_iterator(it):
     return it.next()
-
-
-
+"""
+def advance_iterator(it):
+  return it.next()
+"""
 
 # SiEPIC-EBeam-PDK Layers:
 LayerSi = pya.LayerInfo(1, 0)
@@ -248,8 +250,8 @@ def clear_ErrorLayer(topcell, LayerErrorN):
       i+=1
       iter1.shape().delete()
 #    iter1.next()  # in Python 2.7
-    advance_iterator(iter1)
-  print ("*** Deleted %s errors.") % i
+    iter1.next()
+  print ("*** Deleted %s errors." % i)
 
 
 
@@ -267,11 +269,11 @@ def find_automated_measurement_labels(topcell, LayerTextN):
   while not(iter.at_end()):
     if iter.shape().is_text():
       text = iter.shape().text
-      if string.find(text.string,"opt_in") &gt; -1:
+      if text.string.find("opt_in") &gt; -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t += "label: %s, location: (%s, %s) &lt;br&gt;" %(text.string, text2.x*dbu, text2.y*dbu )
-    advance_iterator(iter)
+    iter.next()
   t += "&lt;br&gt;*** Number of automated measurement labels: %s.&lt;br&gt;" % i
   return t
 
@@ -321,7 +323,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       while not(iter2.at_end()):
         if iter2.shape().is_text():
           print ("%s: DevRec label: %s" % (i, iter2.shape().text))
-        advance_iterator(iter2)
+        iter2.next()
       library = "Design kits/ebeam_v1.0"
       x = iter1.itrans().disp.x*dbu
       y = iter1.itrans().disp.y*dbu
@@ -332,7 +334,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
                   component, instance, x, y, flip, rotate, library) )
       
       # Find the PinRec and record info as Optical_pin
-      
+        
       # Use the pin names on layer PinRec to sort the pins in alphabetical order
       # read; sort; save data.
       iter2 = subcell.begin_shapes_rec(LayerPinRecN)
@@ -357,7 +359,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           #print ( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
           path_points.append(points)
           path_shape.append(iter2.shape())
-        advance_iterator(iter2)
+        iter2.next()
       # Sort pin text labels
       pin_info2 = sorted(pin_info1, key=lambda  pin_info0: pin_info0.pin_text)
 
@@ -401,14 +403,14 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           # register the pin with the component
           optical_components[component_index].npins += 1
           optical_components[component_index].pins.append( pin_index ) 
-          print ("%s: FbrTgt in cell {%s}, at (%s, %s), net %s, pins %s, component # %s, component nets %s")   \
+          print ("%s: FbrTgt in cell {%s}, at (%s, %s), net %s, pins %s, component # %s, component nets %s"   \
               % (i, iter2.cell().name, x, y, net_index, optical_components[component_index].pins, \
-              component_index, optical_components[component_index].nets  )
-        advance_iterator(iter2)
+              component_index, optical_components[component_index].nets  ))
+        iter2.next()
         
     # end if found_component   
      
-    advance_iterator(iter1)
+    iter1.next()
  
   # end while iter1 
 # end def find_all_components
@@ -682,7 +684,7 @@ def find_all_waveguides(cell, layer):
         path = DPath.transformed(DCplxTrans)
 
         # Waveguide parameters
-        print subcell.pcell_parameters_by_name()
+        print (subcell.pcell_parameters_by_name())
         radius = subcell.pcell_parameters_by_name()["radius"]  # in microns
         bend_pts = subcell.pcell_parameters_by_name()["npoints"] 
         wg_width = subcell.pcell_parameters_by_name()['path'].width  # in microns
@@ -692,7 +694,7 @@ def find_all_waveguides(cell, layer):
           area = iter2.shape().polygon.area()
           length = area / wg_width * dbu * dbu
         else:
-          print "## ROUND_PATH waveguide, not polygon; bug in code? ##"
+          print ("## ROUND_PATH waveguide, not polygon; bug in code? ##")
           length =  path.length()*dbu  # ignoring bends
         num_points = path.num_points()
         wg_type = 1
@@ -707,7 +709,7 @@ def find_all_waveguides(cell, layer):
       optical_waveguides.append ( Optical_waveguide (len(optical_waveguides), points, radius, \
           length, wg_type, num_points, wg_width, bend_pts ) )
 
-    advance_iterator(iter1)
+    iter1.next()
   print (" ")
 
 

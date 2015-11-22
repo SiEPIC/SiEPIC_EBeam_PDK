@@ -150,7 +150,7 @@ def flag_component_error(box, text, x, y):
   # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
   topcell.shapes(LayerErrorN).insert(box)
   layout_errors.append(Layout_error(text, x, y) )
-  print text
+  print(text)
   wtext.insertHtml('%s&lt;br&gt;' %text)
 
 
