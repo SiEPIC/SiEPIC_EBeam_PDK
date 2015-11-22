@@ -11,7 +11,7 @@
  <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -44,7 +44,7 @@ version = sys.version
 
 import string
 
-
+"""
 def netlist_extraction(topcell):
   # Collection of functions to extract the circuit netlist from the physical layout
   
@@ -66,7 +66,7 @@ def netlist_extraction(topcell):
   identify_all_nets(optical_pins, optical_waveguides, optical_components)
 
   return optical_waveguides, optical_components
-  
+"""  
 
 
 
@@ -94,10 +94,10 @@ LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
 
 
 # extract the circuit netlist from the physical layout:
-optical_waveguides, optical_components = netlist_extraction(topcell)
+optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
   
 # Output the Spice netlist:
-text_Spice = generate_Spice_file(topcell, optical_waveguides, optical_components)
+text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
 print text_Spice
 
 filename = '/tmp/%s.spi' % topcell.name
@@ -112,11 +112,17 @@ text_lsf = 'switchtolayout;\n'
 text_lsf += 'deleteall;\n'
 text_lsf += 'importnetlist("%s");\n' % filename
 text_lsf += 'run;\n'
-text_lsf += 't1 = getresult("ONA_1", "input 1/mode 1/gain");\n'
-text_lsf += 'visualize(t1);\n'
+for i in range(0, num_detectors):
+  text_lsf += 't%s = getresult("ONA_1", "input %s/mode 1/gain");\n' % (i+1, i+1)
+text_lsf += 'visualize(t1'
+for i in range(1, num_detectors):
+  text_lsf += ', t%s' % (i+1)
+text_lsf += ');\n'
+
 file.write (text_lsf)
 file.close()
 
+print(text_lsf)
 
 if sys.platform.startswith('freebsd'):
     # FreeBSD-specific code here...
