@@ -65,6 +65,10 @@ Lukas Chrostowski           2015/11/19
  - finding the laser and detectors in the layout
  - generating a Spice netlist including Optical Network Analyzer; ready for Lumerical INTERCONNECT
  - Added Python 2 &amp; 3 compatibility for iter.next() vs. next(iter)
+
+Lukas Chrostowski           2015/11/21
+ - bug fix in points_mult, that argument in the function was being modified. needed to copy it.
+ 
  
 """
 
@@ -72,6 +76,14 @@ SiEPIC_Version = '0.1.6'
 
 import pya
 import math
+import string
+
+try:
+  import numpy
+except ImportError:
+  #import numpy
+  print ("no numpy")
+  MODULE_NUMPY = False
 
 
 # SiEPIC-EBeam-PDK Layers:
@@ -85,8 +97,6 @@ LayerINTERCONNECT = pya.LayerInfo(733,0)
 
 
 
-#import numpy
-MODULE_NUMPY = False
 
 # Determine whether we have Python 2 or Python 3
 import sys
@@ -216,14 +226,17 @@ def reset_Optical_classes():
   Layout_error.n = 0
 
 # multiply an array of points by a constant
-def points_mult(dpoints, mult):
+def points_mult(dpoints1, mult):
+  # create a new empty list.  Otherwise, this function would modify the original list
+  # http://stackoverflow.com/questions/240178/python-list-of-lists-changes-reflected-across-sublists-unexpectedly
+  newlist = [[0]*2 for n in range(len(dpoints1))] 
   if MODULE_NUMPY:
-    return numpy.array(dpoints)*mult
+    return numpy.array(dpoints1)*mult
   else:
     for i in range(0,2):
-      for j in range(0,len(points)):
-        dpoints[j][i] *= mult
-    return dpoints
+      for j in range(0,len(dpoints1)):
+        newlist[j][i] = dpoints1[j][i]*mult
+    return newlist
 
 # calculate the mean in (x,y) for an array of points
 def xy_mean_mult(dpoints,dbu):
@@ -355,8 +368,6 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           path= iter2.shape().path.transformed(iter2.itrans())
           path= path.transformed(iter1.itrans())
           points = path_to_points(path)  
-          x = points[0][0]
-          y = points[0][1]
           #print ( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
           path_points.append(points)
           path_shape.append(iter2.shape())
@@ -373,8 +384,8 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
             pya.Point( pin_info2[p1].pin_x, pin_info2[p1].pin_y ) )
           if check_text_in_pin:
             points = path_points[p2]  
-            x = points[0][0]
-            y = points[0][1]
+            x = (points[0][0]+points[1][0])/2   # midpoint of pin path
+            y = (points[0][1]+points[1][1])/2
             pin_index = len(optical_pins)
             optical_pins.append (Optical_pin (pin_index, points, component_index, x, y, 1) )
             optical_components[component_index].npins += 1
@@ -469,8 +480,8 @@ def points_to_Dpath(points, w):
   a1 = []
   for p in points:
     a1.append (pya.DPoint(p[0], p[1]))
-  wg_path = pya.DPath(a1, w)
-  return wg_path
+  wg_path1 = pya.DPath(a1, w)
+  return wg_path1
 
 
 def points_to_path(points, w):
@@ -482,7 +493,7 @@ def points_to_path(points, w):
   
   
 def polygon_to_points(polygon):
-  # for some reason, you assign points to a polygon, but not read them!
+  # for some reason, you can assign points to a polygon, but not read them!
   # http://www.klayout.de/doc/code/class_SimplePolygon.html
   # This function reads the points one by one and returns an array of points
   npts = polygon.to_simple_polygon().points
@@ -959,7 +970,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
   # main circuit
   text += '%s%s %s sch_x=-1 sch_y=-1\n\n' % (topcell.name, opticalIO_pins, topcell.name)
 
-  return text
+  return text, len(detector_nets)
 
 
 def eng_str(x):
@@ -989,7 +1000,263 @@ def eng_str(x):
       #return sign+str(z)+'E'+str(engr_exponent)
 #      return sign+ '%3.3f' % z +str(str_engr_exponent)
       return sign+ str(z) +str(str_engr_exponent)
+
+
+def netlist_extraction(topcell):
+  # Collection of functions to extract the circuit netlist from the physical layout
+  
+  import time
+
+  # Search the layout for the components and waveguides:
+  print ("")
+  print ("* calling find_all_components() – DevRec:")
+  find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
+  clock_find_all_components = time.clock()
+
+  print ("")
+  print ("* calling find_all_waveguides():")
+  find_all_waveguides(topcell, LayerSiN)
+  clock_find_all_waveguides = time.clock()
+
+#  print ("")
+#  print ("* print_Optical_all, after find_all_{components, waveguides}:")
+#  print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
+
+  # Search the arrays to identify all the nets:
+  print ("")
+  print ("* calling identify_all_nets():")
+  identify_all_nets(optical_pins, optical_waveguides, optical_components)
+  clock_identify_all_nets = time.clock()
+
+  print ("")
+  print ("print_Optical_all, after identify_all_nets:")
+  print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
+
+  return optical_waveguides, optical_components, \
+  clock_find_all_components, clock_find_all_waveguides, clock_identify_all_nets
+
+
+  
+def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
+  # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
+  a1 = []
+  for p in dpoints:
+    a1.append (pya.Point(int(p[0]), int(p[1])))
+  path = pya.Path(a1, optical_waveguide.wg_width*4/dbu)
+  x,y = xy_mean_mult(dpoints, dbu)
+  layout_errors.append(Layout_error(text, x, y) )
+  print (text)
+  if 'wtext' in globals():
+    topcell.shapes(LayerErrorN).insert(path)
+    wtext.insertHtml('%s&lt;br&gt;' %text)
+
+
+def check_waveguides(rdb, optical_waveguides, topcell, error_layer):
+  # check waveguides for basic errors.
+  num_errors=0
+
+  rdb_cell = next(rdb.each_cell())
+
+  rdb_cat_id_wg = rdb.create_category("Waveguide errors")
+  
+  rdb_cat_id_wg_path = rdb.create_category(rdb_cat_id_wg, "Path")
+  rdb_cat_id_wg_path.description = "Waveguide path: Only 2 points allowed in a path. Convert to a waveguide (ROUND_PATH) if necessary."
+
+  rdb_cat_id_wg_radius = rdb.create_category(rdb_cat_id_wg, "Radius")
+  rdb_cat_id_wg_radius.description = "Not enough space to accommodate the desired bend radius for the waveguide end."
+
+  rdb_cat_id_wg_bendpts = rdb.create_category(rdb_cat_id_wg, "Bend points")
+  rdb_cat_id_wg_bendpts.description = "Waveguide bend should have more points per circle."
+
+
+  for o in optical_waveguides:
+
+    # Check for paths with &gt; 2 vertices
+    if (o.wg_type == 0 and o.num_points &gt; 2):
+      text = "  *** Layout error.  Waveguide path (%s, %s): Only 2 points allowed in a path. Convert to a waveguide (ROUND_PATH) if necessary. " \
+            % ( o.points[0][0]*dbu, o.points[0][1]*dbu) 
+      dpoints = o.points
+      num_errors += 1
+      flag_waveguide_error(dpoints, text, o, topcell)
+      rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_path.rdb_id())
+      rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
+
+    # find the minimum segment to make sure that the bends have large enough radius
+    if (o.wg_type == 1):
+      # first segment:
+      segment = distance_xy ( o.points[0], o.points[1] ) 
+      if segment &lt; o.radius:
+        text =  "  *** Layout warning.  Not enough space (%s) to accommodate the desired bend radius (%s) for waveguide end." % (segment, o.radius)
+        dpoints=[ o.points[0], o.points[1] ] 
+        num_errors += 1
+        flag_waveguide_error(dpoints, text, o, topcell)
+        rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_radius.rdb_id())
+        rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
+      # last segment:
+      segment = distance_xy ( o.points[len(o.points)-2], o.points[len(o.points)-1] ) 
+      if segment &lt; o.radius:
+        text =  "  *** Layout warning.  Not enough space (%s) to accommodate the desired bend radius (%s) for waveguide end." % (segment, o.radius)
+        dpoints=[ o.points[len(o.points)-2], o.points[len(o.points)-1] ]
+        num_errors += 1
+        flag_waveguide_error(dpoints, text, o, topcell)
+        rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_radius.rdb_id())
+        rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
+      # go through each of the middle segments:
+      for j in range(1, len(o.points)-2):
+        segment = distance_xy ( o.points[j], o.points[j+1] ) 
+        if segment &lt; 2*o.radius and segment != 0:
+          text =  "  *** Layout warning.  Not enough space (%s) to accommodate the desired bend radius (%s) for a mid-segment." % (segment, o.radius)
+          dpoints=[ o.points[j], o.points[j+1] ] 
+          num_errors += 1
+          flag_waveguide_error(dpoints, text, o, topcell)
+          rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_radius.rdb_id())
+          rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
+
+      # Check for waveguides with too few bend points
+      recommended_points = points_per_circle(o.radius)
+      if o.bend_pts &lt; 0.75 * recommended_points:
+        text =  "  *** Layout warning.  Waveguide bends should have at least %s points per circle for a %s micron radius." \
+                     % (int(recommended_points), o.radius)
+        dpoints=o.points
+        num_errors += 1
+        flag_waveguide_error(dpoints, text, o, topcell)
+        rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_bendpts.rdb_id())
+        rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
+              
+  return num_errors
+
+
+def check_components(rdb, cell, LayerDevRecN):
+  # function to go through all the cells
+  # check that the cell has at most ONE DevRec shape.  
+  return False
+ 
+ 
+
+def flag_component_error(box, text, x, y):
+  # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
+  layout_errors.append(Layout_error(text, x, y) )
+  print text
+  if 'wtext' in globals():
+    topcell.shapes(LayerErrorN).insert(box)
+    wtext.insertHtml('%s&lt;br&gt;' %text)
+
+
+def check_connectivity(rdb, optical_components, topcell, LayerErrorN):
+  # Make sure that all pins/waveguides are connected, i.e., dangling pins/waveguides.
+  # Flag disconnected pins
+  # Flag disconnected waveguides
+  # Make sure that waveguides / pins are connected in the correct direction (identify_nets only finds colinear pins/waveguides) 
+
+  num_errors=0
+
+  rdb_cell = next(rdb.each_cell())
+
+  rdb_cat_id = rdb.create_category("Connectivity errors")
+
+  rdb_cat_id_discwg = rdb.create_category(rdb_cat_id, "Disconnected waveguide")
+  rdb_cat_id_discwg.description = "Disconnected waveguides"
+
+  rdb_cat_id_discpin = rdb.create_category(rdb_cat_id, "Disconnected pin")
+  rdb_cat_id_discpin.description = "Disconnected pin"
+
+  if 0:
+   for k in range(0,len(optical_components)):
+    if optical_components[k].npins != len(optical_components[k].nets):
+      text = "  *** Connectivity error.  Mismatch between the number of pins (%s) on the component (%s, %s) at (%s, %s), and the number of nets (%s)." \
+            % ( optical_components[k].npins, optical_components[k].component, optical_components[k].index, \
+                optical_components[k].x, optical_components[k].y, len(optical_components[k].nets) )
+      bbox = layout.cell(optical_components[k].instance).bbox()
+      box = bbox.transformed(pya.Trans(optical_components[k].rotate, optical_components[k].flip, \
+                optical_components[k].x/dbu,optical_components[k].y/dbu))
+#      flag_component_error(box, text, optical_components[k].x, optical_components[k].y)
+
+      # go through all the pins in the component, and check if they aren't assigned to a net
+      for m in range(0,optical_components[k].npins):
+        pin = optical_pins[optical_components[k].pins[m]]
+        if pin.net == 0 and pin.pin_type == 1:  # disconnected pin on a pin_type = 1 (component)
+          text = "  *** Found disconnected pin #%s at (%s, %s)." % (pin.index, pin.x*dbu, pin.y*dbu)
+          box = pya.Box(pin.x-3000, pin.y-3000, pin.x+3000, pin.y+3000)
+#          flag_component_error(box, text, pin.x*dbu, pin.y*dbu)
+
+  for pin in optical_pins:
+    if pin.net == -1 and pin.pin_type != 2:  # disconnected pin not on a pin_type = 2 (optical IO)
+      text = "  *** Found disconnected pin #%s, type %s, at (%s, %s), component #%s {%s}" \
+          % (pin.index, pin.pin_type, pin.x*dbu, pin.y*dbu, \
+             pin.component_n, optical_components[pin.component_n].component)
+      box = pya.Box(pin.x-3000, pin.y-3000, pin.x+3000, pin.y+3000)
+      num_errors += 1
+      flag_component_error(box, text, pin.x*dbu, pin.y*dbu)
+      rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_discpin.rdb_id())
+      rdb_item.add_value(pya.RdbItemValue( pya.DBox(pin.x*dbu-0.3, pin.y*dbu-0.3, pin.x*dbu+0.3, pin.y*dbu+0.3) ) )
+
+  for w1 in optical_waveguides:
+    print (w1.points)
+    # examine the beginning of the waveguide:
+    if w1.net1 == -1:
+      text = "  *** Found disconnected waveguide at (%s, %s), net1" \
+          % (w1.points[0][0]*dbu, w1.points[0][1]*dbu)
+      dpoints = [w1.points[0], w1.points[1]]
+      num_errors += 1
+      flag_waveguide_error( dpoints, text, optical_waveguides[w1.index], topcell)
+      rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_discwg.rdb_id())
+      rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),w1.wg_width) ) )
+    # examine the end of the waveguide:
+    if w1.net2 == -1:
+      text = "  *** Found disconnected waveguide at (%s, %s), net2" \
+          % (w1.points[len(w1.points)-1][0]*dbu, w1.points[len(w1.points)-1][1]*dbu)
+      dpoints = [w1.points[len(w1.points)-1], w1.points[len(w1.points)-2]]
+      print (dpoints)
+      num_errors += 1
+      flag_waveguide_error(dpoints, \
+               text, optical_waveguides[w1.index], topcell)
+      rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_discwg.rdb_id())
+      rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),w1.wg_width) ) )
+
+  return num_errors
     
+
+
+def list_optical_components(optical_components):
+  # list all Optical_component objects from an array
+  # input array, optical_components
+  # example output:         
+  # X_grating_coupler_1 N$7 N$6 grating_coupler library="custom/genericcml" sch_x=-1.42 sch_y=-0.265 sch_r=0 sch_f=false
+
+  for o in optical_components:
+    nets_str = ""
+    for n in o.nets:
+      nets_str += " N$" + str(n)
+    flip = ' sch_f=true' if o.flip else ''
+    if o.rotate &gt; 0:
+      rotate = ' sch_r=%s' % str(o.rotate)
+    else:
+      rotate = ''
+#    t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
+#         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
+    t = '  %s %s %s library="%s" sch_x=%s sch_y=%s %s%s'  % \
+         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, eng_str(o.x * 5e-2), eng_str(o.y * 5e-2), rotate, flip)
+    print (t)
+    wtext.insertHtml('%s&lt;br&gt;' %t)
+
+def list_optical_waveguides(list_optical_waveguides):
+  # list all Optical_waveguides objects from an array
+  # input array, optical_waveguides
+  # example output:         
+  # X5 9 10 ebeam_wg_strip_1550 library="Design kits/ebeam_v1.0" wg_length=7.86299e-06 wg_width=5.085e-07 sch_x=-1.42 sch_y=-0.265
+
+  for o in list_optical_waveguides:
+    nets_str = "N$%s N$%s" %(o.net1, o.net2)
+    x,y = xy_mean_mult(o.points, dbu)
+#    t = '%s %s %s library="%s" wg_length=%s wg_width=%s lay_x=%s lay_y=%s sch_x=%5.3f sch_y=%5.3f'  % \
+#           ( "Xwg" + str(o.index), nets_str, o.component, o.library, eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
+#             eng_str(x * 1e-6), eng_str(y * 1e-6), x, y)
+    t = '  %s %s %s library="%s" wg_length=%s wg_width=%s sch_x=%s sch_y=%s'  % \
+           ( "Xwg" + str(o.index), nets_str, o.component, o.library, \
+             eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), eng_str(x * 5e-2), eng_str(y * 5e-2))
+    print (t)
+    wtext.insertHtml('%s&lt;br&gt;' %t)
+
 
 def waveguide_set_target_length():
   # Function to move the edges of a waveguide to obtain a target length
