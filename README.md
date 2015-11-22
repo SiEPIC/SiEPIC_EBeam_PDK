@@ -10,16 +10,23 @@
  - Support for both GUI and script-based layout, or combinations of both.
  - Whereas a typical schematic-driven design flow includes a schematic, circuit simulation, layout, and verification (see Chapter 10 of the <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">textbook</a>), the approach taken here is Layout-driven, followed by verification, then a schematic (via a netlist) and simulations.
 
+[![Demo video](http://img.youtube.com/vi/FRmkGjVUIH4/0.jpg)](http://www.youtube.com/watch?v=FRmkGjVUIH4)
+[![Lumerical INTERCONNECT simulations](http://img.youtube.com/vi/1bVO4bpiO58/0.jpg)](http://www.youtube.com/watch?v=1bVO4bpiO58)
+
+
 ##Package includes:
 
-- PCells: ring resonator; test structure layout with grating couplers and instantiating the ring resonator.
+- PCells: ring resonator; PCell test structure layout with grating couplers and instantiating the ring resonator PCell.
 - Script / Macro to create a layout, including waveguide generation functions.
 - GDS Library, updated with marker layers for verification/netlist generation.
-- Verification and Netlist generation: 
+- Verification: 
  - Scanning the layout. Finding waveguides, devices, pins.  
  - Verification: Identifying if there are missing connections, mismatched waveguides, too few points in a bend, etc. 
- - Creating a Spice netlist suitable for importing into Lumerical INTERCONNECT for circuit simulations. Including waveguide length (wg_length) for all waveguides.
- - Example layout using the library for verification (EBeam_LukasChrostowski_E_LVS.gds).
+ - Example layouts using the library for verification (EBeam_LukasChrostowski_E_LVS.gds, SiEPIC_EBeam_PDK_Verification_Check.gds).
+- Circuit simulations:
+ - Netlist generation
+ - Creating a Spice netlist suitable for for circuit simulations. This includes extracting the waveguide length (wg_length) for all waveguides.
+ - Menu item "Lumerical INTERCONNECT" will automatically: generate the netlist, launch Lumerical INTERCONNECT to perform the circuit simulations, and pop-up a plot of the transmission spectrum.
 - Waveguide functionality: 
  - Menu item "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
  - Menu item "Shift-W": selected waveguides are converted back to paths.
@@ -52,3 +59,5 @@ I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> t
 
 ![Screenshot1](https://s3.amazonaws.com/edx-course-phot1x-chrostowski/PastedGraphic-9.png)
 ![Screenshot2](https://s3.amazonaws.com/edx-course-phot1x-chrostowski/PastedGraphic-10.png)
+![Screenshot3](https://s3.amazonaws.com/edx-course-phot1x-chrostowski/KLayout_INTERCONNECT.png)
+

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# SiEPIC_Install
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2015
+
+This Python file configures the PDK
+
+
+Version history:
+
+Lukas Chrostowski           2015/11/19
+ - Initial version
+
+"""
+
+import pya
+
+app = pya.Application.instance()
+
+if app.get_config("SiEPIC-config-initialized") == '':
+#  app.set_config("background-color", "#000000")  
+  app.set_config("SiEPIC-config-initialized", "1")    # marks as initialized 
+  app.get_config('key-bindings')
+  # consider setting key bindings here.
+  print ("SiEPIC EBeam PDK – now installed")
+else:
+  print ("SiEPIC EBeam PDK – already installed")
+  
+
+mw = pya.Application.instance().main_window()
+menu = mw.menu()
+t = "siepic_menu"
+if not(menu.is_menu(t)):
+  menu.insert_menu("help_menu",t,"SiEPIC") 
+
+s = "layout_submenu"
+r = "Layout Generation"
+if not(menu.is_menu(t + "." + s)):
+  menu.insert_menu(t+".end",s,r)
+</text>
+</klayout-macro>

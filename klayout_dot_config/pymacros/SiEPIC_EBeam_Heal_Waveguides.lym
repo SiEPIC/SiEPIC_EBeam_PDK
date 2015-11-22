@@ -8,10 +8,10 @@
  <doc/>
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
- <shortcut/>
- <show-in-menu>true</show-in-menu>
+ <shortcut>H</shortcut>
+ <show-in-menu>false</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -44,6 +44,8 @@ Lukas Chrostowski           2015/11/15
 
 
 """
+
+import numpy
 
 
 
