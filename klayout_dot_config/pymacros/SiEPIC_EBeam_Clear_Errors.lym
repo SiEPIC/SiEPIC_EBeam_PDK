@@ -11,7 +11,7 @@
  <shortcut>C</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name>SiEPIC</group-name>
- <menu-path/>
+ <menu-path>siepic_menu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -43,7 +43,7 @@ def include(filename):
     if os.path.exists(filename): 
         execfile(filename)
     else:
-        print "%s doesn't exist" %filename
+        print ("%s doesn't exist" %filename)
 #include('/Users/lukasc/.klayout/pymacros/SiEPIC_EBeam/SiEPIC_EBeam_functions.py')
 
 
