@@ -11,7 +11,7 @@
  <shortcut>W</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -119,7 +119,8 @@ for o in object_selection:
     print ("Selected object is a shape")
     if o.shape.is_path():
       c = o.shape.cell
-      if c.name == "ROUND_PATH" and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+      print (c.basic_name())
+      if c.basic_name() == "ROUND_PATH" and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
         # we have a waveguide GUIDING_LAYER selected
         print ("GUIDING_LAYER in ROUND_PATH on LayerSi. We will not convert this to waveguide!")
       else:
