@@ -296,10 +296,15 @@ def gen_ui():
 # ************************************************************************
 # ************************************************************************
 
+#from time import strftime, clock
+import time
+
 # Create a GUI for the output:
 gen_ui()
 print(wdg)
 wtext.insertHtml('Running SiEPIC-EBeam-PDK Verification and Netlist Generation.&lt;br&gt;')
+wtext.insertHtml('* KLayout SiEPIC_EBeam_PDK v%s, %s.&lt;br&gt;' % (SiEPIC_Version, time.strftime("%Y-%m-%d %H:%M:%S") ) )
+clock_start = time.clock()
 
 
 # Configure variables to draw structures in the presently selected cell:
@@ -337,26 +342,32 @@ optical_waveguides = []
 optical_pins = []
 optical_nets = []
 
+
 # Search the layout for the components and waveguides:
 print ("")
 print ("* calling find_all_components() – DevRec:")
 find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
+clock_find_all_components = time.clock()
 print ("")
 print ("* calling find_all_waveguides():")
 find_all_waveguides(topcell, LayerSiN)
-
+clock_find_all_waveguides = time.clock()
 print ("")
 print ("* print_Optical_all, after find_all_{components, waveguides}:")
 print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
 
+
 # Search the arrays to identify all the nets:
 print ("")
 print ("* calling identify_all_nets():")
+clock_identify_all_nets0 = time.clock()
 identify_all_nets(optical_pins, optical_waveguides, optical_components)
-
+clock_identify_all_nets = time.clock()
 print ("")
 print ("print_Optical_all, after identify_all_nets:")
 print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
+clock_identify_layout = time.clock()
+
 
 # Check the layout for errors, using the above arrays:
 print ("")
@@ -365,18 +376,24 @@ wtext.insertHtml('&lt;br&gt;* Checking layout for errors:&lt;br&gt;&lt;br&gt;')
 layout_errors=[]
 # Check components - overlapping
 check_components(topcell, LayerDevRecN)
+clock_check_components = time.clock()
 # Check waveguides for waveguide-specific problems:
 check_waveguides(optical_waveguides, topcell, LayerErrorN)
+clock_check_waveguides = time.clock()
 # Check connectivity between components and waveguides:
 check_connectivity(optical_components, topcell, LayerErrorN)
+clock_check_connectivity = time.clock()
 lv.add_missing_layers()
 print ("*** Number of errors found: %s." % len(layout_errors) )
 wtext.insertHtml('&lt;br&gt;*** Number of errors found: %s.&lt;br&gt;' % len(layout_errors) )
+clock_verify_layout = time.clock()
 
 
 # Output the Spice netlist:
 text_Spice = generate_Spice_file(topcell, optical_waveguides, optical_components)
 wtext.insertPlainText(text_Spice)
+clock_netlist = time.clock()
+
 
 # Find the automated measurement coordinates:
 wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
@@ -385,6 +402,23 @@ print ("Automated measurement coordinates: ")
 print ("")
 t = find_automated_measurement_labels(topcell, LayerTextN)
 wtext.insertHtml (t)
+clock_automated_measurements = time.clock()
+
+
+wtext.insertHtml('&lt;br&gt;CPU time for searching layout: find_all_components %s, find_all_waveguides %s&lt;br&gt;' \
+% (clock_find_all_components-clock_start, clock_find_all_waveguides-clock_find_all_components) )
+
+wtext.insertHtml('&lt;br&gt;CPU time for identify_all_nets %s&lt;br&gt;' \
+% (clock_identify_all_nets-clock_identify_all_nets0) )
+
+wtext.insertHtml('&lt;br&gt;CPU time for verification: check_components %s, check_waveguides %s, check_connectivity %s&lt;br&gt;' \
+% (clock_check_components-clock_identify_all_nets, clock_check_waveguides-clock_check_components, clock_check_connectivity-clock_check_waveguides) )
+
+wtext.insertHtml('&lt;br&gt;CPU time for Spice netlist %s, automated measurements %s&lt;br&gt;' \
+% (clock_netlist-clock_verify_layout, clock_automated_measurements-clock_netlist) )
+
+wtext.insertHtml('&lt;br&gt;total CPU time: %s. &lt;br&gt;' % (time.clock() - clock_start) )
+
 
 # Done
 wtext.insertHtml('&lt;br&gt;Done.&lt;br&gt;')

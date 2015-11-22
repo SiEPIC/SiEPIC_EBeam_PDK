@@ -898,7 +898,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
 
   Lumerical_schematic_scaling = 3e-2
   
-  from time import strftime
+  from time import strftime 
   
   text = '* Spice output from KLayout SiEPIC_EBeam_PDK v%s, %s.\n\n' % (SiEPIC_Version, strftime("%Y-%m-%d %H:%M:%S") )
 
