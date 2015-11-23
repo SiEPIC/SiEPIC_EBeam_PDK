@@ -65,7 +65,7 @@ Lukas Chrostowski           2015/11/14
  - fix for rounding error in "DoubleBus_Ring"
 
 Lukas Chrostowski           2015/11/15
- - fix for Python 3.4: print ("xxx")
+ - fix for Python 3.4: print("xxx")
  
 Lukas Chrostowski           2015/11/17
  - update "layout_waveguide_rel" to use the calculated points_per_circle(radius)
@@ -155,7 +155,7 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
     layout_pgtext(self.cell, LayerText, -width/2*dbu+3, -height/2*dbu+2, "Number of points: %s" % ( self.npoints), fontsize)
     layout_pgtext(self.cell, LayerText, -width/2*dbu+3, -height/2*dbu+5, "Wavelength range: %4.3f - %4.3f nm" % ( self.wavelength_start, self.wavelength_stop), fontsize)
 
-    print ("PCell produce_impl: laser")
+    print("PCell produce_impl: laser")
 
 
 
@@ -182,7 +182,7 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
   def coerce_parameters_impl(self):
     if 0:
       detector_number = self.number
-      print ("LumericalINTERCONNECT_Detector, original detector number: %s" % detector_number )
+      print("LumericalINTERCONNECT_Detector, original detector number: %s" % detector_number )
       # scan layout for other detectors, record their numbers
       detectors = []
       iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
@@ -194,12 +194,12 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
             if len(n)&gt;0:
               detectors.append (n[0])
         advance_iterator(iter1)
-      print ("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
+      print("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
       if detector_number in detectors:
         detector_number = 1
       while detector_number in detectors:
         detector_number += 1
-      print ("LumericalINTERCONNECT_Detector, new detector number: %s" % detector_number )
+      print("LumericalINTERCONNECT_Detector, new detector number: %s" % detector_number )
       self.number = detector_number
     else:
       pass
@@ -232,11 +232,11 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
             if len(n)&gt;0:
               detectors.append (n[0])
         advance_iterator(iter1)
-      print ("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
+      print("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
       detector_number = 1
       while detector_number in detectors:
         detector_number += 1
-      print ("LumericalINTERCONNECT_Detector, new detector number: %s" % detector_number )
+      print("LumericalINTERCONNECT_Detector, new detector number: %s" % detector_number )
     else:
       pass
 
@@ -276,7 +276,7 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
     fontsize = 2.2
     layout_pgtext(self.cell, LayerText, -width/2*dbu+3, -height/2*dbu+2, "Number: %s" % ( self.number), fontsize)
 
-    print ("PCell produce_impl: detector")
+    print("PCell produce_impl: detector")
 
 
 
@@ -326,7 +326,7 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
     # layout_waveguide_rel(cell, LayerSi, [0,0], points, 0.5, 10)
 
     
-    print ("* layout_waveguide_rel(%s, %s, %s, %s)" % (cell.name, layer, w, radius) )
+    print("* layout_waveguide_rel(%s, %s, %s, %s)" % (cell.name, layer, w, radius) )
 
     ly = cell.layout() 
     dbu = cell.layout().dbu
@@ -389,7 +389,7 @@ def layout_pgtext(cell, layer, x, y, text, mag):
     # flatten and delete polygon text cell
     cell.flatten(True)
 
-    print ("Done layout_pgtext")
+    print("Done layout_pgtext")
 
 
 def layout_Ring(cell, layer, x, y, r, w, npoints):
@@ -522,7 +522,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     if self.textpolygon:
       layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
 
-    print ("Done drawing the layout for – DoubleBus_Ring: %.3f-%g" % ( self.r, self.g) )
+    print("Done drawing the layout for – DoubleBus_Ring: %.3f-%g" % ( self.r, self.g) )
 
 
 
@@ -579,10 +579,10 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 #    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "l": LayerSi})
-#    print ( "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
+#    print( "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
 #    t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
 #    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
-#    print instance.cell_index
+#    print(instance.cell_index)
 
 
 
@@ -623,10 +623,10 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
       GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
     else:
       GC_imported = GC_imported.cell_index()  
-    print ( "Cell: GC_imported: #%s" % GC_imported )
+    print( "Cell: GC_imported: #%s" % GC_imported )
     t = pya.Trans(pya.Trans.R0, 0, 0)
     instance = cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 4, 1))
-    print instance.cell_index
+    print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
     t = pya.Trans(0, 127*2/dbu)
@@ -657,7 +657,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 
-    print ( "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g) )
+    print( "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g) )
 
 
 
@@ -715,11 +715,11 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     y_ring = 127*3/2+r
 
     pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "silayer": LayerSi, "devrec": self.devrec, "pinrec": self.pinrec })
-    print ( "pcell: %s, %s" \
+    print( "pcell: %s, %s" \
         % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
     t = pya.Trans(pya.Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
-    print instance.cell_index
+    print(instance.cell_index)
 
 
     # Grating couplers, Ports 1, 2, 3, 4 (top-down):
@@ -729,10 +729,10 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
       GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
     else:
       GC_imported = GC_imported.cell_index()  
-    print ("Cell: GC_imported: #%s" % GC_imported )
+    print("Cell: GC_imported: #%s" % GC_imported )
     t = pya.Trans(pya.Trans.R0, 0, 0)
     instance = cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 4, 1))
-    print instance.cell_index
+    print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
     t = pya.Trans(0, 127*2/dbu)
@@ -759,7 +759,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
     layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
-    print ( "Done drawing the layout for – TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g) )
+    print( "Done drawing the layout for – TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g) )
 
 
 
@@ -770,7 +770,7 @@ class SiEPIC(pya.Library):
 
   def __init__(self):
 
-    print ("Initializing SiEPIC EBeam PCells library.")
+    print("Initializing SiEPIC EBeam PCells library.")
   
     # Set the description
     self.description = "EBeam PCells"
