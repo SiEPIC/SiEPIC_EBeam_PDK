@@ -97,7 +97,8 @@ LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
 optical_waveguides, optical_components = netlist_extraction(topcell)
   
 # Output the Spice netlist:
-text_Spice = generate_Spice_file(topcell, optical_waveguides, optical_components)
+
+text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
 print(text_Spice)
 
 if sys.platform.startswith("win"):
@@ -109,6 +110,7 @@ else:
 
   filename = '/tmp/%s.spi' % topcell.name
   filename2 = '/tmp/%s.lsf' % topcell.name
+
 
 file = open(filename, 'w')
 file.write (text_Spice)
@@ -141,7 +143,7 @@ elif sys.platform.startswith('darwin'):
     pass
     if string.find(version,"2.7.") &gt; -1:
       import commands
-      print ("Running INTERCONNECT")
+      print("Running INTERCONNECT")
 #      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
       commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
 

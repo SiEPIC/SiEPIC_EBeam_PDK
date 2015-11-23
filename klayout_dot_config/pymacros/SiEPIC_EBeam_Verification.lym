@@ -44,7 +44,7 @@ Lukas Chrostowski 2015/11/12
    - incorrect number of nets connected to a component (disconnected, or too many)
  
 Lukas Chrostowski           2015/11/15
- - fix for Python 3.4: print ("xxx")
+ - fix for Python 3.4: print("xxx")
  - moved some functions from here, to the common "SiEPIC_EBeam_functions file, so they are accessible elsewhere.
  - added pin# text label on PinRec layer; sort pins in Spice output using these names.
 
@@ -365,6 +365,7 @@ check_waveguides(optical_waveguides, topcell, LayerErrorN)
 # Check connectivity between components and waveguides:
 check_connectivity(optical_components, topcell, LayerErrorN)
 lv.add_missing_layers()
+
 print ("*** Number of errors found: %s." % len(layout_errors) )
 wtext.insertHtml('&lt;br&gt;*** Number of errors found: %s.&lt;br&gt;' % len(layout_errors) )
 
@@ -386,6 +387,7 @@ wtext.insertHtml('&lt;br&gt;Done.&lt;br&gt;')
 print ("")
 print ("Done. ")
 print ("")
+
 
 
 
