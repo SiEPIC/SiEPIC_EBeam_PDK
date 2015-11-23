@@ -337,7 +337,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       while not(iter2.at_end()):
         if iter2.shape().is_text():
           print("%s: DevRec label: %s" % (i, iter2.shape().text))
-        advance_iterator(iter2)
+        iter2.next()
       library = "Design kits/ebeam_v1.0"
       x = iter1.itrans().disp.x*dbu
       y = iter1.itrans().disp.y*dbu
@@ -371,7 +371,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           #print( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
           path_points.append(points)
           path_shape.append(iter2.shape())
-        advance_iterator(iter2)
+        iter2.next()
       # Sort pin text labels
       pin_info2 = sorted(pin_info1, key=lambda  pin_info0: pin_info0.pin_text)
 
