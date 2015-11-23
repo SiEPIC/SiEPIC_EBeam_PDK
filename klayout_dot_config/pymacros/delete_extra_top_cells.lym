@@ -47,20 +47,20 @@ def delete_extra_top_cells(keep_cell):
   count = 0
   
   if keep_cell in top_cells:
-    print ("deleting cells...")
+    print("deleting cells...")
     top_keep = keep_cell.cell_index()
     top_delete = []
     for top in ly.each_top_cell():
       if top == top_keep:
-          print ("keep top cell: " + str(ly.cell(top_keep).name))
+          print("keep top cell: " + str(ly.cell(top_keep).name))
       else:
-          print ("delete top cell: " + str(ly.cell(top).name))
+          print("delete top cell: " + str(ly.cell(top).name))
           top_delete.append(top)
           count += 1
     print top_delete
     ly.delete_cells(top_delete)
   else:
-    print ("Nothing deleted.  Requires a top-cell as input.")
+    print("Nothing deleted.  Requires a top-cell as input.")
 
   if len(ly.top_cells()) &gt; 1:  # more cells to delete
     # recursively call this function to keep deleting.
