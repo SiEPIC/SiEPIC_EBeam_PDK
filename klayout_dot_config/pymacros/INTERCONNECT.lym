@@ -104,8 +104,10 @@ print(text_Spice)
 if sys.platform.startswith("win"):
 
   folder_name = app.application_data_path()
-  filename = folder_name + '/%.spi' % topcell.name
-  filename2 = folder_name + '/%.lsf' % topcell.name
+  if not os.path.isdir(folder_name+'/tmp'):
+    os.makedirs(folder_name+"/tmp")
+  filename = folder_name + '/tmp/%s.spi' % topcell.name
+  filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
 else: 
 
   filename = '/tmp/%s.spi' % topcell.name
@@ -151,6 +153,6 @@ elif sys.platform.startswith('win'):
   # windows specific code here
   import subprocess
   #The module commands is deprecated since version 2.6: The commands module has been removed in Python 3. Use the subprocess module instead.
-  subprocess.Popen(["C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe -run %" % filename2], shell=True)
-  </text>
+ # subprocess.Popen(["""&amp; 'C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe' -run %s""" % filename2], shell=True)
+  subprocess.Popen(args=['C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe', '-run', filename2], shell=True)</text>
 </klayout-macro>
