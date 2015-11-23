@@ -39,7 +39,7 @@ Lukas Chrostowski           2015/11/13
  - find all the automated measurement labels
 
 Lukas Chrostowski           2015/11/15
- - fix for Python 3.4: print ("xxx")
+ - fix for Python 3.4: print("xxx")
  - moved some functions from SiEPIC_EBeam_Verification, so they are accessible elsewhere.
 
 Lukas Chrostowski           2015/11/16
@@ -82,7 +82,7 @@ try:
   import numpy
 except ImportError:
   #import numpy
-  print ("no numpy")
+  print("no numpy")
   MODULE_NUMPY = False
 
 
@@ -136,9 +136,9 @@ class Optical_component:
         self.pins = []             # an array of all the pins
 
 def print_Optical_components(optical_components):
-  print ("Optical_components:")
+  print("Optical_components:")
   for o in optical_components:
-    print ("#%s: %s / %s, (%s, %s), nets %s, npins %s, pins %s" %\
+    print("#%s: %s / %s, (%s, %s), nets %s, npins %s, pins %s" %\
         (o.index, o.component, o.instance, o.x, o.y, o.nets, o.npins, o.pins) )
         
 # definition for the optical waveguide class
@@ -158,9 +158,9 @@ class Optical_waveguide:
         self.library = "Design kits/ebeam_v1.0" # compact model library
 
 def print_Optical_waveguides(optical_waveguides):
-  print ("Optical_waveguides:")
+  print("Optical_waveguides:")
   for o in optical_waveguides:
-    print ("#%s: length %s, type %s, net1: %s, net2: %s, points: %s" %\
+    print("#%s: length %s, type %s, net1: %s, net2: %s, points: %s" %\
         (o.index, o.length, o.wg_type, o.net1, o.net2, o.points) )
 
 class Optical_pin:
@@ -174,13 +174,13 @@ class Optical_pin:
         self.pin_type = pin_type        # pin type: 0 = waveguide, 1 = component, 2 = opticalIO
 
 def print_Optical_pins(optical_pins):
-  print ("Optical_pins:")
+  print("Optical_pins:")
   for o in optical_pins:
     if o.pin_type == 1:
       points = o.points
     else:
       points = "..."
-    print ("#%s: component_n %s, pin_type %s, net: %s, (%s, %s), points: %s" %\
+    print("#%s: component_n %s, pin_type %s, net: %s, (%s, %s), points: %s" %\
         (o.index, o.component_n, o.pin_type, o.net, o.x, o.y, points) )
 
 class Optical_net:
@@ -194,7 +194,7 @@ class Optical_net:
         self.pin2_n = pin2_n
 
 def print_Optical_nets(optical_nets):
-  print ("Optical_nets:")
+  print("Optical_nets:")
   for o in optical_nets:
     if o.pin1_type != 0:
       name1 = optical_components[o.pin1_n].component
@@ -204,7 +204,7 @@ def print_Optical_nets(optical_nets):
       name2 = optical_components[o.pin2_n].component
     else:
       name2 = 'waveguide'
-    print ("#%s: pin1: %s (%s) pin_type1: %s; pin2: %s (%s) pin_type2: %s" %\
+    print("#%s: pin1: %s (%s) pin_type1: %s; pin2: %s (%s) pin_type2: %s" %\
         (o.index, o.pin1_n, name1, o.pin1_type, o.pin2_n, name2, o.pin2_type) )
 
 def print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets):
@@ -265,7 +265,7 @@ def clear_ErrorLayer(topcell, LayerErrorN):
       iter1.shape().delete()
 #    iter1.next()  # in Python 2.7
     advance_iterator(iter1)
-  print ("*** Deleted %s errors.") % i
+  print("*** Deleted %s errors.") % i
 
 
 
@@ -323,11 +323,11 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
     # DevRec must be either a Box or a Polygon:
     if iter1.shape().is_box():
       box= iter1.shape().box.transformed(iter1.itrans())
-      print ("%s: DevRec in cell {%s}, box -- %s; %s"   % (i, subcell.basic_name(), box.p1, box.p2) )
+      print("%s: DevRec in cell {%s}, box -- %s; %s"   % (i, subcell.basic_name(), box.p1, box.p2) )
       found_component = True
     if iter1.shape().is_polygon():
       polygon = iter1.shape().polygon.transformed(iter1.itrans())
-      print ("%s: DevRec in cell {%s}, polygon -- %s"   % (i, subcell.basic_name(), polygon))
+      print("%s: DevRec in cell {%s}, polygon -- %s"   % (i, subcell.basic_name(), polygon))
       found_component = True
 
     # A component was found. record the instance info as an Optical_component 
@@ -336,7 +336,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       iter2 = subcell.begin_shapes_rec(LayerDevRecN)
       while not(iter2.at_end()):
         if iter2.shape().is_text():
-          print ("%s: DevRec label: %s" % (i, iter2.shape().text))
+          print("%s: DevRec label: %s" % (i, iter2.shape().text))
         advance_iterator(iter2)
       library = "Design kits/ebeam_v1.0"
       x = iter1.itrans().disp.x*dbu
@@ -362,13 +362,13 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           texto= texto.transformed(iter1.itrans())
           x = texto.x
           y = texto.y
-          #print ( "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y) )
+          #print( "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y) )
           pin_info1.append(Pin_info(iter2.shape().text.string, x, y))
         if iter2.shape().is_path():
           path= iter2.shape().path.transformed(iter2.itrans())
           path= path.transformed(iter1.itrans())
           points = path_to_points(path)  
-          #print ( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
+          #print( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
           path_points.append(points)
           path_shape.append(iter2.shape())
         advance_iterator(iter2)
@@ -390,7 +390,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
             optical_pins.append (Optical_pin (pin_index, points, component_index, x, y, 1) )
             optical_components[component_index].npins += 1
             optical_components[component_index].pins.append( pin_index )
-            print ("%s: PinRec (text=%s) in cell {%s}, component #%s, path -- %s"   \
+            print("%s: PinRec (text=%s) in cell {%s}, component #%s, path -- %s"   \
               % (i, pin_info2[p1].pin_text, iter2.cell().name, component_index, path_to_points(path_shape[p2].path)) )
 
       # Find the FbrTgt, and record info as Optical_pin
@@ -415,7 +415,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           # register the pin with the component
           optical_components[component_index].npins += 1
           optical_components[component_index].pins.append( pin_index ) 
-          print ("%s: FbrTgt in cell {%s}, at (%s, %s), net %s, pins %s, component # %s, component nets %s")   \
+          print("%s: FbrTgt in cell {%s}, at (%s, %s), net %s, pins %s, component # %s, component nets %s")   \
               % (i, iter2.cell().name, x, y, net_index, optical_components[component_index].pins, \
               component_index, optical_components[component_index].nets  )
         advance_iterator(iter2)
@@ -509,7 +509,7 @@ def check_point_in_segment(a, b, c):
     """ How can you determine a point is between two other points on a line segment?
     http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
     by Cyrille Ka.  Check if c is between a and b? """
-    # print ( "%s, %s; %s, %s; %s, %s" % (a.x, a.y, b.x, b.y, c.x, c.y) )
+    # print( "%s, %s; %s, %s; %s, %s" % (a.x, a.y, b.x, b.y, c.x, c.y) )
     crossproduct = (c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y)
     if abs(crossproduct) != 0 : return False 
     dotproduct = (c.x - a.x) * (b.x - a.x) + (c.y - a.y)*(b.y - a.y)
@@ -523,7 +523,7 @@ def PCell_get_parameter_list ( cell_name, library_name ):
   # function to list all the parameters &amp; defaults for a PCell
   # example usage:
   # PCell_get_parameter_list("CIRCLE", "Basic")
-  print ("* def PCell_get_parameter_list ( %s, %s): ") % ( cell_name, library_name )
+  print("* def PCell_get_parameter_list ( %s, %s): ") % ( cell_name, library_name )
   lib = pya.Library.library_by_name(library_name)
   if lib == None:
     raise Exception("Unknown lib '%s'" % library_name)
@@ -533,7 +533,7 @@ def PCell_get_parameter_list ( cell_name, library_name ):
   type2s = ['TypeBoolean', 'TypeDouble', 'TypeInt', 'TypeLayer', 'TypeList', 'TypeNone', 'TypeShape', 'TypeString']
   for p in pcell_decl.get_parameters():
     if ~p.readonly:
-      print ( "Name: %s, %s, unit: %s, default: %s, description: %s%s" % \
+      print( "Name: %s, %s, unit: %s, default: %s, description: %s%s" % \
         (p.name, type2s[p.type], p.unit, p.default, p.description, ", hidden" if p.hidden else ".") )
 
 
@@ -543,11 +543,11 @@ def PCell_get_parameters ( pcell ):
   # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
   # pcell = ly.create_cell("CIRCLE", "Basic", { "actual_radius": 10, "layer": pya.LayerInfo(1, 0) } )
   # PCell_get_parameters( pcell )
-  print ("* def PCell_get_parameters ( %s ):") % pcell 
-  print ( pcell.pcell_parameters() )
+  print("* def PCell_get_parameters ( %s ):") % pcell 
+  print( pcell.pcell_parameters() )
   params = pcell.pcell_parameters_by_name()
   for param in params.keys():
-    print ("Parameter: %s, Value: %s") % (param, params[param])
+    print("Parameter: %s, Value: %s") % (param, params[param])
   return params
   
 
@@ -589,7 +589,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
       if iter1.cell().basic_name() == "LumericalINTERCONNECT_Detector":
         n_detector += 1
         detector_number = subcell.pcell_parameters_by_name()["number"]
-        print ("%s: Detector {%s} %s, box -- %s; %s"   % (n_detector, subcell.basic_name(), detector_number, box.p1, box.p2) )
+        print("%s: Detector {%s} %s, box -- %s; %s"   % (n_detector, subcell.basic_name(), detector_number, box.p1, box.p2) )
         npins_inside_detector = 0
         for pin in optical_pins:
           if pin.pin_type == 2:  # Optical IO
@@ -597,15 +597,15 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
             pin_box = pya.Box(pin.x, pin.y, pin.x, pin.y)
             if pin_box.inside(box):
               # found optical
-              print ("Optical IO pin connected to detector.  Pin #%s: component_n %s, pin_type %s, net: %s, (%s, %s)" %\
+              print("Optical IO pin connected to detector.  Pin #%s: component_n %s, pin_type %s, net: %s, (%s, %s)" %\
                   (pin.index, pin.component_n, pin.pin_type, pin.net, pin.x, pin.y) )
               npins_inside_detector += 1
               detectors_info.append( Detector_info(pin.net, detector_number) ) 
         if npins_inside_detector &gt; 1:
-          print (" *** Error - more than 1 optical IO connected to the detector. ")
+          print(" *** Error - more than 1 optical IO connected to the detector. ")
       if iter1.cell().basic_name() == "LumericalINTERCONNECT_Laser":
         n_laser += 1
-        print ("%s: Laser {%s}, box -- %s; %s"   % (n_laser, subcell.basic_name(), box.p1, box.p2) )
+        print("%s: Laser {%s}, box -- %s; %s"   % (n_laser, subcell.basic_name(), box.p1, box.p2) )
         wavelength_start = subcell.pcell_parameters_by_name()["wavelength_start"]
         wavelength_stop = subcell.pcell_parameters_by_name()["wavelength_stop"]
         wavelength_points = subcell.pcell_parameters_by_name()["npoints"]
@@ -616,12 +616,12 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
             pin_box = pya.Box(pin.x, pin.y, pin.x, pin.y)
             if pin_box.inside(box):
               # found optical
-              print ("Optical IO pin connected to laser.  Pin #%s: component_n %s, pin_type %s, net: %s, (%s, %s)" %\
+              print("Optical IO pin connected to laser.  Pin #%s: component_n %s, pin_type %s, net: %s, (%s, %s)" %\
                   (pin.index, pin.component_n, pin.pin_type, pin.net, pin.x, pin.y) )
               npins_inside_laser += 1
               laser_net = pin.net  
         if npins_inside_laser &gt; 1:
-          print (" *** Error - more than 1 optical IO connected to the laser. ")
+          print(" *** Error - more than 1 optical IO connected to the laser. ")
             
     advance_iterator(iter1)
     
@@ -677,7 +677,7 @@ def find_all_waveguides(cell, layer):
       wg_type = 0
       bend_pts = 0
       wg_width = path.width*dbu
-      print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s"  \
+      print("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s"  \
            % (i, iter1.cell().name, num_points, length, radius, path) )
       found_wg = True
       
@@ -696,7 +696,7 @@ def find_all_waveguides(cell, layer):
         path = DPath.transformed(DCplxTrans)
 
         # Waveguide parameters
-        print subcell.pcell_parameters_by_name()
+        print(subcell.pcell_parameters_by_name())
         radius = subcell.pcell_parameters_by_name()["radius"]  # in microns
         bend_pts = subcell.pcell_parameters_by_name()["npoints"] 
         wg_width = subcell.pcell_parameters_by_name()['path'].width  # in microns
@@ -706,23 +706,23 @@ def find_all_waveguides(cell, layer):
           area = iter2.shape().polygon.area()
           length = area / wg_width * dbu * dbu
         else:
-          print "## ROUND_PATH waveguide, not polygon; bug in code? ##"
+          print("## ROUND_PATH waveguide, not polygon; bug in code? ##")
           length =  path.length()*dbu  # ignoring bends
         num_points = path.num_points()
         wg_type = 1
-        print ("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s" \
+        print("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s" \
             % (i, subcell.name, num_points, length, radius, path) )
         found_wg = True
 
     if found_wg:
       points = path_to_points(path)  
-      print ("path: %s, points: %s" % (path, points) )
+      print("path: %s, points: %s" % (path, points) )
       # save waveguide info into the Optical_waveguide
       optical_waveguides.append ( Optical_waveguide (len(optical_waveguides), points, radius, \
           length, wg_type, num_points, wg_width, bend_pts ) )
 
     advance_iterator(iter1)
-  print (" ")
+  print(" ")
 
 
  
@@ -740,7 +740,7 @@ def check_segments_colinear_overlapping( segment1, segment2 ):
     d = pya.Point(100,0)
     segment1 = [ a, b ]
     segment2 = [ c, d ]
-    print check_segments_colinear_overlapping( segment1, segment2 )
+    print(check_segments_colinear_overlapping( segment1, segment2 ))
   """  
   # check for one of the segment2 points being inside segment1
   check_between1 = check_point_in_segment( segment1[0], segment1[1], segment2[0] ) | \
@@ -785,7 +785,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
     for p2 in optical_pins[ p1.index+1: len(optical_pins) ]:
       if p2.pin_type != 1:
         continue # only analyze pin_type = 1, component.
-      #print ("%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points) )
+      #print("%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points) )
       segment2 = [ pya.Point(*p2.points[0]), pya.Point(*p2.points[1]) ] 
       check = check_segments_colinear_overlapping( segment1, segment2 )
       if check:  # found connected pins:
@@ -798,7 +798,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         # assign this net number to the pins
         p1.net = net_index
         p2.net = net_index
-        print ( "connected: pin-pin, net: %s, component #: %s, %s" % (net_index, p1.component_n, p2.component_n) )
+        print( "connected: pin-pin, net: %s, component #: %s, %s" % (net_index, p1.component_n, p2.component_n) )
         
     # Compare to all waveguides:
     for w1 in optical_waveguides:
@@ -819,7 +819,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         optical_waveguides[w1.index].net1 = net_index
         # assign this net number to the pin
         p1.net = net_index
-        print ( "connected: pin-waveguide, net #: %s, component #: %s, pin #: %s, waveguide #: %s" \
+        print( "connected: pin-waveguide, net #: %s, component #: %s, pin #: %s, waveguide #: %s" \
               % (net_index, p1.component_n, p1.index, w1.index ) )
         
       # examine the end of the waveguide:
@@ -840,7 +840,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         optical_waveguides[w1.index].net2 = net_index
         # assign this net number to the pin
         p1.net = net_index
-        print ( "connected: pin-waveguide, net #: %s, component #: %s, pin #: %s, waveguide #: %s" \
+        print( "connected: pin-waveguide, net #: %s, component #: %s, pin #: %s, waveguide #: %s" \
               % (net_index, p1.component_n, p1.index, w1.index ) )
      
 
@@ -885,7 +885,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
               optical_waveguides[w2.index].net1 = net_index
             else:
               optical_waveguides[w2.index].net2 = net_index
-            print ("connected: waveguide-waveguide")
+            print("connected: waveguide-waveguide")
 
 
 # end def identify_all_nets
@@ -1008,28 +1008,28 @@ def netlist_extraction(topcell):
   import time
 
   # Search the layout for the components and waveguides:
-  print ("")
-  print ("* calling find_all_components() – DevRec:")
+  print("")
+  print("* calling find_all_components() – DevRec:")
   find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
   clock_find_all_components = time.clock()
 
-  print ("")
-  print ("* calling find_all_waveguides():")
+  print("")
+  print("* calling find_all_waveguides():")
   find_all_waveguides(topcell, LayerSiN)
   clock_find_all_waveguides = time.clock()
 
-#  print ("")
-#  print ("* print_Optical_all, after find_all_{components, waveguides}:")
+#  print("")
+#  print("* print_Optical_all, after find_all_{components, waveguides}:")
 #  print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
 
   # Search the arrays to identify all the nets:
-  print ("")
-  print ("* calling identify_all_nets():")
+  print("")
+  print("* calling identify_all_nets():")
   identify_all_nets(optical_pins, optical_waveguides, optical_components)
   clock_identify_all_nets = time.clock()
 
-  print ("")
-  print ("print_Optical_all, after identify_all_nets:")
+  print("")
+  print("print_Optical_all, after identify_all_nets:")
   print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
 
   return optical_waveguides, optical_components, \
@@ -1045,7 +1045,7 @@ def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
   path = pya.Path(a1, optical_waveguide.wg_width*4/dbu)
   x,y = xy_mean_mult(dpoints, dbu)
   layout_errors.append(Layout_error(text, x, y) )
-  print (text)
+  print(text)
   if 'wtext' in globals():
     topcell.shapes(LayerErrorN).insert(path)
     wtext.insertHtml('%s&lt;br&gt;' %text)
@@ -1136,7 +1136,7 @@ def check_components(rdb, cell, LayerDevRecN):
 def flag_component_error(box, text, x, y):
   # global variable "layout_errors" of class "Layout_error" used for storing all the errors.
   layout_errors.append(Layout_error(text, x, y) )
-  print text
+  print(text)
   if 'wtext' in globals():
     topcell.shapes(LayerErrorN).insert(box)
     wtext.insertHtml('%s&lt;br&gt;' %text)
@@ -1191,7 +1191,7 @@ def check_connectivity(rdb, optical_components, topcell, LayerErrorN):
       rdb_item.add_value(pya.RdbItemValue( pya.DBox(pin.x*dbu-0.3, pin.y*dbu-0.3, pin.x*dbu+0.3, pin.y*dbu+0.3) ) )
 
   for w1 in optical_waveguides:
-    print (w1.points)
+    print(w1.points)
     # examine the beginning of the waveguide:
     if w1.net1 == -1:
       text = "  *** Found disconnected waveguide at (%s, %s), net1" \
@@ -1206,7 +1206,7 @@ def check_connectivity(rdb, optical_components, topcell, LayerErrorN):
       text = "  *** Found disconnected waveguide at (%s, %s), net2" \
           % (w1.points[len(w1.points)-1][0]*dbu, w1.points[len(w1.points)-1][1]*dbu)
       dpoints = [w1.points[len(w1.points)-1], w1.points[len(w1.points)-2]]
-      print (dpoints)
+      print(dpoints)
       num_errors += 1
       flag_waveguide_error(dpoints, \
                text, optical_waveguides[w1.index], topcell)
@@ -1236,7 +1236,7 @@ def list_optical_components(optical_components):
 #         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
     t = '  %s %s %s library="%s" sch_x=%s sch_y=%s %s%s'  % \
          ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, eng_str(o.x * 5e-2), eng_str(o.y * 5e-2), rotate, flip)
-    print (t)
+    print(t)
     wtext.insertHtml('%s&lt;br&gt;' %t)
 
 def list_optical_waveguides(list_optical_waveguides):
@@ -1254,7 +1254,7 @@ def list_optical_waveguides(list_optical_waveguides):
     t = '  %s %s %s library="%s" wg_length=%s wg_width=%s sch_x=%s sch_y=%s'  % \
            ( "Xwg" + str(o.index), nets_str, o.component, o.library, \
              eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), eng_str(x * 5e-2), eng_str(y * 5e-2))
-    print (t)
+    print(t)
     wtext.insertHtml('%s&lt;br&gt;' %t)
 
 

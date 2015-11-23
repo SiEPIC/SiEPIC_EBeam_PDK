@@ -98,7 +98,7 @@ optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
   
 # Output the Spice netlist:
 text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
-print text_Spice
+print(text_Spice)
 
 filename = '/tmp/%s.spi' % topcell.name
 file = open(filename, 'w')
@@ -138,7 +138,7 @@ elif sys.platform.startswith('darwin'):
     pass
     if string.find(version,"2.7.") &gt; -1:
       import commands
-      print ("Running INTERCONNECT")
+      print("Running INTERCONNECT")
 #      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
       commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
 

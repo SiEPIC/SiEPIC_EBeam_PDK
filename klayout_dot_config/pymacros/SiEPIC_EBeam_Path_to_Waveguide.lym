@@ -86,13 +86,13 @@ reset_Optical_classes()
 radius_str = cell.property("radius")  
 if radius_str:
   radius = float(radius_str)
-  print ("Radius taken from cell {%s} = %s" % (cell.name, radius) )
+  print("Radius taken from cell {%s} = %s" % (cell.name, radius) )
 else:
   radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
   if radius == None:
     radius = 10
   else:
-    print ("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
+    print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
     cell.set_property("radius", str(radius))
       
 # How close must a waveguide be to a pin for it to snap:
@@ -101,7 +101,7 @@ waveguide_snap_dist = 10
 # Record a transaction, to enable "undo"
 lv.transaction("Path to Waveguide")
 
-print ("------------------ Path to Waveguide --------------")
+print("------------------ Path to Waveguide --------------")
 
 # objects to delete:
 to_delete = []
@@ -114,18 +114,18 @@ object_selection = lv.object_selection
 
 for o in object_selection:
   if o.is_cell_inst():
-    print ("Selected object is a cell, rather than a path.  Please select a path.")
+    print("Selected object is a cell, rather than a path.  Please select a path.")
   else:
-    print ("Selected object is a shape")
+    print("Selected object is a shape")
     if o.shape.is_path():
       c = o.shape.cell
-      print (c.basic_name())
+      print(c.basic_name())
       if c.basic_name() == "ROUND_PATH" and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
         # we have a waveguide GUIDING_LAYER selected
-        print ("GUIDING_LAYER in ROUND_PATH on LayerSi. We will not convert this to waveguide!")
+        print("GUIDING_LAYER in ROUND_PATH on LayerSi. We will not convert this to waveguide!")
       else:
         # Search the layout for the components and waveguides:
-        print ("* calling find_all_components() – DevRec")
+        print("* calling find_all_components() – DevRec")
         find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
         shape_obj = o.shape
         path_obj = o.shape.path
@@ -146,13 +146,13 @@ for o in object_selection:
               a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
           # Update the path
           path_obj = pya.Path(a1, path_obj.width)
-          print ("updated path (inserted mid-point): %s" % path_obj )
+          print("updated path (inserted mid-point): %s" % path_obj )
         # Waveguide parameters
         wg_type = 0
         bend_pts = 0
         #length =  path_obj.length()*dbu
         wg_width = path_obj.width*dbu
-        # print ( "Waveguide:  num_points: %s, length: %s, radius: %s, path: %s"   % (num_points, length, radius, path_obj) )
+        # print( "Waveguide:  num_points: %s, length: %s, radius: %s, path: %s"   % (num_points, length, radius, path_obj) )
 
         # For both the beginning and end of the path:
         for pin in optical_pins:
@@ -161,7 +161,7 @@ for o in object_selection:
           # Calculate the distnace between every pin and each path endpoint
           for pin in optical_pins:
             # this updates "optical_pins" via the "pin" pointer  
-            # print ( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )
+            # print( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )
             pin.dist.append ( distance_xy ( path_endpoint, [pin.x, pin.y] ) ) 
           # Find the closest pin for each path endpoint
         # optical_pins_sorted0[0].dist[0] is the pin distance data sorted in relation to the waveguide beginning:
@@ -196,7 +196,7 @@ for o in object_selection:
               a1.append (pya.Point(p[0], p[1]))
             # Update the path in the layout
             path_obj = pya.Path(a1, path_obj.width)
-            print ("updated path (adjusted beginning point): %s" % path_obj )
+            print("updated path (adjusted beginning point): %s" % path_obj )
           optical_pins_sorted1[0] # pin that is closest to the end of path
           if optical_pins_sorted1[0].dist[1] &lt; waveguide_snap_dist and go_wg_end:
             # Update the path end endpoint to match pin
@@ -214,7 +214,7 @@ for o in object_selection:
               a1.append (pya.Point(p[0], p[1]))
             # Update the path in the layout
             path_obj = pya.Path(a1, path_obj.width)
-            print ("updated path (adjusted end point): %s" % path_obj )
+            print("updated path (adjusted end point): %s" % path_obj )
 
         # Convert the path to a waveguide
         wg_path = points_to_Dpath( points_mult(path_to_points(path_obj),dbu), wg_width)
@@ -231,11 +231,11 @@ for o in object_selection:
 #        new_selection[new_selectionN].cell_index = pcell.cell_index()
 #        new_selection[new_selectionN].cell_index = new_cell
         new_selection[new_selectionN].top = o.top
-        print (o.top)
+        print(o.top)
         new_selection[new_selectionN].append_path = pya.InstElement.new(new_cell)
-        print (new_selection[new_selectionN].is_cell_inst() )
+        print(new_selection[new_selectionN].is_cell_inst() )
     #    op.append_path(RBA::InstElement::new(inst_to_select))   
-        print ("&amp;&amp;&amp;")
+        print("&amp;&amp;&amp;")
       
         # Mark the path for deletion:
         #shape_obj.delete()
