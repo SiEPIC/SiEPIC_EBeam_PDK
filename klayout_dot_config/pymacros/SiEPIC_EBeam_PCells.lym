@@ -392,6 +392,177 @@ def layout_pgtext(cell, layer, x, y, text, mag):
     print("Done layout_pgtext")
 
 
+
+class DirectionalCoupler_HalfRing(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the DirectionalCoupler_HalfRing.
+  Consists of a half-ring with 1 waveguides.
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(DirectionalCoupler_HalfRing, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("bustype", self.TypeInt, "Bus waveguide type: 0 = straight, 1 = mirror", default = 1)
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "DirectionalCoupler_HalfRing(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    from math import pi, cos, sin
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    TextLayerN = ly.layer(self.textl)
+
+    
+    w = int(round(self.w/dbu))
+    r = int(round(self.r/dbu))
+    g = int(round(self.g/dbu))
+
+    # draw the half-circle
+    x = 0
+    y = r+w+g
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 180, 360)
+    
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    # Pins on the ring side:
+    pin = pya.Path([pya.Point(-r, y+pin_length/2), pya.Point(-r, y-pin_length/2)], w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(-r, y)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    pin = pya.Path([pya.Point(r, y+pin_length/2), pya.Point(r, y-pin_length/2)], w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(r, y)
+    text = pya.Text ("pin3", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+
+    # Create the waveguide
+    if self.bustype == 0:
+      wg1 = pya.Box(-r-w/2-w, -w/2, r+w/2+w, w/2)
+      self.cell.shapes(LayerSiN).insert(wg1)
+
+      # Pins on the bus waveguide side:
+      pin = pya.Path([pya.Point(-r-w/2-w-pin_length/2, 0), pya.Point(-r-w/2-w+pin_length/2, 0)], w)
+      self.cell.shapes(LayerPinRecN).insert(pin)
+      t = pya.Trans(-r-w/2-w, 0)
+      text = pya.Text ("pin2", t)
+      shape = self.cell.shapes(LayerPinRecN).insert(text)
+      shape.text_size = 0.4/dbu
+
+      pin = pya.Path([pya.Point(r+w/2+w-pin_length/2, 0), pya.Point(r+w/2+w+pin_length/2, 0)], w)
+      self.cell.shapes(LayerPinRecN).insert(pin)
+      t = pya.Trans(r+w/2+w, 0)
+      text = pya.Text ("pin4", t)
+      shape = self.cell.shapes(LayerPinRecN).insert(text)
+      shape.text_size = 0.4/dbu
+
+      # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+      dev = pya.Box(-r-w/2-w, -w/2-w, r+w/2+w, y )
+      self.cell.shapes(LayerDevRecN).insert(dev)
+
+    if self.bustype == 1:
+      dc_angle = 30.0
+      layout_arc_wg_dbu(self.cell, LayerSiN, 0, -r, r, w, 90-dc_angle, 90)
+      layout_arc_wg_dbu(self.cell, LayerSiN, 0, -r, r, w, 90, 90+dc_angle)
+      y_bottom = -2*(1-cos(dc_angle/180.0*pi))*r
+      x_bottom = 2*sin(dc_angle/180.0*pi)*r
+      layout_arc_wg_dbu(self.cell, LayerSiN, -x_bottom, y_bottom+r, r, w, -90, -90+dc_angle)
+      layout_arc_wg_dbu(self.cell, LayerSiN, x_bottom, y_bottom+r, r, w, -90-dc_angle, -90)
+
+      wg1 = pya.Box(-r-w/2-w, y_bottom-w/2, -x_bottom, y_bottom+w/2)
+      self.cell.shapes(LayerSiN).insert(wg1)
+      wg1 = pya.Box(x_bottom, y_bottom-w/2, r+w/2+w, y_bottom+w/2)
+      self.cell.shapes(LayerSiN).insert(wg1)
+
+      # Pins on the bus waveguide side:
+      pin = pya.Path([pya.Point(-r-w/2-w-pin_length/2, y_bottom), pya.Point(-r-w/2-w+pin_length/2, y_bottom)], w)
+      self.cell.shapes(LayerPinRecN).insert(pin)
+      t = pya.Trans(-r-w/2-w, y_bottom)
+      text = pya.Text ("pin2", t)
+      shape = self.cell.shapes(LayerPinRecN).insert(text)
+      shape.text_size = 0.4/dbu
+
+      pin = pya.Path([pya.Point(r+w/2+w-pin_length/2, y_bottom), pya.Point(r+w/2+w+pin_length/2, y_bottom)], w)
+      self.cell.shapes(LayerPinRecN).insert(pin)
+      t = pya.Trans(r+w/2+w, y_bottom)
+      text = pya.Text ("pin4", t)
+      shape = self.cell.shapes(LayerPinRecN).insert(text)
+      shape.text_size = 0.4/dbu
+
+      # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+      dev = pya.Box(-r-w/2-w, y_bottom-w/2-w, r+w/2+w, y )
+      self.cell.shapes(LayerDevRecN).insert(dev)
+
+
+    t = pya.Trans(r/4, 0)
+    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.0", t)
+    shape = self.cell.shapes(TextLayerN).insert(text)
+    shape.text_size = 0.2/dbu
+
+
+    print("Done drawing the layout for – DirectionalCoupler_HalfRing: %.3f-%g" % ( self.r, self.g) )
+
+
+def layout_arc_wg_dbu(cell, LayerSiN, x, y, r, w, theta_start, theta_stop):
+  # function to draw an arc of waveguide
+  # cell: layout cell to place the layout
+  # LayerSiN: which layer to use
+  # x, y: location of the origin
+  # r: radius
+  # w: waveguide width
+  # length units in dbu
+  # theta_start, theta_stop: angles for the arc
+  # angles in degrees
+
+  # example usage.  Places the ring layout in the presently selected cell.
+  # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+  # layout_Ring(cell, cell.layout().layer(pya.LayerInfo(1, 0)), 0, 0, 10*1000, 0.5*1000, 0, 360)
+
+  from math import pi, cos, sin
+
+  dbu = cell.layout().dbu
+  
+  circle_fraction = abs(theta_stop-theta_start) / 360.0
+  npoints = int(points_per_circle(r*dbu) * circle_fraction)
+  da = 2 * pi / npoints * circle_fraction # increment, in radians
+  pts = []
+  th = theta_start / 360.0 * 2 * pi
+  for i in range(0, npoints+1):
+    pts.append(pya.Point.from_dpoint(pya.DPoint((x+(r+w/2)*cos(i*da+th))/1, (y+(r+w/2)*sin(i*da+th))/1)))
+  for i in range(npoints, -1, -1):
+    pts.append(pya.Point.from_dpoint(pya.DPoint((x+(r-w/2)*cos(i*da+th))/1, (y+(r-w/2)*sin(i*da+th))/1)))
+  cell.shapes(LayerSiN).insert(pya.Polygon(pts))
+
+
 def layout_Ring(cell, layer, x, y, r, w, npoints):
     # function to produce the layout of a ring resonator
     # cell: layout cell to place the layout
@@ -776,11 +947,13 @@ class SiEPIC(pya.Library):
     self.description = "EBeam PCells"
     
     # Create the PCell declarations
+    self.layout().register_pcell("DirectionalCoupler_HalfRing", DirectionalCoupler_HalfRing())
     self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring2", TestStruct_DoubleBus_Ring2())
     self.layout().register_pcell("LumericalINTERCONNECT_Laser", LumericalINTERCONNECT_Laser())
     self.layout().register_pcell("LumericalINTERCONNECT_Detector", LumericalINTERCONNECT_Detector())
+    
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
