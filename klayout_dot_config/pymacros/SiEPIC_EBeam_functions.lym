@@ -110,13 +110,12 @@ else:
     # Python 2 code
     pass
 
+
 try:
   advance_iterator = next
 except NameError:
-  def advance_iterator(it):
+ def advance_iterator(it):
     return it.next()
-
-
 
 
 # definition of classes for Verification, Waveguide making, Waveguide Healing
@@ -263,10 +262,9 @@ def clear_ErrorLayer(topcell, LayerErrorN):
     if iter1.shape().is_path() | iter1.shape().is_box():
       i+=1
       iter1.shape().delete()
+
     iter1.next()  
   print("*** Deleted %s errors." % i)
-
-
 
 import string
 def find_automated_measurement_labels(topcell, LayerTextN):
@@ -347,7 +345,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
                   component, instance, x, y, flip, rotate, library) )
       
       # Find the PinRec and record info as Optical_pin
-      
+        
       # Use the pin names on layer PinRec to sort the pins in alphabetical order
       # read; sort; save data.
       iter2 = subcell.begin_shapes_rec(LayerPinRecN)
@@ -414,6 +412,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           # register the pin with the component
           optical_components[component_index].npins += 1
           optical_components[component_index].pins.append( pin_index ) 
+
           print("%s: FbrTgt in cell {%s}, at (%s, %s), net %s, pins %s, component # %s, component nets %s" \
               % (i, iter2.cell().name, x, y, net_index, optical_components[component_index].pins, \
               component_index, optical_components[component_index].nets ) )
@@ -622,7 +621,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
         if npins_inside_laser &gt; 1:
           print(" *** Error - more than 1 optical IO connected to the laser. ")
             
-    advance_iterator(iter1)
+    iter1.next()
     
   # Sort the detectors:
   detectors_info2 = sorted(detectors_info, key=lambda  d: d.detector_number)
