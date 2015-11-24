@@ -227,18 +227,10 @@ for o in object_selection:
         # http://klayout.de/forum/comments.php?DiscussionID=747
         new_selectionN = len(new_selection)
         new_selection.append( pya.ObjectInstPath() )
-#        new_selection[new_selectionN].layer = LayerSiN
-#        new_selection[new_selectionN].cell_index = pcell.cell_index()
-#        new_selection[new_selectionN].cell_index = new_cell
         new_selection[new_selectionN].top = o.top
-        print(o.top)
-        new_selection[new_selectionN].append_path = pya.InstElement.new(new_cell)
-        print(new_selection[new_selectionN].is_cell_inst() )
-    #    op.append_path(RBA::InstElement::new(inst_to_select))   
-        print("&amp;&amp;&amp;")
+        new_selection[new_selectionN].append_path(pya.InstElement.new(new_cell))
       
         # Mark the path for deletion:
-        #shape_obj.delete()
         to_delete.append(shape_obj)  
 
 n_deleted = len(to_delete)

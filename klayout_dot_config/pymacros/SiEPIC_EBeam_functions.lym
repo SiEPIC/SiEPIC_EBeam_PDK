@@ -332,12 +332,19 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
     # A component was found. record the instance info as an Optical_component 
     if found_component:
       # Find text label for DevRec, to get Library name
+      library = None
       iter2 = subcell.begin_shapes_rec(LayerDevRecN)
       while not(iter2.at_end()):
         if iter2.shape().is_text():
-          print("%s: DevRec label: %s" % (i, iter2.shape().text))
+          text = iter2.shape().text
+          print("%s: DevRec label: %s" % (i, text))
+          if text.string.find("Lumerical_INTERCONNECT_library=") &gt; -1:
+            library = text.string[len("Lumerical_INTERCONNECT_library="):]
+          if text.string.find("Lumerical_INTERCONNECT_component=") &gt; -1:
+            component = text.string[len("Lumerical_INTERCONNECT_component="):]
         iter2.next()
-      library = "Design kits/ebeam_v1.0"
+      if library == None:
+        print("Missing library information for component: %s" % component )
       x = iter1.itrans().disp.x*dbu
       y = iter1.itrans().disp.y*dbu
       flip = iter1.trans().is_mirror()
