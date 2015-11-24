@@ -11,7 +11,7 @@
  <shortcut>H</shortcut>
  <show-in-menu>false</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.end</menu-path>
+ <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
