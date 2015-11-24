@@ -46,6 +46,10 @@ Lukas Chrostowski           2015/11/18
 
 import pya
 
+Waveguide_Type = "ROUND_PATH"
+Waveguide_Lib = "Basic"
+Waveguide_Type = "Waveguide"
+Waveguide_Lib = "MyLib"
 
 # Configure variables to draw structures in the presently selected cell:
 lv = pya.Application.instance().main_window().current_view()
@@ -120,7 +124,7 @@ for o in object_selection:
     if o.shape.is_path():
       c = o.shape.cell
       print(c.basic_name())
-      if c.basic_name() == "ROUND_PATH" and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+      if c.basic_name() == Waveguide_Type and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
         # we have a waveguide GUIDING_LAYER selected
         print("GUIDING_LAYER in ROUND_PATH on LayerSi. We will not convert this to waveguide!")
       else:
@@ -219,7 +223,7 @@ for o in object_selection:
         # Convert the path to a waveguide
         wg_path = points_to_Dpath( points_mult(path_to_points(path_obj),dbu), wg_width)
         param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": LayerSi }
-        pcell = ly.create_cell("ROUND_PATH", "Basic", param )
+        pcell = ly.create_cell(Waveguide_Type, Waveguide_Lib, param )
         t = pya.Trans(0, 0)
         new_cell = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
         
