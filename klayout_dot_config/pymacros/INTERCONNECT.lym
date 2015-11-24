@@ -33,11 +33,11 @@ Lukas Chrostowski           2015/11/19
 """
 
 import os
-print os.name
+print(os.name)
 
 import platform
-print platform.system()
-print platform.release()
+print(platform.system())
+print(platform.release())
 
 import sys
 version = sys.version
