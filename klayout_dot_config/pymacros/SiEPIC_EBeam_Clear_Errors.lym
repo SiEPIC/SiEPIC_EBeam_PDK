@@ -38,16 +38,6 @@ Lukas Chrostowski           2015/11/13
 
 import pya
 
-import os
-def include(filename):
-    if os.path.exists(filename): 
-        execfile(filename)
-    else:
-        print("%s doesn't exist" %filename)
-#include('/Users/lukasc/.klayout/pymacros/SiEPIC_EBeam/SiEPIC_EBeam_functions.py')
-
-
-
 # Configure variables to draw structures in the presently selected cell:
 lv = pya.Application.instance().main_window().current_view()
 if lv == None:
