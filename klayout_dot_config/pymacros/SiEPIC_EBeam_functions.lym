@@ -170,7 +170,7 @@ def print_Optical_waveguides(optical_waveguides):
         (o.index, o.length, o.wg_type, o.net1, o.net2, o.points) )
 
 class Optical_pin:
-    def __init__(self, index, points, component_n, x, y, pin_type):
+    def __init__(self, index, points, component_n, x, y, pin_type, pin_name):
         self.index = index              # pin number, index, should be unique, 0, 1, 2, ...
         self.points = points            # array of vertices, in database units
         self.component_n = component_n  # which component index this pin belongs to
@@ -178,6 +178,7 @@ class Optical_pin:
         self.x = x                      # x coordinate, in database units
         self.y = y                      # y coordinate, in database units
         self.pin_type = pin_type        # pin type: 0 = waveguide, 1 = component, 2 = opticalIO
+        self.pin_name = pin_name        # label read from the cell layout (PinRec text)
 
 def print_Optical_pins(optical_pins):
   print("Optical_pins:")
@@ -186,8 +187,8 @@ def print_Optical_pins(optical_pins):
       points = o.points
     else:
       points = "..."
-    print("#%s: component_n %s, pin_type %s, net: %s, (%s, %s), points: %s" %\
-        (o.index, o.component_n, o.pin_type, o.net, o.x, o.y, points) )
+    print("#%s: component_n %s, pin_name %s, pin_type %s, net: %s, (%s, %s), points: %s" %\
+        (o.index, o.component_n, o.pin_name, o.pin_type, o.net, o.x, o.y, points) )
 
 class Optical_net:
     def __init__(self, index, pin1_type, pin1_n, pin2_type, pin2_n):
@@ -203,11 +204,13 @@ def print_Optical_nets(optical_nets):
   print("Optical_nets:")
   for o in optical_nets:
     if o.pin1_type != 0:
-      name1 = optical_components[o.pin1_n].component
+      name1 = optical_components[optical_pins[o.pin1_n].component_n].component
+#      name1 = optical_components[o.pin1_n].component
     else:
       name1 = 'waveguide'
     if o.pin2_type != 0:
-      name2 = optical_components[o.pin2_n].component
+      name2 = optical_components[optical_pins[o.pin2_n].component_n].component
+#      name2 = optical_components[o.pin2_n].component
     else:
       name2 = 'waveguide'
     print("#%s: pin1: %s (%s) pin_type1: %s; pin2: %s (%s) pin_type2: %s" %\
@@ -354,7 +357,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       x = iter1.itrans().disp.x*dbu
       y = iter1.itrans().disp.y*dbu
       flip = iter1.trans().is_mirror()
-      rotate = int(iter1.trans().rot())*90
+      rotate = (int(iter1.trans().rot())*90) % 360
       component_index = len(optical_components)
       optical_components.append ( Optical_component (component_index, \
                   component, instance, x, y, flip, rotate, library) )
@@ -399,11 +402,14 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
             x = (points[0][0]+points[1][0])/2   # midpoint of pin path
             y = (points[0][1]+points[1][1])/2
             pin_index = len(optical_pins)
-            optical_pins.append (Optical_pin (pin_index, points, component_index, x, y, 1) )
+            optical_pins.append (Optical_pin (pin_index, points, component_index, x, y, 1, pin_info2[p1].pin_text) )
             optical_components[component_index].npins += 1
             optical_components[component_index].pins.append( pin_index )
             print("%s: PinRec (text=%s) in cell {%s}, component #%s, path -- %s"   \
               % (i, pin_info2[p1].pin_text, iter2.cell().name, component_index, path_to_points(path_shape[p2].path)) )
+
+      # reserve space for netlist for this component, based on the number of pins.
+      optical_components[component_index].nets = [-1] * (optical_components[component_index].npins)
 
       # Find the FbrTgt, and record info as Optical_pin
       iter2 = subcell.begin_shapes_rec(LayerFbrTgtN)
@@ -420,18 +426,19 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           x, y = xy_mean_mult([[bb.p1.x, bb.p1.y], [bb.p2.x, bb.p2.y]],1)
 #          x, y = numpy.mean([bb.p1.x, bb.p2.x]), numpy.mean([bb.p1.y, bb.p2.y])
           pin_index = len(optical_pins)
-          optical_pins.append (Optical_pin (pin_index, polygon_to_points(polygon), component_index, x, y, 2) )
+          optical_pins.append (Optical_pin (pin_index, polygon_to_points(polygon), component_index, x, y, 2, "pin0") )
           # register the net with the pin and component
           optical_pins[pin_index].net = net_index
-          optical_components[component_index].nets.append( net_index )
+          optical_components[component_index].nets.insert(0, net_index )
           # register the pin with the component
           optical_components[component_index].npins += 1
-          optical_components[component_index].pins.append( pin_index ) 
+          optical_components[component_index].pins.insert(0, pin_index ) 
           print("%s: FbrTgt in cell {%s}, at (%s, %s), net %s, pins %s, component # %s, component nets %s" \
               % (i, iter2.cell().name, x, y, net_index, optical_components[component_index].pins, \
               component_index, optical_components[component_index].nets ) )
         iter2.next()
-        
+
+
     # end if found_component   
      
     iter1.next()
@@ -859,14 +866,24 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
       if check:  # found connected pins:
         # make a new optical net
         net_index = len(optical_nets)
-        optical_nets.append ( Optical_net (net_index, 1, p1.component_n, 1, p2.component_n) )
+#        optical_nets.append ( Optical_net (net_index, 1, p1.component_n, 1, p2.component_n) )
+        # optical net connects two pins; keep track of pin index:
+        optical_nets.append ( Optical_net (net_index, 1, p1.index, 1, p2.index) )
         # assign this net number to the components
-        optical_components[p1.component_n].nets.append (net_index)
-        optical_components[p2.component_n].nets.append (net_index)
+# this needs to be fixed -- doesn't match correctly
+# need correct pin index
+        # find which where p1 and p2 are in the component:
+        p1_comp = optical_components[p1.component_n]
+        p2_comp = optical_components[p2.component_n]
+        p1_comp.nets[p1_comp.pins.index(p1.index)] = net_index
+        p2_comp.nets[p2_comp.pins.index(p2.index)] = net_index
+#        optical_components[p2.component_n].nets[optical_components[p2.component_n].pins.index(p2.index)] = net_index
+#        optical_components[p1.component_n].nets.append (net_index)
+#        optical_components[p2.component_n].nets.append (net_index)
         # assign this net number to the pins
         p1.net = net_index
         p2.net = net_index
-        print( "connected: pin-pin, net: %s, component #: %s, %s" % (net_index, p1.component_n, p2.component_n) )
+        print( "connected: pin-pin, net: %s, component,pin #: [%s, %s], [%s, %s]" % (net_index, p1.component_n, p1.pin_name, p2.component_n, p2.pin_name) )
         
     # Compare to all waveguides:
     for w1 in optical_waveguides:
@@ -879,7 +896,9 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         net_index = len(optical_nets)
         optical_nets.append ( Optical_net (net_index, 1, p1.component_n, 0, w1.index) )
         # assign this net number to the components
-        optical_components[p1.component_n].nets.append (net_index)
+        p1_comp = optical_components[p1.component_n]
+        p1_comp.nets[p1_comp.pins.index(p1.index)] = net_index
+###        optical_components[p1.component_n].nets.append (net_index)
         if optical_waveguides[w1.index].net1 != -1:
           # problem. Net is already assigned.
           text = "  *** Connectivity error.  Net is already assigned (pin to waveguide). Overwriting."
@@ -899,7 +918,9 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         net_index = len(optical_nets)
         optical_nets.append ( Optical_net (net_index, 1, p1.component_n, 0, w1.index) )
         # assign this net number to the components
-        optical_components[p1.component_n].nets.append (net_index)
+        p1_comp = optical_components[p1.component_n]
+        p1_comp.nets[p1_comp.pins.index(p1.index)] = net_index
+###        optical_components[p1.component_n].nets.append (net_index)
         if optical_waveguides[w1.index].net2 != -1:
           # problem. Net is already assigned.
           text = "  *** Connectivity error.  Net is already assigned (pin to waveguide). Overwriting."
@@ -1087,9 +1108,9 @@ def netlist_extraction(topcell):
   find_all_waveguides(topcell, LayerSiN)
   clock_find_all_waveguides = time.clock()
 
-#  print("")
-#  print("* print_Optical_all, after find_all_{components, waveguides}:")
-#  print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
+  print("")
+  print("* print_Optical_all, after find_all_{components, waveguides}:")
+  print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
 
   # Search the arrays to identify all the nets:
   print("")
