@@ -79,6 +79,9 @@ cell = pya.Application.instance().main_window().current_view().active_cellview()
 if cell == None:
   raise Exception("No cell")
 
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
 
 
 # Check if the present cell is a top cell
