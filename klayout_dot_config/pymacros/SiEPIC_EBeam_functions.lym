@@ -86,6 +86,12 @@ except ImportError:
   MODULE_NUMPY = False
 
 
+Waveguide_Type = "ROUND_PATH"
+Waveguide_Lib = "Basic"
+#Waveguide_Type = "Waveguide_Route"
+#Waveguide_Lib = "SiEPIC"
+
+
 # SiEPIC-EBeam-PDK Layers:
 LayerSi = pya.LayerInfo(1, 0)
 LayerText = pya.LayerInfo(10, 0)
@@ -442,6 +448,35 @@ def distance_xy ( p1, p2 ):
   return distance
 
 
+import math
+def angle_segment(seg):
+  pt1, pt2 = seg
+  x2, y2 = pt2
+  x1, y1 = pt1
+  rads1 = math.atan2(y2-y1,x2-x1)
+  return (rads1)/math.pi*180
+
+def angle_vectors(pt1, pt2):
+  x1, y1 = pt1
+  x2, y2 = pt2
+  rads1 = math.atan2(y1,x1)
+  rads2 = math.atan2(y2,x2)
+  return (rads2-rads1)/math.pi*180
+
+def angle_segments(segA, segB):
+  ptA1, ptA2 = segA
+  ptB1, ptB2 = segB
+  return angle_vectors([ptA2[0]-ptA1[0], ptA2[1]-ptA1[1]], [ptB2[0]-ptB1[0], ptB2[1]-ptB1[1]])
+
+def av_angle_segments(segA, segB):
+  ptA1, ptA2 = segA
+  ptB1, ptB2 = segB
+  angleA = math.atan2(ptA2[1]-ptA1[1], ptA2[0]-ptA1[0])
+  angleB = math.atan2(ptB2[1]-ptB1[1], ptB2[0]-ptB1[0])
+  return (angleA+angleB)/2/math.pi*180
+#  return angle_vectors([ptA2[0]-ptA1[0], ptA2[1]-ptA1[1]], [ptB2[0]-ptB1[0], ptB2[1]-ptB1[1]])
+
+
 def points_per_circle(radius):
   # Calculate the recommended number of points in a circle, based on 
   # http://stackoverflow.com/questions/11774038/how-to-render-a-circle-with-as-few-vertices-as-possible
@@ -555,6 +590,33 @@ def PCell_get_parameters ( pcell ):
   for param in params.keys():
     print("Parameter: %s, Value: %s") % (param, params[param])
   return params
+  
+def find_PCell_pins(subcell):
+  # find the location of the pins in the cell.
+
+  # example usage:
+  # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+  # pcell = ly.create_cell("Waveguide_Bend", "SiEPIC", { } )
+  # find_PCell_pins( pcell )
+
+  LayerPinRecN = subcell.layout().layer(LayerPinRec)
+  iter2 = subcell.begin_shapes_rec(LayerPinRecN)
+  pins = {} # dictionary for pin information
+  while not(iter2.at_end()):
+    print(iter2)
+    # Find text label for PinRec, to get the port numbers
+    if iter2.shape().is_text():
+      texto= iter2.shape().text.transformed(iter2.itrans())
+      x = texto.x
+      y = texto.y
+      text = iter2.shape().text
+      print( "PinRec label: %s at (%s, %s)" % (text, x, y) )
+      pins[ str(text.string) + "_x" ] = x
+      pins[ str(text.string) + "_y" ] = y
+    iter2.next()
+    
+
+  return pins
   
 
 
@@ -914,6 +976,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
   # X_grating_coupler_1 N$7 N$6 grating_coupler library="custom/genericcml" sch_x=-1.42 sch_y=-0.265 sch_r=0 sch_f=false
 
   Lumerical_schematic_scaling = 3e-2
+  Lumerical_schematic_scaling = 20e-2
   
   from time import strftime 
   

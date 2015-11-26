@@ -49,24 +49,45 @@ class Waveguide(pya.PCellDeclarationHelper):
   
   def coerce_parameters_impl(self):
     pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return shape.is_path()
+
+  def transformation_from_shape(self, layout, shape, layer):
+#    return pya.Trans(shape.bbox().center())
+    return pya.Trans(0,0)
+
+  def parameters_from_shape(self, layout, shape, layer):
+    self._param_values = []
+    for pd in self._param_decls:
+      self._param_values.append(pd.default)
+    
+    dbu = layout.dbu
+    print("Waveguide.parameters_from_shape")
+    print(shape.path)
+    points = points_mult(path_to_Dpoints(shape.path), dbu)
+    self.path = points_to_Dpath(points, shape.path.width*dbu)
+
+    # Waveguide radius should be specified in the cell in which the Path_to_Waveguide is called
+    # using a "User Properties" defined via the Cells window.
+    # if missing, a dialog is presented.
+    cell = shape.cell
+    radius_str = cell.property("radius")  
+    if radius_str:
+      radius = float(radius_str)
+      print("Radius taken from cell {%s} = %s" % (cell.name, radius) )
+    else:
+      radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
+      if radius == None:
+        radius = 10.0
+      else:
+        print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
+        cell.set_property("radius", str(radius))
+    self.radius = radius
+    
+    return self._param_values  
         
-  def can_create_from_shape_impl(self):
-    # Implement the "Create PCell from shape" protocol: we can use any shape which 
-    # has a finite bounding box
-    self.shape.is_path()
-  
-  def parameters_from_shape_impl(self):
-    # Implement the "Create PCell from shape" protocol: we set r and l from the shape's 
-    # bounding box width and layer
-    pass
-#    self.r = self.shape.bbox.width() * self.layout.dbu() / 2
-#    self.silayer = self.layout.get_info(self.layer)
-  
-  def transformation_from_shape_impl(self):
-    # Implement the "Create PCell from shape" protocol: we use the center of the shape's
-    # bounding box to determine the transformation
-    return pya.Trans(sef.shape.bbox().center())
-  
+    
   def produce_impl(self):
   
     # fetch the parameters
@@ -87,6 +108,9 @@ class Waveguide(pya.PCellDeclarationHelper):
     r = int(round(self.radius/dbu))
 
     for i in range(1,len(points)-1):
+      # Place Waveguide_Bend components at each corner:
+      # determine rotation
+      
       param = { "w": self.path.width, "r": self.radius, "silayer": LayerSi }
       pcell = ly.create_cell("Waveguide_Bend", "SiEPIC", param )
       trans = pya.Trans(pya.Point(points[i][0]-r, points[i][1]))
@@ -140,22 +164,21 @@ class Circle(pya.PCellDeclarationHelper):
     if self.n &lt;= 4:
       self.n = 4
   
-  def can_create_from_shape_impl(self):
-    # Implement the "Create PCell from shape" protocol: we can use any shape which 
-    # has a finite bounding box
-    self.shape.is_box() or self.shape.is_polygon() or self.shape.is_path()
-  
-  def parameters_from_shape_impl(self):
-    # Implement the "Create PCell from shape" protocol: we set r and l from the shape's 
-    # bounding box width and layer
-    self.r = self.shape.bbox.width() * self.layout.dbu() / 2
-    self.l = self.layout.get_info(self.layer)
-  
-  def transformation_from_shape_impl(self):
-    # Implement the "Create PCell from shape" protocol: we use the center of the shape's
-    # bounding box to determine the transformation
-    return pya.Trans(sef.shape.bbox().center())
-  
+  def can_create_from_shape(self, layout, shape, layer):
+    return shape.is_box() or shape.is_polygon() or shape.is_path()
+
+  def transformation_from_shape(self, layout, shape, layer):
+    return pya.Trans(shape.bbox().center())
+
+  def parameters_from_shape(self, layout, shape, layer):
+    self._param_values = []
+    for pd in self._param_decls:
+      self._param_values.append(pd.default)
+    self.r = shape.bbox().width() * layout.dbu / 2
+    self.l = layout.get_info(layer)
+    return self._param_values  
+
+      
   def produce_impl(self):
   
     # This is the main part of the implementation: create the layout
