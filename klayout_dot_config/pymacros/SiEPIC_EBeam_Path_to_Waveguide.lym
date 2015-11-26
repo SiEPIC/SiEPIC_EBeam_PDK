@@ -46,6 +46,13 @@ Lukas Chrostowski           2015/11/18
 
 import pya
 
+<<<<<<< HEAD
+=======
+Waveguide_Type = "ROUND_PATH"
+Waveguide_Lib = "Basic"
+#Waveguide_Type = "Waveguide"
+#Waveguide_Lib = "MyLib"
+>>>>>>> origin/master
 
 # Configure variables to draw structures in the presently selected cell:
 lv = pya.Application.instance().main_window().current_view()
