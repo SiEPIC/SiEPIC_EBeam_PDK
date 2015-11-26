@@ -213,13 +213,14 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
       # find wg_length, and rotation
       angle = ( angle_segment([points[i+1],points[i+2]]) ) / 90
       wg_length = p2t.distance(p1t) # pya.Path([p2, p1], w).length()
-      # place the waveguide:      
-      param = { "wg_width": w, "length": wg_length, "layer": LayerSi }
-      pcell = ly.create_cell("Waveguide_Straight", "SiEPIC", param )
-      p3 = pya.Point ((p2t.x+p1t.x)/2, (p2t.y+p1t.y)/2) # midpoint of p2t p1t
-      trans = pya.Trans(angle, False, p3)
-      self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
-      print("straight wg inst: %s, %s, %s, [%s];   bend: %s, %s, p2 %s" % (i, angle, wg_length, p2t, bends_instance[i], bends_pcell[i], p2) )
+      if wg_length &gt; 0:
+        # place the waveguide:      
+        param = { "wg_width": w, "length": wg_length, "layer": LayerSi }
+        pcell = ly.create_cell("Waveguide_Straight", "SiEPIC", param )
+        p3 = pya.Point ((p2t.x+p1t.x)/2, (p2t.y+p1t.y)/2) # midpoint of p2t p1t
+        trans = pya.Trans(angle, False, p3)
+        self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
+        print("straight wg inst: %s, %s, %s, [%s];   bend: %s, %s, p2 %s" % (i, angle, wg_length, p2t, bends_instance[i], bends_pcell[i], p2) )
 
 
 
