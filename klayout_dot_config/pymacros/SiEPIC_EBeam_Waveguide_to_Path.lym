@@ -73,7 +73,7 @@ LayerErrorN = ly.layer(LayerError)
 # Record a transaction, to enable "undo"
 lv.transaction("Waveguide to Path")
 
-print ("------------------ Waveguide to Path --------------")
+print("------------------ Waveguide to Path --------------")
 
 # record objects to delete:
 to_delete = []
@@ -90,21 +90,21 @@ for o in object_selection:
   # Find the selected waveguides
 
   if o.is_cell_inst():
-    print ("Selected object is a cell.")
+    print("Selected object is a cell.")
     oinst = o.inst()
     if oinst.is_pcell():
       c = oinst.cell
-      if c.basic_name() == 'ROUND_PATH' and c.pcell_parameters_by_name()['layer'] == LayerSi:
-        print ("ROUND_PATH on LayerSi.")
+      if c.basic_name() == Waveguide_Type and c.pcell_parameters_by_name()['layer'] == LayerSi:
+        print("ROUND_PATH on LayerSi.")
         is_waveguide = True
         trans = oinst.trans
 
   elif o.shape:
-    print ("Selected object is a shape.")
+    print("Selected object is a shape.")
     c = o.shape.cell
-    if c.basic_name() == "ROUND_PATH" and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+    if c.basic_name() == Waveguide_Type and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
       # we have a waveguide GUIDING_LAYER selected
-      print ("Selected object is a GUIDING_LAYER in ROUND_PATH on LayerSi.")
+      print("Selected object is a GUIDING_LAYER in ROUND_PATH on LayerSi.")
       trans = o.source_trans().s_trans()
       o_instpathlen = o.path_length()
       oinst = o.path_nth(o_instpathlen-1).inst()
@@ -113,14 +113,14 @@ for o in object_selection:
   # We now have a waveguide ROUND_PATH PCell, with variables: o (ObjectInstPath), oinst (Instance), c (Cell)
   if is_waveguide == True:
     path_obj = c.pcell_parameters_by_name()['path']
-    print ( path_obj ) 
+    print( path_obj ) 
     wg_width = path_obj.width/dbu
     # convert wg_path (in microns) to database numbers
     wg_path = points_to_path(points_mult(path_to_Dpoints(path_obj), 1/dbu), wg_width)
     # get waveguide transformation
     wg_path_trans = wg_path.transformed(trans)
 
-    print ( "wg_path_trans: %s" % wg_path_trans ) 
+    print( "wg_path_trans: %s" % wg_path_trans ) 
     new_wg = cell.shapes(LayerSiN).insert(wg_path_trans)
 
     # Leave the newly created waveguide selected, to make it obvious to the user.

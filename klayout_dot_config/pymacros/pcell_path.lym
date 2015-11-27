@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>import pya
+import math
+
+"""
+This sample PCell implements a library called "MyLib" with a single PCell that
+draws a circle. It demonstrates the basic implementation techniques for a PCell 
+and how to use the "guiding shape" feature to implement a handle for the circle
+radius.
+
+NOTE: after changing the code, the macro needs to be rerun to install the new
+implementation. The macro is also set to "auto run" to install the PCell 
+when KLayout is run.
+"""
+
+class Waveguide(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the circle
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Waveguide, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("path", self.TypeShape, "", default = pya.DPath([pya.DPoint(0,0), pya.DPoint(10,0), pya.DPoint(10,10)], 0.5)  )
+    self.param("radius", self.TypeDouble, "Radius", default = 5)
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Waveguide_%s" % self.path
+  
+  def coerce_parameters_impl(self):
+    pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return shape.is_path()
+
+  def transformation_from_shape(self, layout, shape, layer):
+#    return pya.Trans(shape.bbox().center())
+    return pya.Trans(0,0)
+
+  def parameters_from_shape(self, layout, shape, layer):
+    self._param_values = []
+    for pd in self._param_decls:
+      self._param_values.append(pd.default)
+    
+    dbu = layout.dbu
+    print("Waveguide.parameters_from_shape")
+    print(shape.path)
+    points = points_mult(path_to_Dpoints(shape.path), dbu)
+    self.path = points_to_Dpath(points, shape.path.width*dbu)
+
+    # Waveguide radius should be specified in the cell in which the Path_to_Waveguide is called
+    # using a "User Properties" defined via the Cells window.
+    # if missing, a dialog is presented.
+    cell = shape.cell
+    radius_str = cell.property("radius")  
+    if radius_str:
+      radius = float(radius_str)
+      print("Radius taken from cell {%s} = %s" % (cell.name, radius) )
+    else:
+      radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
+      if radius == None:
+        radius = 10.0
+      else:
+        print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
+        cell.set_property("radius", str(radius))
+    self.radius = radius
+    
+    return self._param_values  
+        
+    
+  def produce_impl(self):
+  
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
+
+    print("Waveguide:")
+    print(self.path)
+    print(self.path.width/dbu)    
+    points = points_mult(path_to_Dpoints(self.path), 1/dbu)
+    print points
+    path = points_to_path(points,self.path.width/dbu)
+    print path
+    self.cell.shapes(LayerSiN).insert(path)
+    r = int(round(self.radius/dbu))
+
+    for i in range(1,len(points)-1):
+      # Place Waveguide_Bend components at each corner:
+      # determine rotation
+      
+      param = { "w": self.path.width, "r": self.radius, "silayer": LayerSi }
+      pcell = ly.create_cell("Waveguide_Bend", "SiEPIC", param )
+      trans = pya.Trans(pya.Point(points[i][0]-r, points[i][1]))
+      self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))
+
+
+class Circle(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the circle
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Circle, self).__init__()
+
+    # declare the parameters
+    self.param("l", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 0.1)
+    self.param("n", self.TypeInt, "Number of points", default = 64)     
+    # this hidden parameter is used to determine whether the radius has changed
+    # or the "s" handle has been moved
+    self.param("ru", self.TypeDouble, "Radius", default = 0.0, hidden = True)
+    self.param("rd", self.TypeDouble, "Double radius", readonly = True)
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Circle(L=" + str(self.l) + ",R=" + ('%.3f' % self.r) + ")"
+  
+  def coerce_parameters_impl(self):
+  
+    # We employ coerce_parameters_impl to decide whether the handle or the 
+    # numeric parameter has changed (by comparing against the effective 
+    # radius ru) and set ru to the effective radius. We also update the 
+    # numerical value or the shape, depending on which on has not changed.
+    rs = None
+    if isinstance(self.s, pya.DPoint): 
+      # compute distance in micron
+      rs = self.s.distance(pya.DPoint(0, 0))
+    if rs != None and abs(self.r-self.ru) &lt; 1e-6:
+      self.ru = rs
+      self.r = rs 
+    else:
+      self.ru = self.r
+      self.s = pya.DPoint(-self.r, 0)
+    
+    self.rd = 2*self.r
+    
+    # n must be larger or equal than 4
+    if self.n &lt;= 4:
+      self.n = 4
+  
+  def can_create_from_shape(self, layout, shape, layer):
+    return shape.is_box() or shape.is_polygon() or shape.is_path()
+
+  def transformation_from_shape(self, layout, shape, layer):
+    return pya.Trans(shape.bbox().center())
+
+  def parameters_from_shape(self, layout, shape, layer):
+    self._param_values = []
+    for pd in self._param_decls:
+      self._param_values.append(pd.default)
+    self.r = shape.bbox().width() * layout.dbu / 2
+    self.l = layout.get_info(layer)
+    return self._param_values  
+
+      
+  def produce_impl(self):
+  
+    # This is the main part of the implementation: create the layout
+
+    # fetch the parameters
+    ru_dbu = self.ru / self.layout.dbu
+    
+    # compute the circle
+    pts = []
+    da = math.pi * 2 / self.n
+    for i in range(0, self.n):
+      pts.append(pya.Point.from_dpoint(pya.DPoint(ru_dbu * math.cos(i * da), ru_dbu * math.sin(i * da))))
+    
+    # create the shape
+    self.cell.shapes(self.l_layer).insert(pya.Polygon(pts))
+
+    
+class MyLib(pya.Library):
+  """
+  The library where we will put the PCell into 
+  """
+
+  def __init__(self):
+  
+    # Set the description
+    self.description = "My First Library"
+    
+    # Create the PCell declarations
+    self.layout().register_pcell("Waveguide", Waveguide())
+    self.layout().register_pcell("Circle", Circle())
+   # That would be the place to put in more PCells ...
+    
+    # Register us with the name "MyLib".
+    # If a library with that name already existed, it will be replaced then.
+    self.register("MyLib")
+
+
+# Instantiate and register the library
+MyLib()
+</text>
+</klayout-macro>
