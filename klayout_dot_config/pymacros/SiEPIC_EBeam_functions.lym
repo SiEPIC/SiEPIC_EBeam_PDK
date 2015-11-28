@@ -86,10 +86,10 @@ except ImportError:
   MODULE_NUMPY = False
 
 
-Waveguide_Type = "ROUND_PATH"
-Waveguide_Lib = "Basic"
-#Waveguide_Type = "Waveguide_Route"
-#Waveguide_Lib = "SiEPIC"
+#Waveguide_Type = "ROUND_PATH"
+#Waveguide_Lib = "Basic"
+Waveguide_Type = "Waveguide_Route"
+Waveguide_Lib = "SiEPIC"
 
 
 # SiEPIC-EBeam-PDK Layers:
@@ -128,7 +128,7 @@ except NameError:
 # definition of classes for Verification, Waveguide making, Waveguide Healing
 # one for each instance of the components
 class Optical_component:
-    def __init__(self, index, component, instance, x, y, flip, rotate, library):
+    def __init__(self, index, component, instance, x, y, flip, rotate, library, params):
         self.index = index         # component index, should be unique, 0, 1, 2, ...
         self.component = component # which component (name) this pin belongs to
         self.instance = instance   # which component (instance) this pin belongs to
@@ -140,6 +140,7 @@ class Optical_component:
         self.nets = []             # nets connected to component
         self.npins = 0             # number of pin
         self.pins = []             # an array of all the pins
+        self.params = params       # Spice parameters
 
 def print_Optical_components(optical_components):
   print("Optical_components:")
@@ -343,6 +344,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       # Find text label for DevRec, to get Library name
       library = None
       iter2 = subcell.begin_shapes_rec(LayerDevRecN)
+      spice_params = ""
       while not(iter2.at_end()):
         if iter2.shape().is_text():
           text = iter2.shape().text
@@ -351,6 +353,8 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
             library = text.string[len("Lumerical_INTERCONNECT_library="):]
           if text.string.find("Lumerical_INTERCONNECT_component=") &gt; -1:
             component = text.string[len("Lumerical_INTERCONNECT_component="):]
+          if text.string.find("Spice_param:") &gt; -1:
+            spice_params = text.string[len("Spice_param:"):]
         iter2.next()
       if library == None:
         print("Missing library information for component: %s" % component )
@@ -360,7 +364,7 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       rotate = (int(iter1.trans().rot())*90) % 360
       component_index = len(optical_components)
       optical_components.append ( Optical_component (component_index, \
-                  component, instance, x, y, flip, rotate, library) )
+                  component, instance, x, y, flip, rotate, library, spice_params) )
       
       # Find the PinRec and record info as Optical_pin
       
@@ -490,10 +494,12 @@ def points_per_circle(radius):
   # radius in microns
 #  import numpy as n
   error=0.5e-3 # 0.5 nm
-  th = math.acos(2 * (1 - error / radius)**2 - 1)
-  num_vertices = math.ceil(2*math.pi/th)
-  return num_vertices
-
+  if radius &gt; 0:
+    th = math.acos(2 * (1 - error / radius)**2 - 1)
+    num_vertices = math.ceil(2*math.pi/th)
+    return num_vertices
+  else:
+    return 10
 
 def path_to_points(path):
   # function to convert a KLayout Path object to an array of points
@@ -600,7 +606,6 @@ def PCell_get_parameters ( pcell ):
   
 def find_PCell_pins(subcell):
   # find the location of the pins in the cell.
-
   # example usage:
   # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
   # pcell = ly.create_cell("Waveguide_Bend", "SiEPIC", { } )
@@ -610,18 +615,16 @@ def find_PCell_pins(subcell):
   iter2 = subcell.begin_shapes_rec(LayerPinRecN)
   pins = {} # dictionary for pin information
   while not(iter2.at_end()):
-    print(iter2)
     # Find text label for PinRec, to get the port numbers
     if iter2.shape().is_text():
       texto= iter2.shape().text.transformed(iter2.itrans())
       x = texto.x
       y = texto.y
       text = iter2.shape().text
-      print( "PinRec label: %s at (%s, %s)" % (text, x, y) )
+#      print( "PinRec label: %s at (%s, %s)" % (text, x, y) )
       pins[ str(text.string) + "_x" ] = x
       pins[ str(text.string) + "_y" ] = y
     iter2.next()
-    
 
   return pins
   
@@ -776,7 +779,7 @@ def find_all_waveguides(cell, layer):
         bend_pts = subcell.pcell_parameters_by_name()["npoints"] 
         wg_width = subcell.pcell_parameters_by_name()['path'].width  # in microns
         # calculate the length of the waveguide using the area / width
-        iter2 = cell.begin_shapes_rec(LayerSiN)
+        iter2 = subcell.begin_shapes_rec(LayerSiN)
         if iter2.shape().is_polygon():
           area = iter2.shape().polygon.area()
           length = area / wg_width * dbu * dbu
@@ -998,7 +1001,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
 
   Lumerical_schematic_scaling = 3e-2
   Lumerical_schematic_scaling = 20e-2
- 
+ """
  #Mapping of geometry transformation for INTERCONNECT  
   m = {(0, False):[0, False], \
          (90, False):[270, False], \
@@ -1008,7 +1011,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
          (90, True):[90, True], \
          (180, True):[0,True], \
          (270, True):[270, False]}
-  
+  """
   from time import strftime 
   
   text = '* Spice output from KLayout SiEPIC_EBeam_PDK v%s, %s.\n\n' % (SiEPIC_Version, strftime("%Y-%m-%d %H:%M:%S") )
@@ -1018,19 +1021,27 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
   text += '.subckt %s%s\n' % (topcell.name, opticalIO_pins)
   
   for o in optical_components:
+  
+    # convert KLayout GDS rotation/flip to Lumerical INTERCONNECT
+    # KLayout defines mirror as an x-axis flip, whereas INTERCONNECT does y-axis flip
+    # KLayout defines rotation as counter-clockwise, whereas INTERCONNECT does clockwise
+    # input is KLayout [Flip][Rotation]; output is INTERCONNECT:
+    KLayoutInterconnectRotFlip = [[[0,False], [270,False], [180,False], [90,False]], \
+                                  [[180,True], [90,True], [0,True], [270,True]]] 
+    r, f = KLayoutInterconnectRotFlip[1 if o.flip else 0][int(round(o.rotate/90))]
     nets_str = ""
     for n in o.nets:
       nets_str += " N$" + str(n)
-    trans = m[(o.rotate, o.flip)]
-    flip = ' sch_f=true' if trans[1] else ''
-    if trans[0] &gt; 0:
-      rotate = ' sch_r=%s' % str(trans[0])
+
+    flip = ' sch_f=true' if f else ''
+    if r &gt; 0:
+      rotate = ' sch_r=%s' % str(r)
     else:
       rotate = ''
 #    t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
 #         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
-    t = '  %s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
-         ( "x"+str(o.index), nets_str, o.component, o.library, \
+    t = '  %s %s %s library="%s" %s lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
+         ( "x"+str(o.index), nets_str, o.component, o.library, o.params, \
          eng_str(o.x * 1e-6), eng_str(o.y * 1e-6), \
          eng_str(o.x * Lumerical_schematic_scaling), eng_str(o.y * Lumerical_schematic_scaling), \
          rotate, flip)
