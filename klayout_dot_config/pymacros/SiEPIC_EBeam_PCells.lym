@@ -156,6 +156,14 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
     print("Waveguide:")
     print(self.path)
     points = points_mult(path_to_Dpoints(self.path), 1/dbu)  # convert from microns to dbu
+    
+    # check the points to remove any co-linear points
+    for i in range(len(points)-2, 0, -1):
+      # if point i is colinear with its neighbours, remove it
+      if check_point_in_segment(pya.Point(*points[i-1]), pya.Point(*points[i+1]), pya.Point(*points[i])):
+        # points.remove(i)
+        pass
+          
     w = self.path.width/dbu   # w in dbu
     path = points_to_path(points,w)
 
@@ -164,16 +172,24 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
     bends_instance = []
     
     for i in range(1,len(points)-1):
+      # if point i is colinear with its neighbours, skip it
+      if check_point_in_segment(pya.Point(*points[i-1]), pya.Point(*points[i+1]), pya.Point(*points[i])):
+        continue
+        
       # Place Waveguide_Bend components at each corner:
       # determine rotation: +1 left, -1 right.
       rightvsleft_turn = ( ( angle_segments([points[i-1],points[i]], [points[i],points[i+1]])+90 ) % 360 - 90 ) / 90
       angle = ( angle_segment([points[i-1],points[i]]) ) / 90
       radius = self.radius
       seg_len = distance_xy ( points[i-1],points[i] )
-      if seg_len / 2 &lt; radius:
+      if (seg_len &lt; radius) and i==1:  # for the first bend, only 1 segment
+        radius = seg_len
+      if (seg_len / 2 &lt; radius) and i&gt;1:  # for the middle bends, split the segment into two
         radius = seg_len / 2
       seg_len = distance_xy ( points[i],points[i+1] )
-      if seg_len / 2 &lt; radius:
+      if (seg_len  &lt; radius) and i==len(points)-2:
+        radius = seg_len 
+      if (seg_len / 2 &lt; radius) and i&lt;len(points)-2:
         radius = seg_len / 2
       param = { "wg_width": self.path.width, "radius": radius, "silayer": LayerSi }
       pcell = ly.create_cell("Waveguide_Bend", "SiEPIC", param )
@@ -213,35 +229,53 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
         p3 = pya.Point ((p2t.x+p1t.x)/2, (p2t.y+p1t.y)/2) # midpoint of p2t p1t
         trans = pya.Trans(angle, False, p3)
         self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
-        print("straight wg inst: %s, %s, %s, [%s];   bend: %s, %s, p2 %s" % (i, angle, wg_length, p3, bends_instance[i], bends_pcell[i], p2) )
+        print("straight wg mid-section inst: %s, %s, %s, [%s];   bend: %s, %s, p2 %s" % (i, angle, wg_length, p3, bends_instance[i], bends_pcell[i], p2) )
 
-      # put in the straight segment at the beginning and end of the path
-      if i==0:
-        pins = find_PCell_pins(bends_pcell[0])
-        p1 = pya.Point(pins['pin1_x'], pins['pin1_y'] )
-        p1t = bends_instance[0].trans.trans(p1) 
-        p0 = pya.Point(*points[0])
-        angle = ( angle_segment([points[0],points[1]]) ) / 90
-        wg_length = p0.distance(p1t) 
-        p3 = pya.Point ((p0.x+p1t.x)/2, (p0.y+p1t.y)/2) # midpoint
-        
-      if i==len(bends_instance)-2:
-        pins = find_PCell_pins(bends_pcell[i+1])
-        p2 = pya.Point(pins['pin2_x'], pins['pin2_y'] )
-        p2t = bends_instance[i+1].trans.trans(p2) 
-        p0 = pya.Point(*points[i+3])
-        angle = ( angle_segment([points[i+2],points[i+3]]) ) / 90
-        wg_length = p0.distance(p2t) 
-        p3 = pya.Point ((p0.x+p2t.x)/2, (p0.y+p2t.y)/2) # midpoint
-
-      if (i==0 or i==len(bends_instance)-2) and wg_length &gt; 0:
+    # put in the straight segment at the beginning of the path
+    if len(bends_pcell) &gt; 0:
+      pins = find_PCell_pins(bends_pcell[0])
+      p1 = pya.Point(pins['pin1_x'], pins['pin1_y'] )
+      p1t = bends_instance[0].trans.trans(p1) 
+      p0 = pya.Point(*points[0])
+      angle = ( angle_segment([points[0],points[1]]) ) / 90
+      wg_length = p0.distance(p1t) 
+      if wg_length &gt; 0:
         # place the waveguide:      
+        p3 = pya.Point ((p0.x+p1t.x)/2, (p0.y+p1t.y)/2) # midpoint
         param = { "wg_width": w, "wg_length": wg_length, "layer": LayerSi }
         pcell = ly.create_cell("Waveguide_Straight", "SiEPIC", param )
         trans = pya.Trans(angle, False, p3)
         self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
-        print("straight wg inst: %s, %s, %s, [%s]; " % (i, angle, wg_length, p3) )
-
+        print("straight wg end-section inst: %s, %s, %s, [%s]; " % (i, angle, wg_length, p3) )
+        
+      # put in the straight segment at the end of the path
+      i=len(bends_instance)-2
+      pins = find_PCell_pins(bends_pcell[i+1])
+      p2 = pya.Point(pins['pin2_x'], pins['pin2_y'] )
+      p2t = bends_instance[i+1].trans.trans(p2) 
+      p0 = pya.Point(*points[i+3])
+      angle = ( angle_segment([points[i+2],points[i+3]]) ) / 90
+      wg_length = p0.distance(p2t) 
+      if wg_length &gt; 0:
+        # place the waveguide:      
+        p3 = pya.Point ((p0.x+p2t.x)/2, (p0.y+p2t.y)/2) # midpoint
+        param = { "wg_width": w, "wg_length": wg_length, "layer": LayerSi }
+        pcell = ly.create_cell("Waveguide_Straight", "SiEPIC", param )
+        trans = pya.Trans(angle, False, p3)
+        self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
+        print("straight wg end-section inst: %s, %s, %s, [%s]; " % (i, angle, wg_length, p3) )
+    else:
+      # just a straight section:
+        p1 = pya.Point(*points[0])
+        p2 = pya.Point(*points[len(points)-1])
+        wg_length = p1.distance(p2) 
+        angle = ( angle_segment([points[0],points[len(points)-1]]) ) / 90
+        p3 = pya.Point ((p1.x+p2.x)/2, (p1.y+p2.y)/2) # midpoint
+        param = { "wg_width": w, "wg_length": wg_length, "layer": LayerSi }
+        pcell = ly.create_cell("Waveguide_Straight", "SiEPIC", param )
+        trans = pya.Trans(angle, False, p3)
+        self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
+        print("straight wg end-section inst: %s, %s, %s, [%s]; " % (i, angle, wg_length, p3) )
 
 class Waveguide_Bend(pya.PCellDeclarationHelper):
   """
@@ -344,14 +378,11 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = pya.Trans(x+r/10, r/4)
-    text = pya.Text ('Lumerical_INTERCONNECT_component="ebeam_bend_1550"', t)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_bend_1550', t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = pya.Trans(x+r/10, r/2)
-    text = pya.Text ('Spice_param:radius=%.3f'%self.radius, t)
-    shape = self.cell.shapes(LayerDevRecN).insert(text)
-    shape.text_size = r/100
-    text = pya.Text ('Spice_param:wg_width=%.3f'%self.wg_width, t)
+    text = pya.Text ('Spice_param:radius=%.3fu wg_width=%.3fu'% (self.radius,self.wg_width), t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
 
@@ -439,10 +470,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = pya.Trans(length/9, 0)
-    text = pya.Text ('Spice_param:wg_width=%.3f'%(self.wg_width*dbu), t)
-    shape = self.cell.shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
-    text = pya.Text ('Spice_param:wg_length=%.3f'%(self.wg_length*dbu), t)
+    text = pya.Text ('Spice_param:wg_width=%.3fu wg_length=%.3fu'%(self.wg_width*dbu, self.wg_length*dbu), t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
