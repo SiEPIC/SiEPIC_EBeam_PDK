@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# dL_Design_Generator
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Jaspreet Jhoja (c) 2015
+
+This Python file takes an input for design variations and create a max of 6 TE mode design variations.
+
+uses:
+ - the SiEPIC EBeam GDS Library
+ - the SiEPIC EBeam PCell Library
+it does:
+ - deletes everything first
+ - takes dL as input and creates compact waveguide designs
+ 
+
+Version history:
+
+Jaspreet Jhoja          2015/11/27
+ - Initial version
+"""
+
+# 
+# Python script to create a layout for testing a double-bus ring resonator.
+# uses:
+#  - the SiEPIC EBeam GDS Library
+#  - the SiEPIC EBeam PCell Library
+# deletes everything first
+# works for radius of 5um
+# Currently limited to dL values of 70-300 microns
+
+#dL values for the designs
+dl = [70, 100, 125, 150, 175, 280]
+
+#waveguide bend radius, changing this will change how many designs will be formed.
+wg_bend_radius = 5
+
+#change the waveguide width, default: 500nm or 0.5microns
+wg_width = 0.5
+
+
+
+
+
+
+import pya
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+# find the currently selected cell:
+cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if cell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = 1 / ly.dbu
+
+
+# clean all cells within "cell"
+ly.prune_subcells(cell.cell_index(), 10)
+#delete_extra_top_cells(cell)
+
+# Layer mapping:
+LayerSi = pya.LayerInfo(1, 0)
+LayerSiN = cell.layout().layer(LayerSi)
+fpLayer = pya.LayerInfo(99, 0)
+fpLayerN = cell.layout().layer(fpLayer)
+TextLayer = pya.LayerInfo(10, 0)
+TextLayerN = cell.layout().layer(TextLayer)
+
+# Draw floor plan
+cell.shapes(fpLayerN).insert(pya.Box(0,0, 610*dbu, 405*dbu))
+
+
+#Manually request a number of designs
+number_of_designs = len(dl)
+
+#space between the designs
+space = 100
+#12 is max for 6 designs
+#1 design for every 33 points
+
+#Decide number of designs per radius
+if (wg_bend_radius &gt;5 and wg_bend_radius &lt;= 12):
+  number_of_designs = 6
+  space  =100
+  
+elif(wg_bend_radius &gt;12):
+  point_diff = wg_bend_radius-12 
+  space = 100 + (point_diff*3)
+  number_of_designs = 605/space
+
+top_cell = cell
+cell = cell.layout().create_cell("MZIVariations")
+t = pya.Trans(pya.Trans.R0, 40 * dbu, 12 * dbu)
+# place "cell" in the top cell
+top_cell.insert(pya.CellInstArray(cell.cell_index(), t))
+
+# Grating couplers, P1orts 1, 2, 3, 4 (top-down):
+GC_imported = ly.create_cell("ebeam_gc_te1550", "SiEPIC-EBeam").cell_index()
+print ("Cell: GC_imported: #%s" % GC_imported)
+t = pya.Trans(pya.Trans.R0, 0, 0)
+cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127*dbu), pya.Point(space*dbu,0), 2, number_of_designs))
+
+#coordinates for GC
+GC_coord = [0,0]
+
+#Ybranch import and setup
+branch_imported = ly.create_cell("ebeam_y_1550", "SiEPIC-EBeam").cell_index()
+#splitter ybranch
+cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R0, 0, 127*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
+#joiner ybranch
+cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R270, ((15+2.75+wg_bend_radius)*dbu), ((127+15+2.75+wg_bend_radius) * dbu)), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
+
+
+
+
+#Drawing L1
+#Comment-Del: add 2.75 to go up and 2.75 to attach tp bottom
+points_L1 = [ [15, 127+2.75], [wg_bend_radius+15, 127+2.75], [wg_bend_radius+15, 127+2.75+wg_bend_radius] ] 
+L1 = layout_waveguide_abs(cell, LayerSi, points_L1, wg_width, wg_bend_radius)
+
+#instantiate the design for other waveguides
+a= pya.CellInstArray(ly.cell_by_name("ROUND_PATH"), pya.Trans(pya.Trans.R0, (space+15)*dbu, (127+2.75)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs-1)
+cell.insert(a)
+
+#extract coordinates for final attachments to the GC
+pt_f_x = wg_bend_radius+15
+pt_f_y = 127+2.75+wg_bend_radius
+
+
+#waveguide joining combiner with the output GC
+points_final = [[pt_f_x+2.75, pt_f_y+15],[pt_f_x +2.75, pt_f_y+15+wg_bend_radius], [pt_f_x +2.75+wg_bend_radius, pt_f_y+15+wg_bend_radius], [pt_f_x +2.75+wg_bend_radius+ wg_bend_radius+6, pt_f_y+15+wg_bend_radius], [pt_f_x +2.75+wg_bend_radius+wg_bend_radius+6, pt_f_y+15],
+[pt_f_x +2.75+wg_bend_radius+wg_bend_radius+6, 0], [0,0]]
+layout_waveguide_abs(cell, LayerSi, points_final, wg_width, wg_bend_radius)
+
+#instantiate the path for other designs
+a = pya.CellInstArray(ly.cell_by_name("ROUND_PATH$1"), pya.Trans(pya.Trans.R0, (space+pt_f_x+2.75)*dbu, (pt_f_y+15)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs-1)
+cell.insert(a)
+
+def drawL2(dL,n):
+  val = abs(dL-70)
+  addvalx = 0 #max canbe held upto 25
+  addvaly = 0 #can hold max value of upto 85
+
+
+  if(val&lt;50):
+    addvalx = val/2
+  elif(val&lt;=300):
+    addvalx = (50/2)
+    addvaly = ((val-50)/2)
+  #elif(val&gt;220):
+  #  addvalx = 25
+   # addvaly = (())
+
+  
+  points_L2 = [[15+(space*n), 127-2.75],[(space*n)+wg_bend_radius+15, 127-2.75],[(space*n)+wg_bend_radius+15, 127-2.75-10],
+[(space*n)+wg_bend_radius+15-10-3.79341-addvalx, 127-2.75-10],
+[(space*n)+wg_bend_radius+15-10-3.79341-addvalx, 127-2.75-10-10-addvaly],
+[(space*n)+wg_bend_radius+20.5, 127-2.75-20-addvaly], 
+[(space*n)+wg_bend_radius+20.5, 127+2.75+wg_bend_radius]]
+
+  L2 = layout_waveguide_abs(cell, LayerSi, points_L2, wg_width, wg_bend_radius)
+  # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
+  t = pya.Trans((space*n)*dbu, 127*dbu)
+  text = pya.Text ("opt_in_TE_1550_device_MZI"+str(n), t)
+  shape = cell.shapes(TextLayerN).insert(text)
+  shape.text_size = 3*dbu
+
+for i in range(len(dl)):
+  drawL2(dl[i],i)
+  </text>
+</klayout-macro>
