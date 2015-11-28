@@ -813,7 +813,7 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
     wg_path = pya.DPath(a1, w)
 
     npoints = points_per_circle(radius)
-    param = { "npoints": npoints, "radius": radius, "path": wg_path, "layer": layer }
+    param = { "npoints": npoints, "radius": float(radius), "path": wg_path, "layer": layer }
 
     pcell = ly.create_cell("ROUND_PATH", "Basic", param )
 
