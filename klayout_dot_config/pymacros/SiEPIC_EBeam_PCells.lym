@@ -478,18 +478,18 @@ class Waveguide_Straight2(pya.PCellDeclarationHelper):
     self.cell.shapes(LayerSiN).insert(path.simple_polygon())
 
     angle = ( angle_segment([points[0],points[1]]) ) / 90
-    print int(round(angle))
-    print w
+    print(int(round(angle)))
+    print(w)
     
     # Pins on the bus waveguide side:
     pin_length = 200
     t = pya.Trans(int(round(angle)), 0, pya.Point(round(points[0][0]), round(points[0][1])))
 #    t = pya.Trans(pya.Point(round(points[0][0]), round(points[0][1])))
-    print t
-    print points
+    print(t)
+    print(points)
 #    pya.Point(points[i][0], points[i][1])
     pin = pya.Path([pya.Point(-pin_length/2, 0), pya.Point(pin_length/2, 0)], w)
-    print pin
+    print(pin)
     pin_t = pin.transformed(t)
     self.cell.shapes(LayerPinRecN).insert(pin_t)
     text = pya.Text ("pin1", t)
