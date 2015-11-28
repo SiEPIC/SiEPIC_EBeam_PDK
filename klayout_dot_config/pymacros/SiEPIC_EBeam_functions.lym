@@ -600,7 +600,6 @@ def PCell_get_parameters ( pcell ):
   
 def find_PCell_pins(subcell):
   # find the location of the pins in the cell.
-
   # example usage:
   # ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
   # pcell = ly.create_cell("Waveguide_Bend", "SiEPIC", { } )
@@ -610,18 +609,16 @@ def find_PCell_pins(subcell):
   iter2 = subcell.begin_shapes_rec(LayerPinRecN)
   pins = {} # dictionary for pin information
   while not(iter2.at_end()):
-    print(iter2)
     # Find text label for PinRec, to get the port numbers
     if iter2.shape().is_text():
       texto= iter2.shape().text.transformed(iter2.itrans())
       x = texto.x
       y = texto.y
       text = iter2.shape().text
-      print( "PinRec label: %s at (%s, %s)" % (text, x, y) )
+#      print( "PinRec label: %s at (%s, %s)" % (text, x, y) )
       pins[ str(text.string) + "_x" ] = x
       pins[ str(text.string) + "_y" ] = y
     iter2.next()
-    
 
   return pins
   
@@ -1008,12 +1005,20 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
   text += '.subckt %s%s\n' % (topcell.name, opticalIO_pins)
   
   for o in optical_components:
+  
+    # convert KLayout GDS rotation/flip to Lumerical INTERCONNECT
+    # KLayout defines mirror as an x-axis flip, whereas INTERCONNECT does y-axis flip
+    # KLayout defines rotation as counter-clockwise, whereas INTERCONNECT does clockwise
+    # input is KLayout [Flip][Rotation]; output is INTERCONNECT:
+    KLayoutInterconnectRotFlip = [[[0,False], [270,False], [180,False], [90,False]], \
+                                  [[180,True], [90,True], [0,True], [270,True]]] 
+    r, f = KLayoutInterconnectRotFlip[1 if o.flip else 0][int(round(o.rotate/90))]
     nets_str = ""
     for n in o.nets:
       nets_str += " N$" + str(n)
-    flip = ' sch_f=true' if o.flip else ''
-    if o.rotate &gt; 0:
-      rotate = ' sch_r=%s' % str(o.rotate)
+    flip = ' sch_f=true' if f else ''
+    if r &gt; 0:
+      rotate = ' sch_r=%s' % str(r)
     else:
       rotate = ''
 #    t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
