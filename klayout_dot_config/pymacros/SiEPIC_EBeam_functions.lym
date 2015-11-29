@@ -1001,7 +1001,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
 
   Lumerical_schematic_scaling = 3e-2
   Lumerical_schematic_scaling = 20e-2
- """
+  """
  #Mapping of geometry transformation for INTERCONNECT  
   m = {(0, False):[0, False], \
          (90, False):[270, False], \
