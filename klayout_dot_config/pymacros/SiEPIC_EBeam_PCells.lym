@@ -536,6 +536,7 @@ class Waveguide_Straight2(pya.PCellDeclarationHelper):
     pin_length = 200
     t = pya.Trans(int(round(angle)), 0, pya.Point(round(points[0][0]), round(points[0][1])))
 #    t = pya.Trans(pya.Point(round(points[0][0]), round(points[0][1])))
+
 #    pya.Point(points[i][0], points[i][1])
     pin = pya.Path([pya.Point(-pin_length/2, 0), pya.Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)

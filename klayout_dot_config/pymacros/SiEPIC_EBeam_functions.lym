@@ -1001,7 +1001,17 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
 
   Lumerical_schematic_scaling = 3e-2
   Lumerical_schematic_scaling = 20e-2
-  
+  """
+ #Mapping of geometry transformation for INTERCONNECT  
+  m = {(0, False):[0, False], \
+         (90, False):[270, False], \
+         (180, False):[180, False], \
+         (270, False):[90, False], \
+         (0, True):[180,True], \
+         (90, True):[90, True], \
+         (180, True):[0,True], \
+         (270, True):[270, False]}
+  """
   from time import strftime 
   
   text = '* Spice output from KLayout SiEPIC_EBeam_PDK v%s, %s.\n\n' % (SiEPIC_Version, strftime("%Y-%m-%d %H:%M:%S") )
@@ -1022,6 +1032,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
     nets_str = ""
     for n in o.nets:
       nets_str += " N$" + str(n)
+
     flip = ' sch_f=true' if f else ''
     if r &gt; 0:
       rotate = ' sch_r=%s' % str(r)
