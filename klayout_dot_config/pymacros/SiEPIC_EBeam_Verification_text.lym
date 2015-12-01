@@ -45,7 +45,7 @@ Lukas Chrostowski 2015/11/12
    - incorrect number of nets connected to a component (disconnected, or too many)
  
 Lukas Chrostowski           2015/11/15
- - fix for Python 3.4: print ("xxx")
+ - fix for Python 3.4: print("xxx")
  - moved some functions from here, to the common "SiEPIC_EBeam_functions file, so they are accessible elsewhere.
  - added pin# text label on PinRec layer; sort pins in Spice output using these names.
 
@@ -186,8 +186,8 @@ clock_identify_layout = time.clock()
 
 # ********* Verification ********* 
 # Check the layout for errors, using the above arrays:
-print ("")
-print ("Checking layout for errors: ")
+print("")
+print("Checking layout for errors: ")
 if 'wtext' in globals():
   wtext.insertHtml('&lt;br&gt;* Checking layout for errors:&lt;br&gt;&lt;br&gt;')
 layout_errors=[]
@@ -201,7 +201,7 @@ clock_check_waveguides = time.clock()
 check_connectivity(rdb, optical_components, topcell, LayerErrorN)
 clock_check_connectivity = time.clock()
 lv.add_missing_layers()
-print ("*** Number of errors found: %s." % len(layout_errors) )
+print("*** Number of errors found: %s." % len(layout_errors) )
 if 'wtext' in globals():
   wtext.insertHtml('&lt;br&gt;*** Number of errors found: %s.&lt;br&gt;' % len(layout_errors) )
 clock_verify_layout = time.clock()
@@ -217,9 +217,9 @@ clock_netlist = time.clock()
 # Find the automated measurement coordinates:
 if 'wtext' in globals():
   wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
-print ("")
-print ("Automated measurement coordinates: ")
-print ("")
+print("")
+print("Automated measurement coordinates: ")
+print("")
 t = find_automated_measurement_labels(topcell, LayerTextN)
 if 'wtext' in globals():
   wtext.insertHtml (t)
@@ -246,9 +246,9 @@ if 'wtext' in globals():
 if 'wtext' in globals():
   wtext.insertHtml('&lt;br&gt;Done.&lt;br&gt;')
   
-print ("")
-print ("Done. ")
-print ("")
+print("")
+print("Done. ")
+print("")
 
 
 #lv.show_rdb(rdb_i, cv.cell_index)
