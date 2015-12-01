@@ -40,9 +40,9 @@ if app.get_config("SiEPIC-config-initialized") == '':
   app.set_config("SiEPIC-config-initialized", "1")    # marks as initialized 
   app.get_config('key-bindings')
   # consider setting key bindings here.
-  print ("SiEPIC EBeam PDK – now installed")
+  print("SiEPIC EBeam PDK – now installed")
 else:
-  print ("SiEPIC EBeam PDK – already installed")
+  print("SiEPIC EBeam PDK – already installed")
   
 
 mw = pya.Application.instance().main_window()

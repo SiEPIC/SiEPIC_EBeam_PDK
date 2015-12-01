@@ -33,41 +33,16 @@ Lukas Chrostowski           2015/11/19
 """
 
 import os
-print os.name
+print(os.name)
 
 import platform
-print platform.system()
-print platform.release()
+print(platform.system())
+print(platform.release())
 
 import sys
 version = sys.version
 
 import string
-
-"""
-def netlist_extraction(topcell):
-  # Collection of functions to extract the circuit netlist from the physical layout
-  
-  # Search the layout for the components and waveguides:
-  print ("")
-  print ("* calling find_all_components() – DevRec:")
-  find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
-  print ("")
-  print ("* calling find_all_waveguides():")
-  find_all_waveguides(topcell, LayerSiN)
-
-  print ("")
-  print ("* print_Optical_all, after find_all_{components, waveguides}:")
-  print_Optical_all(optical_components, optical_waveguides, optical_pins, optical_nets)
-
-  # Search the arrays to identify all the nets:
-  print ("")
-  print ("* calling identify_all_nets():")
-  identify_all_nets(optical_pins, optical_waveguides, optical_components)
-
-  return optical_waveguides, optical_components
-"""  
-
 
 
 # find the currently selected cell:
@@ -98,15 +73,26 @@ optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
   
 # Output the Spice netlist:
 text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
-print text_Spice
+print(text_Spice)
 
-filename = '/tmp/%s.spi' % topcell.name
+if sys.platform.startswith("win"):
+
+  folder_name = app.application_data_path()
+  if not os.path.isdir(folder_name+'/tmp'):
+    os.makedirs(folder_name+"/tmp")
+  filename = folder_name + '/tmp/%s.spi' % topcell.name
+  filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
+else: 
+
+  filename = '/tmp/%s.spi' % topcell.name
+  filename2 = '/tmp/%s.lsf' % topcell.name
+
+# Write the Spice netlist to file
 file = open(filename, 'w')
 file.write (text_Spice)
 file.close()
 
-
-filename2 = '/tmp/%s.lsf' % topcell.name
+# Write the Lumerical INTERCONNECT start-up script.
 file = open(filename2, 'w')
 text_lsf = 'switchtolayout;\n'
 text_lsf += 'deleteall;\n'
@@ -124,23 +110,26 @@ file.close()
 
 print(text_lsf)
 
-if sys.platform.startswith('freebsd'):
-    # FreeBSD-specific code here...
-    pass
-elif sys.platform.startswith('linux'):
-    # Linux-specific code here...
-    if string.find(version,"2.") &gt; -1:
-      import commands
-      commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
+if sys.platform.startswith('linux'):
+  # Linux-specific code here...
+  if string.find(version,"2.") &gt; -1:
+    import commands
+    print("Running INTERCONNECT")
+    commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
 
 elif sys.platform.startswith('darwin'):
-    # OSX specific
-    pass
-    if string.find(version,"2.7.") &gt; -1:
-      import commands
-      print ("Running INTERCONNECT")
-#      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
-      commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
+  # OSX specific
+  if string.find(version,"2.7.") &gt; -1:
+    import commands
+    print("Running INTERCONNECT")
+    #commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
+    commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
 
+elif sys.platform.startswith('win'):
+  # Windows specific code here
+  import subprocess
+  print("Running INTERCONNECT")
+  subprocess.Popen(args=['C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe', '-run', filename2], shell=True)
+  
 </text>
 </klayout-macro>
