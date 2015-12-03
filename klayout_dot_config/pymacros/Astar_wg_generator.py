@@ -31,12 +31,12 @@ Version history:
 
 Jaspreet Jhoja          2015/12/03
 
- - Takes Manual coordinate input, if no coordinates are set,
+ - takes Manual coordinate input, if no coordinates are set,
     then the script automatically extract coordinates from the 
      start_pt and end_pt text.      
- - Allow input for desired gap between waveguides
+ - allows input for desired gap between waveguides
  - only works for waveguide width of 500nm 
- -  usually takes 10-15 seconds, depending on the complexity of the obstacle
+ - usually takes 10-15 seconds, depending on the complexity of the obstacle
 """
 
 # 
