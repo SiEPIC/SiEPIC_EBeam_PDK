@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>MZI 12 TE mode designs generator, by Jaspreet Jhoja</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,9 +9,9 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.layout_submenu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -32,22 +32,35 @@ it does:
  
 
 Version history:
-
+Jaspreet Jhoja          2015/12/01
+ - Fix for Layout Warning: Not enough space for the bend radius
+ - The dL range has been extended: 70-535um
+ - Generates upto 12 TE mode designs
+ 
 Jaspreet Jhoja          2015/11/27
  - Initial version
+ - dL range of 70-300um
+ - Gennerates upto 6 TE mode designs
 """
-
 # 
-# Python script to create a layout for testing a double-bus ring resonator.
 # uses:
 #  - the SiEPIC EBeam GDS Library
 #  - the SiEPIC EBeam PCell Library
 # deletes everything first
 # works for radius of 5um
-# Currently limited to dL values of 70-300 microns
+# Works for the dL values ranging between 70-535 microns
+
+import pya
 
 #dL values for the designs
-dl = [70, 100, 125, 150, 175, 280]
+dl = [70,  270, 380 ,450, 465,500,400, 500,100,367,200,251]
+
+#validate dL values
+for i in dl:
+  if(i&lt;70):
+    dl.pop(dl.index(i))
+  if(i&gt;535):
+    dl.pop(dl.index(i))
 
 #waveguide bend radius, changing this will change how many designs will be formed.
 wg_bend_radius = 5
@@ -55,13 +68,9 @@ wg_bend_radius = 5
 #change the waveguide width, default: 500nm or 0.5microns
 wg_width = 0.5
 
-
-
-
-
-
-import pya
 lv = pya.Application.instance().main_window().current_view()
+
+
 if lv == None:
   raise Exception("No view selected")
 # Find the currently selected layout.
@@ -91,103 +100,150 @@ TextLayerN = cell.layout().layer(TextLayer)
 # Draw floor plan
 cell.shapes(fpLayerN).insert(pya.Box(0,0, 610*dbu, 405*dbu))
 
+#coordinates for GC
+GC_coord = [0,227]
 
 #Manually request a number of designs
 number_of_designs = len(dl)
 
 #space between the designs
 space = 100
-#12 is max for 6 designs
-#1 design for every 33 points
 
+#1 design for every 33 points
 #Decide number of designs per radius
-if (wg_bend_radius &gt;5 and wg_bend_radius &lt;= 12):
-  number_of_designs = 6
-  space  =100
-  
-elif(wg_bend_radius &gt;12):
-  point_diff = wg_bend_radius-12 
-  space = 100 + (point_diff*3)
-  number_of_designs = 605/space
 
 top_cell = cell
-cell = cell.layout().create_cell("MZIVariations")
-t = pya.Trans(pya.Trans.R0, 40 * dbu, 12 * dbu)
-# place "cell" in the top cell
+cell = cell.layout().create_cell("MZI_TE_Variations")
+t = pya.Trans(pya.Trans.R0, 40 * dbu, (12 * dbu))
+  # place "cell" in the top cell
 top_cell.insert(pya.CellInstArray(cell.cell_index(), t))
-
-# Grating couplers, P1orts 1, 2, 3, 4 (top-down):
+  # Grating couplers, P1orts 1, 2, 3, 4 (top-down):
 GC_imported = ly.create_cell("ebeam_gc_te1550", "SiEPIC-EBeam").cell_index()
 print ("Cell: GC_imported: #%s" % GC_imported)
-t = pya.Trans(pya.Trans.R0, 0, 0)
-cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127*dbu), pya.Point(space*dbu,0), 2, number_of_designs))
+  
+#function that draws Grating Coupler
+def draw_gc(gc_y_coord, number_of_designs):
 
-#coordinates for GC
-GC_coord = [0,0]
-
-#Ybranch import and setup
-branch_imported = ly.create_cell("ebeam_y_1550", "SiEPIC-EBeam").cell_index()
-#splitter ybranch
-cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R0, 0, 127*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
-#joiner ybranch
-cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R270, ((15+2.75+wg_bend_radius)*dbu), ((127+15+2.75+wg_bend_radius) * dbu)), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
-
-
-
-
-#Drawing L1
-#Comment-Del: add 2.75 to go up and 2.75 to attach tp bottom
-points_L1 = [ [15, 127+2.75], [wg_bend_radius+15, 127+2.75], [wg_bend_radius+15, 127+2.75+wg_bend_radius] ] 
-L1 = layout_waveguide_abs(cell, LayerSi, points_L1, wg_width, wg_bend_radius)
-
-#instantiate the design for other waveguides
-a= pya.CellInstArray(ly.cell_by_name("ROUND_PATH"), pya.Trans(pya.Trans.R0, (space+15)*dbu, (127+2.75)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs-1)
-cell.insert(a)
-
-#extract coordinates for final attachments to the GC
-pt_f_x = wg_bend_radius+15
-pt_f_y = 127+2.75+wg_bend_radius
+  t = pya.Trans(pya.Trans.R0, 0, gc_y_coord*dbu)
+  
+  cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127*dbu), pya.Point(space*dbu,0), 2, number_of_designs))
+  #Ybranch import and setup
+  branch_imported = ly.create_cell("ebeam_y_1550", "SiEPIC-EBeam").cell_index()
+  #splitter ybranch
+  cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R0, 0, (127+gc_y_coord)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
+  #joiner ybranch
+  cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R270, ((15+2.75+wg_bend_radius)*dbu), ((gc_y_coord+127+15+2.75+wg_bend_radius) * dbu)), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
 
 
-#waveguide joining combiner with the output GC
-points_final = [[pt_f_x+2.75, pt_f_y+15],[pt_f_x +2.75, pt_f_y+15+wg_bend_radius], [pt_f_x +2.75+wg_bend_radius, pt_f_y+15+wg_bend_radius], [pt_f_x +2.75+wg_bend_radius+ wg_bend_radius+6, pt_f_y+15+wg_bend_radius], [pt_f_x +2.75+wg_bend_radius+wg_bend_radius+6, pt_f_y+15],
-[pt_f_x +2.75+wg_bend_radius+wg_bend_radius+6, 0], [0,0]]
-layout_waveguide_abs(cell, LayerSi, points_final, wg_width, wg_bend_radius)
+#function Drawing L1
+  #Comment-Del: add 2.75 to go up and 2.75 to attach tp bottom
+  points_L1 = [ [15, 127+gc_y_coord+2.75], [wg_bend_radius+15, 127+gc_y_coord+2.75], [wg_bend_radius+15, (127+gc_y_coord+2.75+wg_bend_radius)] ] 
+  L1 = layout_waveguide_abs(cell, LayerSi, points_L1, wg_width, wg_bend_radius)
+  
+  #instantiate the design for other waveguides
+  a= pya.CellInstArray(ly.cell_by_name("ROUND_PATH"), pya.Trans(pya.Trans.R0, (space+15)*dbu, (127+gc_y_coord+2.75)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs-1)
+  cell.insert(a)
+  
+  #extract coordinates for final attachments to the GC
+  pt_f_x = wg_bend_radius+15
+  pt_f_y = 127+gc_y_coord+2.75+wg_bend_radius
+  
+  
+  #waveguide joining combiner with the output GC
+  
+  points_final = [[pt_f_x+2.75, pt_f_y+15],[pt_f_x +2.75, pt_f_y+16+wg_bend_radius], [pt_f_x +2.75+wg_bend_radius+wg_bend_radius, pt_f_y+16+wg_bend_radius],
+  [pt_f_x +2.75+wg_bend_radius+wg_bend_radius, gc_y_coord], [0,gc_y_coord]]
+  layout_waveguide_abs(cell, LayerSi, points_final, wg_width, wg_bend_radius)
+  
+  #instantiate the path for other designs
+  a = pya.CellInstArray(ly.cell_by_name("ROUND_PATH$1"), pya.Trans(pya.Trans.R0, (space+pt_f_x+2.75)*dbu, (pt_f_y+15)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs-1)
+  cell.insert(a)
 
-#instantiate the path for other designs
-a = pya.CellInstArray(ly.cell_by_name("ROUND_PATH$1"), pya.Trans(pya.Trans.R0, (space+pt_f_x+2.75)*dbu, (pt_f_y+15)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs-1)
-cell.insert(a)
 
-def drawL2(dL,n):
+def drawL2(dL,n, gc_y_coord):
   val = abs(dL-70)
   addvalx = 0 #max canbe held upto 25
   addvaly = 0 #can hold max value of upto 85
 
-
-  if(val&lt;50):
-    addvalx = val/2
-  elif(val&lt;=300):
-    addvalx = (50/2)
-    addvaly = ((val-50)/2)
+  if(dL&lt;120):
+    addvalx = (val/2)
+  elif(dL&lt;=310):
+    addvalx = float(64/2)
+    addvaly = float((val-64)/2)
+  elif(dL&gt;310 and dL&lt;=380):
+    val= val-13
+    addvalx = float(64/2)
+    addvaly = (val-(128))/2
+  elif(dL&gt;380 and dL&lt;=465):
+    val= val-2
+    addvalx = float(64/2)
+    addvaly = (val-(36*6))/2
+  elif(dL&gt;465 and dL&lt;535):
+    val = val-7
+    addvalx = float(64/2)
+    addvaly = (val-(36*8))/2
+  #print (val,addvalx, addvaly)
   #elif(val&gt;220):
   #  addvalx = 25
    # addvaly = (())
 
-  
-  points_L2 = [[15+(space*n), 127-2.75],[(space*n)+wg_bend_radius+15, 127-2.75],[(space*n)+wg_bend_radius+15, 127-2.75-10],
-[(space*n)+wg_bend_radius+15-10-3.79341-addvalx, 127-2.75-10],
-[(space*n)+wg_bend_radius+15-10-3.79341-addvalx, 127-2.75-10-10-addvaly],
-[(space*n)+wg_bend_radius+20.5, 127-2.75-20-addvaly], 
-[(space*n)+wg_bend_radius+20.5, 127+2.75+wg_bend_radius]]
+  coordedit = [[[(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-12-10], [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75-12-10],
+   [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75-12-(20)], [(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-12-(20)]],
+   
+   [[(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-12-30], [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75-12-30],
+   [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75-12-(40)], [(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-12-(40)]],
+   
+      [[(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-12-50], [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75-12-50],
+   [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75-12-(60)], [(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-12-(60)]]]
 
+  points_L2 = [[15+(space*n), 127+gc_y_coord-2.75],
+    [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75],
+    [(space*n)+wg_bend_radius+15, 127+gc_y_coord-2.75-12],
+    [(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-12],
+    [(space*n)+wg_bend_radius+15-10.79341-addvalx, 127+gc_y_coord-2.75-18-addvaly-5],
+    [(space*n)+wg_bend_radius+20.5, 127+gc_y_coord-2.75-18-addvaly-5], 
+    [(space*n)+wg_bend_radius+20.5, 127+gc_y_coord+2.75+wg_bend_radius]]
+  if(n&lt;=5 and dL&lt;=310):
+    None
+  elif(dL&gt;310 and dL&lt;=380):
+   # change_coord(10)
+    for i in coordedit[0]:
+      points_L2.insert(4+(coordedit[0].index(i)),i)
+  elif(dL&gt;380 and dL&lt;=465):
+
+    for i in coordedit[0]:
+      points_L2.insert(4+(coordedit[0].index(i)),i)
+
+    for i in coordedit[1]:
+      points_L2.insert(8+(coordedit[1].index(i)),i)
+  
+  elif(dL&gt;465 and dL&lt;535):
+    for i in coordedit[0]:
+      points_L2.insert(4+(coordedit[0].index(i)),i)
+    for i in coordedit[1]:
+      points_L2.insert(8+(coordedit[1].index(i)),i)
+    for i in coordedit[2]:
+      points_L2.insert(12+(coordedit[2].index(i)),i)
+     # points_L2.pop(7)    
+  print ( points_L2)
   L2 = layout_waveguide_abs(cell, LayerSi, points_L2, wg_width, wg_bend_radius)
   # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-  t = pya.Trans((space*n)*dbu, 127*dbu)
+  t = pya.Trans((space*n)*dbu, gc_y_coord*dbu)
   text = pya.Text ("opt_in_TE_1550_device_MZI"+str(n), t)
   shape = cell.shapes(TextLayerN).insert(text)
   shape.text_size = 3*dbu
-
-for i in range(len(dl)):
-  drawL2(dl[i],i)
-  </text>
+#  elif(dL&gt;300)
+if (len(dl)&gt;6):
+  draw_gc(0,6)
+  for i in range(6):
+    drawL2(dl[i],i,0)
+  remaining_designs = len(dl)-6
+  draw_gc(227,remaining_designs)
+  for i in range(remaining_designs):
+    drawL2(dl[i+6],i,227)  
+else:
+  draw_gc(0,len(dl))
+  for i in range(len(dl)):
+    drawL2(dl[i],i)
+</text>
 </klayout-macro>
