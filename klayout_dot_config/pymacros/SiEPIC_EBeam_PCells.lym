@@ -73,6 +73,14 @@ Lukas Chrostowski           2015/11/17
 Lukas Chrostowski           2015/11/19
  - Lumerical INTERCONNECT laser, detector
 
+Lukas Chrostowski           2015/11/xx
+ - Waveguide based on bends, straight waveguide.
+
+Lukas Chrostowski           2015/12/3
+ - Bragg grating
+ 
+
+
 """
 
 import pya
@@ -82,6 +90,121 @@ import math
 MODULE_NUMPY = False
 
 dbu = 0.001
+
+
+
+class Bragg_waveguide(pya.PCellDeclarationHelper):
+  """
+  Input: length, width
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Bragg_waveguide, self).__init__()
+
+    # declare the parameters
+    self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
+    self.param("grating_period", self.TypeDouble, "Grating period", default = 0.317)     
+    self.param("corrugation_width", self.TypeDouble, "Corrugration width", default = 0.05)     
+    self.param("misalignment", self.TypeDouble, "Grating misalignment", default = 0.0)     
+#    self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.5)     
+    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(31, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+#    self.param("textl", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Bragg_waveguide_%s-%.3f-%.3f-%.3f" % \
+    (self.number_of_periods, self.grating_period, self.corrugation_width, self.misalignment)
+  
+  def coerce_parameters_impl(self):
+    pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return False
+    
+  def produce_impl(self):
+  
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+
+    LayerSi = self.layer
+    LayerSiN = ly.layer(LayerSi)
+    LayerSiSPN = ly.layer(LayerSiSP)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+
+    # Draw the Bragg grating:
+    box_width = int(round(self.grating_period/2/dbu))
+    grating_period = int(round(self.grating_period/dbu))
+    w = 500
+    half_w = w/2
+    half_corrugation_w = int(round(self.corrugation_width/2/dbu))
+    misalignment = int(round(self.misalignment/dbu))
+    for i in range(0,self.number_of_periods):
+      x = int(round((i * self.grating_period)/dbu))
+      box1 = pya.Box(x, 0, x + box_width, half_w+half_corrugation_w)
+      box2 = pya.Box(x + box_width, 0, x + grating_period, half_w-half_corrugation_w)
+      box3 = pya.Box(x + misalignment, 0, x + box_width + misalignment, -half_w-half_corrugation_w)
+      box4 = pya.Box(x + box_width + misalignment, 0, x + grating_period + misalignment, -half_w+half_corrugation_w)
+      self.cell.shapes(LayerSiN).insert(box1)
+      self.cell.shapes(LayerSiN).insert(box2)
+      self.cell.shapes(LayerSiN).insert(box3)
+      self.cell.shapes(LayerSiN).insert(box4)
+    length = x + grating_period + misalignment
+    if misalignment &gt; 0:
+      # extra piece at the end:
+      box2 = pya.Box(x + grating_period, 0, length, half_w)
+      self.cell.shapes(LayerSiN).insert(box2)
+      # extra piece at the beginning:
+      box3 = pya.Box(0, 0, misalignment, -half_w)
+      self.cell.shapes(LayerSiN).insert(box3)
+
+    
+    # Pins on the waveguide:
+    pin_length = 200
+
+    t = pya.Trans(0,0)
+    pin = pya.Path([pya.Point(-pin_length/2, 0), pya.Point(pin_length/2, 0)], w)
+    pin_t = pin.transformed(t)
+    self.cell.shapes(LayerPinRecN).insert(pin_t)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    t = pya.Trans(length,0)
+    pin_t = pin.transformed(t)
+    self.cell.shapes(LayerPinRecN).insert(pin_t)
+    text = pya.Text ("pin2", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Compact model information
+    t = pya.Trans(0, 0)
+    text = pya.Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.0', t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = pya.Trans(length/10, 0)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_bragg_te1550', t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = pya.Trans(length/9, 0)
+    text = pya.Text \
+      ('Spice_param:number_of_periods=%s grating_period=%.3fu corrugation_width=%.3fu misalignment=%.3fu' %\
+      (self.number_of_periods, self.grating_period, self.corrugation_width, self.misalignment), t )
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    points = [[0,0], [length, 0]]
+    path = points_to_path(points,w)
+    path = points_to_path(points,w*3)
+    self.cell.shapes(LayerDevRecN).insert(path.simple_polygon())
+
+
 
 
 class Waveguide_Route(pya.PCellDeclarationHelper):
@@ -1436,6 +1559,7 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("Waveguide_Bend", Waveguide_Bend())
     self.layout().register_pcell("Waveguide_Route", Waveguide_Route())
     self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
+    self.layout().register_pcell("Bragg_waveguide", Bragg_waveguide())
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
