@@ -94,6 +94,7 @@ Waveguide_Lib = "SiEPIC"
 
 # SiEPIC-EBeam-PDK Layers:
 LayerSi = pya.LayerInfo(1, 0)
+LayerSiSP = pya.LayerInfo(31, 0)
 LayerText = pya.LayerInfo(10, 0)
 LayerPinRec = pya.LayerInfo(69, 0)
 LayerDevRec = pya.LayerInfo(68, 0)
