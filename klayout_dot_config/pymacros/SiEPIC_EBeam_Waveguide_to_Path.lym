@@ -110,7 +110,7 @@ for o in object_selection:
   elif o.shape:
     print("Selected object is a shape.")
     c = o.shape.cell
-    if c.basic_name() == Waveguide_Type and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+    if c.basic_name() in Waveguide_Types and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
       # we have a waveguide GUIDING_LAYER selected
       print("Selected object is a GUIDING_LAYER in %s on LayerSi." % c.basic_name() )
       trans = o.source_trans().s_trans()
