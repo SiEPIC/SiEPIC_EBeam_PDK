@@ -1003,8 +1003,8 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
   # example output:         
   # X_grating_coupler_1 N$7 N$6 grating_coupler library="custom/genericcml" sch_x=-1.42 sch_y=-0.265 sch_r=0 sch_f=false
 
-  Lumerical_schematic_scaling = 3e-2
-  Lumerical_schematic_scaling = 20e-2
+  Lumerical_schematic_scaling = 5e-2
+#  Lumerical_schematic_scaling = 20e-2
 
   # convert KLayout GDS rotation/flip to Lumerical INTERCONNECT
   # KLayout defines mirror as an x-axis flip, whereas INTERCONNECT does y-axis flip
@@ -1094,6 +1094,8 @@ def eng_str(x):
     import math
     # x input in meters
     # output in meters, engineering notation, rounded to 1 nm
+    
+    EngExp_notation = 1 # 1 = "1.0e-6", 0 = "1.0u"
     x = round(x*1E9)/1E9
     y = abs(x)
     if y == 0:
@@ -1114,9 +1116,11 @@ def eng_str(x):
         str_engr_exponent = ""
         z = y/10**engr_exponent
       sign = '-' if x &lt; 0 else ''
-      #return sign+str(z)+'E'+str(engr_exponent)
+      if EngExp_notation:
+        return sign+str(z)+'E'+str(engr_exponent)
 #      return sign+ '%3.3f' % z +str(str_engr_exponent)
-      return sign+ str(z) +str(str_engr_exponent)
+      else:
+        return sign+ str(z) +str(str_engr_exponent)
 
 
 def netlist_extraction(topcell):
