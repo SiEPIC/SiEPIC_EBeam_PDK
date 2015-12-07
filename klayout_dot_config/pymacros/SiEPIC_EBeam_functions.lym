@@ -1043,8 +1043,8 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
       rotate = ''
 #    t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
 #         ( "X"+o.component+"_"+str(o.index), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
-    t = '  %s %s %s library="%s" %s lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
 #    t = '  %s %s %s library="%s" %s $X=%s $Y=%s sch_x=%s sch_y=%s %s%s'  % \
+    t = '  %s %s %s library="%s" %s lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
          ( "x"+str(o.index), nets_str, o.component, o.library, o.params, \
          eng_str(o.x * 1e-6), eng_str(o.y * 1e-6), \
          eng_str(o.x * Lumerical_schematic_scaling), eng_str(o.y * Lumerical_schematic_scaling), \
