@@ -1381,6 +1381,99 @@ def list_optical_waveguides(list_optical_waveguides):
     wtext.insertHtml('%s&lt;br&gt;' %t)
 
 
+
+
+def terminate_all_disconnected_pins(optical_pins, optical_waveguides, optical_components):
+  """
+  Find all disconnected pins, and add a disconnected component for circuit simulations
+  to properly account for reflections.
+  Function based on check_connectivity().
+  
+  steps:
+   - Find all disconnected pins &amp; waveguides
+   - to do: attempt to recognize if it is connected to a TE or TM circuit
+   - Add "disconnected" component to all disconnected pins &amp; waveguides
+  """
+
+  print ("running - terminate_all_disconnected_pins():")
+
+  # attach a TE disconnected component to disconnected pins.
+  component = "ebeam_disconnected_te1550"  # disconnected pin model name
+  library = "Design kits/ebeam_v1.2" # compact model library
+  
+  for pin in optical_pins:
+    if pin.net == -1 and pin.pin_type != 2:  # disconnected pin not on a pin_type = 2 (optical IO)
+      x, y = pin.x*dbu, pin.y*dbu
+      text = "  *** Found disconnected pin #%s, type %s, at (%s, %s), component #%s {%s}" \
+          % (pin.idx, pin.pin_type, x, y, \
+             pin.component_idx, optical_components[pin.component_idx].component)
+      print(text)
+
+      # Add "disconnected" component:
+      component_idx = len(optical_components)
+      optical_components.append ( Optical_component (component_idx, \
+                  component, component, x, y, 0, 0, library, "") )
+      # Make an optical net
+      net_idx = len(optical_nets)
+      optical_nets.append ( Optical_net (net_idx, 1, pin.component_idx, \
+                            1, optical_components[component_idx].idx) )
+      # update pin
+      pin.net = net_idx
+      # update the two components.  find where the pin is in the first component.
+      optical_components[pin.component_idx].nets\
+          [optical_components[pin.component_idx].pins.index(pin.idx)] \
+          = net_idx
+      optical_components[component_idx].nets.append ( net_idx )
+        
+  for w1 in optical_waveguides:
+    # examine the beginning of the waveguide:
+    if w1.net1 == -1:
+      x, y = w1.points[0][0]*dbu, w1.points[0][1]*dbu
+      text = "  *** Found disconnected waveguide at (%s, %s), net1" \
+          % (x, y)
+      print(text)
+      
+      # Add "disconnected" component:
+      component_idx = len(optical_components)
+      optical_components.append ( Optical_component (component_idx, \
+                  component, component, x, y, 0, 0, library, "") )
+      # Make an optical net
+      net_idx = len(optical_nets)
+      optical_nets.append ( Optical_net (net_idx, 0, w1.idx, \
+                            1, optical_components[component_idx].idx) )
+      # update pin
+      pin.net = net_idx
+      # update the new component.  
+      optical_components[component_idx].nets.append ( net_idx )
+      # update the waveguide
+      w1.net1 = net_idx
+
+    # examine the end of the waveguide:
+    if w1.net2 == -1:
+      x, y = w1.points[len(w1.points)-1][0]*dbu, w1.points[len(w1.points)-1][1]*dbu
+      text = "  *** Found disconnected waveguide at (%s, %s), net2" \
+          % (x,y)
+      print(text)
+
+      # Add "disconnected" component:
+      component_idx = len(optical_components)
+      optical_components.append ( Optical_component (component_idx, \
+                  component, component, x, y, 0, 0, library, "") )
+      # Make an optical net
+      net_idx = len(optical_nets)
+      optical_nets.append ( Optical_net (net_idx, 0, w1.idx, \
+                            1, optical_components[component_idx].idx) )
+      # update pin
+      pin.net = net_idx
+      # update the new component.  
+      optical_components[component_idx].nets.append ( net_idx )
+      # update the waveguide
+      w1.net2 = net_idx
+
+  return optical_waveguides, optical_components
+
+
+
 def waveguide_set_target_length():
   # Function to move the edges of a waveguide to obtain a target length
   # - Dialog prompts user for a target length, and to click on an edge to select shape and edge to move
