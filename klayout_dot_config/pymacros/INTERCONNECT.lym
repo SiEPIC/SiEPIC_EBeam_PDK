@@ -70,6 +70,10 @@ LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
 
 # extract the circuit netlist from the physical layout:
 optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
+
+# Add the "disconnected" component to all disconnected pins
+optical_waveguides, optical_components = \
+  terminate_all_disconnected_pins(optical_pins, optical_waveguides, optical_components)
   
 # Output the Spice netlist:
 text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
@@ -123,7 +127,7 @@ elif sys.platform.startswith('darwin'):
     import commands
     print("Running INTERCONNECT")
     #commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
-    commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
+    commands.getstatusoutput('open -n /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
 
 elif sys.platform.startswith('win'):
   # Windows specific code here
