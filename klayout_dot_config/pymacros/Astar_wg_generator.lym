@@ -265,7 +265,6 @@ class AStar:
           clist.append(ch3)
       if(ch4 not in restricted_points):
           clist.append(ch4)
-      
 
       gScore.update({str(ch1): gc1})
       gScore.update({str(ch2): gc1})
@@ -317,7 +316,6 @@ class AStar:
             current = ast.literal_eval(current)
             if current == goal:
                 return self.reconstructPath(cameFrom,start,goal)
-                #return "lol"
             openSet.remove(str(current))
             closedSet.add(str(current))
             for neighbor in self.neighborNodes(current):
@@ -330,7 +328,6 @@ class AStar:
                     fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal)
                     if str(neighbor) not in openSet:
                         openSet.add(str(neighbor))
-
         return "no path found"
 
 a=AStar()
