@@ -40,6 +40,13 @@ Lukas Chrostowski           2015/11/18
 Lukas Chrostowski           2015/11/18
  - removed need for numpy.array
  
+Lukas Chrostowski           2015/12/xx
+ - identify the waveguide either from the GUIDING_PATH or from the PCell
+ - convert either from ROUND_PATH or Waveguide_Route, depending on the variable
+
+Lukas Chrostowski           2015/12/04
+ - fix to convert either from ROUND_PATH or Waveguide_Route, based on what is selected
+ 
 """
 
 
@@ -86,6 +93,7 @@ object_selection = lv.object_selection   # returns ObjectInstPath[].
 
 is_waveguide = False
 
+
 for o in object_selection:
   # Find the selected waveguides
 
@@ -94,17 +102,17 @@ for o in object_selection:
     oinst = o.inst()
     if oinst.is_pcell():
       c = oinst.cell
-      if c.basic_name() == Waveguide_Type and c.pcell_parameters_by_name()['layer'] == LayerSi:
-        print("ROUND_PATH on LayerSi.")
+      if c.basic_name() in Waveguide_Types and c.pcell_parameters_by_name()['layer'] == LayerSi:
+        print("%s on LayerSi." % c.basic_name() )
         is_waveguide = True
         trans = oinst.trans
 
   elif o.shape:
     print("Selected object is a shape.")
     c = o.shape.cell
-    if c.basic_name() == Waveguide_Type and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+    if c.basic_name() in Waveguide_Types and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
       # we have a waveguide GUIDING_LAYER selected
-      print("Selected object is a GUIDING_LAYER in ROUND_PATH on LayerSi.")
+      print("Selected object is a GUIDING_LAYER in %s on LayerSi." % c.basic_name() )
       trans = o.source_trans().s_trans()
       o_instpathlen = o.path_length()
       oinst = o.path_nth(o_instpathlen-1).inst()
@@ -148,6 +156,6 @@ lv.object_selection = new_selection
 lv.commit()
 
 if not(is_waveguide):
-  v = pya.MessageBox.warning("No waveguide selected", "No waveguide selected.\nPlease select a ROUND_PATH waveguide. \nIt will get converted to a path.", pya.MessageBox.Ok)
+  v = pya.MessageBox.warning("No waveguide selected", "No waveguide selected.\nPlease select a waveguide. \nIt will get converted to a path.", pya.MessageBox.Ok)
 </text>
 </klayout-macro>

@@ -41,10 +41,20 @@ Lukas Chrostowski           2015/11/17
 Lukas Chrostowski           2015/11/18
  - If the GUIDING_SHAPE (a path) is selected, don't do anything. Already a waveguide.
  - removed need for numpy.array
+
+Lukas Chrostowski           2015/11/xx
+ - support for either ROUND_PATH or Waveguide_Route, based on global variable
+
+Lukas Chrostowski           2015/12/04
+ - menu to choose between ROUND_PATH or Waveguide_Route
+
+Lukas Chrostowski           2015/12/9
+ - .index() is a list method; replaced Optical_*.idx with .idx
  
 """
 
 import pya
+
 
 
 # Configure variables to draw structures in the presently selected cell:
@@ -80,6 +90,27 @@ optical_nets = []
 reset_Optical_classes()
 
 
+# Record a transaction, to enable "undo"
+lv.transaction("Path to Waveguide")
+
+
+# Waveguide type is specified using a "User Properties" defined via the Cells window.
+# if missing, a dialog is presented.
+Waveguide_Type = cell.property("Waveguide_Type")
+if Waveguide_Type and Waveguide_Type in Waveguide_Types:
+  print("Waveguide type {%s}, taken from cell {%s}" % (Waveguide_Type, cell.name) )
+else:
+  Waveguide_Type = pya.InputDialog.ask_item("Waveguide Type", "Choose the type of waveguide to use.  \nThe value will be saved as a user property in cell {%s}." % cell.name, [ "ROUND_PATH", "Waveguide_Route" ], 0)
+  print("Waveguide type taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Waveguide_Type, cell.name) )
+  cell.set_property("Waveguide_Type", Waveguide_Type)
+
+# Configure the library to use for the waveguide type.
+if Waveguide_Type == "ROUND_PATH":
+  Waveguide_Lib = "Basic"
+elif Waveguide_Type == "Waveguide_Route":
+  Waveguide_Lib = "SiEPIC"
+
+
 # Waveguide radius should be specified in the cell in which the Path_to_Waveguide is called
 # using a "User Properties" defined via the Cells window.
 # if missing, a dialog is presented.
@@ -88,7 +119,7 @@ if radius_str:
   radius = float(radius_str)
   print("Radius taken from cell {%s} = %s" % (cell.name, radius) )
 else:
-  radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
+  radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the desired bend radius (microns).  \nThe value will be saved as a user property in cell {%s}." % cell.name, 5, 1, 500, 3)
   if radius == None:
     radius = 10
   else:
@@ -98,8 +129,6 @@ else:
 # How close must a waveguide be to a pin for it to snap:
 waveguide_snap_dist = 10
 
-# Record a transaction, to enable "undo"
-lv.transaction("Path to Waveguide")
 
 print("------------------ Path to Waveguide --------------")
 
@@ -172,7 +201,7 @@ for o in object_selection:
           # check if both ends of the waveguide want to snap to the same vertex. If so, pick the closest waveguide end.
           go_wg_beginning = True
           go_wg_end = True
-          if optical_pins_sorted0[0].index == optical_pins_sorted1[0].index:
+          if optical_pins_sorted0[0].idx == optical_pins_sorted1[0].idx:
             # same pin!  find the closest one: 
             if optical_pins_sorted0[0].dist[0] &lt; optical_pins_sorted1[0].dist[1]:
               # Beginning is closest, don't touch the end
