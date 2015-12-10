@@ -14,7 +14,8 @@
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text># Python script
+ <text>
+ # Python script
 # A* algorithm for waveguide path generation
 
 """
@@ -28,15 +29,21 @@ uses:
  - the SiEPIC EBeam PCell Library
 
 Version history:
+Jaspreet Jhoja          2015/12/10
+- Reduced grid density and fast path generation.
+- Minimum grid coordinate increment is 10um. There should always be a zero at ones place therefore coordinates like 20.1, 21, 1, 5, 2, 111 are not valid
+- Valid coordinates should look like 0, 10, 20.0, 110, 120, 300 
+- Also check the other waveguides' coordinates. They should also be aligned to the grid.
+
+
 
 Jaspreet Jhoja          2015/12/03
-
- - takes Manual coordinate input, if no coordinates are set,
-    then the script automatically extract coordinates from the 
-     start_pt and end_pt text.      
- - allows input for desired gap between waveguides
+ - Takes Manual coordinate input, if no coordinates are set,
+   then the script automatically extract coordinates from the 
+   start_pt and end_pt text.      
+ - Allow input for desired gap between waveguides
  - only works for waveguide width of 500nm 
- - usually takes 10-15 seconds, depending on the complexity of the obstacle
+ -  usually takes 10-15 seconds, depending on the complexity of the obstacle
 """
 
 # 
@@ -54,9 +61,10 @@ Jaspreet Jhoja          2015/12/03
 
 
 import pya
-import sys, ast, copy, time, string
-from shapely.geometry import LineString
-global opened, closed, child_nodes, listtoget, barred_points, gap
+import sys, ast, copy, operator, heapq, time, string, collections
+from math import sqrt
+from collections import deque
+global opened, closed, child_nodes, listtoget, barred_points, gap, restricted_points
 
 
 opened = [] # stores all the generated but yet to visit nodes
@@ -79,18 +87,18 @@ def find_points(topcell, LayerTextN):
   while not(iter.at_end()):
     if iter.shape().is_text():
       text = iter.shape().text
-      if text.string.find("start_pt") &gt; -1:
+      if text.string.find("start_pt") > -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
-        #t += "label: %s, location: (%s, %s) &lt;br&gt;" %(text.string, text2.x*dbu, text2.y*dbu )
-      if text.string.find("end_pt") &gt; -1:
+        #t += "label: %s, location: (%s, %s) <br>" %(text.string, text2.x*dbu, text2.y*dbu )
+      if text.string.find("end_pt") > -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
-        #t += "label: %s, location: (%s, %s) &lt;br&gt;" %(text.string, text2.x*dbu, text2.y*dbu )
+        #t += "label: %s, location: (%s, %s) <br>" %(text.string, text2.x*dbu, text2.y*dbu )
     iter.next()
- # t += "&lt;br&gt;*** Number of automated measurement labels: %s.&lt;br&gt;" % i
+ # t += "<br>*** Number of automated measurement labels: %s.<br>" % i
   return t
 
 if(starting_pt == goal_pt):
@@ -164,33 +172,57 @@ for i in optical_waveguides:
   converted_points = i.points
   b_points.append([i.wg_width*1e3,converted_points])
 
-#following loop generates coordinates for the area which needs to be avoided 
+bar_points = []
+
 for i in b_points:
-  diff = i[0]*2 #wg_width
-  c_data = i[1] #copy data
-  c1 = copy.deepcopy(c_data) 
-  c2 = copy.deepcopy(c_data)
-  c3 = copy.deepcopy(c_data)
-  c4 = copy.deepcopy(c_data)
+  a = []
+  for j in i[1]:
+    a.append([int(j[0]*1e-3), int(j[1]*1e-3)])
+  bar_points.append(a)
   
-  for j in c1:
-    j[0] = j[0] + (diff)
-  
-  for k in c2:
-    k[0] = k[0] - (diff)
-  
-  for l in c3:
-    l[1] = l[1] + (diff)
+restricted_points = []
+def addin(x):
+    global restricted_points
+    restricted_points = restricted_points +[[x[0],x[1]]]
     
-  for m in c4:
-    m[1] = m[1] - (diff)
-  
-  barred_points.append(c1)
-  barred_points.append(c2)
-  barred_points.append(c3)
-  barred_points.append(c4)
-  
-  
+for i in bar_points:
+    for j in i:
+        if(i.index(j)>0):
+            ind = i.index(j)
+            x = i[ind-1]
+            y = i[ind]
+          #  print x,y
+            z= copy.deepcopy(x)
+            diffx=x[0]-y[0]
+            diffy=x[1]-y[1]
+
+            if(diffx<0):
+                multx = -1
+            else:
+                multx = 1
+
+            if(diffy <0):
+                multy = -1
+            else:
+                multy = 1
+
+
+          #  print abs(diffx),abs(diffy)
+            if(abs(diffx)>0):
+                for p in range(int(abs(diffx)/10)):
+                    z[0] = z[0] - (multx *10)
+                    addin(z)
+                    for q in range(int(abs(diffy)/10)):
+                        z[1] = z[1] - (multy *10)
+                        addin(z)
+                    z[1] = x[1]
+            else:
+                for q in range(int(abs(diffy)/10)):
+                        z[1] = z[1] - (multy *10)
+                        addin(z)
+        else:
+         addin(j)
+    
 #barred_points contains the data about the restricted areas
 
   
@@ -199,162 +231,123 @@ for i in b_points:
 ###########################################################################
 
 
-#defining a node
-class node:
-  data = [] #grid data in x,y
-  parent = None#its parent
-  mvalue = 0   #heuristic value
-  gvalue = 0   #path cost
-  fvalue = 0   #total function cost
-  goal = [-2950,-500] 
-  restricted = 0
+class AStar:
+    def distBetween(self,current,neighbor):
+        return 10
 
-  def __init__(self, grid, head):
-    self. data = grid #load grid starting point data
-    self. parent = head #defining its parent
-    self.manhattan()
-    if(head == None):
-      self.gvalue = 0
-    else:
-      self.gvalue = head.gvalue + 1
-    
-    self.fvalue = self.gvalue + self.mvalue
-    
-    
-  def manhattan(self):  #This is a heuristic estimate function
-      self.mvalue = 0
-      self.mvalue = abs(self.data[0]-self.goal[0]) + abs(self.data[1]-self.goal[1])
-        
-  
-  def generatechild(self):
-     #This function generates all possible children of a node
+    def heuristicEstimate(self,start,goal):
+        hvalue = (abs(start[0]-goal[0]) + abs(start[1]-goal[1]))#*1.001
+        return hvalue
+
+    def neighborNodes(self,current):
       clist = []
+
+      ch1 = copy.deepcopy(current)
+      gc1 = gScore[str(current)] + 10
+      ch1[0] = ch1[0]+10
+
       
-      data1 = copy.deepcopy(self.data)
-      data1[0] = data1[0]+50
-      ch1 = node(data1,self)
+      ch2 = copy.deepcopy(current)
+      ch2[0] = ch2[0]-10
+
+      ch3 = copy.deepcopy(current)
+      ch3[1] = ch3[1]+10
       
-      data2 = copy.deepcopy(self.data)
-      data2[0] = data2[0]-50
-      ch2 = node(data2,self)
+      ch4 = copy.deepcopy(current)
+      ch4[1] = ch4[1]-10
+      if(ch1 not in restricted_points):
+          clist.append(ch1)
+
+      if(ch2 not in restricted_points):    
+          clist.append(ch2)
+
+      if(ch3 not in restricted_points):
+          clist.append(ch3)
+      if(ch4 not in restricted_points):
+          clist.append(ch4)
       
-      data3 = copy.deepcopy(self.data)
-      data3[1] = data3[1]+50
-      ch3 = node(data3,self)
-      
-      data4 = copy.deepcopy(self.data)
-      data4[1] = data4[1]-50
-      ch4 = node(data4,self)
-      
-      #Check if any of the children lies in the restricted areas, if it does then mark it restricted
-      if(len(closed)&gt;=1):
-      
-        for i in barred_points:
-          p1 = LineString(i)
-          p2 = LineString([closed[-1].data,ch1.data])
-          if(p1.intersects(p2)==True):
-            ch1.restricted = 1
-   
-          p2 = LineString([closed[-1].data,ch2.data])
-          if(p1.intersects(p2)==True):
-            ch2.restricted = 1        
-          
-  
-          p2 = LineString([closed[-1].data,ch3.data])
-          if(p1.intersects(p2)==True):
-            ch3.restricted = 1          
-            
-          p2 = LineString([closed[-1].data,ch4.data])
-          if(p1.intersects(p2)==True):
-            ch4.restricted = 1          
-            
-      #If a child is not in restricted area then add it to the valid children list, clist
-      if(ch1.restricted == 0):
-        clist.append(ch1)
-      if(ch2.restricted == 0):
-        clist.append(ch2)
-      if(ch3.restricted == 0):
-        clist.append(ch3)
-      if(ch4.restricted == 0):
-        clist.append(ch4)
+
+      gScore.update({str(ch1): gc1})
+      gScore.update({str(ch2): gc1})
+      gScore.update({str(ch3):gc1})
+      gScore.update({str(ch4): gc1})
       
       return clist
     
+    def reconstructPath(self,cameFrom,start, goal):
+        try:
+            global path
+            path = deque()
+
+            node = (goal)
+            path.appendleft(node)
+            while True:
+            #    print node
+                node = cameFrom[str(node)]
+                path.appendleft((node))
+                if(node == str(start)):
+                    return path
+        except Exception as e:
+            None
     
-    
-def Astar():
-  #initiates lists
-  global opened, closed, child_nodes, current_node, listtoget
+    def getLowest(self,openSet,fScore):
+        global lowest
+        lowest = float("inf")
+        lowestNode = None
+        for node in openSet:
+            if fScore[str(node)] < lowest:
+                lowest = fScore[str(node)]
+                lowestNode = node
+        return lowestNode
+
+    def aStar(self,start,goal):
+        global gScore, fScore, openSet, closedSet, current, cameFrom
+        cameFrom = {}
+        openSet = set()
+        openSet.add(str(start))
+        closedSet = set()
+        gScore = {}
+        fScore = {}
+        gScore.update({str(start): 0})
+        fScore.update({str(start): 0})
+        gScore[str(start)] = 0
+        fScore[str(start)] = gScore[str(start)] + self.heuristicEstimate(start,goal)
+        while len(openSet) != 0:
+            current = self.getLowest(openSet,fScore)
+            current = ast.literal_eval(current)
+            if current == goal:
+                return self.reconstructPath(cameFrom,start,goal)
+                #return "lol"
+            openSet.remove(str(current))
+            closedSet.add(str(current))
+            for neighbor in self.neighborNodes(current):
+                tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor)
+                if str(neighbor) in closedSet and tentative_gScore >= gScore[str(neighbor)]:
+                    continue
+                if str(neighbor) not in closedSet or tentative_gScore < gScore[str(neighbor)]:
+                    cameFrom[str(neighbor)] = current
+                    gScore[str(neighbor)] = tentative_gScore
+                    fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal)
+                    if str(neighbor) not in openSet:
+                        openSet.add(str(neighbor))
+
+        return "no path found"
+
+a=AStar()
+a.aStar([int(starting_pt[0]*1e-3),int(starting_pt[1]*1e-3)],[int(goal_pt[0]*1e-3),int(goal_pt[1]*1e-3)])
+#b = a.reconstructPath(cameFrom, starting_pt,goal_pt)
  
- #create starting node 
-  start_node = node(starting_pt,None)
-  start_node.goal = goal_pt
-  #Add the node to the open list
-  opened.append(start_node)
-  
- # print start_node.data
-  
-  while(len(opened)&gt;0): #while there are no instances to test
-    opened = sorted(opened, key=lambda x: x.fvalue) #sort the open list in an order of ascending fvalues. 
-    current_node = opened[0] #select the one with less cost or recommended by the heuristic
-    
-    if(current_node.data == current_node.goal): #If node meets the goal then print out
-        closed.append(current_node)
-        return ("Success.")
-        
-    opened.pop(0) #remove the component from the opened list
-    child_nodes = [] #create an empty list to contain its child nodes
-    child_nodes = current_node.generatechild() # generate its children
-
-    try:
-
-      for each in child_nodes:
-          if(any(y.data == each.data for y in closed) == True): #if successor is in the closed list, skip it
-            continue
-
-          if(any(x.data == each.data for x in opened) == True): #if successor is in the open list, check if the existing node has smaller gvalue than successor 
-                             for i in opened:                   # If it does, then update the existing node
-                               if((i.gvalue&gt;each.gvalue) and (i.data == each.data)):
-                                 i.gvalue = each.gvalue
-                                 i.parent = each.parent
-
-
-          else:   #Otherwise add it to the open list
-            opened.append(each)
-    except Exception as e:
-      None
-
-    closed.append(current_node)  #Add current node to the closed list
-
-
-def backtrack(a):#This function backtracks and stores points for optimal path in a list
-  global duplicate
-  duplicate.append(a.data)
-  a = a.parent
-  if(a.data == starting_pt):
-    return ""
-  backtrack(a) 
-  
   
 def draw(): #This function is responsible for drawing on the star
-        global closed, ref_pt, duplicate
-        duplicate = []
-        ref_pt = closed[-1]
 
-        backtrack(ref_pt)       
-
-        duplicate.reverse()
-
-        for i in duplicate:
-          pt = i
-          pt[0]= float(pt[0]*1e-3)
-          pt[1] =float(pt[1]*1e-3)
-          wg_points.append(pt)
         cell = pya.Application.instance().main_window().current_view().active_cellview().cell
       #  cell = cell.layout().create_cell("MZI_TE_Variations")
         #cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-        L1 = layout_waveguide_abs(cell, LayerSi, wg_points , 0.5, 1)
+        L1 = layout_waveguide_abs(cell, LayerSi, wg_points , 0.5, 5)
   
-Astar()
-draw()</text>
+wg_points = path
+
+draw()
+ 
+ </text>
 </klayout-macro>
