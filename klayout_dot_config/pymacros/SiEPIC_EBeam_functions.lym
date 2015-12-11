@@ -72,6 +72,9 @@ Lukas Chrostowski           2015/11/21
 Lukas Chrostowski           2015/12/9
  - .index() is a list method; replaced Optical_*.idx with .idx
  
+ - Working towards merging ROUND_PATH and Waveguide_Route, into Waveguide_Route.  
+   Provide option for netlist generation (simple, advanced).
+   need to identify the Inst for waveguide, in find_all_waveguides, and save in optical_waveguides
 """
 
 SiEPIC_Version = '0.1.6'
@@ -101,12 +104,13 @@ LayerINTERCONNECT = pya.LayerInfo(733,0)
 
 
 # define the types of waveguides we have, as defined in Path_to_Waveguide
-Waveguide_Types = "ROUND_PATH Waveguide_Route"
-#Waveguide_Type = "ROUND_PATH"
-#Waveguide_Lib = "Basic"
-#Waveguide_Type = "Waveguide_Route"
-#Waveguide_Lib = "SiEPIC"
+#Waveguide_Types = "ROUND_PATH Waveguide_Route Waveguide_Route_simple"
+#Waveguide_Types = ["ROUND_PATH", "Waveguide_Route", "Waveguide_Route_simple"]
+Waveguide_Types = ["ROUND_PATH", "Waveguide_Route"]
 
+# Netlist extraction will merge straight+bend sections into waveguide (1), 
+# or extract each bend, straight section, etc. (0)
+WAVEGUIDE_extract_simple = 1
 
 
 
@@ -165,10 +169,11 @@ class Optical_waveguide:
         self.num_points = num_points # number of vertices in the path
         self.wg_width = wg_width  # waveguide width
         self.bend_pts = bend_pts  # number of points in a bend, per circle
-        self.net1 = -1             # nets; one at each end of the waveguide
-        self.net2 = -1             # nets; one at each end of the waveguide
+        self.net1 = -1            # nets; one at each end of the waveguide
+        self.net2 = -1            # nets; one at each end of the waveguide
         self.component = "ebeam_wg_strip_1550"  # waveguide model name
         self.library = "Design kits/ebeam_v1.2" # compact model library
+        self.inst = 0             # class Instance for the waveguide cell instance
 
 def print_Optical_waveguides(optical_waveguides):
   print("Optical_waveguides:")
@@ -766,7 +771,8 @@ def find_all_waveguides(cell, layer):
       found_wg = True
       
     if iter1.shape().is_polygon():
-      if iter1.cell().basic_name() == "ROUND_PATH":
+      if iter1.cell().basic_name() == "ROUND_PATH" or \
+        (iter1.cell().basic_name() == "Waveguide_Route" and WAVEGUIDE_extract_simple ):
         # This is a waveguide implemented using a PCell ROUND_PATH
         subcell = iter1.cell()        
         # Get the waveguide guiding shape path from the "ROUND_PATH" PCell 
@@ -989,6 +995,24 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
 # end def identify_all_nets
 
 
+
+def identify_all_nets_fast(optical_pins, optical_waveguides, optical_components):
+  # function to identify all the nets from the layout
+  # use the data in Optical_pin, Optical_waveguide to find overlaps
+  # and save results in Optical_component
+
+  # Make sure that there are exactly 2 pins for each net (not like in electronics!)
+
+  # make a database of pins and waveguide ends
+  # sort the pins by x, y.  
+  # - find overlapping pins / waveguide ends
+  
+  # data structure used for all pins.
+  class All_pins:
+    def __init__(self, x, y, pin_type, ):
+      self.detector_net = detector_net
+      self.detector_number = detector_number
+  all_pins = []  
 
 
 def find_optical_IO_pins(optical_pins):
