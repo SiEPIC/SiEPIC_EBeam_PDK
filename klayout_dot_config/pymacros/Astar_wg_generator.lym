@@ -29,18 +29,12 @@ uses:
  - the SiEPIC EBeam PCell Library
 
 Version history:
-Jaspreet Jhoja          2015/12/10
-- Reduced grid density and fast path generation.
-- Minimum grid coordinate increment is 10um. There should always be a zero at ones place therefore coordinates like 20.1, 21, 1, 5, 2, 111 are not valid
-- Valid coordinates should look like 0, 10, 20.0, 110, 120, 300 
-- Also check the other waveguides' coordinates. They should also be aligned to the grid.
-
-
 
 Jaspreet Jhoja          2015/12/03
+
  - Takes Manual coordinate input, if no coordinates are set,
-   then the script automatically extract coordinates from the 
-   start_pt and end_pt text.      
+    then the script automatically extract coordinates from the 
+     start_pt and end_pt text.      
  - Allow input for desired gap between waveguides
  - only works for waveguide width of 500nm 
  -  usually takes 10-15 seconds, depending on the complexity of the obstacle
@@ -55,11 +49,9 @@ Jaspreet Jhoja          2015/12/03
 #be patient, usually it takes around 14-15 seconds depending on the complexity of the obstacles
 
 
-
-
-
-
-
+from shapely.geometry import LinearRing
+from shapely.geometry import LineString
+from collections import deque
 import pya
 import sys, ast, copy, operator, heapq, time, string, collections
 from math import sqrt
@@ -79,7 +71,6 @@ wg_points = [] #list containing all the final backtracked path points
 
 
 def find_points(topcell, LayerTextN):
-  # find_automated_measurement_labels(topcell, LayerTextN)
   t = []
   dbu = topcell.layout().dbu
   iter = topcell.begin_shapes_rec(LayerTextN)
@@ -91,14 +82,12 @@ def find_points(topcell, LayerTextN):
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
-        #t += "label: %s, location: (%s, %s) <br>" %(text.string, text2.x*dbu, text2.y*dbu )
       if text.string.find("end_pt") > -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
-        #t += "label: %s, location: (%s, %s) <br>" %(text.string, text2.x*dbu, text2.y*dbu )
     iter.next()
- # t += "<br>*** Number of automated measurement labels: %s.<br>" % i
+
   return t
 
 if(starting_pt == goal_pt):
@@ -177,51 +166,128 @@ bar_points = []
 for i in b_points:
   a = []
   for j in i[1]:
-    a.append([int(j[0]*1e-3), int(j[1]*1e-3)])
+    a.append([float(j[0]*1e-3), float(j[1]*1e-3)])
   bar_points.append(a)
   
-restricted_points = []
-def addin(x):
-    global restricted_points
-    restricted_points = restricted_points +[[x[0],x[1]]]
-    
-for i in bar_points:
-    for j in i:
-        if(i.index(j)>0):
-            ind = i.index(j)
-            x = i[ind-1]
-            y = i[ind]
-          #  print x,y
-            z= copy.deepcopy(x)
-            diffx=x[0]-y[0]
-            diffy=x[1]-y[1]
+temp_points = bar_points
+width = 0.5
+barred_points = [] #list used to store obstacle points which will get used to generate polygons
+shell = []# points that will actually get used
+shell_pt=[]
+add = 3
 
-            if(diffx<0):
-                multx = -1
-            else:
-                multx = 1
+#The following loop generates vertices to be used in sparse graph
+for l in temp_points:
+    a= l
+    m=[]
+    n = []
+    for i in range(0,len(a),1):
+        if(i>0):
+            if(a[i][0]==a[i-1][0]):
+                if((a[i-1][1]-a[i][1])>0):#08 00
+                    p =[a[i][0],a[i][1]-add]
+                    q =[a[i-1][0],a[i-1][1]+add]
+                elif((a[i-1][1]-a[i][1])<0):
+                    p =[a[i][0],a[i][1]+add]
+                    q =[a[i-1][0],a[i-1][1]-add]
+                if(len(m)>=1):
+                    p[0] = m[i-1][0]
+                    q[0] = m[i-1][0]
+            elif(a[i][1] == a[i-1][1]):
+                if((a[i][0]-a[i-1][0])>0):#00 90
+                    p =[a[i][0]+add,a[i][1]]
+                    q =[a[i-1][0]-add,a[i-1][1]]
+                elif((a[i][0]-a[i-1][0])<0):
+                    p =[a[i][0]-add,a[i][1]]
+                    q =[a[i-1][0]+add,a[i-1][1]]
+                if(len(m)>=1):
+                    p[1] = m[i-1][1]
+                    q[1] = m[i-1][1]
+                    
+            if(a[i-1] not in n):
+               # print q, "here"
+                m.append(q)
+                n.append(a[i-1])
+            if(a[i] not in n):
+               # print p,"here"
+                m.append(p)
+                n.append(a[i])
 
-            if(diffy <0):
-                multy = -1
-            else:
-                multy = 1
+    shell.append(m)
 
 
-          #  print abs(diffx),abs(diffy)
-            if(abs(diffx)>0):
-                for p in range(int(abs(diffx)/10)):
-                    z[0] = z[0] - (multx *10)
-                    addin(z)
-                    for q in range(int(abs(diffy)/10)):
-                        z[1] = z[1] - (multy *10)
-                        addin(z)
-                    z[1] = x[1]
-            else:
-                for q in range(int(abs(diffy)/10)):
-                        z[1] = z[1] - (multy *10)
-                        addin(z)
-        else:
-         addin(j)
+#The following loop generates points to be used to create obtacle polygons
+for i in temp_points:
+    line = LineString(i) 
+    left_bound = line.parallel_offset(width, 'left', join_style=2, mitre_limit=10.0)
+    right_bound =line.parallel_offset(width, 'right', join_style=2, mitre_limit=10.0)
+
+    x1,y1 = left_bound.xy
+    x2,y2 = right_bound.xy
+
+    lb_list = []
+    rb_list = []
+
+    for j in range(len(x1)):
+        lb_list.append((x1[j], y1[j]))
+
+
+    for j in range(len(x2)):
+        rb_list.append((x2[j], y2[j]))
+
+        
+    poly_points = rb_list+ lb_list
+    barred_points.append(poly_points)
+
+#The following loop is used to extract shell points
+for i in shell:
+    line = LineString(i) 
+    left_bound = line.parallel_offset(3, 'left', join_style=2, mitre_limit=10.0)
+    right_bound =line.parallel_offset(3, 'right', join_style=2, mitre_limit=10.0)
+    x1,y1 = left_bound.xy
+    x2,y2 = right_bound.xy
+
+    lb_list = []
+    rb_list = []
+
+    for j in range(len(x1)):
+        lb_list.append((x1[j], y1[j]))
+
+    for j in range(len(x2)):
+        rb_list.append((x2[j], y2[j]))
+
+        
+    poly_points = rb_list+ lb_list
+    shell_pt =shell_pt+(poly_points)
+
+#The following for loop creates a list of obstacle polygons
+polygon_list = []
+for i in barred_points:
+    a = LinearRing(i)
+    polygon_list.append(a)
+
+visible_list=[]
+#This function is used to generate visible vertices
+def getvisibleVertices(current):
+    global visible_list, actual_points, temp_store
+    visible_list = []
+    temp_store = []
+    actual_points = []
+
+    for k in shell_pt:
+        a = LineString([current,k])
+        valid = 1
+        for l in polygon_list:
+            if(a.intersects(l) == True):
+                valid = 0
+        if(valid == 1):
+                actual_points.append(k)
+    return actual_points
+
+
+def heuristicEstimate(start,goal):
+    hvalue = (abs(start[0]-goal[0]) + abs(start[1]-goal[1]))
+    return hvalue
     
 #barred_points contains the data about the restricted areas
 
@@ -231,59 +297,50 @@ for i in bar_points:
 ###########################################################################
 
 
+        
+
+        
 class AStar:
     def distBetween(self,current,neighbor):
-        return 10
+        distance = sqrt(abs(current[0]-neighbor[0])**2 + abs(current[1]-neighbor[1])**2)
+        return distance
 
     def heuristicEstimate(self,start,goal):
-        hvalue = (abs(start[0]-goal[0]) + abs(start[1]-goal[1]))#*1.001
+        print(start, goal)
+        type(start)
+        type(goal)
+        #hvalue = abs(start[0]-goal[0]) + abs(start[1]-goal[1])#*1.001
+        hvalue = sqrt(abs(start[0]-goal[0])**2 + abs(start[1]-goal[1])**2)
         return hvalue
 
-    def neighborNodes(self,current):
-      clist = []
+    def neighborNodes(self,current, goal, atype):
+        clist = []
 
-      ch1 = copy.deepcopy(current)
-      gc1 = gScore[str(current)] + 10
-      ch1[0] = ch1[0]+10
+        if(atype == "search"):
+          test = LineString([current,goal])
+          find_vertices = 0
+          for i in polygon_list:
+              if(test.intersects(i)== True):
+                  find_vertices = 1
+          if(find_vertices==1):
+              clist = getvisibleVertices(current)
+          else:
+              clist = [goal]
+        for i in clist:
+           gc = gScore[str(current)] + self.distBetween(current,i)
+           gScore.update({str(i): gc})
+        return clist
 
-      
-      ch2 = copy.deepcopy(current)
-      ch2[0] = ch2[0]-10
-
-      ch3 = copy.deepcopy(current)
-      ch3[1] = ch3[1]+10
-      
-      ch4 = copy.deepcopy(current)
-      ch4[1] = ch4[1]-10
-      if(ch1 not in restricted_points):
-          clist.append(ch1)
-
-      if(ch2 not in restricted_points):    
-          clist.append(ch2)
-
-      if(ch3 not in restricted_points):
-          clist.append(ch3)
-      if(ch4 not in restricted_points):
-          clist.append(ch4)
-
-      gScore.update({str(ch1): gc1})
-      gScore.update({str(ch2): gc1})
-      gScore.update({str(ch3):gc1})
-      gScore.update({str(ch4): gc1})
-      
-      return clist
-    
     def reconstructPath(self,cameFrom,start, goal):
         try:
             global path
             path = deque()
-
             node = (goal)
             path.appendleft(node)
             while True:
-            #    print node
+               # print node
                 node = cameFrom[str(node)]
-                path.appendleft((node))
+                path.appendleft(node)
                 if(node == str(start)):
                     return path
         except Exception as e:
@@ -299,8 +356,10 @@ class AStar:
                 lowestNode = node
         return lowestNode
 
-    def aStar(self,start,goal):
+    def aStar(self,start,goal, atype):
         global gScore, fScore, openSet, closedSet, current, cameFrom
+        gScore =[]
+        fScore = []
         cameFrom = {}
         openSet = set()
         openSet.add(str(start))
@@ -314,37 +373,69 @@ class AStar:
         while len(openSet) != 0:
             current = self.getLowest(openSet,fScore)
             current = ast.literal_eval(current)
-            if current == goal:
-                return self.reconstructPath(cameFrom,start,goal)
             openSet.remove(str(current))
             closedSet.add(str(current))
-            for neighbor in self.neighborNodes(current):
+
+            if current == goal:
+                #print "done"
+                return self.reconstructPath(cameFrom,start,goal)
+
+            for neighbor in self.neighborNodes(current,goal, atype):
                 tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor)
                 if str(neighbor) in closedSet and tentative_gScore >= gScore[str(neighbor)]:
                     continue
                 if str(neighbor) not in closedSet or tentative_gScore < gScore[str(neighbor)]:
                     cameFrom[str(neighbor)] = current
                     gScore[str(neighbor)] = tentative_gScore
-                    fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal)
+                    fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(list(neighbor),goal)
                     if str(neighbor) not in openSet:
                         openSet.add(str(neighbor))
-        return "no path found"
 
-a=AStar()
-a.aStar([int(starting_pt[0]*1e-3),int(starting_pt[1]*1e-3)],[int(goal_pt[0]*1e-3),int(goal_pt[1]*1e-3)])
-#b = a.reconstructPath(cameFrom, starting_pt,goal_pt)
- 
+        return "nothing found"
+
   
 def draw(): #This function is responsible for drawing on the star
 
         cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-      #  cell = cell.layout().create_cell("MZI_TE_Variations")
-        #cell = pya.Application.instance().main_window().current_view().active_cellview().cell
         L1 = layout_waveguide_abs(cell, LayerSi, wg_points , 0.5, 5)
-  
-wg_points = path
+
+
+a=AStar()
+#g = a.aStar([int(starting_pt[0]),int(starting_pt[1])],[int(goal_pt[0]),int(goal_pt[1])],"search")
+g = a.aStar([10,200],[110,190],"search")
+b = path
+final =[]
+
+#The following is the test code creates a smooth manhattan path which will be drawn on the grid edges.
+#This code is still under testing and will get updated once debugged.
+#for i in range(len(b)):
+#    if(i>0):
+#        p = None
+#        x = list(b[i])
+#        y = list(b[i-1])
+#        final.append(y)
+#        if(x[1] != y[1]):
+#            p = copy.deepcopy(y)
+#            p[1] = x[1]
+#        elif(y[0] != x[0]):
+#            p = copy.deepcopy(y)
+#            p[0] = x[0]
+#        add =1
+#        line = LineString([y,p])
+#        for z in polygon_list:
+#            if line.intersects(z) == True:
+#                add = 0
+#        if(add == 1):
+#            final.append(p)
+#    if(i==len(b)-1):
+#        final.append(b[i])
+
+final_pt = []
+for i in path:
+  if(i not in final_pt):
+    final_pt.append(list(i))
+wg_points = final_pt
 
 draw()
- 
  </text>
 </klayout-macro>
