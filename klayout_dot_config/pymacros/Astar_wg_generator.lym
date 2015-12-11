@@ -29,6 +29,10 @@ uses:
  - the SiEPIC EBeam PCell Library
 
 Version history:
+Jaspreet Jhoja          2015/12/9- 2015/12/11
+- Uses visible graph to navigate through the mesh.
+- Improved speed and solution time.
+
 
 Jaspreet Jhoja          2015/12/03
 
