@@ -50,7 +50,7 @@ Lukas Chrostowski           2015/12/04
 
 Lukas Chrostowski           2015/12/9
  - .index() is a list method; replaced Optical_*.idx with .idx
- - Convert all Si paths if nothing is selected.
+ - Convert all Si paths to waveguides if nothing is selected.
  
 """
 
@@ -101,7 +101,7 @@ Waveguide_Type = cell.property("Waveguide_Type")
 if Waveguide_Type and Waveguide_Type in Waveguide_Types:
   print("Waveguide type {%s}, taken from cell {%s}" % (Waveguide_Type, cell.name) )
 else:
-  Waveguide_Type = pya.InputDialog.ask_item("Waveguide Type", "Choose the type of waveguide to use.  \nThe value will be saved as a user property in cell {%s}." % cell.name, [ "ROUND_PATH", "Waveguide_Route" ], 0)
+  Waveguide_Type = pya.InputDialog.ask_item("Waveguide Type", "Choose the type of waveguide to use.  \nThe value will be saved as a user property in cell {%s}." % cell.name, Waveguide_Types, 0)
   print("Waveguide type taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Waveguide_Type, cell.name) )
   cell.set_property("Waveguide_Type", Waveguide_Type)
 
