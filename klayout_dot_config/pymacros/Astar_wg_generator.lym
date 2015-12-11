@@ -406,7 +406,7 @@ def draw(): #This function is responsible for drawing on the star
 
 a=AStar()
 #g = a.aStar([int(starting_pt[0]),int(starting_pt[1])],[int(goal_pt[0]),int(goal_pt[1])],"search")
-g = a.aStar([10,200],[110,190],"search")
+g = a.aStar([float(starting_pt[0]*1e-3),float(starting_pt[1]*1e-3)],[float(goal_pt[0]*1e-3),float(goal_pt[1]*1e-3)],"search")
 b = path
 final =[]
 
