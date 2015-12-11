@@ -313,8 +313,8 @@ class AStar:
         print(start, goal)
         type(start)
         type(goal)
-        hvalue = abs(start[0]-goal[0]) + abs(start[1]-goal[1])#*1.001
-        #hvalue = sqrt(abs(start[0]-goal[0])**2 + abs(start[1]-goal[1])**2)
+        #hvalue = abs(start[0]-goal[0]) + abs(start[1]-goal[1])#*1.001
+        hvalue = sqrt(abs(start[0]-goal[0])**2 + abs(start[1]-goal[1])**2)
         return hvalue
 
     def neighborNodes(self,current, goal, atype):
