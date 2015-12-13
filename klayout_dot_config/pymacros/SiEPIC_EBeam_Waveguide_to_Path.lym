@@ -46,7 +46,10 @@ Lukas Chrostowski           2015/12/xx
 
 Lukas Chrostowski           2015/12/04
  - fix to convert either from ROUND_PATH or Waveguide_Route, based on what is selected
- 
+
+Lukas Chrostowski           2015/12/10
+ - Convert all Waveguides to Si paths if nothing is selected.
+
 """
 
 
@@ -63,8 +66,8 @@ ly = pya.Application.instance().main_window().current_view().active_cellview().l
 if ly == None:
   raise Exception("No layout")
 # find the currently selected cell:
-cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-if cell == None:
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if topcell == None:
   raise Exception("No cell")
 # fetch the database parameters
 dbu = ly.dbu
@@ -76,6 +79,13 @@ LayerDevRecN = ly.layer(LayerDevRec)
 LayerFbrTgtN = ly.layer(LayerFbrTgt)
 LayerErrorN = ly.layer(LayerError)
 
+# initialize the arrays to keep track of layout objects
+reset_Optical_classes()
+optical_components = []
+optical_waveguides = []
+optical_pins = []
+optical_nets = []
+layout_errors = []
 
 # Record a transaction, to enable "undo"
 lv.transaction("Waveguide to Path")
@@ -85,18 +95,28 @@ print("------------------ Waveguide to Path --------------")
 # record objects to delete:
 to_delete = []
 
-# new objects will become selected
+# new objects will become selected after the waveguide-to-path operation
 new_selection = []
 
 # Find the selected objects
 object_selection = lv.object_selection   # returns ObjectInstPath[].
 
+if object_selection == []:
+  print("Nothing selected.  Automatically selecting waveguides.")
+  # find all instances, specifically, Waveguides:
+  for inst in topcell.each_inst():
+    print("Cell: %s" % (inst.cell.basic_name() ) )
+    if inst.cell.basic_name() in Waveguide_Types:
+      n = len(object_selection)
+      object_selection.append( pya.ObjectInstPath() )
+      object_selection[n].top = topcell.cell_index()
+      object_selection[n].append_path(pya.InstElement.new(inst))
+  # Select the newly added objects
+  lv.object_selection = object_selection
+
 is_waveguide = False
-
-
 for o in object_selection:
   # Find the selected waveguides
-
   if o.is_cell_inst():
     print("Selected object is a cell.")
     oinst = o.inst()
@@ -129,9 +149,9 @@ for o in object_selection:
     wg_path_trans = wg_path.transformed(trans)
 
     print( "wg_path_trans: %s" % wg_path_trans ) 
-    new_wg = cell.shapes(LayerSiN).insert(wg_path_trans)
+    new_wg = topcell.shapes(LayerSiN).insert(wg_path_trans)
 
-    # Leave the newly created waveguide selected, to make it obvious to the user.
+    # Leave the newly created path selected, to make it obvious to the user.
     # http://klayout.de/forum/comments.php?DiscussionID=747
     new_selectionN = len(new_selection)
     new_selection.append( pya.ObjectInstPath() )
@@ -157,5 +177,9 @@ lv.commit()
 
 if not(is_waveguide):
   v = pya.MessageBox.warning("No waveguide selected", "No waveguide selected.\nPlease select a waveguide. \nIt will get converted to a path.", pya.MessageBox.Ok)
+else:
+  # Update the net list. Used for future waveguide healing operation.
+  optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
+
 </text>
 </klayout-macro>
