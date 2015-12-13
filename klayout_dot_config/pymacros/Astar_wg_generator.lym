@@ -55,9 +55,6 @@ Jaspreet Jhoja          2015/12/03
 # deletes everything first
 #be patient, usually it takes around 14-15 seconds depending on the complexity of the obstacles
 
-
-from shapely.geometry import LinearRing
-from shapely.geometry import LineString
 from collections import deque
 import pya
 import sys, ast, copy, operator, heapq, time, string, collections
