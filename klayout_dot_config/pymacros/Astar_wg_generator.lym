@@ -321,7 +321,7 @@ def generateBounds(list_pt, width):
 shell_pt = generateBounds(shell, 3)
 barred_points = generateBounds(temp_points, width)
 polygon_list = []
-
+p_list = []
 for i in barred_points:
     a = []
     for j in barred_points:
@@ -330,13 +330,12 @@ for i in barred_points:
             if((i[0]==j[0]) or (i[1] == j[1])):
                 a.append(i)
                 a.append(j)
-                polygon_list.append(a)
-
-for i in polygon_list:
-	for j in polygon_list:
-		if(i[0]==j[1] and i[1] == j[0]):
-			polygon_list.remove(j)
-			
+                p_list.append(a)
+for i in p_list:
+    a= [i[1],i[0]]
+    if(i not in polygon_list and a not in polygon_list):
+        polygon_list.append(i) 
+      
 #check intersection from polygon list
 #shell_pt has the points for vertices to check with intersection list
 #This function is used to generate visible vertices
