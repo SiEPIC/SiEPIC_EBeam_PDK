@@ -30,6 +30,13 @@ uses:
 
 Version history:
 
+Jaspreet Jhoja 		2015/12/13
+- Does not use any external libraries
+
+Jaspreet Jhoja          2015/12/9- 2015/12/11
+- Uses visible graph to navigate through the mesh.
+- Improved speed and solution time.
+
 Jaspreet Jhoja          2015/12/03
 
  - Takes Manual coordinate input, if no coordinates are set,
