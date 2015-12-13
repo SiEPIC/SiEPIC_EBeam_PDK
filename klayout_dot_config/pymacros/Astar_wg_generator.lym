@@ -48,6 +48,9 @@ Jaspreet Jhoja          2015/12/03
 # deletes everything first
 #be patient, usually it takes around 14-15 seconds depending on the complexity of the obstacles
 
+
+from shapely.geometry import LinearRing
+from shapely.geometry import LineString
 from collections import deque
 import pya
 import sys, ast, copy, operator, heapq, time, string, collections
@@ -93,6 +96,8 @@ if(starting_pt == goal_pt):
   t = find_points(topcell, LayerTextN)
   starting_pt = t[1]
   goal_pt = t[0]
+
+
 
 # Configure variables to draw structures in the presently selected cell:
 lv = pya.Application.instance().main_window().current_view()
@@ -197,17 +202,13 @@ for l in temp_points:
                     q =[a[i-1][0]+add,a[i-1][1]]
                 if(len(m)>=1):
                     p[1] = m[i-1][1]
-                    q[1] = m[i-1][1]
-                    
+                    q[1] = m[i-1][1]                    
             if(a[i-1] not in n):
-               # print q, "here"
                 m.append(q)
                 n.append(a[i-1])
             if(a[i] not in n):
-               # print p,"here"
                 m.append(p)
                 n.append(a[i])
-
     shell.append(m)
 
 ########### FUNCTION for CHECKING IF A POINT INTERSECTS ###############
@@ -221,7 +222,7 @@ def ccw(A,B,C):
 	return (C.y-A.y)*(B.x-A.x) > (B.y-A.y)*(C.x-A.x)
 
 def intersect(A,B,C,D):
-	return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
+	return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)	
 	
 ########### FUNCTION for GENERATING LINE BOUNDS ####################
     
@@ -249,8 +250,7 @@ def generateBounds(list_pt, width):
                                     r =[a[i][0]-width,a[i][1]-width]
                                     s =[a[i][0]+width,a[i][1]+width]
                             except Exceptions as e:
-                                None
-                                
+                                None                                
                     elif((a[i-1][1]-a[i][1])>0):#checked
                         p =[a[i-1][0]+width,a[i-1][1]]
                         q =[a[i-1][0]-width,a[i-1][1]]
@@ -267,7 +267,6 @@ def generateBounds(list_pt, width):
                                     s =[a[i][0]+width,a[i][1]-width]
                             except Exceptions as e:
                                 None
-
                 elif(a[i][1] == a[i-1][1]):#checked
                     if((a[i-1][0]-a[i][0])>0):#08 00
                         p =[a[i-1][0],a[i-1][1]-width]
@@ -284,8 +283,7 @@ def generateBounds(list_pt, width):
                                     r =[a[i][0]-width,a[i][1]+width]
                                     s =[a[i][0]+width,a[i][1]-width]
                             except Exceptions as e:
-                                None
-                                
+                                None                                
                     elif((a[i-1][0]-a[i][0])<0):#checked
                         p =[a[i-1][0],a[i-1][1]+width]
                         q =[a[i-1][0],a[i-1][1]-width]
@@ -301,8 +299,7 @@ def generateBounds(list_pt, width):
                                     r =[a[i][0]+width,a[i][1]+width]
                                     s =[a[i][0]-width,a[i][1]-width]
                             except Exceptions as e:
-                                None  
-                        
+                                None                          
                 if(p not in empty_list):
                     m.append(p)
                 if(r not in empty_list):
@@ -311,17 +308,14 @@ def generateBounds(list_pt, width):
                     m.append(q)
                 if(s not in empty_list):
                     m.append(s)    
-
                 empty_list.append(m)
     return_list = []
     for i in empty_list:
-        return_list = return_list + i
-        
+        return_list = return_list + i        
     return return_list
 
 shell_pt = generateBounds(shell, 3)
 barred_points = generateBounds(temp_points, width)
-
 polygon_list = []
 
 for i in barred_points:
@@ -340,8 +334,7 @@ for i in polygon_list:
 			polygon_list.remove(j)
 			
 #check intersection from polygon list
-#shell_pt has the points for vertices to check with intersection list               
-
+#shell_pt has the points for vertices to check with intersection list
 #This function is used to generate visible vertices
 def getvisibleVertices(current):
     actual_points = []
@@ -358,11 +351,11 @@ def getvisibleVertices(current):
         if(valid == 1):
                 actual_points.append(k)
     return actual_points
-#barred_points contains the data about the restricted areas
-  
+
+#barred_points contains the data about the restricted areas  
 ###########################################################################  
 ############ PHASE -2 : DEFINING NODE AND A* Algorithm ####################
-###########################################################################
+###########################################################################        
 
 class AStar:
     def distBetween(self,current,neighbor):
@@ -377,7 +370,6 @@ class AStar:
 
     def neighborNodes(self,current, goal, atype):
         clist = []
-
         if(atype == "search"):
             test = [Point(current[0], current[1]),Point(goal[0], goal[1])]
             find_vertices = 0
@@ -402,7 +394,6 @@ class AStar:
             node = (goal)
             path.appendleft(node)
             while True:
-               # print node
                 node = cameFrom[str(node)]
                 path.appendleft(node)
                 if(node == str(start)):
@@ -439,11 +430,8 @@ class AStar:
             current = ast.literal_eval(current)
             openSet.remove(str(current))
             closedSet.add(str(current))
-            #print current
             if current == goal:
-                #print "finished"
                 return self.reconstructPath(cameFrom,start,goal)
-
             for neighbor in self.neighborNodes(current,goal, atype):
                 tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor)
                 if str(neighbor) in closedSet and tentative_gScore >= gScore[str(neighbor)]:
@@ -454,8 +442,8 @@ class AStar:
                     fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal)
                     if str(neighbor) not in openSet:
                         openSet.add(str(neighbor))
-
         return "nothing found"
+
 def startSearch(start, goal):
     global sparse_pt
     a=AStar()
@@ -466,7 +454,8 @@ def startSearch(start, goal):
           point[0] = round(point[0],2)
           point[1] = round(point[1],2)
           if(i not in sparse_pt):
-             sparse_pt.append(list(point))  
+             sparse_pt.append(list(point))
+  
 def draw(): #This function is responsible for drawing on the star
         cell = pya.Application.instance().main_window().current_view().active_cellview().cell
         L1 = layout_waveguide_abs(cell, LayerSi, wg_points , 0.5, 5)
@@ -484,6 +473,7 @@ for i in path:
   if(i not in final_pt):
     final_pt.append(list(point))
 wg_points = final_pt
+
 draw()
  </text>
 </klayout-macro>
