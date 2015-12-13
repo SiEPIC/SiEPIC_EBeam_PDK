@@ -48,9 +48,6 @@ Jaspreet Jhoja          2015/12/03
 # deletes everything first
 #be patient, usually it takes around 14-15 seconds depending on the complexity of the obstacles
 
-
-from shapely.geometry import LinearRing
-from shapely.geometry import LineString
 from collections import deque
 import pya
 import sys, ast, copy, operator, heapq, time, string, collections
@@ -96,8 +93,6 @@ if(starting_pt == goal_pt):
   t = find_points(topcell, LayerTextN)
   starting_pt = t[1]
   goal_pt = t[0]
-
-
 
 # Configure variables to draw structures in the presently selected cell:
 lv = pya.Application.instance().main_window().current_view()
@@ -228,7 +223,6 @@ def ccw(A,B,C):
 def intersect(A,B,C,D):
 	return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
 	
-	
 ########### FUNCTION for GENERATING LINE BOUNDS ####################
     
 def generateBounds(list_pt, width):
@@ -328,7 +322,6 @@ def generateBounds(list_pt, width):
 shell_pt = generateBounds(shell, 3)
 barred_points = generateBounds(temp_points, width)
 
-
 polygon_list = []
 
 for i in barred_points:
@@ -347,8 +340,7 @@ for i in polygon_list:
 			polygon_list.remove(j)
 			
 #check intersection from polygon list
-#shell_pt has the points for vertices to check with intersection list
-                
+#shell_pt has the points for vertices to check with intersection list               
 
 #This function is used to generate visible vertices
 def getvisibleVertices(current):
@@ -366,17 +358,11 @@ def getvisibleVertices(current):
         if(valid == 1):
                 actual_points.append(k)
     return actual_points
-
-
 #barred_points contains the data about the restricted areas
-
   
 ###########################################################################  
 ############ PHASE -2 : DEFINING NODE AND A* Algorithm ####################
 ###########################################################################
-
-
-        
 
 class AStar:
     def distBetween(self,current,neighbor):
@@ -480,22 +466,16 @@ def startSearch(start, goal):
           point[0] = round(point[0],2)
           point[1] = round(point[1],2)
           if(i not in sparse_pt):
-             sparse_pt.append(list(point))
-
-  
+             sparse_pt.append(list(point))  
 def draw(): #This function is responsible for drawing on the star
-
         cell = pya.Application.instance().main_window().current_view().active_cellview().cell
         L1 = layout_waveguide_abs(cell, LayerSi, wg_points , 0.5, 5)
-
 
 a=AStar()
 g = a.aStar([float(starting_pt[0]*1e-3),float(starting_pt[1]*1e-3)],[float(goal_pt[0]*1e-3),float(goal_pt[1]*1e-3)],"search")
 #g = a.aStar([10,200],[110,190],"search")
 b = path
 final =[]
-
-
 final_pt = []
 for i in path:
   point = list(i)
@@ -504,8 +484,6 @@ for i in path:
   if(i not in final_pt):
     final_pt.append(list(point))
 wg_points = final_pt
-
 draw()
- 
  </text>
 </klayout-macro>
