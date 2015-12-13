@@ -50,6 +50,7 @@ Lukas Chrostowski           2015/12/04
 
 Lukas Chrostowski           2015/12/9
  - .index() is a list method; replaced Optical_*.idx with .idx
+ - Convert all Si paths to waveguides if nothing is selected.
  
 """
 
@@ -100,7 +101,7 @@ Waveguide_Type = cell.property("Waveguide_Type")
 if Waveguide_Type and Waveguide_Type in Waveguide_Types:
   print("Waveguide type {%s}, taken from cell {%s}" % (Waveguide_Type, cell.name) )
 else:
-  Waveguide_Type = pya.InputDialog.ask_item("Waveguide Type", "Choose the type of waveguide to use.  \nThe value will be saved as a user property in cell {%s}." % cell.name, [ "ROUND_PATH", "Waveguide_Route" ], 0)
+  Waveguide_Type = pya.InputDialog.ask_item("Waveguide Type", "Choose the type of waveguide to use.  \nThe value will be saved as a user property in cell {%s}." % cell.name, Waveguide_Types, 0)
   print("Waveguide type taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Waveguide_Type, cell.name) )
   cell.set_property("Waveguide_Type", Waveguide_Type)
 
@@ -135,11 +136,33 @@ print("------------------ Path to Waveguide --------------")
 # objects to delete:
 to_delete = []
 
-# new objects will become selected
+# new waveguide objects will become selected after they are added.
 new_selection = []
 
 # Find the selected paths
 object_selection = lv.object_selection
+
+if object_selection == []:
+  print("Nothing selected.  Automatically selecting paths.")
+  # find all shapes, in order to find all paths
+  iter1 = cell.begin_shapes_rec(LayerSiN)
+  i=0
+  found_wg = False
+  while not(iter1.at_end()):
+    i+=1
+    if iter1.shape().is_path():
+      # This is a path on the silicon layer, to be converted to a waveguide. 
+      n = len(object_selection)
+      object_selection.append( pya.ObjectInstPath() )
+      object_selection[n].layer = LayerSiN
+      object_selection[n].shape = iter1.shape()
+      object_selection[n].top = cell.cell_index()
+      object_selection[n].cv_index = 0 # o.cv_index, lv.active_cellview()
+    iter1.next()
+
+  # Select the newly added objects
+  lv.object_selection = object_selection
+
 
 for o in object_selection:
   if o.is_cell_inst():
@@ -277,7 +300,7 @@ lv.commit()
 
 
 if n_deleted == 0:
-  v = pya.MessageBox.warning("No path selected", "No path selected.\nPlease select a path. \nIt will get converted to a ROUND_PATH waveguide.", pya.MessageBox.Ok)
+  v = pya.MessageBox.warning("No path selected", "No path selected.\nPlease select a path. \nIt will get converted to a waveguide.", pya.MessageBox.Ok)
 
 # Save the optical_waveguides for future heal operations
 #optical_waveguides_registered = [] # check if this exists...

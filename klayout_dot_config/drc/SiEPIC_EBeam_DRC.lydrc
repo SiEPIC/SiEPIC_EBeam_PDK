@@ -15,15 +15,22 @@
  <interpreter>dsl</interpreter>
  <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
  <text># Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
-# This is a sample:
 
 report("DRC")
+
 ## minimum feature size of 60nm
-Si=input(1,0)
-Si.width(0.06).output("Silicon_width","minimum feature size violation")
+LayerSi=input(1,0)
+LayerSi.width(0.06).output("Silicon_width","minimum feature size violation")
+
+DevRec=input(68,0)
+
+overlaps = DevRec.merged(2)
+output(overlaps, "Devices","Devices cannot be overlapping")
 
 ## make sure the devices are within the floor plan layer region;
-#boundary=input(99)
-#Si.outside(boundary).output("Boundary","devices are out of boundary")
+boundary=input(99)
+LayerSi.outside(boundary).output("Boundary","devices are out of boundary")
+
+
 </text>
 </klayout-macro>
