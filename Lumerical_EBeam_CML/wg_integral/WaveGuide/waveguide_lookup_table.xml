@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "index_table">
+<association>
+    <design>
+        <value name="heigth" type="double">2.1e-07</value>
+        <value name="width" type="double">4.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=480,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.1e-07</value>
+        <value name="width" type="double">5e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=500,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.1e-07</value>
+        <value name="width" type="double">5.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=520,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.2e-07</value>
+        <value name="width" type="double">4.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=480,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.2e-07</value>
+        <value name="width" type="double">5e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=500,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.2e-07</value>
+        <value name="width" type="double">5.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=520,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.3e-07</value>
+        <value name="width" type="double">4.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=480,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.3e-07</value>
+        <value name="width" type="double">5e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=500,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="heigth" type="double">2.3e-07</value>
+        <value name="width" type="double">5.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff" type="string">WaveGuide,w=520,h=230.txt</value>
+    </extracted>
+</association>
+</lumerical_lookup_table>
