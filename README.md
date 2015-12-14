@@ -40,8 +40,9 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
 
 ##Installation instructions:
 
- - The files in the klayout_dot_config folder go into your KLayout configuration folder. On Linux and OSX, this is $HOME/.klayout
-  - I don’t know what the equivalent is on windows. 
+ - The files in the klayout_dot_config folder go into your KLayout configuration folder. 
+  - On Linux and OSX, this is $HOME/.klayout
+  - On windows systems, the KLayout configuration folder can be found under C:\Users\YOURUSERNAME\AppData\Roaming\KLayout (64bit)\
  - Alternatively, you can import all the files one by one using the KLayout IDE.  How to use the <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
  - For Linux/OSX, you need Python (which comes with the Mac); for Windows, KLayout comes with Python built-in.
 
