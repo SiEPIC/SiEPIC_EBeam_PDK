@@ -101,6 +101,43 @@ file = open(filename2, 'w')
 text_lsf = 'switchtolayout;\n'
 text_lsf += 'deleteall;\n'
 text_lsf += 'importnetlist("%s");\n' % filename
+
+text_lsf += 'select("::Root Element");  \n'
+text_lsf += 'set("setup script",' + "'"+ '\n'
+text_lsf += 'x_span = 1000e-6;     \n'
+text_lsf += 'y_span = 1000e-6;     \n'
+text_lsf += 'corr_length_x = 50e-6; \n'
+text_lsf += 'corr_length_y = 50e-6; \n'
+
+text_lsf += 'Nx = 100;    \n'
+text_lsf += 'Ny = 100;    \n'
+text_lsf += 'grid=x_span/Nx;  \n'
+
+text_lsf += 'sigma_rms_width = 6;  \n'  # an RMS amplitude that leads to +/- 20 nm variation
+text_lsf += 'sigma_rms_thickness = 3; \n' # an RMS amplitude that leads to +/- 10 nm variation
+text_lsf += 'x_wafer = linspace(-x_span/2,x_span/2,Nx); \n'
+text_lsf += 'y_wafer = linspace(-y_span/2,y_span/2,Ny); \n'
+
+text_lsf += 'thickness_xy_wafer = sroughness( x_wafer, y_wafer, sigma_rms_thickness, corr_length_x, corr_length_y, seed_process );  \n'
+text_lsf += 'width_xy_wafer = sroughness( x_wafer, y_wafer, sigma_rms_width, corr_length_x, corr_length_y, seed_process );  \n'
+
+text_lsf += 'select('+'"'+'::Root Element::Simple_MZI'+'"'+');\n'
+text_lsf += 'set("thickness_xy_wafer",thickness_xy_wafer);\n'
+text_lsf += 'set("width_xy_wafer",width_xy_wafer);\n'
+text_lsf += 'set("Resolution",Nx);\n'
+text_lsf += 'set("grid",grid);\n'
+text_lsf += 'set("wafer_existence",1);\n'
+text_lsf += "'"+');\n'
+
+text_lsf += 'addproperty("::Root Element", "seed_process", "wafer", "Number");\n'
+text_lsf += 'set("seed_process",1); \n'
+
+text_lsf += 'addproperty("::Root Element::Simple_MZI", "thickness_xy_wafer", "wafer", "Matrix");\n'
+text_lsf += 'addproperty("::Root Element::Simple_MZI", "width_xy_wafer", "wafer", "Matrix");\n'
+text_lsf += 'addproperty("::Root Element::Simple_MZI", "grid", "wafer", "Number");\n'
+text_lsf += 'addproperty("::Root Element::Simple_MZI", "Resolution", "wafer", "Number");\n'
+text_lsf += 'addproperty("::Root Element::Simple_MZI", "wafer_existence", "wafer", "Number");\n'
+
 text_lsf += 'run;\n'
 for i in range(0, num_detectors):
   text_lsf += 't%s = getresult("ONA_1", "input %s/mode 1/gain");\n' % (i+1, i+1)
