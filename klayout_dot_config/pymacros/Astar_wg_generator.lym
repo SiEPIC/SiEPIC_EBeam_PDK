@@ -29,10 +29,13 @@ uses:
  - the SiEPIC EBeam PCell Library
 
 Version history:
+
+Jaspreet Jhoja 		2015/12/13
+- Does not use any external libraries
+
 Jaspreet Jhoja          2015/12/9- 2015/12/11
 - Uses visible graph to navigate through the mesh.
 - Improved speed and solution time.
-
 
 Jaspreet Jhoja          2015/12/03
 
@@ -52,9 +55,6 @@ Jaspreet Jhoja          2015/12/03
 # deletes everything first
 #be patient, usually it takes around 14-15 seconds depending on the complexity of the obstacles
 
-
-from shapely.geometry import LinearRing
-from shapely.geometry import LineString
 from collections import deque
 import pya
 import sys, ast, copy, operator, heapq, time, string, collections
@@ -170,7 +170,7 @@ bar_points = []
 for i in b_points:
   a = []
   for j in i[1]:
-    a.append([float(j[0]*1e-3), float(j[1]*1e-3)])
+    a.append([round(float(j[0]*1e-3),2), round(float(j[1]*1e-3),2)])
   bar_points.append(a)
   
 temp_points = bar_points
@@ -206,133 +206,188 @@ for l in temp_points:
                     q =[a[i-1][0]+add,a[i-1][1]]
                 if(len(m)&gt;=1):
                     p[1] = m[i-1][1]
-                    q[1] = m[i-1][1]
-                    
+                    q[1] = m[i-1][1]                    
             if(a[i-1] not in n):
-               # print q, "here"
                 m.append(q)
                 n.append(a[i-1])
             if(a[i] not in n):
-               # print p,"here"
                 m.append(p)
                 n.append(a[i])
-
     shell.append(m)
 
+########### FUNCTION for CHECKING IF A POINT INTERSECTS ###############
+    
+class Point:
+	def __init__(self,x,y):
+		self.x = x
+		self.y = y
 
-#The following loop generates points to be used to create obtacle polygons
-for i in temp_points:
-    line = LineString(i) 
-    left_bound = line.parallel_offset(width, 'left', join_style=2, mitre_limit=10.0)
-    right_bound =line.parallel_offset(width, 'right', join_style=2, mitre_limit=10.0)
+def ccw(A,B,C):
+	return (C.y-A.y)*(B.x-A.x) > (B.y-A.y)*(C.x-A.x)
 
-    x1,y1 = left_bound.xy
-    x2,y2 = right_bound.xy
+def intersect(A,B,C,D):
+	return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)	
+	
+########### FUNCTION for GENERATING LINE BOUNDS ####################
+    
+def generateBounds(list_pt, width):
+    empty_list=[]
+    for j in list_pt:
+        a= j
+        n = []
+        m=[]
+        for i in range(len(a)):
+            if(i>0):
+                if(a[i][0]==a[i-1][0]):
+                    if((a[i-1][1]-a[i][1])<0):#checked
+                        p =[a[i-1][0]+width,a[i-1][1]]
+                        q =[a[i-1][0]-width,a[i-1][1]]
+                        if(i == len(a)-1):
+                                r =[a[i][0]+width,a[i][1]]
+                                s =[a[i][0]-width,a[i][1]]
+                        else:                            
+                            try:
+                                if(a[i+1][0]-a[i][0]>0):
+                                    r =[a[i][0]+width,a[i][1]-width]
+                                    s =[a[i][0]-width,a[i][1]+width]
+                                elif(a[i+1][0]-a[i][0]<0):
+                                    r =[a[i][0]-width,a[i][1]-width]
+                                    s =[a[i][0]+width,a[i][1]+width]
+                            except Exceptions as e:
+                                None                                
+                    elif((a[i-1][1]-a[i][1])>0):#checked
+                        p =[a[i-1][0]+width,a[i-1][1]]
+                        q =[a[i-1][0]-width,a[i-1][1]]
+                        if(i == len(a)-1):
+                                r =[a[i][0]+width,a[i][1]]
+                                s =[a[i][0]-width,a[i][1]]
+                        else:                            
+                            try:
+                                if(a[i+1][0]-a[i][0]>0):
+                                    r =[a[i][0]+width,a[i][1]-width]
+                                    s =[a[i][0]-width,a[i][1]+width]
+                                elif(a[i+1][0]-a[i][0]<0):
+                                    r =[a[i][0]-width,a[i][1]+width]
+                                    s =[a[i][0]+width,a[i][1]-width]
+                            except Exceptions as e:
+                                None
+                elif(a[i][1] == a[i-1][1]):#checked
+                    if((a[i-1][0]-a[i][0])>0):#08 00
+                        p =[a[i-1][0],a[i-1][1]-width]
+                        q =[a[i-1][0],a[i-1][1]+width]
+                        if(i == len(a)-1):
+                                r =[a[i][0],a[i][1]-width]
+                                s =[a[i][0],a[i][1]+width]
+                        else:                            
+                            try:
+                                if(a[i+1][1]-a[i][1]>0):
+                                    r =[a[i][0]-width,a[i][1]-width]
+                                    s =[a[i][0]+width,a[i][1]+width]
+                                elif(a[i+1][1]-a[i][1]<0):
+                                    r =[a[i][0]-width,a[i][1]+width]
+                                    s =[a[i][0]+width,a[i][1]-width]
+                            except Exceptions as e:
+                                None                                
+                    elif((a[i-1][0]-a[i][0])<0):#checked
+                        p =[a[i-1][0],a[i-1][1]+width]
+                        q =[a[i-1][0],a[i-1][1]-width]
+                        if(i == len(a)-1):
+                                r =[a[i][0],a[i][1]-width]
+                                s =[a[i][0],a[i][1]+width]
+                        else:                            
+                            try:
+                                if(a[i+1][1]-a[i][1]>0):
+                                    r =[a[i][0]-width,a[i][1]+width]
+                                    s =[a[i][0]+width,a[i][1]-width]
+                                elif(a[i+1][1]-a[i][1]<0):
+                                    r =[a[i][0]+width,a[i][1]+width]
+                                    s =[a[i][0]-width,a[i][1]-width]
+                            except Exceptions as e:
+                                None                          
+                if(p not in empty_list):
+                    m.append(p)
+                if(r not in empty_list):
+                    m.append(r)
+                if(q not in empty_list):
+                    m.append(q)
+                if(s not in empty_list):
+                    m.append(s)    
+                empty_list.append(m)
+    return_list = []
+    for i in empty_list:
+        return_list = return_list + i        
+    return return_list
 
-    lb_list = []
-    rb_list = []
-
-    for j in range(len(x1)):
-        lb_list.append((x1[j], y1[j]))
-
-
-    for j in range(len(x2)):
-        rb_list.append((x2[j], y2[j]))
-
-        
-    poly_points = rb_list+ lb_list
-    barred_points.append(poly_points)
-
-#The following loop is used to extract shell points
-for i in shell:
-    line = LineString(i) 
-    left_bound = line.parallel_offset(3, 'left', join_style=2, mitre_limit=10.0)
-    right_bound =line.parallel_offset(3, 'right', join_style=2, mitre_limit=10.0)
-    x1,y1 = left_bound.xy
-    x2,y2 = right_bound.xy
-
-    lb_list = []
-    rb_list = []
-
-    for j in range(len(x1)):
-        lb_list.append((x1[j], y1[j]))
-
-    for j in range(len(x2)):
-        rb_list.append((x2[j], y2[j]))
-
-        
-    poly_points = rb_list+ lb_list
-    shell_pt =shell_pt+(poly_points)
-
-#The following for loop creates a list of obstacle polygons
+shell_pt = generateBounds(shell, 3)
+barred_points = generateBounds(temp_points, width)
 polygon_list = []
+p_list = []
 for i in barred_points:
-    a = LinearRing(i)
-    polygon_list.append(a)
-
-visible_list=[]
+    a = []
+    for j in barred_points:
+        if(i!=j):
+            a=[]
+            if((i[0]==j[0]) or (i[1] == j[1])):
+                a.append(i)
+                a.append(j)
+                p_list.append(a)
+for i in p_list:
+    a= [i[1],i[0]]
+    if(i not in polygon_list and a not in polygon_list):
+        polygon_list.append(i) 
+      
+#check intersection from polygon list
+#shell_pt has the points for vertices to check with intersection list
 #This function is used to generate visible vertices
 def getvisibleVertices(current):
-    global visible_list, actual_points, temp_store
-    visible_list = []
-    temp_store = []
     actual_points = []
-
     for k in shell_pt:
-        a = LineString([current,k])
+        currentpt = Point(current[0],current[1])
+        kpt = Point(k[0], k[1])
+        #currentpt to kpt
         valid = 1
         for l in polygon_list:
-            if(a.intersects(l) == True):
+            pt1 = Point(l[0][0], l[0][1])
+            pt2 = Point(l[1][0], l[1][1])
+            if(intersect(currentpt, kpt, pt1, pt2) == True):
                 valid = 0
         if(valid == 1):
                 actual_points.append(k)
     return actual_points
 
-
-def heuristicEstimate(start,goal):
-    hvalue = (abs(start[0]-goal[0]) + abs(start[1]-goal[1]))
-    return hvalue
-    
-#barred_points contains the data about the restricted areas
-
-  
+#barred_points contains the data about the restricted areas  
 ###########################################################################  
 ############ PHASE -2 : DEFINING NODE AND A* Algorithm ####################
-###########################################################################
+###########################################################################        
 
-
-        
-
-        
 class AStar:
     def distBetween(self,current,neighbor):
+       # distance = (abs(current[0]-neighbor[0]) + abs(current[1]-neighbor[1]))
         distance = sqrt(abs(current[0]-neighbor[0])**2 + abs(current[1]-neighbor[1])**2)
         return distance
 
     def heuristicEstimate(self,start,goal):
-        print(start, goal)
-        type(start)
-        type(goal)
-        #hvalue = abs(start[0]-goal[0]) + abs(start[1]-goal[1])#*1.001
+       # hvalue = (abs(start[0]-goal[0]) + abs(start[1]-goal[1]))#*1.001
         hvalue = sqrt(abs(start[0]-goal[0])**2 + abs(start[1]-goal[1])**2)
         return hvalue
 
     def neighborNodes(self,current, goal, atype):
         clist = []
-
         if(atype == "search"):
-          test = LineString([current,goal])
-          find_vertices = 0
-          for i in polygon_list:
-              if(test.intersects(i)== True):
-                  find_vertices = 1
-          if(find_vertices==1):
-              clist = getvisibleVertices(current)
-          else:
-              clist = [goal]
-        for i in clist:
-           gc = gScore[str(current)] + self.distBetween(current,i)
-           gScore.update({str(i): gc})
+            test = [Point(current[0], current[1]),Point(goal[0], goal[1])]
+            find_vertices = 0
+            for i in polygon_list:
+                pt1 = Point(i[0][0], i[0][1])
+                pt2 = Point(i[1][0], i[1][1])
+                if(intersect(test[0], test[1], pt1, pt2)== True):
+                    find_vertices = 1
+            if(find_vertices==1):
+                clist = getvisibleVertices(current)
+            else:
+                clist = [goal]
+            for i in clist:
+                gc = gScore[str(current)] + self.distBetween(current,i)
+                gScore.update({str(i): gc})            
         return clist
 
     def reconstructPath(self,cameFrom,start, goal):
@@ -342,7 +397,6 @@ class AStar:
             node = (goal)
             path.appendleft(node)
             while True:
-               # print node
                 node = cameFrom[str(node)]
                 path.appendleft(node)
                 if(node == str(start)):
@@ -379,11 +433,8 @@ class AStar:
             current = ast.literal_eval(current)
             openSet.remove(str(current))
             closedSet.add(str(current))
-
             if current == goal:
-                #print "done"
                 return self.reconstructPath(cameFrom,start,goal)
-
             for neighbor in self.neighborNodes(current,goal, atype):
                 tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor)
                 if str(neighbor) in closedSet and tentative_gScore &gt;= gScore[str(neighbor)]:
@@ -391,54 +442,56 @@ class AStar:
                 if str(neighbor) not in closedSet or tentative_gScore &lt; gScore[str(neighbor)]:
                     cameFrom[str(neighbor)] = current
                     gScore[str(neighbor)] = tentative_gScore
-                    fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(list(neighbor),goal)
+                    fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal)
                     if str(neighbor) not in openSet:
                         openSet.add(str(neighbor))
-
         return "nothing found"
 
+def startSearch(start, goal):
+    global sparse_pt
+    a=AStar()
+    g =a.aStar(start,goal, "search")
+    sparse_pt = []
+    for i in path:
+          point = list(i)
+          point[0] = round(point[0],2)
+          point[1] = round(point[1],2)
+          if(i not in sparse_pt):
+             sparse_pt.append(list(point))
   
 def draw(): #This function is responsible for drawing on the star
-
         cell = pya.Application.instance().main_window().current_view().active_cellview().cell
         L1 = layout_waveguide_abs(cell, LayerSi, wg_points , 0.5, 5)
 
-
 a=AStar()
-#g = a.aStar([int(starting_pt[0]),int(starting_pt[1])],[int(goal_pt[0]),int(goal_pt[1])],"search")
 g = a.aStar([float(starting_pt[0]*1e-3),float(starting_pt[1]*1e-3)],[float(goal_pt[0]*1e-3),float(goal_pt[1]*1e-3)],"search")
 b = path
 final =[]
-
-#The following is the test code creates a smooth manhattan path which will be drawn on the grid edges.
-#This code is still under testing and will get updated once debugged.
-#for i in range(len(b)):
-#    if(i&gt;0):
-#        p = None
-#        x = list(b[i])
-#        y = list(b[i-1])
-#        final.append(y)
-#        if(x[1] != y[1]):
-#            p = copy.deepcopy(y)
-#            p[1] = x[1]
-#        elif(y[0] != x[0]):
-#            p = copy.deepcopy(y)
-#            p[0] = x[0]
-#        add =1
-#        line = LineString([y,p])
-#        for z in polygon_list:
-#            if line.intersects(z) == True:
-#                add = 0
-#        if(add == 1):
-#            final.append(p)
-#    if(i==len(b)-1):
-#        final.append(b[i])
-
 final_pt = []
 for i in path:
+  point = list(i)
+  point[0] = round(point[0],2)
+  point[1] = round(point[1],2)
   if(i not in final_pt):
-    final_pt.append(list(i))
-wg_points = final_pt
+    final_pt.append(list(point))
+final_pt.reverse()
+
+for i in final_pt:
+	spt = Point(starting_pt[0]*1e-3,starting_pt[1]*1e-3)
+	cpt = Point(i[0], i[1])
+	yes = 0
+	for j in polygon_list:
+		pt1 = Point(j[0][0], j[0][1])
+		pt2 = Point(j[1][0], j[1][1])
+		if(intersect(spt,cpt, pt1,pt2)):
+			yes = 1
+	if(yes == 1):
+		final.append(i)
+	else:
+		final.append(i)
+		final.append([starting_pt[0]*1e-3,starting_pt[1]*1e-3])
+		break
+wg_points = final
 
 draw()
  </text>
