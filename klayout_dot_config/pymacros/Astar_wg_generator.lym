@@ -30,6 +30,10 @@ uses:
 
 Version history:
 
+Jaspreet Jhoja 		2015/12/24 - 2015/12/29
+- Optimised for designs with multiple waveguides.
+- Applied optimisation filter to remove overlapping path points.
+
 Jaspreet Jhoja 		2015/12/13
 - Does not use any external libraries
 
@@ -38,13 +42,13 @@ Jaspreet Jhoja          2015/12/9- 2015/12/11
 - Improved speed and solution time.
 
 Jaspreet Jhoja          2015/12/03
-
  - Takes Manual coordinate input, if no coordinates are set,
     then the script automatically extract coordinates from the 
      start_pt and end_pt text.      
  - Allow input for desired gap between waveguides
  - only works for waveguide width of 500nm 
  -  usually takes 10-15 seconds, depending on the complexity of the obstacle
+ 
 """
 
 # 
@@ -82,11 +86,11 @@ def find_points(topcell, LayerTextN):
   while not(iter.at_end()):
     if iter.shape().is_text():
       text = iter.shape().text
-      if text.string.find("start_pt") &gt; -1:
+      if text.string.find("start_pt") > -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
-      if text.string.find("end_pt") &gt; -1:
+      if text.string.find("end_pt") > -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
@@ -186,25 +190,25 @@ for l in temp_points:
     m=[]
     n = []
     for i in range(0,len(a),1):
-        if(i&gt;0):
+        if(i>0):
             if(a[i][0]==a[i-1][0]):
-                if((a[i-1][1]-a[i][1])&gt;0):#08 00
+                if((a[i-1][1]-a[i][1])>0):#08 00
                     p =[a[i][0],a[i][1]-add]
                     q =[a[i-1][0],a[i-1][1]+add]
-                elif((a[i-1][1]-a[i][1])&lt;0):
+                elif((a[i-1][1]-a[i][1])<0):
                     p =[a[i][0],a[i][1]+add]
                     q =[a[i-1][0],a[i-1][1]-add]
-                if(len(m)&gt;=1):
+                if(len(m)>=1):
                     p[0] = m[i-1][0]
                     q[0] = m[i-1][0]
             elif(a[i][1] == a[i-1][1]):
-                if((a[i][0]-a[i-1][0])&gt;0):#00 90
+                if((a[i][0]-a[i-1][0])>0):#00 90
                     p =[a[i][0]+add,a[i][1]]
                     q =[a[i-1][0]-add,a[i-1][1]]
-                elif((a[i][0]-a[i-1][0])&lt;0):
+                elif((a[i][0]-a[i-1][0])<0):
                     p =[a[i][0]-add,a[i][1]]
                     q =[a[i-1][0]+add,a[i-1][1]]
-                if(len(m)&gt;=1):
+                if(len(m)>=1):
                     p[1] = m[i-1][1]
                     q[1] = m[i-1][1]                    
             if(a[i-1] not in n):
@@ -236,6 +240,10 @@ def generateBounds(list_pt, width):
         a= j
         n = []
         m=[]
+        p=[]
+        q=[]
+        r=[]
+        s=[]
         for i in range(len(a)):
             if(i>0):
                 if(a[i][0]==a[i-1][0]):
@@ -317,42 +325,49 @@ def generateBounds(list_pt, width):
     for i in empty_list:
         return_list = return_list + i        
     return return_list
-
+    
+shell= filter(None, shell)
 shell_pt = generateBounds(shell, 3)
+temp_points = filter(None, temp_points)
 barred_points = generateBounds(temp_points, width)
 polygon_list = []
-p_list = []
+
+p_list=[]
 for i in barred_points:
     a = []
     for j in barred_points:
-        if(i!=j):
-            a=[]
-            if((i[0]==j[0]) or (i[1] == j[1])):
-                a.append(i)
-                a.append(j)
-                p_list.append(a)
+        if(i!= [] and j!=[]):
+          if(i!=j):
+              a=[]
+              if((i[0]==j[0]) or (i[1] == j[1])):
+                  a.append(i)
+                  a.append(j)
+                  p_list.append(a)
+
 for i in p_list:
     a= [i[1],i[0]]
     if(i not in polygon_list and a not in polygon_list):
         polygon_list.append(i) 
-      
+#check intersection from polygon 
+			
 #check intersection from polygon list
 #shell_pt has the points for vertices to check with intersection list
 #This function is used to generate visible vertices
 def getvisibleVertices(current):
     actual_points = []
     for k in shell_pt:
-        currentpt = Point(current[0],current[1])
-        kpt = Point(k[0], k[1])
-        #currentpt to kpt
-        valid = 1
-        for l in polygon_list:
-            pt1 = Point(l[0][0], l[0][1])
-            pt2 = Point(l[1][0], l[1][1])
-            if(intersect(currentpt, kpt, pt1, pt2) == True):
-                valid = 0
-        if(valid == 1):
-                actual_points.append(k)
+        if (k!=[]):
+          currentpt = Point(current[0],current[1])
+          kpt = Point(k[0], k[1])
+          #currentpt to kpt
+          valid = 1
+          for l in polygon_list:
+             pt1 = Point(l[0][0], l[0][1])
+             pt2 = Point(l[1][0], l[1][1])
+             if(intersect(currentpt, kpt, pt1, pt2) == True):
+                 valid = 0
+          if(valid == 1):
+                 actual_points.append(k)
     return actual_points
 
 #barred_points contains the data about the restricted areas  
@@ -361,32 +376,35 @@ def getvisibleVertices(current):
 ###########################################################################        
 
 class AStar:
-    def distBetween(self,current,neighbor):
-       # distance = (abs(current[0]-neighbor[0]) + abs(current[1]-neighbor[1]))
-        distance = sqrt(abs(current[0]-neighbor[0])**2 + abs(current[1]-neighbor[1])**2)
+    def distBetween(self,current,neighbor, atype):
+        if(atype == "solve"):
+          distance = (abs(current[0]-neighbor[0]) + abs(current[1]-neighbor[1]))
+        elif(atype == "search"):
+          distance = sqrt(abs(current[0]-neighbor[0])**2 + abs(current[1]-neighbor[1])**2)
         return distance
 
-    def heuristicEstimate(self,start,goal):
-       # hvalue = (abs(start[0]-goal[0]) + abs(start[1]-goal[1]))#*1.001
-        hvalue = sqrt(abs(start[0]-goal[0])**2 + abs(start[1]-goal[1])**2)
+    def heuristicEstimate(self,start,goal, atype):
+        if(atype== "solve"):
+          hvalue = (abs(start[0]-goal[0]) + abs(start[1]-goal[1]))#*1.001
+        elif(atype == "search"):
+          hvalue = sqrt(abs(start[0]-goal[0])**2 + abs(start[1]-goal[1])**2)
         return hvalue
 
     def neighborNodes(self,current, goal, atype):
         clist = []
-        if(atype == "search"):
-            test = [Point(current[0], current[1]),Point(goal[0], goal[1])]
-            find_vertices = 0
-            for i in polygon_list:
+        test = [Point(current[0], current[1]),Point(goal[0], goal[1])]
+        find_vertices = 0
+        for i in polygon_list:
                 pt1 = Point(i[0][0], i[0][1])
                 pt2 = Point(i[1][0], i[1][1])
                 if(intersect(test[0], test[1], pt1, pt2)== True):
                     find_vertices = 1
-            if(find_vertices==1):
+        if(find_vertices==1):
                 clist = getvisibleVertices(current)
-            else:
+        else:
                 clist = [goal]
-            for i in clist:
-                gc = gScore[str(current)] + self.distBetween(current,i)
+        for i in clist:
+                gc = gScore[str(current)] + self.distBetween(current,i, atype)
                 gScore.update({str(i): gc})            
         return clist
 
@@ -409,7 +427,7 @@ class AStar:
         lowest = float("inf")
         lowestNode = None
         for node in openSet:
-            if fScore[str(node)] &lt; lowest:
+            if fScore[str(node)] < lowest:
                 lowest = fScore[str(node)]
                 lowestNode = node
         return lowestNode
@@ -427,7 +445,7 @@ class AStar:
         gScore.update({str(start): 0})
         fScore.update({str(start): 0})
         gScore[str(start)] = 0
-        fScore[str(start)] = gScore[str(start)] + self.heuristicEstimate(start,goal)
+        fScore[str(start)] = gScore[str(start)] + self.heuristicEstimate(start,goal,atype)
         while len(openSet) != 0:
             current = self.getLowest(openSet,fScore)
             current = ast.literal_eval(current)
@@ -436,13 +454,13 @@ class AStar:
             if current == goal:
                 return self.reconstructPath(cameFrom,start,goal)
             for neighbor in self.neighborNodes(current,goal, atype):
-                tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor)
-                if str(neighbor) in closedSet and tentative_gScore &gt;= gScore[str(neighbor)]:
+                tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor, atype)
+                if str(neighbor) in closedSet and tentative_gScore >= gScore[str(neighbor)]:
                     continue
-                if str(neighbor) not in closedSet or tentative_gScore &lt; gScore[str(neighbor)]:
+                if str(neighbor) not in closedSet or tentative_gScore < gScore[str(neighbor)]:
                     cameFrom[str(neighbor)] = current
                     gScore[str(neighbor)] = tentative_gScore
-                    fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal)
+                    fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal, atype)
                     if str(neighbor) not in openSet:
                         openSet.add(str(neighbor))
         return "nothing found"
@@ -465,6 +483,7 @@ def draw(): #This function is responsible for drawing on the star
 
 a=AStar()
 g = a.aStar([float(starting_pt[0]*1e-3),float(starting_pt[1]*1e-3)],[float(goal_pt[0]*1e-3),float(goal_pt[1]*1e-3)],"search")
+#g = a.aStar([10,200],[110,190],"search")
 b = path
 final =[]
 final_pt = []
@@ -475,7 +494,7 @@ for i in path:
   if(i not in final_pt):
     final_pt.append(list(point))
 final_pt.reverse()
-
+print ("here", final_pt)
 for i in final_pt:
 	spt = Point(starting_pt[0]*1e-3,starting_pt[1]*1e-3)
 	cpt = Point(i[0], i[1])
@@ -493,6 +512,59 @@ for i in final_pt:
 		break
 wg_points = final
 
+#final filter for unoptimal points
+optimised_pts = []
+wg_copy = []
+for i in wg_points:
+  wg_copy.append(i)
+wg_copy.reverse()
+
+links = []
+
+def proof(ind1, ind2):
+  global links
+  intersection = 0
+  i = wg_copy[ind1]
+  j = wg_points[ind2]
+  firstpt = Point(i[0], i[1])
+  secondpt = Point(j[0], j[1])
+  for k in polygon_list:
+    pt1 = Point(k[0][0], k[0][1])
+    pt2 = Point(k[1][0], k[1][1])
+    if(intersect(firstpt, secondpt, pt1, pt2)==True):
+      intersection = 1
+  if(intersection == 0):
+    links.append([i, j])
+    if(i == wg_points[0] or j == wg_points[0]):
+      return
+    if(ind1+1 <= len(wg_copy)-1):
+      proof(ind1+1, ind2)
+  else:
+    proof(ind1, ind2-1)
+proof(0, -1)
+
+start = wg_points[-1]
+end = wg_points[0]
+
+def finalfilter(pt):
+  first = pt
+  second = []
+  if(pt == start):
+    return
+  else:
+    for i in links:
+      if(i[0] == pt):
+        second = i[1]
+        if(first not in optimised_pts):
+          optimised_pts.append(first)
+        if(second not in optimised_pts):
+          optimised_pts.append(second)
+        finalfilter(second)
+
+finalfilter(end)
+wg_points = optimised_pts
+
+print (wg_points)
 draw()
  </text>
 </klayout-macro>
