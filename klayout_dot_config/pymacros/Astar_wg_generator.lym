@@ -15,6 +15,7 @@
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>
+
  # Python script
 # A* algorithm for waveguide path generation
 
@@ -87,11 +88,11 @@ def find_points(topcell, LayerTextN):
   while not(iter.at_end()):
     if iter.shape().is_text():
       text = iter.shape().text
-      if text.string.find("start_pt") > -1:
+      if text.string.find("start_pt") &gt; -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
-      if text.string.find("end_pt") > -1:
+      if text.string.find("end_pt") &gt; -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
         t.append([text2.x, text2.y])
@@ -191,25 +192,25 @@ for l in temp_points:
     m=[]
     n = []
     for i in range(0,len(a),1):
-        if(i>0):
+        if(i&gt;0):
             if(a[i][0]==a[i-1][0]):
-                if((a[i-1][1]-a[i][1])>0):#08 00
+                if((a[i-1][1]-a[i][1])&gt;0):#08 00
                     p =[a[i][0],a[i][1]-add]
                     q =[a[i-1][0],a[i-1][1]+add]
-                elif((a[i-1][1]-a[i][1])<0):
+                elif((a[i-1][1]-a[i][1])&lt;0):
                     p =[a[i][0],a[i][1]+add]
                     q =[a[i-1][0],a[i-1][1]-add]
-                if(len(m)>=1):
+                if(len(m)&gt;=1):
                     p[0] = m[i-1][0]
                     q[0] = m[i-1][0]
             elif(a[i][1] == a[i-1][1]):
-                if((a[i][0]-a[i-1][0])>0):#00 90
+                if((a[i][0]-a[i-1][0])&gt;0):#00 90
                     p =[a[i][0]+add,a[i][1]]
                     q =[a[i-1][0]-add,a[i-1][1]]
-                elif((a[i][0]-a[i-1][0])<0):
+                elif((a[i][0]-a[i-1][0])&lt;0):
                     p =[a[i][0]-add,a[i][1]]
                     q =[a[i-1][0]+add,a[i-1][1]]
-                if(len(m)>=1):
+                if(len(m)&gt;=1):
                     p[1] = m[i-1][1]
                     q[1] = m[i-1][1]                    
             if(a[i-1] not in n):
@@ -228,7 +229,7 @@ class Point:
 		self.y = y
 
 def ccw(A,B,C):
-	return (C.y-A.y)*(B.x-A.x) > (B.y-A.y)*(C.x-A.x)
+	return (C.y-A.y)*(B.x-A.x) &gt; (B.y-A.y)*(C.x-A.x)
 
 def intersect(A,B,C,D):
 	return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)	
@@ -246,9 +247,9 @@ def generateBounds(list_pt, width):
         r=[]
         s=[]
         for i in range(len(a)):
-            if(i>0):
+            if(i&gt;0):
                 if(a[i][0]==a[i-1][0]):
-                    if((a[i-1][1]-a[i][1])<0):#checked
+                    if((a[i-1][1]-a[i][1])&lt;0):#checked
                         p =[a[i-1][0]+width,a[i-1][1]]
                         q =[a[i-1][0]-width,a[i-1][1]]
                         if(i == len(a)-1):
@@ -256,15 +257,15 @@ def generateBounds(list_pt, width):
                                 s =[a[i][0]-width,a[i][1]]
                         else:                            
                             try:
-                                if(a[i+1][0]-a[i][0]>0):
+                                if(a[i+1][0]-a[i][0]&gt;0):
                                     r =[a[i][0]+width,a[i][1]-width]
                                     s =[a[i][0]-width,a[i][1]+width]
-                                elif(a[i+1][0]-a[i][0]<0):
+                                elif(a[i+1][0]-a[i][0]&lt;0):
                                     r =[a[i][0]-width,a[i][1]-width]
                                     s =[a[i][0]+width,a[i][1]+width]
                             except Exceptions as e:
                                 None                                
-                    elif((a[i-1][1]-a[i][1])>0):#checked
+                    elif((a[i-1][1]-a[i][1])&gt;0):#checked
                         p =[a[i-1][0]+width,a[i-1][1]]
                         q =[a[i-1][0]-width,a[i-1][1]]
                         if(i == len(a)-1):
@@ -272,16 +273,16 @@ def generateBounds(list_pt, width):
                                 s =[a[i][0]-width,a[i][1]]
                         else:                            
                             try:
-                                if(a[i+1][0]-a[i][0]>0):
+                                if(a[i+1][0]-a[i][0]&gt;0):
                                     r =[a[i][0]+width,a[i][1]-width]
                                     s =[a[i][0]-width,a[i][1]+width]
-                                elif(a[i+1][0]-a[i][0]<0):
+                                elif(a[i+1][0]-a[i][0]&lt;0):
                                     r =[a[i][0]-width,a[i][1]+width]
                                     s =[a[i][0]+width,a[i][1]-width]
                             except Exceptions as e:
                                 None
                 elif(a[i][1] == a[i-1][1]):#checked
-                    if((a[i-1][0]-a[i][0])>0):#08 00
+                    if((a[i-1][0]-a[i][0])&gt;0):#08 00
                         p =[a[i-1][0],a[i-1][1]-width]
                         q =[a[i-1][0],a[i-1][1]+width]
                         if(i == len(a)-1):
@@ -289,15 +290,15 @@ def generateBounds(list_pt, width):
                                 s =[a[i][0],a[i][1]+width]
                         else:                            
                             try:
-                                if(a[i+1][1]-a[i][1]>0):
+                                if(a[i+1][1]-a[i][1]&gt;0):
                                     r =[a[i][0]-width,a[i][1]-width]
                                     s =[a[i][0]+width,a[i][1]+width]
-                                elif(a[i+1][1]-a[i][1]<0):
+                                elif(a[i+1][1]-a[i][1]&lt;0):
                                     r =[a[i][0]-width,a[i][1]+width]
                                     s =[a[i][0]+width,a[i][1]-width]
                             except Exceptions as e:
                                 None                                
-                    elif((a[i-1][0]-a[i][0])<0):#checked
+                    elif((a[i-1][0]-a[i][0])&lt;0):#checked
                         p =[a[i-1][0],a[i-1][1]+width]
                         q =[a[i-1][0],a[i-1][1]-width]
                         if(i == len(a)-1):
@@ -305,10 +306,10 @@ def generateBounds(list_pt, width):
                                 s =[a[i][0],a[i][1]+width]
                         else:                            
                             try:
-                                if(a[i+1][1]-a[i][1]>0):
+                                if(a[i+1][1]-a[i][1]&gt;0):
                                     r =[a[i][0]-width,a[i][1]+width]
                                     s =[a[i][0]+width,a[i][1]-width]
-                                elif(a[i+1][1]-a[i][1]<0):
+                                elif(a[i+1][1]-a[i][1]&lt;0):
                                     r =[a[i][0]+width,a[i][1]+width]
                                     s =[a[i][0]-width,a[i][1]-width]
                             except Exceptions as e:
@@ -428,7 +429,7 @@ class AStar:
         lowest = float("inf")
         lowestNode = None
         for node in openSet:
-            if fScore[str(node)] < lowest:
+            if fScore[str(node)] &lt; lowest:
                 lowest = fScore[str(node)]
                 lowestNode = node
         return lowestNode
@@ -456,9 +457,9 @@ class AStar:
                 return self.reconstructPath(cameFrom,start,goal)
             for neighbor in self.neighborNodes(current,goal, atype):
                 tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor, atype)
-                if str(neighbor) in closedSet and tentative_gScore >= gScore[str(neighbor)]:
+                if str(neighbor) in closedSet and tentative_gScore &gt;= gScore[str(neighbor)]:
                     continue
-                if str(neighbor) not in closedSet or tentative_gScore < gScore[str(neighbor)]:
+                if str(neighbor) not in closedSet or tentative_gScore &lt; gScore[str(neighbor)]:
                     cameFrom[str(neighbor)] = current
                     gScore[str(neighbor)] = tentative_gScore
                     fScore[str(neighbor)] = gScore[str(neighbor)] + self.heuristicEstimate(neighbor,goal, atype)
@@ -538,7 +539,7 @@ def proof(ind1, ind2):
     links.append([i, j])
     if(i == wg_points[0] or j == wg_points[0]):
       return
-    if(ind1+1 <= len(wg_copy)-1):
+    if(ind1+1 &lt;= len(wg_copy)-1):
       proof(ind1+1, ind2)
   else:
     proof(ind1, ind2-1)
@@ -567,5 +568,6 @@ wg_points = optimised_pts
 
 print (wg_points)
 draw()
+
  </text>
 </klayout-macro>
