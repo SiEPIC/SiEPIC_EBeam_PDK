@@ -31,6 +31,7 @@
  - Menu item "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
  - Menu item "Shift-W": selected waveguides are converted back to paths.
 - EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
+- Monte Carlo simulations of waveguides.q
 
 ## Download:
 

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Lumerical INTERCONNECT - Monte Carlo simulations</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# SiEPIC_EBeam_functions
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2015
+
+This Python file extract the circuit netlist from the physical layout, saves it to Spice file, 
+and launches Lumerical INTERCONNECT for circuit simulations.
+
+Version history:
+
+Lukas Chrostowski           2015/11/19
+ - initial version
+ - generating a Spice netlist including Optical Network Analyzer; launch Lumerical INTERCONNECT simulation
+
+Zeqin Lu                    2015/12/10
+ - Monte Carlo simulation
+   
+"""
+
+import os
+print(os.name)
+
+import platform
+print(platform.system())
+print(platform.release())
+
+import sys
+version = sys.version
+
+import string
+
+
+# find the currently selected cell:
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if topcell == None:
+  raise Exception("No cell")
+layout = topcell.layout()
+dbu = layout.dbu
+
+# initialize the arrays to keep track of layout objects
+optical_components = []
+optical_waveguides = []
+optical_pins = []
+optical_nets = []
+
+# Define layers based on the PDK:
+LayerSiN = layout.layer(LayerSi)
+LayerTextN = layout.layer(LayerText)
+LayerPinRecN = layout.layer(LayerPinRec)
+LayerDevRecN = layout.layer(LayerDevRec)
+LayerFbrTgtN = layout.layer(LayerFbrTgt)
+LayerErrorN = layout.layer(LayerError)
+LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
+
+
+# extract the circuit netlist from the physical layout:
+optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
+  
+# Output the Spice netlist:
+text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
+print(text_Spice)
+
+if sys.platform.startswith("win"):
+
+  folder_name = app.application_data_path()
+  if not os.path.isdir(folder_name+'/tmp'):
+    os.makedirs(folder_name+"/tmp")
+  filename = folder_name + '/tmp/%s.spi' % topcell.name
+  filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
+else: 
+
+  filename = '/tmp/%s.spi' % topcell.name
+  filename2 = '/tmp/%s.lsf' % topcell.name
+
+# Write the Spice netlist to file
+file = open(filename, 'w')
+file.write (text_Spice)
+file.close()
+
+# Write the Lumerical INTERCONNECT start-up script.
+file = open(filename2, 'w')
+text_lsf = 'switchtolayout;\n'
+text_lsf += 'deleteall;\n'
+text_lsf += 'importnetlist("%s");\n' % filename
+ 
+############################## Wafer generation ###########################################
+text_lsf += 'addproperty("::Root Element", "seed_process", "wafer", "Number");\n'
+text_lsf += 'set("seed_process",1); \n'
+
+text_lsf += 'select("::Root Element");\n'
+text_lsf += 'set("setup script",'+ "'" +  ' \n'
+text_lsf += 'x_span = 2000e-6;  \n'   
+text_lsf += 'y_span = 2000e-6;   \n'
+text_lsf += 'corr_length_x = 50e-6;  \n'
+text_lsf += 'corr_length_y = 50e-6; \n'
+ 
+text_lsf += 'Nx = 200;    \n'
+text_lsf += 'Ny = 200;  \n'
+text_lsf += 'grid=x_span/Nx;  \n'
+
+text_lsf += 'sigma_rms_width = 6;     \n'
+text_lsf += 'sigma_rms_thickness = 3;   \n'
+ 
+text_lsf += 'x_wafer = linspace(-x_span/2,x_span/2,Nx); \n'
+text_lsf += 'y_wafer = linspace(-y_span/2,y_span/2,Ny); \n'
+
+text_lsf += 'thickness_xy_wafer = sroughness( x_wafer, y_wafer, sigma_rms_thickness, corr_length_x, corr_length_y, seed_process );    \n'
+text_lsf += 'width_xy_wafer = sroughness( x_wafer, y_wafer, sigma_rms_width, corr_length_x, corr_length_y, seed_process );    \n'
+text_lsf += 'groupscope("::Root Element::%s");  \n' % topcell.name
+text_lsf += 'selectpartial("wg"); \n'
+text_lsf += 'set("thickness_xy_wafer",thickness_xy_wafer);  \n'
+text_lsf += 'set("width_xy_wafer",width_xy_wafer);  \n'
+text_lsf += 'set("Resolution",Nx);  \n'
+text_lsf += 'set("grid",grid);  \n'
+text_lsf += 'set("non_uniform",1);  \n'
+text_lsf += "'"+'); \n'
+
+text_lsf += 'for (simu=1;simu&lt;=20;simu=simu+1) {   \n'
+
+text_lsf += 'switchtodesign; \n'
+text_lsf += 'select("::Root Element"); \n'
+text_lsf += 'set("seed_process",rand(1,50,2));  \n'
+  
+text_lsf += 'run;\n'
+text_lsf += 'select("ONA_1");\n'
+text_lsf += 'f_start = get("start frequency");\n'
+text_lsf += 'f_stop = get("stop frequency");\n'
+text_lsf += 'num_points = get("number of points");\n'
+text_lsf += 'wavelength = c/f_start : (c/f_stop-c/f_start)/(num_points-1) : c/f_stop;\n'
+text_lsf += 'gain = getattribute( getresult("ONA_1","input 1/mode 1/gain"), "TE gain (dB)" );\n'
+text_lsf += 'plot(wavelength,gain);\n'
+text_lsf += 'holdon;\n'
+text_lsf += '}\n'
+
+file.write (text_lsf)
+file.close()
+
+print(text_lsf)
+
+if sys.platform.startswith('linux'):
+  # Linux-specific code here...
+  if string.find(version,"2.") &gt; -1:
+    import commands
+    print("Running INTERCONNECT")
+    commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
+
+elif sys.platform.startswith('darwin'):
+  # OSX specific
+  if string.find(version,"2.7.") &gt; -1:
+    import commands
+    print("Running INTERCONNECT")
+    #commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
+    commands.getstatusoutput('open -n /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
+
+elif sys.platform.startswith('win'):
+  # Windows specific code here
+  import subprocess
+  print("Running INTERCONNECT")
+  subprocess.Popen(args=['C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe', '-run', filename2], shell=True)
+  
+</text>
+</klayout-macro>

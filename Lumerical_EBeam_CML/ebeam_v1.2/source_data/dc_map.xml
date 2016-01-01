@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "directional_coupler">
+<association>
+    <design>
+        <value name="Lc" type="double">0</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=0um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">2.5e-06</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=2.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">5e-06</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">7.5e-06</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=7.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">1e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=10um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">1.25e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=12.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">1.5e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=15um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">1.75e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=17.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">2e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=20um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">2.25e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=22.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">2.5e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=25um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">2.75e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=27.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">3e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=30um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">3.25e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=32.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">3.5e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=35um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">3.75e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=37.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">4e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=40um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">4.25e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=42.5um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">4.5e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=45um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">4.75e-05</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=200nm_Lc=47.5um.sparam</value>
+    </extracted>
+</association>
