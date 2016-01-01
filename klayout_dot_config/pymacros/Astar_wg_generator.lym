@@ -33,6 +33,7 @@ Version history:
 Jaspreet Jhoja 		2015/12/24 - 2015/12/29
 - Optimised for designs with multiple waveguides.
 - Applied optimisation filter to remove overlapping path points.
+- Filter also smoothens hard vertices.
 
 Jaspreet Jhoja 		2015/12/13
 - Does not use any external libraries
