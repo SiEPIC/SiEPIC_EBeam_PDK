@@ -46,8 +46,8 @@
   <source>26/0@1</source>
  </properties>
  <properties>
-  <frame-color>#008050</frame-color>
-  <fill-color>#008050</fill-color>
+  <frame-color>#ff0000</frame-color>
+  <fill-color>#ff0000</fill-color>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
@@ -61,8 +61,8 @@
   <source>31/0@1</source>
  </properties>
  <properties>
-  <frame-color>#008000</frame-color>
-  <fill-color>#008000</fill-color>
+  <frame-color>#ff0080</frame-color>
+  <fill-color>#ff0080</fill-color>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I4</dither-pattern>
@@ -76,8 +76,8 @@
   <source>'32_Si_p4nm' 32/0@1</source>
  </properties>
  <properties>
-  <frame-color>#508000</frame-color>
-  <fill-color>#508000</fill-color>
+  <frame-color>#ff80a8</frame-color>
+  <fill-color>#ff80a8</fill-color>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
@@ -89,6 +89,36 @@
   <animation>0</animation>
   <name>33_Si_p2nm</name>
   <source>'33_Si_p2nm' 33/0@1</source>
+ </properties>
+ <properties>
+  <frame-color>#805000</frame-color>
+  <fill-color>#805000</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I5</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>11_M1</name>
+  <source>11/0@1</source>
+ </properties>
+ <properties>
+  <frame-color>#008000</frame-color>
+  <fill-color>#008000</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I9</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>12_M2</name>
+  <source>12/0@1</source>
  </properties>
  <properties>
   <frame-color>#8000ff</frame-color>
@@ -164,21 +194,6 @@
   <animation>0</animation>
   <name>Errors</name>
   <source>999/0@1</source>
- </properties>
- <properties>
-  <frame-color>#800057</frame-color>
-  <fill-color>#800057</fill-color>
-  <frame-brightness>0</frame-brightness>
-  <fill-brightness>0</fill-brightness>
-  <dither-pattern>I1</dither-pattern>
-  <valid>true</valid>
-  <visible>true</visible>
-  <transparent>false</transparent>
-  <width>3</width>
-  <marked>false</marked>
-  <animation>0</animation>
-  <name>Lumerical</name>
-  <source>733/0@1</source>
  </properties>
  <name/>
 </layer-properties>
