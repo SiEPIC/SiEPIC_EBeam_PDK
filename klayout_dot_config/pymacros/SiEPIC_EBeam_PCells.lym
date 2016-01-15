@@ -207,6 +207,86 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
 
 
 
+class Waveguide_Route_simple(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the circle
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Waveguide_Route_simple, self).__init__()
+
+    # declare the parameters
+    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("path", self.TypeShape, "", default = pya.DPath([pya.DPoint(0,0), pya.DPoint(10,0), pya.DPoint(10,10)], 0.5)  )
+    self.param("radius", self.TypeDouble, "Radius", default = 5)
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Waveguide_Route_simple_%s" % self.path
+  
+  def coerce_parameters_impl(self):
+    pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return shape.is_path()
+
+  def transformation_from_shape(self, layout, shape, layer):
+    return pya.Trans(0,0)
+
+  def parameters_from_shape(self, layout, shape, layer):
+    self._param_values = []
+    for pd in self._param_decls:
+      self._param_values.append(pd.default)
+    
+    dbu = layout.dbu
+    print("Waveguide_Route_simple.parameters_from_shape")
+    print(shape.path)
+    points = points_mult(path_to_Dpoints(shape.path), dbu)
+    self.path = points_to_Dpath(points, shape.path.width*dbu)
+
+    # Waveguide radius should be specified in the cell in which the Path_to_Waveguide is called
+    # using a "User Properties" defined via the Cells window.
+    # if missing, a dialog is presented.
+    cell = shape.cell
+    radius_str = cell.property("radius")  
+    if radius_str:
+      radius = float(radius_str)
+      print("Radius taken from cell {%s} = %s" % (cell.name, radius) )
+    else:
+      radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
+      if radius == None:
+        radius = 10.0
+      else:
+        print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
+        cell.set_property("radius", str(radius))
+    self.radius = radius
+    
+    return self._param_values  
+        
+    
+  def produce_impl(self):
+  
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+
+    LayerSi = self.layer
+    LayerSiN = ly.layer(LayerSi)
+
+    print("Waveguide:")
+    print(self.path)
+#    points = points_mult(path_to_Dpoints(self.path), 1/dbu)  # convert from microns to dbu
+
+    points = path_to_Dpoints(self.path) 
+#    w = self.path.width/dbu   # w in dbu
+#    path = points_to_path(points,w)
+
+    layout_waveguide_abs(self.cell, self.layer, points, self.path.width, self.radius)
+    
+    
+
 class Waveguide_Route(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the circle
@@ -399,6 +479,7 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
         trans = pya.Trans(angle, False, p3)
         self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
         print("straight wg end-section inst: %s, %s, %s, [%s]; " % (i, angle, wg_length, p3) )
+
 
 class Waveguide_Bend(pya.PCellDeclarationHelper):
   """
@@ -1558,6 +1639,7 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("LumericalINTERCONNECT_Detector", LumericalINTERCONNECT_Detector())
     self.layout().register_pcell("Waveguide_Bend", Waveguide_Bend())
     self.layout().register_pcell("Waveguide_Route", Waveguide_Route())
+    self.layout().register_pcell("Waveguide_Route_simple", Waveguide_Route_simple())
     self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
     self.layout().register_pcell("Bragg_waveguide", Bragg_waveguide())
     
