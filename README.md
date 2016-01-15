@@ -31,7 +31,7 @@
  - Menu item "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
  - Menu item "Shift-W": selected waveguides are converted back to paths.
 - EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
-- Monte Carlo simulations of waveguides.q
+- Monte Carlo simulations of waveguides.
 
 ## Download:
 
@@ -41,6 +41,7 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
 
 ##Installation instructions:
 
+###For KLayout:
  - The files in the klayout_dot_config folder go into your KLayout configuration folder. 
   - On Linux and OSX, this is $HOME/.klayout
   - On windows systems, the KLayout configuration folder can be found under C:\Users\YOURUSERNAME\AppData\Roaming\KLayout (64bit)\
@@ -48,6 +49,10 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
  - For Linux/OSX, you need Python (which comes with the Mac); for Windows, KLayout comes with Python built-in.
 
 I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository. This is useful to automatically update my local KLayout installation (e.g., multiple computers), as changes are made in GitHub.
+
+###For Lumerical INTERCONNECT:
+ - To take advantage of the circuit simulations from layout capability, you need to install the Compact Model Library (CML) in INTERCONNECT.
+ - Install the latest version of the CML from the folder "Lumerical_EBeam_CML" using the instructions provided on <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's web page</a>.
 
 ##Contributing to this project:
 
