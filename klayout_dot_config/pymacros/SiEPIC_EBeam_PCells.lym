@@ -184,7 +184,7 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = pya.Trans(0, 0)
-    text = pya.Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.0', t)
+    text = pya.Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = pya.Trans(length/10, 0)
@@ -497,7 +497,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = pya.Trans(x+r/10, 0)
-    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.1", t)
+    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = pya.Trans(x+r/10, r/4)
@@ -585,7 +585,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = pya.Trans(0, 0)
-    text = pya.Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.0', t)
+    text = pya.Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = pya.Trans(length/10, 0)
@@ -1122,7 +1122,7 @@ class DirectionalCoupler_HalfRing(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = pya.Trans(r/4, 0)
-    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.0", t)
+    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = pya.Trans(r/4, r/4)
