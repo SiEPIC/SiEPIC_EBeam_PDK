@@ -52,7 +52,7 @@ I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> t
 
 ###For Lumerical INTERCONNECT:
  - To take advantage of the circuit simulations from layout capability, you need to install the Compact Model Library (CML) in INTERCONNECT.
- - Install the latest version of the CML from the folder "Lumerical_EBeam_CML" using the instructions provided on <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's web page</a>.
+ - Install the latest version of the CML (e.g., ebeam_v1.2_2016_01_15.cml) from the folder "Lumerical_EBeam_CML" using the instructions provided on <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's web page</a>.
 
 ##Contributing to this project:
 
