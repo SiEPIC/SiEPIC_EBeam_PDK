@@ -1,7 +1,7 @@
 # SiEPIC_EBeam_PDK
 
 - <a href="www.siepic.ubc.ca">SiEPIC</a> EBeam PDK, Library - for silicon photonics layout, design and verification
-- by Lukas Chrostowski, (c) 2015
+- by Lukas Chrostowski, (c) 2015-2016
 - Package for KLayout, klayout.de (developed on KLayout version 0.24.3, OSX)
 - Instruction on design, layout, fabrication, test, data analysis for silicon photonics provided in the edX course: <a href="edx.org/course/silicon-photonics-design-fabrication-ubcx-phot1x">Silicon Photonics Design, Fabrication and Data Analysis</a> and textbook <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">Silicon Photonics Design: From Devices to Systems</a> by Lukas Chrostowski and Michael Hochberg.
 
