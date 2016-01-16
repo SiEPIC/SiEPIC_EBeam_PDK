@@ -50,9 +50,9 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
 
  - Start KLayout
  - You should:
-   1) get a message (default layer properties file is not configured).
-   2) see a top-level menu called “SiEPIC”
-   If you don’t see these, the SiEPIC klayout files are not correctly installed. Go back to the KLayout configuration installation above.
+   - get a message (default layer properties file is not configured).
+   - see a top-level menu called “SiEPIC”
+   - If you don’t see these, the SiEPIC klayout files are not correctly installed. Go back to the KLayout configuration installation above.
 
  - File – Setup (Windows) or KLayout – Preferences (OSX)
   - Application – Editing Mode
@@ -62,8 +62,8 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
 	  - click on the “…” to bring up a file finder window, and locate the file “klayout_Layers_EBeam.lyp”
 	  - turn on “Automatically add other layers”
   - Ok
-- Quit and restart KLayout
-- Menu SiEPIC – SiEPIC configure shortcut keys  (configures the shortcut keys as per other popular layout tools)
+ - Quit and restart KLayout
+ - Menu SiEPIC – SiEPIC configure shortcut keys  (configures the shortcut keys as per other popular layout tools)
 
 ###For Lumerical INTERCONNECT:
  - To take advantage of the circuit simulations from layout capability, you need to install the Compact Model Library (CML) in INTERCONNECT.
