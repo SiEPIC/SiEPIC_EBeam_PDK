@@ -40,19 +40,36 @@
 This is posted on GitHub for 1) revision control, 2) so that others can contribute to it, find bugs, 3) easy download of the latest version.
 
 ##Installation instructions:
+ - Unzip the PDK.
 
 ###For KLayout:
- - The files in the klayout_dot_config folder go into your KLayout configuration folder. 
+ - Copy the files from the klayout_dot_config folder (from the zip file) into your KLayout configuration folder: 
   - On Linux and OSX, this is $HOME/.klayout
   - On windows systems, the KLayout configuration folder can be found under C:\Users\YOURUSERNAME\AppData\Roaming\KLayout (64bit)\
- - Alternatively, you can import all the files one by one using the KLayout IDE.  How to use the <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
- - For Linux/OSX, you need Python (which comes with the Mac); for Windows, KLayout comes with Python built-in.
+  - Alternatively, you can import all the files one by one using the KLayout IDE.  How to use the <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
 
-I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository. This is useful to automatically update my local KLayout installation (e.g., multiple computers), as changes are made in GitHub.
+ - Start KLayout
+ - You should:
+   1) get a message (default layer properties file is not configured).
+   2) see a top-level menu called “SiEPIC”
+   If you don’t see these, the SiEPIC klayout files are not correctly installed. Go back to the KLayout configuration installation above.
+
+ - File – Setup (Windows) or KLayout – Preferences (OSX)
+  - Application – Editing Mode
+	  - turn on “Use editing mode by default”
+  - Application – Layer Properties
+	  - turn on “Use default layer properties file”
+	  - click on the “…” to bring up a file finder window, and locate the file “klayout_Layers_EBeam.lyp”
+	  - turn on “Automatically add other layers”
+  - Ok
+- Quit and restart KLayout
+- Menu SiEPIC – SiEPIC configure shortcut keys  (configures the shortcut keys as per other popular layout tools)
 
 ###For Lumerical INTERCONNECT:
  - To take advantage of the circuit simulations from layout capability, you need to install the Compact Model Library (CML) in INTERCONNECT.
  - Install the latest version of the CML (e.g., ebeam_v1.2_2016_01_15.cml) from the folder "Lumerical_EBeam_CML" using the instructions provided on <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's web page</a>.
+
+[Optional]: I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository. This is useful to automatically update my local KLayout installation (e.g., multiple computers), as changes are made in GitHub.
 
 ##Contributing to this project:
 
