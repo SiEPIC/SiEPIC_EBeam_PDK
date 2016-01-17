@@ -39,10 +39,9 @@
 
 This is posted on GitHub for 1) revision control, 2) so that others can contribute to it, find bugs, 3) easy download of the latest version.
 
-##Installation instructions:
+##Installation instructions -- KLayout:
+ - Make sure you have <a href="http://www.klayout.de/build.html">KLayout version 0.24.3 or higher</a> installed.  
  - Unzip the PDK.
-
-###For KLayout:
  - Copy the files from the klayout_dot_config folder (from the zip file) into your KLayout configuration folder: 
   - On Linux and OSX, this is $HOME/.klayout
   - On windows systems, the KLayout configuration folder can be found under C:\Users\YOURUSERNAME\AppData\Roaming\KLayout (64bit)\
@@ -65,8 +64,8 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
  - Quit and restart KLayout
  - Menu SiEPIC – SiEPIC configure shortcut keys  (configures the shortcut keys as per other popular layout tools)
 
-###For Lumerical INTERCONNECT:
- - To take advantage of the circuit simulations from layout capability, you need to install the Compact Model Library (CML) in INTERCONNECT.
+###Installation instructions -- Lumerical INTERCONNECT:
+ - To take advantage of the circuit simulations from layout capability, you need to install the Compact Model Library (CML) in <a href=https://www.lumerical.com/tcad-products/interconnect/>Lumerical INTERCONNECT</a>.
  - Install the latest version of the CML (e.g., ebeam_v1.2_2016_01_15.cml) from the folder "Lumerical_EBeam_CML" using the instructions provided on <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's web page</a>.
 
 [Optional]: I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository. This is useful to automatically update my local KLayout installation (e.g., multiple computers), as changes are made in GitHub.
