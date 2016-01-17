@@ -45,7 +45,6 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
  - Copy the files from the klayout_dot_config folder (from the zip file) into your KLayout configuration folder: 
   - On Linux and OSX, this is $HOME/.klayout
   - On windows systems, the KLayout configuration folder can be found under C:\Users\YOURUSERNAME\AppData\Roaming\KLayout (64bit)\
-  - Alternatively, you can import all the files one by one using the KLayout IDE.  How to use the <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
 
  - Start KLayout
  - You should:
@@ -74,7 +73,8 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
 
  - On the GitHub web page, Fork a copy of the project into your own account.
  - Clone to your Desktop
- - Make edits/contributions
+ - Make edits/contributions.  You can use the KLayout IDE to write Python (or Ruby) scripts; <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
+
  - "Commit to master" (your own master)
  - Create a <a href="https://help.github.com/articles/using-pull-requests/">Pull Request</a> -- this will notify me of your contribution, which I can merge into the main project
 
