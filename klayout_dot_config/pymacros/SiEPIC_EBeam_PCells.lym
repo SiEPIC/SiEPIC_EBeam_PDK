@@ -78,6 +78,9 @@ Lukas Chrostowski           2015/11/xx
 
 Lukas Chrostowski           2015/12/3
  - Bragg grating
+
+Lukas Chrostowski           2016/01/17
+ - Taper, matching EBeam CML component
  
 
 
@@ -90,6 +93,123 @@ import math
 MODULE_NUMPY = False
 
 dbu = 0.001
+
+
+
+
+
+class ebeam_taper_te1550(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the strip waveguide taper.
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(ebeam_taper_te1550, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("wg_width1", self.TypeDouble, "Waveguide Width1 (CML only supports 0.4, 0.5, 0.6)", default = 0.5)
+    self.param("wg_width2", self.TypeDouble, "Waveguide Width2 (CML only supports 1, 2, 3)", default = 3)
+    self.param("wg_length", self.TypeDouble, "Waveguide Length (CML only supports a range of 1-10)", default = 10)
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+    # hidden parameters, can be used to query this component:
+    self.param("p1", self.TypeShape, "DPoint location of pin1", default = pya.Point(-10000, 0), hidden = True, readonly = True)
+    self.param("p2", self.TypeShape, "DPoint location of pin2", default = pya.Point(0, 10000), hidden = True, readonly = True)
+    
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "ebeam_taper_te1550(R=" + ('%.3f-%.3f-%.3f' % (self.wg_width1,self.wg_width2,self.wg_length) ) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+
+
+  def produce(self, layout, layers, parameters, cell):
+    """
+    coerce parameters (make consistent)
+    """
+    self._layers = layers
+    self.cell = cell
+    self._param_values = parameters
+    self.layout = layout
+
+
+    # cell: layout cell to place the layout
+    # LayerSiN: which layer to use
+    # w: waveguide width
+    # length units in dbu
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    
+    LayerSi = self.silayer
+    LayerSiN = self.silayer_layer
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    
+    w1 = int(round(self.wg_width1/dbu))
+    w2 = int(round(self.wg_width2/dbu))
+    length = int(round(self.wg_length/dbu))
+
+    pts = [pya.Point(0,-w1/2), pya.Point(0,w1/2), pya.Point(length,w2/2), pya.Point(length,-w2/2)]
+    cell.shapes(LayerSiN).insert(pya.Polygon(pts))
+
+    
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    # Pin on the left side:
+    p1 = [pya.Point(pin_length/2,0), pya.Point(-pin_length/2,0)]
+    p1c = pya.Point(0,0)
+    self.set_p1 = p1c
+    self.p1 = p1c
+    pin = pya.Path(p1, w1)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(0, 0)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Pin on the right side:
+    p2 = [pya.Point(length+pin_length/2,0), pya.Point(length-pin_length/2,0)]
+    p2c = pya.Point(length, 0)
+    self.set_p2 = p2c
+    self.p2 = p2c
+    pin = pya.Path(p2, w2)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(length, 0)
+    text = pya.Text ("pin2", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    points = [[0,0], [length, 0]]
+    path = points_to_path(points,w2+w1*2)
+    self.cell.shapes(LayerDevRecN).insert(path.simple_polygon())
+
+
+    # Compact model information
+    t = pya.Trans(w1/10, 0)
+    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = length/100
+    t = pya.Trans(length/10, w1/4)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_taper_te1550', t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = length/100
+    t = pya.Trans(length/10, w1/2)
+    text = pya.Text ('Spice_param:wg_width1=%.3fu wg_width2=%.3fu wg_length=%.3fu'% (self.wg_width1,self.wg_width2,self.wg_length), t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = length/100
+
+    return "ebeam_taper_te1550(" + ('%.3f-%.3f-%.3f' % (self.wg_width1,self.wg_width2,self.wg_length) ) + ")"
+
+
 
 
 
@@ -1642,6 +1762,8 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("Waveguide_Route_simple", Waveguide_Route_simple())
     self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
     self.layout().register_pcell("Bragg_waveguide", Bragg_waveguide())
+    self.layout().register_pcell("ebeam_taper_te1550", ebeam_taper_te1550())
+    
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
