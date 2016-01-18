@@ -47,6 +47,8 @@ version = sys.version
 
 import string
 
+SIMULATION = 2    # Monte Carlo INTERCONNECT simulation
+
 
 # find the currently selected cell:
 topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
