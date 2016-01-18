@@ -62,8 +62,8 @@ This is posted on GitHub for 1) revision control, 2) so that others can contribu
  - Menu SiEPIC – SiEPIC configure shortcut keys  (configures the shortcut keys as per other popular layout tools)
 
 ###Installation instructions – Lumerical INTERCONNECT:
- - To take advantage of the circuit simulations from layout capability, you need to install the Compact Model Library (CML) in <a href=https://www.lumerical.com/tcad-products/interconnect/>Lumerical INTERCONNECT</a>.
- - Install the latest version of the CML (e.g., ebeam_v1.2_2016_01_15.cml) from the folder "Lumerical_EBeam_CML" using the instructions provided on <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's web page</a>.
+ - To take advantage of the circuit simulations from layout capability, you need <a href=https://www.lumerical.com/tcad-products/interconnect/>Lumerical INTERCONNECT</a>, and then need to install the Compact Model Library (CML) provided here.
+ - Install the latest version of the CML (e.g., ebeam_v1.2_2016_01_15.cml) from the folder "Lumerical_EBeam_CML" using the instructions provided in the PDF file "ebeam_Lumerical_CML_User_Guide_xxx.pdf". More info on CMLs can be found on <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's web page</a>.
 
 [Optional]: I am personally using <a href="https://desktop.github.com/">GitHub desktop</a> to synchronize my files. Then I created symbolic links in my .klayout folder to point to the local copy of this repository. This is useful to automatically update my local KLayout installation (e.g., multiple computers), as changes are made in GitHub.
 
