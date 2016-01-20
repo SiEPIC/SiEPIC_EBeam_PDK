@@ -172,8 +172,8 @@ class Optical_waveguide:
         self.net1 = -1            # nets; one at each end of the waveguide
         self.net2 = -1            # nets; one at each end of the waveguide
         self.inst = 0             # class Instance for the waveguide cell instance
-#        self.component = "ebeam_wg_integral_1550"  # comprehensive waveguide model (regular and MC simulations)
-        self.component = "ebeam_wg_strip_1550"  # waveguide model name
+        self.component = "ebeam_wg_integral_1550"  # comprehensive waveguide model (regular and MC simulations)
+#        self.component = "ebeam_wg_strip_1550"  # waveguide model name
         self.library = "Design kits/ebeam_v1.2" # compact model library
 #        if 'SIMULATION' in globals():
 #          if SIMULATION == 2:
