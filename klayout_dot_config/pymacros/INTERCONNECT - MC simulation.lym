@@ -135,7 +135,7 @@ text_lsf += 'set("grid",grid);  \n'
 text_lsf += 'set("non_uniform",1);  \n'
 text_lsf += "'"+'); \n'
 
-text_lsf += 'for (simu=1;simu&lt;=20;simu=simu+1) {   \n'
+text_lsf += 'for (simu=1;simu&lt;=8;simu=simu+1) {   \n'
 
 text_lsf += 'switchtodesign; \n'
 text_lsf += 'select("::Root Element"); \n'
