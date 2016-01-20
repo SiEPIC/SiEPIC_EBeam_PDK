@@ -174,7 +174,7 @@ class Optical_waveguide:
         self.inst = 0             # class Instance for the waveguide cell instance
         self.component = "ebeam_wg_integral_1550"  # comprehensive waveguide model (regular and MC simulations)
 #        self.component = "ebeam_wg_strip_1550"  # waveguide model name
-        self.library = "Design kits/ebeam_v1.2" # compact model library
+        self.library = "Design kits/wg_integral" # compact model library
 #        if 'SIMULATION' in globals():
 #          if SIMULATION == 2:
 #            self.component = "ebeam_wg_integral_1550"  # Monte Carlo waveguide model name
