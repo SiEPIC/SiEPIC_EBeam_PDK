@@ -171,11 +171,13 @@ class Optical_waveguide:
         self.bend_pts = bend_pts  # number of points in a bend, per circle
         self.net1 = -1            # nets; one at each end of the waveguide
         self.net2 = -1            # nets; one at each end of the waveguide
-#        self.component = "ebeam_wg_strip_1550"  # waveguide model name
-#        self.library = "Design kits/ebeam_v1.2" # compact model library
-        self.component = "ebeam_wg_integral_1550"  # waveguide model name
-        self.library = "Design kits/wg_integral" # compact model library
         self.inst = 0             # class Instance for the waveguide cell instance
+        self.component = "ebeam_wg_integral_1550"  # comprehensive waveguide model (regular and MC simulations)
+#        self.component = "ebeam_wg_strip_1550"  # waveguide model name
+        self.library = "Design kits/ebeam_v1.2" # compact model library
+#        if 'SIMULATION' in globals():
+#          if SIMULATION == 2:
+#            self.component = "ebeam_wg_integral_1550"  # Monte Carlo waveguide model name
 
 def print_Optical_waveguides(optical_waveguides):
   print("Optical_waveguides:")
@@ -776,35 +778,39 @@ def find_all_waveguides(cell, layer):
       if iter1.cell().basic_name() == "ROUND_PATH" or \
         (iter1.cell().basic_name() == "Waveguide_Route" and WAVEGUIDE_extract_simple ):
         # This is a waveguide implemented using a PCell ROUND_PATH
-        subcell = iter1.cell()        
-        # Get the waveguide guiding shape path from the "ROUND_PATH" PCell 
-        DPath = subcell.pcell_parameters_by_name()["path"]*(1/dbu)  # DPath object
-        ipath = pya.Path.from_dpath(DPath)  # Construct an integer-coordinate path from a floating-point coordinate one
+        subcell = iter1.cell()
+        if subcell.is_pcell_variant():    
+          # Get the waveguide guiding shape path from the "ROUND_PATH" PCell 
+          DPath = subcell.pcell_parameters_by_name()["path"]*(1/dbu)  # DPath object
+          ipath = pya.Path.from_dpath(DPath)  # Construct an integer-coordinate path from a floating-point coordinate one
 
-        # Find out the transformation that needs to be performed on the path relative to the top cell
-        # and apply this on the waveguide guiding shape path
-        trans = iter1.trans() # CplxTrans object of the instance 
-        DCplxTrans = pya.DCplxTrans.from_itrans(trans) # need CplxTrans to DCplxTrans
-        path = DPath.transformed(DCplxTrans)
+          # Find out the transformation that needs to be performed on the path relative to the top cell
+          # and apply this on the waveguide guiding shape path
+          trans = iter1.trans() # CplxTrans object of the instance 
+          DCplxTrans = pya.DCplxTrans.from_itrans(trans) # need CplxTrans to DCplxTrans
+          path = DPath.transformed(DCplxTrans)
 
-        # Waveguide parameters
-        print(subcell.pcell_parameters_by_name())
-        radius = subcell.pcell_parameters_by_name()["radius"]  # in microns
-        bend_pts = subcell.pcell_parameters_by_name()["npoints"] 
-        wg_width = subcell.pcell_parameters_by_name()['path'].width  # in microns
-        # calculate the length of the waveguide using the area / width
-        iter2 = subcell.begin_shapes_rec(LayerSiN)
-        if iter2.shape().is_polygon():
-          area = iter2.shape().polygon.area()
-          length = area / wg_width * dbu * dbu
+          # Waveguide parameters
+          print(subcell.pcell_parameters_by_name())
+          radius = subcell.pcell_parameters_by_name()["radius"]  # in microns
+          bend_pts = subcell.pcell_parameters_by_name()["npoints"] 
+          wg_width = subcell.pcell_parameters_by_name()['path'].width  # in microns
+          # calculate the length of the waveguide using the area / width
+          iter2 = subcell.begin_shapes_rec(LayerSiN)
+          if iter2.shape().is_polygon():
+            area = iter2.shape().polygon.area()
+            length = area / wg_width * dbu * dbu
+          else:
+            print("## ROUND_PATH waveguide, not polygon; bug in code? ##")
+            length =  path.length()*dbu  # ignoring bends
+          num_points = path.num_points()
+          wg_type = 1
+          print("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s" \
+              % (i, subcell.name, num_points, length, radius, path) )
+          found_wg = True
         else:
-          print("## ROUND_PATH waveguide, not polygon; bug in code? ##")
-          length =  path.length()*dbu  # ignoring bends
-        num_points = path.num_points()
-        wg_type = 1
-        print("Waveguide #%s: In cell {%s}, num_points: %s, length: %s, radius: %s, path: %s" \
-            % (i, subcell.name, num_points, length, radius, path) )
-        found_wg = True
+          print("## ROUND_PATH cell, but not a PCell. Can't extract info. ##")
+          v = pya.MessageBox.warning("Can't extract waveguide", "Verification warning: Can't extract waveguide.\nFound a %s waveguide, but it isn't a PCell. \nNote: This verification only works on original KLayout-created layouts (not merged)." % iter1.cell().basic_name(), pya.MessageBox.Ok)
 
     if found_wg:
       points = path_to_points(path)  
