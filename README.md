@@ -34,48 +34,18 @@
 - EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
 - Monte Carlo simulations of waveguides.
 
-## Download:
 
-<a href="https://github.com/lukasc-ubc/SiEPIC_EBeam_PDK/archive/master.zip">Zip file download of the PDK</a>
-
-This is posted on GitHub for 1) revision control, 2) so that others can contribute to it, find bugs, 3) easy download of the latest version.
-
-##Installation instructions – for KLayout:
- - Make sure you have <a href="http://www.klayout.de/build.html">KLayout version 0.24.3 or higher</a> installed.  
- - Unzip the PDK.
- - Copy the files from the klayout_dot_config folder (from the zip file) into your KLayout configuration folder: 
-  - On Linux and OSX, this is $HOME/.klayout
-  - On windows systems, the KLayout configuration folder can be found under C:\Users\YOURUSERNAME\AppData\Roaming\KLayout (64bit)
- - Start KLayout
- - You should:
-   - get a message (default layer properties file is not configured).
-   - see a top-level menu called “SiEPIC”
-   - If you don’t see these, the SiEPIC klayout files are not correctly installed. Go back to the KLayout configuration installation above.
- - File – Setup (Windows) or KLayout – Preferences (OSX)
-  - Application – Editing Mode
-	  - turn on “Use editing mode by default”
-  - Application – Layer Properties
-	  - turn on “Use default layer properties file”
-	  - click on the “…” to bring up a file finder window, and locate the file “klayout_Layers_EBeam.lyp”
-	  - turn on “Automatically add other layers”
-  - Ok
- - Quit and restart KLayout
- - Menu SiEPIC – SiEPIC configure shortcut keys  (configures the shortcut keys as per other popular layout tools)
-
-###Installation instructions – for Lumerical INTERCONNECT:
- - To take advantage of the circuit simulations from layout capability, you need <a href=https://www.lumerical.com/tcad-products/interconnect/>Lumerical INTERCONNECT</a>, and then need to install the Compact Model Library (CML) provided here.
- - Install the latest version of the CML (e.g., ebeam_v1.2_2016_01_15.cml) found in the folder "Lumerical_EBeam_CML":
-  - Open the INTERCONNECT program, and find the “Element Library” window.
-  - Right-click on the “Design kits” folder (at the bottom of the “Elements”) and select “Install”.
-  - Select the E-beam CML file for the “Compact Model Library Package” (the CML file from the ZIP archive provided here)
-  - Set the “Destination Folder” (any folder on your computer), and then click “OK”.
-  - Now the elements should be available in a new “ebeam_v1.2” folder in “Design kits”.
-  - To use the E-beam elements, simply drag and drop the elements into the schematic editor.
- - More details on installation instructions and the CML models are provided in the PDF file "ebeam_Lumerical_CML_User_Guide_xxx.pdf". More info on CMLs can be found on <a href="https://kb.lumerical.com/en/pic_cml.html">Lumerical's CML page</a> and <a href="https://kb.lumerical.com/en/ref_install_compact_model_library.html">Lumerical's CML installation page</a>.  For more information about how to use INTERCONNECT, please visit the <a href="https://kb.lumerical.com/en/index.html">Lumerical Knowledge Base</a>.
+##Download and Installation instructions:
+ - <a href="https://github.com/lukasc-ubc/SiEPIC_EBeam_PDK/wiki/Installation-instructions">SiEPIC_EBeam_PDK download and installation instructions</a> on the wiki page.  
 
 
 ##Contributing to this project:
 
+You can download the latest development version (master) of the PDK: <a href="https://github.com/lukasc-ubc/SiEPIC_EBeam_PDK/archive/master.zip">Zip file download of the PDK</a>
+
+It is posted on GitHub for 1) revision control, 2) so that others can contribute to it, find bugs, 3) easy download of the latest version.
+
+To contribute to the PDK:
  - On the GitHub web page, Fork a copy of the project into your own account.
  - Clone to your Desktop
  - Make edits/contributions.  You can use the KLayout IDE to write Python (or Ruby) scripts; <a href = http://www.klayout.de/doc/about/macro_editor.html>KLayout Python IDE for writing/debugging PCells/scripts/macros</a>.
