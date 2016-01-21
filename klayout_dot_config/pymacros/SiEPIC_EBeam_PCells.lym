@@ -82,6 +82,8 @@ Lukas Chrostowski           2015/12/3
 Lukas Chrostowski           2016/01/17
  - Taper, matching EBeam CML component
  
+Lukas Chrostowski           2016/01/20
+ - (sinusoidal) Bragg grating
 
 
 """
@@ -225,9 +227,10 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
-    self.param("grating_period", self.TypeDouble, "Grating period", default = 0.317)     
-    self.param("corrugation_width", self.TypeDouble, "Corrugration width", default = 0.05)     
-    self.param("misalignment", self.TypeDouble, "Grating misalignment", default = 0.0)     
+    self.param("grating_period", self.TypeDouble, "Grating period (microns)", default = 0.317)     
+    self.param("corrugation_width", self.TypeDouble, "Corrugration width (microns)", default = 0.05)     
+    self.param("misalignment", self.TypeDouble, "Grating misalignment (microns)", default = 0.0)     
+    self.param("sinusoidal", self.TypeBoolean, "Grating Type (Rectangular=False, Sinusoidal=True)", default = False)     
 #    self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.5)     
     self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(31, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
@@ -264,24 +267,52 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
     half_w = w/2
     half_corrugation_w = int(round(self.corrugation_width/2/dbu))
     misalignment = int(round(self.misalignment/dbu))
-    for i in range(0,self.number_of_periods):
-      x = int(round((i * self.grating_period)/dbu))
-      box1 = pya.Box(x, 0, x + box_width, half_w+half_corrugation_w)
-      box2 = pya.Box(x + box_width, 0, x + grating_period, half_w-half_corrugation_w)
-      box3 = pya.Box(x + misalignment, 0, x + box_width + misalignment, -half_w-half_corrugation_w)
-      box4 = pya.Box(x + box_width + misalignment, 0, x + grating_period + misalignment, -half_w+half_corrugation_w)
-      self.cell.shapes(LayerSiN).insert(box1)
-      self.cell.shapes(LayerSiN).insert(box2)
-      self.cell.shapes(LayerSiN).insert(box3)
-      self.cell.shapes(LayerSiN).insert(box4)
-    length = x + grating_period + misalignment
-    if misalignment &gt; 0:
-      # extra piece at the end:
-      box2 = pya.Box(x + grating_period, 0, length, half_w)
-      self.cell.shapes(LayerSiN).insert(box2)
-      # extra piece at the beginning:
-      box3 = pya.Box(0, 0, misalignment, -half_w)
-      self.cell.shapes(LayerSiN).insert(box3)
+    if self.sinusoidal:
+      npoints_sin = 40
+      for i in range(0,self.number_of_periods):
+        x = (round((i * self.grating_period)/dbu))
+        box1 = pya.Box(x, 0, x + box_width, half_w+half_corrugation_w)
+        pts1 = [pya.Point(x,0)]
+        pts3 = [pya.Point(x + misalignment,0)]
+        for i1 in range(0,npoints_sin+1):
+          x1 = i1 * 2* math.pi / npoints_sin
+          y1 = round(half_corrugation_w*math.sin(x1))
+          x1 = round(x1/2/math.pi*grating_period)
+#          print("x: %s, y: %s" % (x1,y1))
+          pts1.append( pya.Point(x + x1,half_w+y1 ) )
+          pts3.append( pya.Point(x + misalignment + x1,-half_w-y1 ) )
+        pts1.append( pya.Point(x + grating_period, 0) )
+        pts3.append( pya.Point(x + grating_period + misalignment, 0) )
+        self.cell.shapes(LayerSiN).insert(pya.Polygon(pts1))
+        self.cell.shapes(LayerSiN).insert(pya.Polygon(pts3))
+      length = x + grating_period + misalignment
+      if misalignment &gt; 0:
+        # extra piece at the end:
+        box2 = pya.Box(x + grating_period, 0, length, half_w)
+        self.cell.shapes(LayerSiN).insert(box2)
+        # extra piece at the beginning:
+        box3 = pya.Box(0, 0, misalignment, -half_w)
+        self.cell.shapes(LayerSiN).insert(box3)
+
+    else:
+      for i in range(0,self.number_of_periods):
+        x = int(round((i * self.grating_period)/dbu))
+        box1 = pya.Box(x, 0, x + box_width, half_w+half_corrugation_w)
+        box2 = pya.Box(x + box_width, 0, x + grating_period, half_w-half_corrugation_w)
+        box3 = pya.Box(x + misalignment, 0, x + box_width + misalignment, -half_w-half_corrugation_w)
+        box4 = pya.Box(x + box_width + misalignment, 0, x + grating_period + misalignment, -half_w+half_corrugation_w)
+        self.cell.shapes(LayerSiN).insert(box1)
+        self.cell.shapes(LayerSiN).insert(box2)
+        self.cell.shapes(LayerSiN).insert(box3)
+        self.cell.shapes(LayerSiN).insert(box4)
+      length = x + grating_period + misalignment
+      if misalignment &gt; 0:
+        # extra piece at the end:
+        box2 = pya.Box(x + grating_period, 0, length, half_w)
+        self.cell.shapes(LayerSiN).insert(box2)
+        # extra piece at the beginning:
+        box3 = pya.Box(0, 0, misalignment, -half_w)
+        self.cell.shapes(LayerSiN).insert(box3)
 
     
     # Pins on the waveguide:
@@ -313,8 +344,8 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
     shape.text_size = 0.1/dbu
     t = pya.Trans(length/9, 0)
     text = pya.Text \
-      ('Spice_param:number_of_periods=%s grating_period=%.3fu corrugation_width=%.3fu misalignment=%.3fu' %\
-      (self.number_of_periods, self.grating_period, self.corrugation_width, self.misalignment), t )
+      ('Spice_param:number_of_periods=%s grating_period=%.3fu corrugation_width=%.3fu misalignment=%.3fu sinusoidal=%s' %\
+      (self.number_of_periods, self.grating_period, self.corrugation_width, self.misalignment, int(self.sinusoidal)), t )
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
