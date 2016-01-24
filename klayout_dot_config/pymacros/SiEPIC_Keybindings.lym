@@ -128,6 +128,18 @@ module MyMacro
   # activate &amp; store the changed configuration
   RBA::Application.instance.set_config('key-bindings', config_new)
 
+  RBA::Application.instance.set_config('edit-connect-angle-mode','ortho')
+  RBA::Application.instance.set_config('edit-inst-angle','0')
+  RBA::Application.instance.set_config('edit-move-angle-mode','diagonal')
+  RBA::Application.instance.set_config('edit-snap-to-objects','true')
+  RBA::Application.instance.set_config('grid-micron','0.01')
+  RBA::Application.instance.set_config('edit-top-level-selection','true')
+  RBA::Application.instance.set_config('inst-color','#ffcdcd')
+  RBA::Application.instance.set_config('text-font','3')
+  RBA::Application.instance.set_config('guiding-shape-line-width','0')
+  RBA::Application.instance.set_config('rdb-marker-color','#ff0000')
+  RBA::Application.instance.set_config('rdb-marker-line-width','8')
+
 end
 </text>
 </klayout-macro>
