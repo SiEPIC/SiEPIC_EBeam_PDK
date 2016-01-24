@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>SiEPIC configure shortcut keys</description>
+ <description>* SiEPIC Configure shortcut keys, settings, layers</description>
  <version/>
  <category/>
  <prolog/>
@@ -11,7 +11,7 @@
  <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.end</menu-path>
+ <menu-path>siepic_menu.beginning</menu-path>
  <interpreter>ruby</interpreter>
  <dsl-interpreter-name/>
  <text># Ruby script
@@ -139,6 +139,7 @@ module MyMacro
   RBA::Application.instance.set_config('guiding-shape-line-width','0')
   RBA::Application.instance.set_config('rdb-marker-color','#ff0000')
   RBA::Application.instance.set_config('rdb-marker-line-width','8')
+  RBA::Application.instance.set_config('default-layer-properties', File.join(RBA::Application.instance.application_data_path(),'libraries','klayout_Layers_EBeam.lyp') )
 
 end
 </text>
