@@ -1223,6 +1223,9 @@ def check_waveguides(rdb, optical_waveguides, topcell, error_layer):
   rdb_cat_id_wg_bendpts = rdb.create_category(rdb_cat_id_wg, "Bend points")
   rdb_cat_id_wg_bendpts.description = "Waveguide bend should have more points per circle."
 
+  rdb_cat_id_wg_manhattan = rdb.create_category(rdb_cat_id_wg, "Manhattan")
+  rdb_cat_id_wg_manhattan.description =  "The first and last waveguide segment need to be Manhattan (vertical or horizontal) so that they can connect to device pins."
+
 
   for o in optical_waveguides:
 
@@ -1277,7 +1280,25 @@ def check_waveguides(rdb, optical_waveguides, topcell, error_layer):
         flag_waveguide_error(dpoints, text, o, topcell)
         rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_bendpts.rdb_id())
         rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
-              
+      # Check if waveguide end segments are Manhattan; this ensures they can connect to a pin
+      # first segment
+      if ( o.points[0][0] != o.points[1][0] and o.points[0][1] != o.points[1][1] ):
+        num_errors += 1
+        text =  "  *** Layout warning.  The first and last waveguide segment need to be Manhattan (vertical or horizontal) so that they can connect to device pins."
+        dpoints=[ o.points[0], o.points[1] ] 
+        flag_waveguide_error(dpoints, text, o, topcell)
+        rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_manhattan.rdb_id())
+        rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
+      # last segment
+      last = len(o.points)-1
+      if ( o.points[last][0] != o.points[last-1][0] and o.points[last][1] != o.points[last-1][1] ):
+        num_errors += 1
+        text =  "  *** Layout warning.  The first and last waveguide segment need to be Manhattan (vertical or horizontal) so that they can connect to device pins."
+        dpoints=[ o.points[last-1], o.points[last] ]
+        flag_waveguide_error(dpoints, text, o, topcell)
+        rdb_item = rdb.create_item(rdb_cell.rdb_id(),rdb_cat_id_wg_manhattan.rdb_id())
+        rdb_item.add_value(pya.RdbItemValue( points_to_Dpath(points_mult(dpoints, dbu),o.wg_width) ) )
+
   return num_errors
 
 

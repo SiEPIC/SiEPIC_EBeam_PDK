@@ -966,17 +966,17 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
         
     t = pya.Trans(-width/2+3/dbu, height/2-4/dbu)
     text = pya.Text ("Tunable Laser", t)
-    shape = self.cell.shapes(TextLayerN).insert(text)
+    shape = self.cell.shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
     t = pya.Trans(-width/2+3/dbu, height/2-8/dbu)
     text = pya.Text ("Wavelength range: %4.3f - %4.3f nm" % ( self.wavelength_start, self.wavelength_stop), t)
-    shape = self.cell.shapes(TextLayerN).insert(text)
+    shape = self.cell.shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
     t = pya.Trans(-width/2+3/dbu, height/2-12/dbu)
     text = pya.Text ("Number of points: %s" % ( self.npoints), t)
-    shape = self.cell.shapes(TextLayerN).insert(text)
+    shape = self.cell.shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
     # Add a polygon text description
@@ -1087,12 +1087,12 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
         
     t = pya.Trans(-width/2+3/dbu, height/2-4/dbu)
     text = pya.Text ("Detector", t)
-    shape = self.cell.shapes(TextLayerN).insert(text)
+    shape = self.cell.shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
     t = pya.Trans(-width/2+3/dbu, height/2-8/dbu)
     text = pya.Text ("Detector Number: %s" % ( self.number), t)
-    shape = self.cell.shapes(TextLayerN).insert(text)
+    shape = self.cell.shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
     
     # Label to be used for Spice netlist, and for unique detector generation (coerce, above)
