@@ -126,7 +126,9 @@ module MyMacro
   config_new = mapping.collect{|k,v| "#{k}:#{v}"}.join(';')
   
   # activate &amp; store the changed configuration
-  RBA::Application.instance.set_config('key-bindings', config_new)
+  if config != ""  # strange bug in Windows.  key-bindings is blank.
+    RBA::Application.instance.set_config('key-bindings', config_new)
+  end
 
   RBA::Application.instance.set_config('edit-connect-angle-mode','ortho')
   RBA::Application.instance.set_config('edit-inst-angle','0')
