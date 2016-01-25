@@ -4,7 +4,9 @@
 - by Lukas Chrostowski, (c) 2015-2016
 - Package for KLayout, klayout.de (developed on KLayout version 0.24.3, OSX)
 - Instruction on design, layout, fabrication, test, data analysis for silicon photonics provided in the edX course: <a href="http://edx.org/course/silicon-photonics-design-fabrication-ubcx-phot1x">Silicon Photonics Design, Fabrication and Data Analysis</a> and textbook <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">Silicon Photonics Design: From Devices to Systems</a> by Lukas Chrostowski and Michael Hochberg.
-
+ - Fabrication runs via Electron Beam Lithography are available, including <a href="https://www.linkedin.com/pulse/openebl-fabrication-test-passive-silicon-photonic-lukas-chrostowski">openEBL</a> fabrication.
+ 
+ 
 ##Objectives:
  - Use an open-source layout tool (KLayout) to implement a sophisticated layout design environment for silicon photonics
  - Support for both GUI and script-based layout, or combinations of both.
