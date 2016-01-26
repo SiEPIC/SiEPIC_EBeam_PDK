@@ -885,24 +885,25 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         continue # only analyze pin_type = 1, component.
       #print("%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points) )
       segment2 = [ pya.Point(*p2.points[0]), pya.Point(*p2.points[1]) ] 
+      # first check that the pins are pointing in the same direction and overlapping:
       check = check_segments_colinear_overlapping( segment1, segment2 )
-      if check:  # found connected pins:
+      # then check that the pin centres are perfectly overlapping (to avoid phase errors in simulations, slight disconnections)
+      x1 = (p1.points[0][0]+p1.points[1][0])/2   # midpoint of pin path
+      y1 = (p1.points[0][1]+p1.points[1][1])/2
+      x2 = (p2.points[0][0]+p2.points[1][0])/2   # midpoint of pin path
+      y2 = (p2.points[0][1]+p2.points[1][1])/2
+      check2 = (x1 == x2) and (y1 == y2)
+      if check and check2:  # found connected pins:
         # make a new optical net
         net_idx = len(optical_nets)
-#        optical_nets.append ( Optical_net (net_idx, 1, p1.component_idx, 1, p2.component_idx) )
         # optical net connects two pins; keep track of pin index:
         optical_nets.append ( Optical_net (net_idx, 1, p1.idx, 1, p2.idx) )
         # assign this net number to the components
-# this needs to be fixed -- doesn't match correctly
-# need correct pin index
         # find which where p1 and p2 are in the component:
         p1_comp = optical_components[p1.component_idx]
         p2_comp = optical_components[p2.component_idx]
         p1_comp.nets[p1_comp.pins.index(p1.idx)] = net_idx
         p2_comp.nets[p2_comp.pins.index(p2.idx)] = net_idx
-#        optical_components[p2.component_idx].nets[optical_components[p2.component_idx].pins.index(p2.idx)] = net_idx
-#        optical_components[p1.component_idx].nets.append (net_idx)
-#        optical_components[p2.component_idx].nets.append (net_idx)
         # assign this net number to the pins
         p1.net = net_idx
         p2.net = net_idx
@@ -910,11 +911,17 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
         
     # Compare to all waveguides:
     for w1 in optical_waveguides:
-      
       # examine the beginning of the waveguide:
       segment2 = [ pya.Point(*w1.points[0]), pya.Point(*w1.points[1]) ] 
+      # first check that the pin is pointing in the same direction and overlapping as the waveguide segment:
       check1 = check_segments_colinear_overlapping( segment1, segment2 )
-      if check1:  # found connected pins:
+      # then check that the waveguide endpoint is perfectly at the pin centre
+      x1 = (p1.points[0][0]+p1.points[1][0])/2   # midpoint of pin path
+      y1 = (p1.points[0][1]+p1.points[1][1])/2
+      x2 = w1.points[0][0]   # endpoint of waveguide
+      y2 = w1.points[0][1]
+      check1b = (x1 == x2) and (y1 == y2)
+      if check1 and check1b:  # found connected pins:
         # make a new optical net
         net_idx = len(optical_nets)
         optical_nets.append ( Optical_net (net_idx, 1, p1.component_idx, 0, w1.idx) )
@@ -935,8 +942,15 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
       # examine the end of the waveguide:
       np = len(w1.points)
       segment2 = [ pya.Point(*w1.points[np-2]), pya.Point(*w1.points[np-1]) ] 
+      # first check that the pin is pointing in the same direction and overlapping as the waveguide segment:
       check2 = check_segments_colinear_overlapping( segment1, segment2 )
-      if check2:  # found connected pins:
+      # then check that the waveguide endpoint is perfectly at the pin centre
+      x1 = (p1.points[0][0]+p1.points[1][0])/2   # midpoint of pin path
+      y1 = (p1.points[0][1]+p1.points[1][1])/2
+      x2 = w1.points[np-1][0]   # endpoint of waveguide
+      y2 = w1.points[np-1][1]
+      check2b = (x1 == x2) and (y1 == y2)
+      if check2 and check2b:  # found connected pins:
         # make a new optical net
         net_idx = len(optical_nets)
         optical_nets.append ( Optical_net (net_idx, 1, p1.component_idx, 0, w1.idx) )
