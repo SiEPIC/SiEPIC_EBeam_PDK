@@ -62,6 +62,7 @@ optical_components = []
 optical_waveguides = []
 optical_pins = []
 optical_nets = []
+layout_errors=[]
 
 # Define layers based on the PDK:
 LayerSiN = layout.layer(LayerSi)

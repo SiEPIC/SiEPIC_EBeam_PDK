@@ -106,6 +106,7 @@ optical_components = []
 optical_waveguides = []
 optical_pins = []
 optical_nets = []
+layout_errors=[]
 
 # Create a Results Database
 rdb_i = lv.create_rdb("SiEPIC_Verification")
@@ -127,7 +128,6 @@ optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
 # Check the layout for errors, using the above arrays:
 print("")
 print("Checking layout for errors: ")
-layout_errors=[]
 # Check components - overlapping
 number_errors = check_components(rdb, topcell, LayerDevRecN)
 # Check waveguides for waveguide-specific problems:
