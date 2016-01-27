@@ -8,7 +8,7 @@
  <doc/>
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
- <shortcut>C</shortcut>
+ <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name>SiEPIC</group-name>
  <menu-path>siepic_menu.end</menu-path>
