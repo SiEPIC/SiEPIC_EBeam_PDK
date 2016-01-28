@@ -1,0 +1,109 @@
+# SiEPIC ebeam compact model library (CML) 
+# Copyright 2015 Lumerical Solutions, Inc.
+# by Xu Wang
+
+# Monte Carlo added by Lukas Chrostowski and Zeqin Lu.
+
+
+# Monte Carlo part:
+
+if (non_uniform==1) {
+
+    x=%x coordinate%;
+    y=%y coordinate%;
+
+    x1_wafer = floor(x/grid); # location of component on the wafer map
+    y1_wafer = floor(y/grid);
+
+    devi_width = width_xy_wafer(Resolution/2 + x1_wafer, Resolution/2 + y1_wafer)*1e-9;
+    devi_thickness = thickness_xy_wafer(Resolution/2 + x1_wafer, Resolution/2 + y1_wafer)*1e-9;                     
+
+    initial_width = 500e-9;
+    initial_thickness = 220e-9;
+
+    waveguide_width = initial_width + devi_width;  # [m]
+    waveguide_thickness = initial_thickness + devi_thickness; # [m]
+
+
+    # effective index and group index interpolations
+    # The following built-in script interpolates effective index (neff), group index (ng), and dispersion, 
+    # and applies the interpolated results to the waveguide. 
+
+    filename = %local path%+"/wg_integral_source/wg_strip_lookup_table.xml";
+    table = "index_table";
+
+    design = cell(2);
+    extracted = cell(1);
+
+    #design (input parameters)
+    design{1} = struct;
+    design{1}.name = "width";
+    design{1}.value = waveguide_width;
+    design{2} = struct;
+    design{2}.name = "heigth";  
+    design{2}.value = waveguide_thickness; 
+
+    index = lookupreadtable(filename, table, design, 'neff_ng');
+    central_wavelength = index(1)*1e9;
+    ne1 = index(2);        # TE at 1550 nm
+    ng1 = index(4);        # TE at 1550 nm
+
+
+    design{1}.value = 500e-9;
+    design{2}.value = 220e-9; 
+
+    index = lookupreadtable(filename, table, design, 'neff_ng');
+    central_wavelength = index(1)*1e9;
+    ne1_0 = index(2);        # TE at 1550 nm
+    ng1_0 = index(4);        # TE at 1550 nm
+
+}
+else {
+    filename = %local path%+"/wg_integral_source/wg_strip_lookup_table.xml";
+    table = "index_table";
+
+    design = cell(2);
+    extracted = cell(1);
+
+    #design (input parameters)
+    design{1} = struct;
+    design{1}.name = "width";
+    design{1}.value = 500e-9;
+    design{2} = struct;
+    design{2}.name = "heigth";  
+    design{2}.value = 220e-9; 
+
+    index = lookupreadtable(filename, table, design, 'neff_ng');
+    central_wavelength = index(1)*1e9;
+    ne1 = index(2);        # TE at 1550 nm
+    ng1 = index(4);        # TE at 1550 nm
+    ne1_0 = ne1;
+    ng1_0 = ng1;
+}
+
+
+
+
+temp = round(number_of_periods);
+if (almostequal(number_of_periods,temp)!=1)
+{
+    msg = name + ': number_of_periods is not an integer. The model will round the number to the nearest integer: ' + num2str(temp) + '.';
+    message(msg);
+    number_of_periods = temp;
+}
+
+#set("input parameter","Bragg frequency");
+#set("input parameter","grating period");
+#set("period",grating_period);
+
+#neff = 2.44695;
+#ng = 4.20818;
+? bragg_wavelength = (1570e-9 + (grating_period-324e-9)/324e-9*ne1/ng1*1570e-9) * ne1/ne1_0;
+? kappa= (1392.7887 * corrugation_width * 1e9 + 11271.6719) * cos(misalignment/grating_period*pi);
+? grating_length = grating_period * number_of_periods;
+setnamed("WBG_1", "bragg frequency", c/bragg_wavelength);
+setnamed("WBG_1", "grating coupling coefficient", kappa);
+setnamed("WBG_1", "length", grating_length);
+setnamed("WBG_1", "loss 1", 590);
+setnamed("WBG_1", "group index 1", ng1);
+setresult("BraggWavelength", bragg_wavelength);
