@@ -149,7 +149,7 @@ text_lsf += '  set("seed_process",rand(1,500,2));  \n'
   
 text_lsf += '  run;\n'
 
-if 0:
+if 1:
   text_lsf += '  select("ONA_1");\n'
   text_lsf += '  f_start = get("start frequency");\n'
   text_lsf += '  f_stop = get("stop frequency");\n'
