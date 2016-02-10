@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>SiEPIC configure shortcut keys</description>
+ <description>* SiEPIC Configure shortcut keys, settings, layers</description>
  <version/>
  <category/>
  <prolog/>
@@ -11,7 +11,7 @@
  <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.end</menu-path>
+ <menu-path>siepic_menu.beginning</menu-path>
  <interpreter>ruby</interpreter>
  <dsl-interpreter-name/>
  <text># Ruby script
@@ -98,8 +98,8 @@ module MyMacro
   mapping['edit_menu.show_properties'] = "'Q'"
   mapping['edit_menu.edit_options'] = "'E'"
   mapping['edit_menu.selection_menu.change_layer'] = "'Shift+L'"
-  mapping['edit_menu.selection_menu.sel_flip_x'] = "'H'"
-  mapping['edit_menu.selection_menu.sel_flip_y'] = "'V'"
+  mapping['edit_menu.selection_menu.sel_flip_x'] = "'Shift+H'"
+  mapping['edit_menu.selection_menu.sel_flip_y'] = "'Shift+V'"
   mapping['edit_menu.selection_menu.sel_move'] = "'Ctrl+M'"
 #  mapping['edit_menu.selection_menu.size'] = "'Z'"
 #  mapping['edit_menu.selection_menu.tap'] = "''"
@@ -126,7 +126,22 @@ module MyMacro
   config_new = mapping.collect{|k,v| "#{k}:#{v}"}.join(';')
   
   # activate &amp; store the changed configuration
-  RBA::Application.instance.set_config('key-bindings', config_new)
+  if config != ""  # strange bug in Windows.  key-bindings is blank.
+    RBA::Application.instance.set_config('key-bindings', config_new)
+  end
+
+  RBA::Application.instance.set_config('edit-connect-angle-mode','ortho')
+  RBA::Application.instance.set_config('edit-inst-angle','0')
+  RBA::Application.instance.set_config('edit-move-angle-mode','diagonal')
+  RBA::Application.instance.set_config('edit-snap-to-objects','true')
+  RBA::Application.instance.set_config('grid-micron','0.01')
+  RBA::Application.instance.set_config('edit-top-level-selection','true')
+  RBA::Application.instance.set_config('inst-color','#ffcdcd')
+  RBA::Application.instance.set_config('text-font','3')
+  RBA::Application.instance.set_config('guiding-shape-line-width','0')
+  RBA::Application.instance.set_config('rdb-marker-color','#ff0000')
+  RBA::Application.instance.set_config('rdb-marker-line-width','8')
+  RBA::Application.instance.set_config('default-layer-properties', File.join(RBA::Application.instance.application_data_path(),'libraries','klayout_Layers_EBeam.lyp') )
 
 end
 </text>
