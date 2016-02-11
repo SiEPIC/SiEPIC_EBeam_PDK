@@ -821,7 +821,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = pya.Trans(length/10, 0)
-    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_wg_strip_1550', t)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = pya.Trans(length/9, 0)
