@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>A* waveguide routing</description>
+ <description>Automated A* waveguide routing</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -32,9 +32,10 @@ uses:
 
 Version history:
 
-Jaspreet Jhoja 		2015/12/24 - 2016/02/11
+Jaspreet Jhoja 		2015/12/24 - 2016/02/12
 - Implemented Manhattan routing for the sparse points.
 - The user may experience some bugs at this stage.
+NOTE: If the script generates broken waveguides
 
 Jaspreet Jhoja 		2015/12/24 - 2015/12/29
 - Optimised for designs with multiple waveguides.
@@ -80,7 +81,6 @@ child_nodes = [] # stores all the child nodes
 barred_points = [] #points on 1d lines which are already taken
 starting_pt=[0, 0]  #starting X and Y coordinates
 goal_pt = [0,0]  #Goal C and Y coordinates
-gap = 1000 #desired gap between waveguides. Default: 0.5um
 wg_points = [] #list containing all the final backtracked path points
 
 
@@ -334,11 +334,11 @@ def generateBounds(list_pt, width):
     return return_list
     
 shell= filter(None, shell)
-shell_pt = generateBounds(shell, 3)
+shell_pt = generateBounds(shell, 5)#change this, higher the value, smoother the composition
 temp_points = filter(None, temp_points)
 points_for_mangen = copy.deepcopy(temp_points)
-barred_points = generateBounds(temp_points, 1)
-mangen_points = generateBounds(points_for_mangen, 1)
+barred_points = generateBounds(temp_points, 1.5)#change this when waveguide seems incomplete
+mangen_points = generateBounds(points_for_mangen, 1.5) #change this when waveguide is incomplete
 
 
 
@@ -487,7 +487,7 @@ class AStar:
                 return self.reconstructPath(cameFrom,start,goal)
             for neighbor in self.neighborNodes(current,goal, atype):
                 tentative_gScore = gScore[str(current)] + self.distBetween(current,neighbor, atype)
-                if str(neighbor) in closedSet and tentative_gScore  &gt;= gScore[str(neighbor)]:
+                if str(neighbor) in closedSet and tentative_gScore &gt;= gScore[str(neighbor)]:
                     continue
                 if str(neighbor) not in closedSet or tentative_gScore  &lt;  gScore[str(neighbor)]:
                     cameFrom[str(neighbor)] = current
@@ -624,7 +624,7 @@ for i in barred_pts:
     barred_pts.remove(i)
 add = []
 man_points =[]
-
+direction = "a"
 def appendfunction(x):
   if(x not in man_points):
     man_points.append(x)
@@ -865,6 +865,7 @@ optimise()
 print(man_points)
 wg_points = man_points
 draw("silicon")
+
 
  </text>
 </klayout-macro>
