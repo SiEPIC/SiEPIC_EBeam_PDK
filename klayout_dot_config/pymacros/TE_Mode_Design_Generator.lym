@@ -130,9 +130,9 @@ def draw_gc(gc_y_coord, number_of_designs):
   #Ybranch import and setup
   branch_imported = ly.create_cell("ebeam_y_1550", "SiEPIC-EBeam").cell_index()
   #splitter ybranch
-  cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R0, 0, (127+gc_y_coord)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
+  cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R0, 7.5*dbu, (127+gc_y_coord)*dbu), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
   #joiner ybranch
-  cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R270, ((15+2.75+wg_bend_radius)*dbu), ((gc_y_coord+127+15+2.75+wg_bend_radius) * dbu)), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
+  cell.insert(pya.CellInstArray(branch_imported, pya.Trans(pya.Trans.R270, ((15+2.75+wg_bend_radius)*dbu), ((gc_y_coord+127+7.5+2.75+wg_bend_radius) * dbu)), pya.Point(0,127*dbu), pya.Point(space*dbu,0), 1, number_of_designs))
 
 
 #function Drawing L1

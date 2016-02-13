@@ -32,6 +32,9 @@ This Python file implements the healing of waveguides, if components have been m
   - If yes, move the beginning/end waveguide segments to match the original pin.
 
 
+-- Maybe this should be Heal_Components?
+     namely, move all components that have been disconnected?  probably not... (GCs..)
+
  
 Version history:
 
