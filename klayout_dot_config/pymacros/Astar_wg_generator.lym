@@ -32,10 +32,9 @@ uses:
 
 Version history:
 
-Jaspreet Jhoja 		2015/12/24 - 2016/02/12
+Jaspreet Jhoja 		2015/12/24 - 2016/02/13
 - Implemented Manhattan routing for the sparse points.
-- The user may experience some bugs at this stage.
-NOTE: If the script generates broken waveguides
+- The user may experience some bugs at this stage eg. Broken waveguides
 
 Jaspreet Jhoja 		2015/12/24 - 2015/12/29
 - Optimised for designs with multiple waveguides.
