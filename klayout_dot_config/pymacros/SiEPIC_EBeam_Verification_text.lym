@@ -168,6 +168,7 @@ optical_components = []
 optical_waveguides = []
 optical_pins = []
 optical_nets = []
+layout_errors=[]
 
 # Create a Results Database
 rdb_i = lv.create_rdb("SiEPIC_Verification")

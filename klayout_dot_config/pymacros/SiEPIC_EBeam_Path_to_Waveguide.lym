@@ -169,13 +169,16 @@ for o in object_selection:
     print("Selected object is a cell, rather than a path.  Please select a path.")
   else:
     print("Selected object is a shape")
-    if o.shape.is_path():
+    # check if it is a path; check if it is in the present top cell; skip if it is in a subcell.
+    if o.shape.is_path() and cell == o.shape.cell:
       c = o.shape.cell
       print(c.basic_name())
       if c.basic_name() == Waveguide_Type and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
         # we have a waveguide GUIDING_LAYER selected
         print("GUIDING_LAYER in ROUND_PATH on LayerSi. We will not convert this to waveguide!")
       else:
+        # this is a path.
+        
         # Search the layout for the components and waveguides:
         print("* calling find_all_components() – DevRec")
         find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)

@@ -44,6 +44,7 @@ version = sys.version
 
 import string
 
+SIMULATION = 1    # Regular INTERCONNECT simulation
 
 # find the currently selected cell:
 topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
@@ -57,6 +58,11 @@ optical_components = []
 optical_waveguides = []
 optical_pins = []
 optical_nets = []
+layout_errors=[]
+
+if 'wtext' in globals():
+  # don't use the text window for output.
+  del(wtext)
 
 # Define layers based on the PDK:
 LayerSiN = layout.layer(LayerSi)
