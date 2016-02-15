@@ -136,10 +136,14 @@ text_lsf += 'y = linspace(-y_span/2,y_span/2,Ny); \n'
 text_lsf += 'xx = meshgridx(x,y) ;  \n'
 text_lsf += 'yy = meshgridy(x,y) ;  \n'
 
+text_lsf += '  seed1=rand(1,1000); \n'
+text_lsf += '  randreset(seed1); \n'
 text_lsf += 'Z_thickness = sigma_rms_thickness*randnmatrix(Nx,Ny);  \n'
 text_lsf += 'F_thickness = exp(-(xx^2/(corr_length_x^2/2)+yy^2/(corr_length_y^2/2))); \n'
 text_lsf += 'thickness_xy_wafer = real( 2/sqrt(pi)*y_span/Nx/sqrt(corr_length_x)/sqrt(corr_length_y)*invfft(fft(Z_thickness,1,0)*fft(F_thickness,1,0), 1, 0)  );    \n'  
 
+text_lsf += '  seed2=rand(1,1000); \n'
+text_lsf += '  randreset(seed2); \n'
 text_lsf += 'Z_width = sigma_rms_width*randnmatrix(Nx,Ny);  \n'
 text_lsf += 'F_width = exp(-(xx^2/(corr_length_x^2/2)+yy^2/(corr_length_y^2/2))); \n'
 text_lsf += 'width_xy_wafer = real( 2/sqrt(pi)*y_span/Nx/sqrt(corr_length_x)/sqrt(corr_length_y)*invfft(fft(Z_width,1,0)*fft(F_width,1,0), 1, 0)  );  \n' 
@@ -165,6 +169,7 @@ text_lsf += 'for (simu=1;simu&lt;=10;simu=simu+1) {   \n'
 text_lsf += '  switchtodesign; \n'
 #text_lsf += '  select("::Root Element"); \n'
 #text_lsf += '  set("seed_process",rand(1,500,2));  \n'
+
 text_lsf += '  run;\n'
 
 if 0:
