@@ -160,14 +160,14 @@ text_lsf += 'set("non_uniform",1);  \n'
 text_lsf += "'"+'); \n'
 
 text_lsf += '#Run Monte Carlo simulations; \n'
-text_lsf += 'for (simu=1;simu&lt;=5;simu=simu+1) {   \n'
+text_lsf += 'for (simu=1;simu&lt;=10;simu=simu+1) {   \n'
 
 text_lsf += '  switchtodesign; \n'
 #text_lsf += '  select("::Root Element"); \n'
 #text_lsf += '  set("seed_process",rand(1,500,2));  \n'
 text_lsf += '  run;\n'
 
-if 1:
+if 0:
   text_lsf += '  select("ONA_1");\n'
   text_lsf += '  f_start = get("start frequency");\n'
   text_lsf += '  f_stop = get("stop frequency");\n'
