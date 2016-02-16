@@ -168,7 +168,7 @@ text_lsf += 'set("non_uniform",1);  \n'
 text_lsf += "'"+'); \n'
 
 text_lsf += '#Run Monte Carlo simulations; \n'
-text_lsf += 'for (simu=1;simu&lt;=30;simu=simu+1) {   \n'
+text_lsf += 'for (simu=1;simu&lt;=5;simu=simu+1) {   \n'
 
 text_lsf += '  switchtodesign; \n'
 text_lsf += '  seed=simu; \n'
