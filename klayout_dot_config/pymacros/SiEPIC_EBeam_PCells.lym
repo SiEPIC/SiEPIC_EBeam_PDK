@@ -29,9 +29,15 @@ PCells:
 *******
 
 1) Double-bus ring resonator
-class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
-class DoubleBus_Ring(pya.PCellDeclarationHelper):
+class TestStruct_DoubleBus_Ring
+class DoubleBus_Ring
 def layout_Ring(cell, layer, x, y, r, w, npoints):
+
+2) Waveguide Taper
+class ebeam_taper_te1550
+
+3) Bragg grating waveguide
+class Bragg_waveguide
 
 Also includes additional functions:
 
@@ -360,7 +366,7 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
 
 class Waveguide_Route_simple(pya.PCellDeclarationHelper):
   """
-  The PCell declaration for the circle
+  The PCell declaration for a waveguide route
   """
 
   def __init__(self):
@@ -440,7 +446,7 @@ class Waveguide_Route_simple(pya.PCellDeclarationHelper):
 
 class Waveguide_Route(pya.PCellDeclarationHelper):
   """
-  The PCell declaration for the circle
+  The PCell declaration for a waveguide route
   """
 
   def __init__(self):
@@ -1282,14 +1288,14 @@ class DirectionalCoupler_HalfRing(pya.PCellDeclarationHelper):
     pin = pya.Path([pya.Point(-r, y+pin_length/2), pya.Point(-r, y-pin_length/2)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = pya.Trans(-r, y)
-    text = pya.Text ("pin1", t)
+    text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([pya.Point(r, y+pin_length/2), pya.Point(r, y-pin_length/2)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = pya.Trans(r, y)
-    text = pya.Text ("pin3", t)
+    text = pya.Text ("pin4", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
@@ -1303,14 +1309,14 @@ class DirectionalCoupler_HalfRing(pya.PCellDeclarationHelper):
       pin = pya.Path([pya.Point(-r-w/2-w-pin_length/2, 0), pya.Point(-r-w/2-w+pin_length/2, 0)], w)
       self.cell.shapes(LayerPinRecN).insert(pin)
       t = pya.Trans(-r-w/2-w, 0)
-      text = pya.Text ("pin2", t)
+      text = pya.Text ("pin1", t)
       shape = self.cell.shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
 
       pin = pya.Path([pya.Point(r+w/2+w-pin_length/2, 0), pya.Point(r+w/2+w+pin_length/2, 0)], w)
       self.cell.shapes(LayerPinRecN).insert(pin)
       t = pya.Trans(r+w/2+w, 0)
-      text = pya.Text ("pin4", t)
+      text = pya.Text ("pin3", t)
       shape = self.cell.shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
 
@@ -1336,14 +1342,14 @@ class DirectionalCoupler_HalfRing(pya.PCellDeclarationHelper):
       pin = pya.Path([pya.Point(-r-w/2-w-pin_length/2, y_bottom), pya.Point(-r-w/2-w+pin_length/2, y_bottom)], w)
       self.cell.shapes(LayerPinRecN).insert(pin)
       t = pya.Trans(-r-w/2-w, y_bottom)
-      text = pya.Text ("pin2", t)
+      text = pya.Text ("pin1", t)
       shape = self.cell.shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
 
       pin = pya.Path([pya.Point(r+w/2+w-pin_length/2, y_bottom), pya.Point(r+w/2+w+pin_length/2, y_bottom)], w)
       self.cell.shapes(LayerPinRecN).insert(pin)
       t = pya.Trans(r+w/2+w, y_bottom)
-      text = pya.Text ("pin4", t)
+      text = pya.Text ("pin3", t)
       shape = self.cell.shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
 
@@ -1358,9 +1364,14 @@ class DirectionalCoupler_HalfRing(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = pya.Trans(r/4, r/4)
-    text = pya.Text ('Lumerical_INTERCONNECT_component="ebeam_dc_te1550"', t)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_pc_te1550', t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
+    t = pya.Trans(r/4, r/2)
+    text = pya.Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% (self.w,self.g,int(self.r)), t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.017/dbu
+
 
 
     print("Done drawing the layout for – DirectionalCoupler_HalfRing: %.3f-%g" % ( self.r, self.g) )
