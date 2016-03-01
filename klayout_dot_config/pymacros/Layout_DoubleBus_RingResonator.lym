@@ -103,33 +103,50 @@ shape = cell.shapes(TextLayerN).insert(text)
 shape.text_size = 3*dbu
 
 # Ring resonator PCell
-r = 20
+r = 10
 wg_width = 0.5
-g = 0.2
-pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", { "r": r, "w": wg_width, "g": g, "l": LayerSi  } )
+g = 0.1
+pcell = ly.create_cell("DirectionalCoupler_HalfRing", "SiEPIC", { "r": r, "w": wg_width, "g": g, "silayer": LayerSi, "bustype": 0 } )
 print ("Cell: pcell: #%s" % pcell.cell_index())
-y_ring = 127*3/2+r
+y_ring = 127*3/2
 t = pya.Trans(pya.Trans.R270, 10 * dbu, y_ring * dbu) 
 instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+t = pya.Trans(pya.Trans.R90, (10+2*r+2*g+2*wg_width) * dbu, y_ring * dbu) 
+instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+
+
 
 # Create paths for waveguides
 wg_bend_radius = 10
 
 # GC3 to bottom-left of ring
-points = [ [0, 127], [10,127], [10, y_ring-2*r-wg_width] ] 
+points = [ [0, 127], [10,127], [10, y_ring-1*r-1.5*wg_width] ] 
 layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
+pcell = ly.create_cell("LumericalINTERCONNECT_Detector", "SiEPIC", { "number": 2 } )
+t = pya.Trans(pya.Trans.R0, -20*dbu, 127*1 * dbu) 
+instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
 
 # GC4 to bottom-right of ring
-points = [ [0, 0], [10+2*r+2*g+2*wg_width,0], [10+2*r+2*g+2*wg_width, y_ring-2*r-wg_width]  ] 
+points = [ [0, 0], [10+2*r+2*g+2*wg_width,0], [10+2*r+2*g+2*wg_width, y_ring-1*r-1.5*wg_width]  ] 
 layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
+pcell = ly.create_cell("LumericalINTERCONNECT_Detector", "SiEPIC", { "number": 3 } )
+t = pya.Trans(pya.Trans.R0, -20*dbu, 127*0 * dbu) 
+instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
 
-# GC2 to top-right of ring
-points = [ [10,y_ring], [10, 127*2], [0,127*2] ] 
+# GC2 to top-left of ring
+points = [ [10,y_ring+r+1.5*wg_width], [10, 127*2], [0,127*2] ] 
 layout_waveguide_abs(cell, LayerSi, points, wg_width, wg_bend_radius)
+pcell = ly.create_cell("LumericalINTERCONNECT_Laser", "SiEPIC", { "npoints": 5000 } )
+t = pya.Trans(pya.Trans.R0, -20*dbu, 127*2 * dbu) 
+instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
 
-# GC1 to top-left of ring
-points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
+# GC1 to top-right of ring
+points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring+r+1.5*wg_width] ] 
 layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
+pcell = ly.create_cell("LumericalINTERCONNECT_Detector", "SiEPIC", { "number": 1 } )
+t = pya.Trans(pya.Trans.R0, -20*dbu, 127*3 * dbu) 
+instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+
 
 print ("done layout...")
 </text>
