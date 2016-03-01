@@ -1124,7 +1124,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
         get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
   if laser_net &gt; -1:
     text += '* Optical Network Analyzer:\n'
-    text += '.ona input_unit=wavelength input_parameter=start_and_stop\n  + minimum_loss=50\n  + analysis_type=scattering_data\n  + multithreading=user_defined number_of_threads=1\n' 
+    text += '.ona input_unit=wavelength input_parameter=start_and_stop\n  + minimum_loss=80\n  + analysis_type=scattering_data\n  + multithreading=user_defined number_of_threads=1\n' 
     text += '  + start=%4.3fe-9\n' % wavelength_start
     text += '  + stop=%4.3fe-9\n' % wavelength_stop
     text += '  + number_of_points=%s\n' % wavelength_points
