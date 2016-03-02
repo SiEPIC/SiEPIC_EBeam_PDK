@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Lumerical INTERCONNECT - Monte Carlo simulations</description>
+ <description>Lumerical INTERCONNECT - DtD Monte Carlo simulations</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -30,8 +30,8 @@ Lukas Chrostowski           2015/11/19
  - initial version
  - generating a Spice netlist including Optical Network Analyzer; launch Lumerical INTERCONNECT simulation
 
-Zeqin Lu                    2015/12/10
- - Monte Carlo simulation
+Zeqin Lu                    2016/2/18
+ - Within Wafer Monte Carlo simulation
    
 """
 
@@ -47,7 +47,7 @@ version = sys.version
 
 import string
 
-SIMULATION = 2    # Monte Carlo INTERCONNECT simulation
+SIMULATION = 2    #  INTERCONNECT simulation
 
 INTERCONNECT_VISUALIZER = 1  # Plot the data using the Lumerical visualizer, or a regular plot?
 
@@ -106,67 +106,92 @@ text_lsf = '###DEVELOPER:Zeqin Lu, University of British Columbia, Feb. 2016  \n
 text_lsf += 'switchtolayout;\n'
 text_lsf += 'deleteall;\n'
 text_lsf += 'importnetlist("%s");\n' % filename
-text_lsf += 'addproperty("::Root Element", "seed", "wafer", "Number");  \n'
-text_lsf += 'addproperty("::Root Element::%s", "thickness_xy_wafer", "wafer", "Matrix");\n' % topcell.name
-text_lsf += 'addproperty("::Root Element::%s", "width_xy_wafer", "wafer", "Matrix");\n' % topcell.name
-text_lsf += 'addproperty("::Root Element::%s", "grid", "wafer", "Number");\n' % topcell.name 
-text_lsf += 'addproperty("::Root Element::%s", "Resolution", "wafer", "Number");\n' % topcell.name
-text_lsf += 'addproperty("::Root Element::%s", "non_uniform", "wafer", "Number");\n'  % topcell.name
+text_lsf += 'addproperty("::Root Element", "wafer_uniformity_thickness", "wafer", "Matrix");\n' 
+text_lsf += 'addproperty("::Root Element", "wafer_uniformity_width", "wafer", "Matrix");\n' 
+text_lsf += 'addproperty("::Root Element", "N", "wafer", "Number");\n'  
+text_lsf += 'addproperty("::Root Element", "die_num", "wafer", "Number");\n' 
+text_lsf += 'addproperty("::Root Element", "wafer_length", "wafer", "Number");\n'   
+  
+text_lsf += 'addproperty("::Root Element::%s", "MC_uniformity_thickness", "wafer", "Matrix");\n' % topcell.name
+text_lsf += 'addproperty("::Root Element::%s", "MC_uniformity_width", "wafer", "Matrix");\n' % topcell.name
+text_lsf += 'addproperty("::Root Element::%s", "MC_grid", "wafer", "Number");\n' % topcell.name
+text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_x", "wafer", "Number");\n'  % topcell.name
+text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_y", "wafer", "Number");\n' % topcell.name
+text_lsf += 'addproperty("::Root Element::%s", "MC_non_uniform", "wafer", "Number");\n'  % topcell.name
 
 ############################## Wafer generation ###########################################
-#text_lsf += 'addproperty("::Root Element", "seed_process", "wafer", "Number");\n'
-#text_lsf += 'set("seed_process",1); \n'
-
-text_lsf += 'select("::Root Element");\n'
-text_lsf += 'set("setup script",'+ "'" +  ' \n'
-text_lsf += 'x_span = 100000e-6;  \n'    #100x100 mm^2 wafer 
-text_lsf += 'y_span = 100000e-6;   \n'   
-text_lsf += 'corr_length_x = 4500e-6;  \n'  
-text_lsf += 'corr_length_y = 4500e-6; \n'   
- 
-text_lsf += 'Nx = 500;    \n'
-text_lsf += 'Ny = 500;  \n'
+text_lsf += 'wafer_length = 100000e-6;  \n'    #100x100 mm^2 wafer 
+text_lsf += 'clx = 4500e-6;  \n'  # Correlation length in x
+text_lsf += 'cly = 4500e-6; \n'   # Correlation length in y
+text_lsf += 'N = 500;  \n'        
+text_lsf += 'wafer_grid=wafer_length/N; \n'   
 
 text_lsf += 'sigma_rms_width = 15/3;     \n'
 text_lsf += 'sigma_rms_thickness = 6/3;   \n'
  
-text_lsf += 'x = linspace(-x_span/2,x_span/2,Nx); \n'
-text_lsf += 'y = linspace(-y_span/2,y_span/2,Ny); \n'
-
+text_lsf += 'x = linspace(-wafer_length/2,wafer_length/2,N); \n'
+text_lsf += 'y = linspace(-wafer_length/2,wafer_length/2,N); \n'
 text_lsf += 'xx = meshgridx(x,y) ;  \n'
 text_lsf += 'yy = meshgridy(x,y) ;  \n'
 
-text_lsf += 'randreset(seed); \n'
-text_lsf += 'Z_thickness = sigma_rms_thickness*randnmatrix(Nx,Ny);  \n'
-text_lsf += 'F_thickness = exp(-(xx^2/(corr_length_x^2/2)+yy^2/(corr_length_y^2/2))); \n'
-text_lsf += 'thickness_xy_wafer = real( 2/sqrt(pi)*y_span/Nx/sqrt(corr_length_x)/sqrt(corr_length_y)*invfft(fft(Z_thickness,1,0)*fft(F_thickness,1,0), 1, 0)  );    \n'  
+text_lsf += 'Z_thickness = sigma_rms_thickness*randnmatrix(N,N);  \n'
+text_lsf += 'F_thickness = exp(-(abs(xx)/(clx/2)+abs(yy)/(cly/2))); \n' # exponential filter
+text_lsf += 'wafer_uniformity_thickness = real( 2*wafer_length/N/sqrt(clx*cly)*invfft(fft(Z_thickness,1,0)*fft(F_thickness,1,0), 1, 0)  );  \n' # wafer created using exponential filter
+#text_lsf += 'F_thickness = exp(-(xx^2/(clx^2/2)+yy^2/(cly^2/2))); \n'  # Gaussian filter
+#text_lsf += 'wafer_uniformity_thickness = real( 2/sqrt(pi)*wafer_length/N/sqrt(clx)/sqrt(cly)*invfft(fft(Z_thickness,1,0)*fft(F_thickness,1,0), 1, 0)  );    \n' # wafer created using Gaussian filter 
 
-text_lsf += 'randreset(seed-1000); \n'
-text_lsf += 'Z_width = sigma_rms_width*randnmatrix(Nx,Ny);  \n'
-text_lsf += 'F_width = exp(-(xx^2/(corr_length_x^2/2)+yy^2/(corr_length_y^2/2))); \n'
-text_lsf += 'width_xy_wafer = real( 2/sqrt(pi)*y_span/Nx/sqrt(corr_length_x)/sqrt(corr_length_y)*invfft(fft(Z_width,1,0)*fft(F_width,1,0), 1, 0)  );  \n' 
+text_lsf += 'Z_width = sigma_rms_width*randnmatrix(N,N);  \n'
+text_lsf += 'F_width = exp(-(abs(xx)/(clx/2)+abs(yy)/(cly/2))); \n' # exponential filter
+text_lsf += 'wafer_uniformity_width = real( 2*wafer_length/N/sqrt(clx*cly)*invfft(fft(Z_width,1,0)*fft(F_width,1,0), 1, 0)  );  \n' # wafer created using exponential filter
+#text_lsf += 'F_width = exp(-(xx^2/(clx^2/2)+yy^2/(cly^2/2))); \n'  # Gaussian filter
+#text_lsf += 'wafer_uniformity_width = real( 2/sqrt(pi)*wafer_length/N/sqrt(clx)/sqrt(cly)*invfft(fft(Z_width,1,0)*fft(F_width,1,0), 1, 0)  );    \n' # wafer created using Gaussian filter 
 
-text_lsf += '######################## high resolution interpolation ################# \n'
-text_lsf += 'Nx_new = 800;  \n'   
-text_lsf += 'Nx_new = 800;  \n'
-text_lsf += 'x_span_new = 4000e-6; \n'
-text_lsf += 'y_span_new = 4000e-6; \n'
-text_lsf += 'grid=x_span_new/Nx_new;  \n'
-text_lsf += 'Resolution = Nx_new;  \n'
+##################################### pass wafers to root ###################
+text_lsf += '#pass wafers to object \n'
+text_lsf += 'select("::Root Element");  \n' 
+text_lsf += 'set("wafer_uniformity_thickness", wafer_uniformity_thickness);  \n'
+text_lsf += 'set("wafer_uniformity_width", wafer_uniformity_width);  \n'
+text_lsf += 'set("N",N);  \n'
+text_lsf += 'set("wafer_length",wafer_length);  \n'
 
-text_lsf += 'x_new = linspace(-x_span_new/2,x_span_new/2,Nx); \n'
-text_lsf += 'y_new = linspace(-y_span_new/2,y_span_new/2,Ny); \n'
-text_lsf += 'thickness_new_wafer = interp(thickness_xy_wafer, x, y, x_new, y_new); # interpolation \n'
-text_lsf += 'width_new_wafer = interp(width_xy_wafer, x, y, x_new, y_new); # interpolation \n'
+text_lsf += 'select("::Root Element");\n'
+text_lsf += 'set("setup script",'+ "'" +  ' \n'
+text_lsf += '######################## high resolution interpolation for dies ################# \n'
+text_lsf += 'MC_grid = 5e-6;  \n'   
+text_lsf += 'die_span_x = 5000e-6; \n'
+text_lsf += 'die_span_y = 5000e-6; \n'
+text_lsf += 'MC_resolution_x = die_span_x/MC_grid;  \n'
+text_lsf += 'MC_resolution_y = die_span_y/MC_grid;  \n'
+text_lsf += 'die_num_x = floor(wafer_length/die_span_x); \n'
+text_lsf += 'die_num_y = floor(wafer_length/die_span_y); \n'
+text_lsf += 'die_num_total = die_num_x*die_num_y; \n'
+text_lsf += 'x = linspace(-wafer_length/2,wafer_length/2,N); \n'
+text_lsf += 'y = linspace(-wafer_length/2,wafer_length/2,N); \n'
 
+# pick die for simulation
+text_lsf += 'if (die_num&lt;=die_num_total) {  \n'
+text_lsf += 'j=die_num; \n'
+text_lsf += 'die_min_x = -wafer_length/2+(j-1)*die_span_x -floor((j-1)/die_num_x)*wafer_length; \n'
+text_lsf += 'die_max_x = -wafer_length/2+j*die_span_x -floor((j-1)/die_num_x)*wafer_length; \n'
+text_lsf += 'die_min_y = wafer_length/2-ceil(j/die_num_y)*die_span_y; \n'
+text_lsf += 'die_max_y = wafer_length/2-(ceil(j/die_num_y)-1)*die_span_y; \n'
 
-text_lsf += '#pass wafers to Root \n'
+text_lsf += 'x_die = linspace(die_min_x, die_max_x, MC_resolution_x); \n'
+text_lsf += 'y_die = linspace(die_min_y, die_max_y, MC_resolution_y); \n'
+
+text_lsf += 'MC_uniformity_thickness = interp(wafer_uniformity_thickness, x, y, x_die, y_die); # interpolation \n'
+text_lsf += 'MC_uniformity_width = interp(wafer_uniformity_width, x, y, x_die, y_die); # interpolation \n'
+text_lsf += '} \n'
+
+text_lsf += '#pass wafers to object \n'
 text_lsf += 'select("::Root Element::%s");  \n' % topcell.name
-text_lsf += 'set("thickness_xy_wafer",thickness_new_wafer);  \n'
-text_lsf += 'set("width_xy_wafer",width_new_wafer);  \n'
-text_lsf += 'set("Resolution",Resolution);  \n'
-text_lsf += 'set("grid",grid);  \n'
-text_lsf += 'set("non_uniform",1);  \n'
+text_lsf += 'set("MC_uniformity_thickness",MC_uniformity_thickness);  \n'
+text_lsf += 'set("MC_uniformity_width",MC_uniformity_width);  \n'
+text_lsf += 'set("MC_resolution_x",MC_resolution_x);  \n'
+text_lsf += 'set("MC_resolution_y",MC_resolution_y);  \n'
+text_lsf += 'set("MC_grid",MC_grid);  \n'
+text_lsf += 'set("MC_non_uniform",1);  \n'
+
 text_lsf += "'"+'); \n'
 
 
@@ -178,8 +203,7 @@ text_lsf += 'seed=randreset; \n'
 text_lsf += 'for (simu=1;simu&lt;=5;simu=simu+1) {   \n'
 text_lsf += '  switchtodesign; \n'
 text_lsf += '  select("::Root Element");  \n'
-text_lsf += '  seed=seed+1; \n'
-text_lsf += '  set("seed",seed);  \n'
+text_lsf += '  set("die_num",simu);  \n'
 text_lsf += '  run;\n'
 
 text_lsf += '  select("ONA_1");\n'
