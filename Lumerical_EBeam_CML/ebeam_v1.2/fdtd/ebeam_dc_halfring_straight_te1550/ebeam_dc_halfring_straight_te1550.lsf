@@ -1,0 +1,9 @@
+gap=1e-07;
+radius=4e-06;
+waveguide_width=5e-07;
+waveguide_thickness=5e-07;
+setnamed("::model","gap",gap);
+setnamed("::model","radius",radius);
+setnamed("::model","si_thickness",waveguide_thickness);
+setnamed("::model","wg_width",waveguide_width);
+save("/Users/zeqin/Desktop/test/ebeam_v1.2/fdtd/ebeam_dc_halfring_straight_te1550/ebeam_dc_halfring_straight_te1550_gap=100nm_radius=4um_width=500nm_thickness=500nm.fsp");ebeam_dc_halfring_straight_te1550_generate_s_parameters;exit;
