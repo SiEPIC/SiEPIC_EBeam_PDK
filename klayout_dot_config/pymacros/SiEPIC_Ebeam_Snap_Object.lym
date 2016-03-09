@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>SiEPIC: Snap object</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut>Shift+O</shortcut>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# SiEPIC_EBeam_Waveguide_to_Path
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2015
+
+This Python file implements the snapping of one object to the another object. 
+
+
+Version history:
+
+Lukas Chrostowski           2016/03/08
+ - Initial version
+
+"""
+
+# Configure variables to draw structures in the presently selected cell:
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+# find the currently selected cell:
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if topcell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = ly.dbu
+
+# Define layers based on PDK_functions:
+LayerSiN = ly.layer(LayerSi)
+LayerPinRecN = ly.layer(LayerPinRec)
+LayerDevRecN = ly.layer(LayerDevRec)
+LayerFbrTgtN = ly.layer(LayerFbrTgt)
+LayerErrorN = ly.layer(LayerError)
+
+# initialize the arrays to keep track of layout objects
+reset_Optical_classes()
+optical_components = []
+optical_waveguides = []
+optical_pins = []
+optical_nets = []
+layout_errors = []
+
+# Record a transaction, to enable "undo"
+lv.transaction("Object snapping")
+
+# extract the circuit netlist from the physical layout:
+optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
+
+# we need two objects.  One is selected, and the other is a transient selection
+if lv.has_transient_object_selection() == False:
+  v = pya.MessageBox.warning("No transient selection", "Hover the mouse (transient selection) over the object to which you wish to snap to.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
+else:
+  # find the transient selection:
+  o_transient_iter = lv.each_object_selected_transient()
+  o_transient = o_transient_iter.next() # returns ObjectInstPath[].
+  
+  # Find the selected objects
+  o_selection = lv.object_selection   # returns ObjectInstPath[].
+  if len(o_selection) &lt;&gt; 1:
+    v = pya.MessageBox.warning("No selection", "Select the object you wish to be moved.", pya.MessageBox.Ok)
+  else:
+    o_selection = o_selection[0]
+    if o_transient == o_selection:
+      v = pya.MessageBox.warning("Same selection", "We need two different objects: one selected, and one transient (hover mouse over).", pya.MessageBox.Ok)
+    else:
+      pass
+
+
+# Record a transaction, to enable "undo"
+lv.commit()
+
+</text>
+</klayout-macro>

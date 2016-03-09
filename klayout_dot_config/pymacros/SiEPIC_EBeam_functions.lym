@@ -825,12 +825,12 @@ def find_all_waveguides(cell, layer):
 
  
 
-def check_segments_colinear_overlapping( segment1, segment2 ):
+def check_segments_collinear_overlapping( segment1, segment2 ):
   """ 
   we want to identify ONLY the following situation:
         X  O  X  O
   where XX is a segment, and OO is another segment
-  namely, colinear, but also XX overlapping OO
+  namely, collinear, but also XX overlapping OO
   example usage: 
     a = pya.Point(0,0)
     b = pya.Point(50,0)
@@ -838,7 +838,7 @@ def check_segments_colinear_overlapping( segment1, segment2 ):
     d = pya.Point(100,0)
     segment1 = [ a, b ]
     segment2 = [ c, d ]
-    print(check_segments_colinear_overlapping( segment1, segment2 ))
+    print(check_segments_collinear_overlapping( segment1, segment2 ))
   """  
   # check for one of the segment2 points being inside segment1
   check_between1 = check_point_in_segment( segment1[0], segment1[1], segment2[0] ) | \
@@ -886,7 +886,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
       #print("%s, %s, %s, %s" % (p1.n, p1.points, p2.n, p2.points) )
       segment2 = [ pya.Point(*p2.points[0]), pya.Point(*p2.points[1]) ] 
       # first check that the pins are pointing in the same direction and overlapping:
-      check = check_segments_colinear_overlapping( segment1, segment2 )
+      check = check_segments_collinear_overlapping( segment1, segment2 )
       # then check that the pin centres are perfectly overlapping (to avoid phase errors in simulations, slight disconnections)
       x1 = (p1.points[0][0]+p1.points[1][0])/2   # midpoint of pin path
       y1 = (p1.points[0][1]+p1.points[1][1])/2
@@ -914,7 +914,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
       # examine the beginning of the waveguide:
       segment2 = [ pya.Point(*w1.points[0]), pya.Point(*w1.points[1]) ] 
       # first check that the pin is pointing in the same direction and overlapping as the waveguide segment:
-      check1 = check_segments_colinear_overlapping( segment1, segment2 )
+      check1 = check_segments_collinear_overlapping( segment1, segment2 )
       # then check that the waveguide endpoint is perfectly at the pin centre
       x1 = (p1.points[0][0]+p1.points[1][0])/2   # midpoint of pin path
       y1 = (p1.points[0][1]+p1.points[1][1])/2
@@ -943,7 +943,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
       np = len(w1.points)
       segment2 = [ pya.Point(*w1.points[np-2]), pya.Point(*w1.points[np-1]) ] 
       # first check that the pin is pointing in the same direction and overlapping as the waveguide segment:
-      check2 = check_segments_colinear_overlapping( segment1, segment2 )
+      check2 = check_segments_collinear_overlapping( segment1, segment2 )
       # then check that the waveguide endpoint is perfectly at the pin centre
       x1 = (p1.points[0][0]+p1.points[1][0])/2   # midpoint of pin path
       y1 = (p1.points[0][1]+p1.points[1][1])/2
@@ -998,7 +998,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
             w2_seg=w2_segment2
             
           # perform comparison between each of the waveguide ends:
-          check = check_segments_colinear_overlapping( w1_seg, w2_seg )
+          check = check_segments_collinear_overlapping( w1_seg, w2_seg )
           if check:  # found connected pins:
             # make a new optical net
             net_idx = len(optical_nets)
@@ -1336,7 +1336,7 @@ def check_connectivity(rdb, optical_components, topcell, LayerErrorN):
   # Make sure that all pins/waveguides are connected, i.e., dangling pins/waveguides.
   # Flag disconnected pins
   # Flag disconnected waveguides
-  # Make sure that waveguides / pins are connected in the correct direction (identify_nets only finds colinear pins/waveguides) 
+  # Make sure that waveguides / pins are connected in the correct direction (identify_nets only finds collinear pins/waveguides) 
 
   num_errors=0
 
