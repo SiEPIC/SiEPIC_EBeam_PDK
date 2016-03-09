@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>SiEPIC: 1-Path to Waveguide</description>
+ <description>Path to Waveguide</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -11,7 +11,7 @@
  <shortcut>W</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.end</menu-path>
+ <menu-path>siepic_menu.waveguides_submenu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -164,6 +164,10 @@ if object_selection == []:
   lv.object_selection = object_selection
 
 
+# Search the layout for the components:
+print("* calling find_all_components() – DevRec")
+find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
+
 for o in object_selection:
   if o.is_cell_inst():
     print("Selected object is a cell, rather than a path.  Please select a path.")
@@ -179,9 +183,6 @@ for o in object_selection:
       else:
         # this is a path.
         
-        # Search the layout for the components and waveguides:
-        print("* calling find_all_components() – DevRec")
-        find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
         shape_obj = o.shape
         path_obj = o.shape.path
         num_points = path_obj.num_points()
