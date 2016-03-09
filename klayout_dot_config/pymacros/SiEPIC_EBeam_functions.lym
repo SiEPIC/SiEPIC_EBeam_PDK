@@ -315,6 +315,12 @@ def find_automated_measurement_labels(topcell, LayerTextN):
   t += "&lt;br&gt;*** Number of automated measurement labels: %s.&lt;br&gt;" % i
   return t
 
+# sorting the pins uses the Pin_info class:
+class Pin_info:
+  def __init__(self, pin_text, pin_x, pin_y):
+    self.pin_text = pin_text
+    self.pin_x = pin_x
+    self.pin_y = pin_y
   
 def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
   # function to traverse the entire layout hierarchy and find all the components
@@ -326,12 +332,6 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
   
   # Use the pin names on layer PinRec to sort the pins in alphabetical order
   #   Requires that a text label be in PinRec layer, co-linear inside the PinRec path.
-  # sorting the pins uses the Pin_info class:
-  class Pin_info:
-    def __init__(self, pin_text, pin_x, pin_y):
-      self.pin_text = pin_text
-      self.pin_x = pin_x
-      self.pin_y = pin_y
 
 
   # Find all the DevRec shapes
@@ -822,7 +822,21 @@ def find_all_waveguides(cell, layer):
     iter1.next()
   print(" ")
 
-
+def check_segments_same_direction( segment1, segment2 ):
+  # check that they have the same direction
+  is_slope_equal = False
+  # check ∆x = 0 first to avoid division by 0
+  dx1 = (segment1[0].x-segment1[1].x)
+  dx2 = (segment2[0].x-segment2[1].x)
+  if dx2 == 0 and dx1 == 0:
+    is_slope_equal = True  # both vertical
+  elif dx1 != 0 and dx2 != 0:
+    # check slopes
+    slope1 = (segment1[0].y-segment1[1].y) / (segment1[0].x-segment1[1].x)
+    slope2 = (segment2[0].y-segment2[1].y) / (segment2[0].x-segment2[1].x)
+    if slope1 == slope2:
+      is_slope_equal = True  # both have the same slope
+  return is_slope_equal
  
 
 def check_segments_collinear_overlapping( segment1, segment2 ):
@@ -846,20 +860,10 @@ def check_segments_collinear_overlapping( segment1, segment2 ):
   # check for one of the segment1 points being inside segment2
   check_between2 = check_point_in_segment( segment2[0], segment2[1], segment1[0] ) | \
                   check_point_in_segment( segment2[0], segment2[1], segment1[1] )
-  # check that they have the same direction
-  is_slope_equal = False
-  # check ∆x = 0 first to avoid division by 0
-  dx1 = (segment1[0].x-segment1[1].x)
-  dx2 = (segment2[0].x-segment2[1].x)
-  if dx2 == 0 and dx1 == 0:
-    is_slope_equal = True  # both vertical
-  elif dx1 != 0 and dx2 != 0:
-    # check slopes
-    slope1 = (segment1[0].y-segment1[1].y) / (segment1[0].x-segment1[1].x)
-    slope2 = (segment2[0].y-segment2[1].y) / (segment2[0].x-segment2[1].x)
-    if slope1 == slope2:
-      is_slope_equal = True  # both have the same slope
 
+  # check that they have the same direction
+  is_slope_equal = check_segments_same_direction( segment1, segment2 )
+  
   return check_between1 and check_between2 and is_slope_equal
 
 
