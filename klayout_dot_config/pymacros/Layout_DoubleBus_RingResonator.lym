@@ -106,7 +106,7 @@ shape.text_size = 3*dbu
 r = 10
 wg_width = 0.5
 g = 0.1
-pcell = ly.create_cell("DirectionalCoupler_HalfRing", "SiEPIC", { "r": r, "w": wg_width, "g": g, "silayer": LayerSi, "bustype": 0 } )
+pcell = ly.create_cell("DirectionalCoupler_HalfRing_Straight", "SiEPIC", { "r": r, "w": wg_width, "g": g, "silayer": LayerSi, "bustype": 0 } )
 print ("Cell: pcell: #%s" % pcell.cell_index())
 y_ring = 127*3/2
 t = pya.Trans(pya.Trans.R270, 10 * dbu, y_ring * dbu) 
