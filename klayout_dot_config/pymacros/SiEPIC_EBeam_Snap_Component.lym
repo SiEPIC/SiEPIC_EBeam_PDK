@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>SiEPIC: Snap object</description>
+ <description>Snap object using nearest pins</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -11,18 +11,23 @@
  <shortcut>Shift+O</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.end</menu-path>
+ <menu-path>siepic_menu.layout_submenu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
-# SiEPIC_EBeam_Waveguide_to_Path
+# SiEPIC_EBeam_Snap_Component
 
 """
 This file is part of the SiEPIC_EBeam_PDK
-by Lukas Chrostowski (c) 2015
+by Lukas Chrostowski (c) 2016
 
-This Python file implements the snapping of one object to the another object. 
+This Python file implements snapping of one component to another. 
 
+Usage:
+- Click to select the component you wish to move
+- Hover the mouse over the component you wish to align to
+- Shift-O to run this script
+- The script will find the closest pins between these components, and move the selected component
 
 Version history:
 
@@ -98,9 +103,9 @@ else:
       idx1 = -1
       idx2 = -1
       for o in optical_components:
-        if o.x / dbu == x1 and o.y / dbu == y1:
+        if int(o.x / dbu) == x1 and int(o.y / dbu) == y1:
           idx1 = o.idx
-        if o.x / dbu == x2 and o.y / dbu == y2:
+        if int(o.x / dbu) == x2 and int(o.y / dbu) == y2:
           idx2 = o.idx
       if idx1 &lt; 0 or idx2 &lt; 0:
         v = pya.MessageBox.warning("Optical components not found", "Optical components not found.", pya.MessageBox.Ok)
@@ -115,26 +120,22 @@ else:
             angle_p1_p2 = angle_segments(optical_pins[p1].points,optical_pins[p2].points)
 #            print check_segments_same_direction( optical_pins[p1].points, optical_pins[p2].points )
             if angle_p1_p2 == 0 or abs(angle_p1_p2) == 180:
-            
               # find the closest ones
               dx = optical_pins[p1].x - optical_pins[p2].x
               dy = optical_pins[p1].y - optical_pins[p2].y
               dist_comp = dx*dx + dy*dy
-              print dist_comp
               if dist &gt; dist_comp:
                 # save this dx/dy as the shortest distance transformation
                 dist = dist_comp
                 dx12 = dx
-                dy12 = dy
-        print dx12
-        print dy12
-        
+                dy12 = dy        
 #        print o_selection.inst().trans.disp.x
-
-        # Move the selected object
-        trans = pya.Trans(dx12,dy12)
-        o_selection.inst().transform(trans)
-      
+        if dist &lt; 1e100:
+          # Move the selected object
+          trans = pya.Trans(dx12,dy12)
+          o_selection.inst().transform(trans)
+        else:
+          v = pya.MessageBox.warning("Snapping failed", "Snapping failed.  No matching pins found.", pya.MessageBox.Ok)
 
 # Record a transaction, to enable "undo"
 lv.commit()

@@ -63,8 +63,29 @@ t = "siepic_menu"
 if not(menu.is_menu(t)):
   menu.insert_menu("help_menu",t,"SiEPIC") 
 
+s = "waveguides_submenu"
+r = "Waveguides"
+if not(menu.is_menu(t + "." + s)):
+  menu.insert_menu(t+".end",s,r)
+
 s = "layout_submenu"
-r = "Layout Generation"
+r = "Layout"
+if not(menu.is_menu(t + "." + s)):
+  menu.insert_menu(t+".end",s,r)
+
+s = "exlayout_submenu"
+r = "Example Layouts"
+if not(menu.is_menu(t + "." + s)):
+  menu.insert_menu(t+".end",s,r)
+
+s = "verification_submenu"
+r = "Verification"
+if not(menu.is_menu(t + "." + s)):
+  menu.insert_menu(t+".end",s,r)
+
+
+s = "simulation_submenu"
+r = "Simulation"
 if not(menu.is_menu(t + "." + s)):
   menu.insert_menu(t+".end",s,r)
 </text>
