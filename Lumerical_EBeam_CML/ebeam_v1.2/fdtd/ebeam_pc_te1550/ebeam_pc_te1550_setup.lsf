@@ -1,5 +1,5 @@
-gap=1.2e-007;
-radius=4e-006;
+gap=1e-07;
+radius=5e-06;
 setnamed("::model","gap",gap);
 setnamed("::model","radius",radius);
-save("C:/Users/xwang/Desktop/Xu_Files/dynamic_fdtd_model/fdtd/ebeam_pc_te1550/ebeam_pc_te1550_120nm_4um.fsp");ebeam_pc_te1550_generate_s_parameters;
+save("/Users/lukasc/Documents/ebeam_v1.2/fdtd/ebeam_pc_te1550/ebeam_pc_te1550_100nm_5um.fsp");ebeam_pc_te1550_generate_s_parameters;
