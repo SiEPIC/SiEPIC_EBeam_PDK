@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# SiEPIC_EBeam_Verification
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Jaspreet Jhoja (c) 2016
+
+This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simulations.
+It required tcl8.6 and tk8.6 to work.
+
+
+Version history:
+
+Jaspreet Jhoja 2016/03/11 
+ - Empty GUI with no functionality.
+ """
+
+import pya
+import tkinter as tk
+from tkinter import ttk 
+
+
+class GUIFrame(tk.Frame):
+    textvar = ""
+    def __init__(self, parent, text="", *args, **options):
+        tk.Frame.__init__(self, parent, *args, **options)
+        
+        self.textvar = text
+        self.show = tk.IntVar()
+        self.show.set(0)
+
+        self.title_frame = ttk.Frame(self)
+        self.title_frame.pack(fill="x", expand=1)
+        self.toggle_button = ttk.Checkbutton(self.title_frame,width="100", text=text, command=None,
+                                            variable=self.show, style ="Toolbutton")
+        self.toggle_button.pack(side="left")
+        
+      #  ttk.Label(self.title_frame, text=text).pack(side="left", fill="x", expand=1)
+
+        self.sub_frame = tk.Frame(self, relief="sunken", borderwidth=1, bg='WHITE')
+        self.sub_frame.pack(fill="x", expand=1)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.maxsize(500,800)
+    root.minsize(500,200)
+#First frame
+    frame1 = GUIFrame(root, text='Within Wafer thickness variations', relief="raised", borderwidth=3)
+    frame1.pack(anchor="n")
+    ttk.Label(frame1.sub_frame, text='                     Sigma RMS for width (nm) :').grid(row=0,column=0,padx=5)
+    a1 = ttk.Entry(frame1.sub_frame)
+    a1.grid(row=0,column=1,padx=5, pady=5)
+   # ttk.Label(frame1.sub_frame, text='nm').grid(row=0,column=2,padx=5)
+    #ttk.Entry(frame1.sub_frame).grid(row=0, column2)
+    ttk.Label(frame1.sub_frame, text='                Sigma RMS for thickness (nm) :').grid(row=1,column=0,padx=5)
+    a2 = ttk.Entry(frame1.sub_frame)
+    a2.grid(row=1,column=1,padx=5,pady =5)
+    ttk.Label(frame1.sub_frame, text='                          Correlation length (um) :').grid(row=2,column=0,padx=5)
+    a3= ttk.Entry(frame1.sub_frame)
+    a3.grid(row=2,column=1,padx=5,pady=5)
+
+#Second Frame
+    frame2 = GUIFrame(root, text='Within Die variations', relief="raised", borderwidth=3)
+    frame2.pack(fill="x", anchor="n")
+    ttk.Label(frame2.sub_frame, text='                     Sigma RMS for width (nm) :').grid(row=0,column=0,padx=5)
+    b1 = ttk.Entry(frame2.sub_frame)
+    b1.grid(row=0,column=1,padx=5, pady=5)
+    ttk.Label(frame2.sub_frame, text='                Sigma RMS for thickness (nm) :').grid(row=1,column=0,padx=5)
+    b2 = ttk.Entry(frame2.sub_frame)
+    b2.grid(row=1,column=1,padx=5,pady=5)
+    ttk.Label(frame2.sub_frame, text='                          Correlation length (um) :').grid(row=2,column=0,padx=5)
+    b3 = ttk.Entry(frame2.sub_frame)
+    b3.grid(row=2,column=1,padx=5,pady=5)
+
+#Third Frame
+    frame3 = GUIFrame(root, text='Wafer mean', relief="raised", borderwidth=3)
+    frame3.pack(fill="x",  anchor="n")
+    ttk.Label(frame3.sub_frame, text='                     Sigma RMS for width (nm) :').grid(row=0,column=0,padx=5)
+    c1 = ttk.Entry(frame3.sub_frame)
+    c1.grid(row=0,column=1,padx=5,pady=5)
+    ttk.Label(frame3.sub_frame, text='                Sigma RMS for thickness (nm) :').grid(row=1,column=0,padx=5)
+    c2 = ttk.Entry(frame3.sub_frame)
+    c2.grid(row=1,column=1,padx=5,pady=5)
+
+
+#Fourth Frame
+    frame4 = GUIFrame(root, text='Wafer size', relief="raised", borderwidth=3)
+    frame4.pack(fill="x",  anchor="n")
+    ttk.Label(frame4.sub_frame, text='                              Wafer Length x (mm) :').grid(row=0,column=0,padx=5)
+    d1 = ttk.Entry(frame4.sub_frame)
+    d1.grid(row=0,column=1,padx=5,pady=5)
+    ttk.Label(frame4.sub_frame, text='                              Wafer Length y (mm) :').grid(row=1,column=0,padx=5)
+    d2 = ttk.Entry(frame4.sub_frame)
+    d2.grid(row=1,column=1,padx=5,pady=5)
+  
+#Fifth Frame
+    frame5 = GUIFrame(root, text='Die size', relief="raised", borderwidth=3)
+    frame5.pack(fill="x",  anchor="n")
+    ttk.Label(frame5.sub_frame, text='                                  Die Length x (mm) :').grid(row=0,column=0,padx=5)
+    e1 = ttk.Entry(frame5.sub_frame)
+    e1.grid(row=0,column=1,padx=5,pady=5)
+    ttk.Label(frame5.sub_frame, text='                                  Die Length y (mm) :').grid(row=1,column=0,padx=5)
+    e2 = ttk.Entry(frame5.sub_frame)
+    e2.grid(row=1,column=1,padx=5,pady=5)
+
+    def extractval():
+      data = []
+      #extract frist frame
+      data.append(a1.get())
+      data.append(a2.get())
+      data.append(a3.get())
+      #extract second frame
+      data.append(b1.get())
+      data.append(b2.get())
+      data.append(b3.get())
+      #extract third frame
+      data.append(c1.get())
+      data.append(c2.get())
+      #extract fourth frame
+      data.append(d1.get())
+      data.append(d2.get())
+      #extract fifth frame
+      data.append(e1.get())
+      data.append(e2.get())
+      print(data)
+      
+    ttk.Button(root, text = "run MC simulation", command=extractval).pack(pady=10)
+     #    self.toggle_button = ttk.Checkbutton(self.title_frame,width="100", text=text, command=None,
+      #                                      variable=self.show, style ="Toolbutton")   
+    root.title("Monte Carlo Simulations")
+    root.mainloop()</text>
+</klayout-macro>
