@@ -36,4 +36,13 @@
         <value name="s-param" type="string">ebeam_pc_te1550_gap=200nm_radius=4um.dat</value>
     </extracted>
 </association>
+<association>
+    <design>
+        <value name="gap" type="double">1e-07</value>
+        <value name="radius" type="double">5e-06</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">ebeam_pc_te1550_gap=100nm_radius=5um.dat</value>
+    </extracted>
+</association>
 </lumerical_lookup_table>
