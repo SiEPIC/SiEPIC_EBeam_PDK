@@ -116,19 +116,21 @@ else:
         dist = 1e100
         for p1 in optical_components[idx1].pins:
           for p2 in optical_components[idx2].pins:
-            # check if pins are in the same orientation
-            angle_p1_p2 = angle_segments(optical_pins[p1].points,optical_pins[p2].points)
-#            print check_segments_same_direction( optical_pins[p1].points, optical_pins[p2].points )
-            if angle_p1_p2 == 0 or abs(angle_p1_p2) == 180:
-              # find the closest ones
-              dx = optical_pins[p1].x - optical_pins[p2].x
-              dy = optical_pins[p1].y - optical_pins[p2].y
-              dist_comp = dx*dx + dy*dy
-              if dist &gt; dist_comp:
-                # save this dx/dy as the shortest distance transformation
-                dist = dist_comp
-                dx12 = dx
-                dy12 = dy        
+            # check if both pins are type "1 = component"
+            if optical_pins[p1].pin_type == 1 and  optical_pins[p2].pin_type == 1:
+              # check if pins are in the same orientation
+              angle_p1_p2 = angle_segments(optical_pins[p1].points,optical_pins[p2].points)
+  #            print check_segments_same_direction( optical_pins[p1].points, optical_pins[p2].points )
+              if angle_p1_p2 == 0 or abs(angle_p1_p2) == 180:
+                # find the closest ones
+                dx = optical_pins[p1].x - optical_pins[p2].x
+                dy = optical_pins[p1].y - optical_pins[p2].y
+                dist_comp = dx*dx + dy*dy
+                if dist &gt; dist_comp:
+                  # save this dx/dy as the shortest distance transformation
+                  dist = dist_comp
+                  dx12 = dx
+                  dy12 = dy        
 #        print o_selection.inst().trans.disp.x
         if dist &lt; 1e100:
           # Move the selected object
