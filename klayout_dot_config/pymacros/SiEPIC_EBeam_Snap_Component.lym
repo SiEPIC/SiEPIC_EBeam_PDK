@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Snap object using nearest pins</description>
+ <description>Snap component using nearest pins</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
