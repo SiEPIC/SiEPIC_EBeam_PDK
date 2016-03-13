@@ -22,127 +22,222 @@ This file is part of the SiEPIC_EBeam_PDK
 by Jaspreet Jhoja (c) 2016
 
 This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simulations.
-It required tcl8.6 and tk8.6 to work.
-
 
 Version history:
 
+Jaspreet Jhoja 2016/03/13 
+ - Verifies the field input and highlight the unacceptable input.
+ - Does not require tk8.6 and tcl8.6
+
 Jaspreet Jhoja 2016/03/11 
  - Empty GUI with no functionality.
+ - Requires tk8.6 and tcl 8.6 to work
  """
-
+from pya import *
 import pya
-import tkinter as tk
-from tkinter import ttk 
+
+datalist = [] # list to store data from all fields
+objlist = []#list of data objects
+clear = []#12 clears should be there
+
+wdg = QDialog(pya.Application.instance().main_window())
+wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
+wdg.setWindowTitle("Monte-Carlo Simulation")
+titlefont = QFont("Courier", 9, QFont.Bold, False)
+hbox = QVBoxLayout(wdg)
+wdg.setFixedSize(650, 300)
+
+mapper = QSignalMapper()
 
 
-class GUIFrame(tk.Frame):
-    textvar = ""
-    def __init__(self, parent, text="", *args, **options):
-        tk.Frame.__init__(self, parent, *args, **options)
-        
-        self.textvar = text
-        self.show = tk.IntVar()
-        self.show.set(0)
+def action(obj):
+  try:
+    float(obj.text)
+    obj.setStyleSheet("border: 2px solid green;")
 
-        self.title_frame = ttk.Frame(self)
-        self.title_frame.pack(fill="x", expand=1)
-        self.toggle_button = ttk.Checkbutton(self.title_frame,width="100", text=text, command=None,
-                                            variable=self.show, style ="Toolbutton")
-        self.toggle_button.pack(side="left")
-        
-      #  ttk.Label(self.title_frame, text=text).pack(side="left", fill="x", expand=1)
+  except Exception:
+    obj.setStyleSheet("border: 2px solid red;")
+    
+#validate text input
+def errorcheck(self):
+  for each in objlist:
+    if(each.text == ''):
+     None
+    else:
+      action(each)
 
-        self.sub_frame = tk.Frame(self, relief="sunken", borderwidth=1, bg='WHITE')
-        self.sub_frame.pack(fill="x", expand=1)
+#Left Frame top section
+lframe1 = QFrame()
+lframe1.setFrameShape(QFrame.StyledPanel)
+lf1title = QLabel('Within Wafer thickness variations')
+lf1title.setFont(titlefont)
+lf1label1 = QLabel('Sigma RMS for width (nm): ')
+lf1label2 = QLabel('Sigma RMS for thickness (nm): ')
+lf1label3 = QLabel('Correlation length (um): ')
+lf1text1 = QLineEdit()
+lf1text1.setAccessibleName('lf1text1')
+lf1text1.textChanged(errorcheck)
+lf1text2 = QLineEdit()
+lf1text2.setAccessibleName('lf1text2')
+lf1text2.textChanged(errorcheck)
+lf1text3 = QLineEdit()
+lf1text3.setAccessibleName('lf1text3')
+lf1text3.textChanged(errorcheck)
+lf1form = QGridLayout()
+lf1form.addWidget(lf1title,0,0,2,0)
+lf1form.addWidget(lf1label1, 2,0)
+lf1form.addWidget(lf1text1, 2,1)
+lf1form.addWidget(lf1label2, 3,0)
+lf1form.addWidget(lf1text2, 3,1)
+lf1form.addWidget(lf1label3, 4,0)
+lf1form.addWidget(lf1text3, 4,1)
+lframe1.setLayout(lf1form)
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.maxsize(500,800)
-    root.minsize(500,200)
-#First frame
-    frame1 = GUIFrame(root, text='Within Wafer thickness variations', relief="raised", borderwidth=3)
-    frame1.pack(anchor="n")
-    ttk.Label(frame1.sub_frame, text='                     Sigma RMS for width (nm) :').grid(row=0,column=0,padx=5)
-    a1 = ttk.Entry(frame1.sub_frame)
-    a1.grid(row=0,column=1,padx=5, pady=5)
-   # ttk.Label(frame1.sub_frame, text='nm').grid(row=0,column=2,padx=5)
-    #ttk.Entry(frame1.sub_frame).grid(row=0, column2)
-    ttk.Label(frame1.sub_frame, text='                Sigma RMS for thickness (nm) :').grid(row=1,column=0,padx=5)
-    a2 = ttk.Entry(frame1.sub_frame)
-    a2.grid(row=1,column=1,padx=5,pady =5)
-    ttk.Label(frame1.sub_frame, text='                          Correlation length (um) :').grid(row=2,column=0,padx=5)
-    a3= ttk.Entry(frame1.sub_frame)
-    a3.grid(row=2,column=1,padx=5,pady=5)
-
-#Second Frame
-    frame2 = GUIFrame(root, text='Within Die variations', relief="raised", borderwidth=3)
-    frame2.pack(fill="x", anchor="n")
-    ttk.Label(frame2.sub_frame, text='                     Sigma RMS for width (nm) :').grid(row=0,column=0,padx=5)
-    b1 = ttk.Entry(frame2.sub_frame)
-    b1.grid(row=0,column=1,padx=5, pady=5)
-    ttk.Label(frame2.sub_frame, text='                Sigma RMS for thickness (nm) :').grid(row=1,column=0,padx=5)
-    b2 = ttk.Entry(frame2.sub_frame)
-    b2.grid(row=1,column=1,padx=5,pady=5)
-    ttk.Label(frame2.sub_frame, text='                          Correlation length (um) :').grid(row=2,column=0,padx=5)
-    b3 = ttk.Entry(frame2.sub_frame)
-    b3.grid(row=2,column=1,padx=5,pady=5)
-
-#Third Frame
-    frame3 = GUIFrame(root, text='Wafer mean', relief="raised", borderwidth=3)
-    frame3.pack(fill="x",  anchor="n")
-    ttk.Label(frame3.sub_frame, text='                     Sigma RMS for width (nm) :').grid(row=0,column=0,padx=5)
-    c1 = ttk.Entry(frame3.sub_frame)
-    c1.grid(row=0,column=1,padx=5,pady=5)
-    ttk.Label(frame3.sub_frame, text='                Sigma RMS for thickness (nm) :').grid(row=1,column=0,padx=5)
-    c2 = ttk.Entry(frame3.sub_frame)
-    c2.grid(row=1,column=1,padx=5,pady=5)
+#Left Frame bottom section
+lframe2 = QFrame()
+lframe2.setFrameShape(QFrame.StyledPanel)
+lf2title = QLabel('Within Die variations')
+lf2title.setFont(titlefont)
+lf2label1 = QLabel('Sigma RMS for width (nm): ')
+lf2label2 = QLabel('Sigma RMS for thickness (nm): ')
+lf2label3 = QLabel('Correlation length (um): ')
+lf2text1 = QLineEdit()
+lf2text1.setAccessibleName('lf2text1')
+lf2text1.textChanged(errorcheck)
+lf2text2 = QLineEdit()
+lf2text2.setAccessibleName('lf2text2')
+lf2text2.textChanged(errorcheck)
+lf2text3 = QLineEdit()
+lf2text3.setAccessibleName('lf2text3')
+lf2text3.textChanged(errorcheck)
+lf2form = QGridLayout()
+lf2form.addWidget(lf2title,0,0,2,0)
+lf2form.addWidget(lf2label1, 2,0)
+lf2form.addWidget(lf2text1, 2,1)
+lf2form.addWidget(lf2label2, 3,0)
+lf2form.addWidget(lf2text2, 3,1)
+lf2form.addWidget(lf2label3, 4,0)
+lf2form.addWidget(lf2text3, 4,1)
+lframe2.setLayout(lf2form)
 
 
-#Fourth Frame
-    frame4 = GUIFrame(root, text='Wafer size', relief="raised", borderwidth=3)
-    frame4.pack(fill="x",  anchor="n")
-    ttk.Label(frame4.sub_frame, text='                              Wafer Length x (mm) :').grid(row=0,column=0,padx=5)
-    d1 = ttk.Entry(frame4.sub_frame)
-    d1.grid(row=0,column=1,padx=5,pady=5)
-    ttk.Label(frame4.sub_frame, text='                              Wafer Length y (mm) :').grid(row=1,column=0,padx=5)
-    d2 = ttk.Entry(frame4.sub_frame)
-    d2.grid(row=1,column=1,padx=5,pady=5)
+#Right Frame -section1
+rframe1 = QFrame()
+rframe1.setFrameShape(QFrame.StyledPanel)
+rf1title = QLabel('Wafer mean')
+rf1title.setFont(titlefont)
+rf1label1 = QLabel('Sigma RMS for width (nm): ')
+rf1label2 = QLabel('Sigma RMS for thickness (nm): ')
+rf1text1 = QLineEdit()
+rf1text1.setAccessibleName('rf1text1')
+rf1text1.textChanged(errorcheck)
+rf1text2 = QLineEdit()
+rf1text2.setAccessibleName('rf1text2')
+rf1text2.textChanged(errorcheck)
+rf1form = QGridLayout()
+rf1form.addWidget(rf1title,0,0,2,0)
+rf1form.addWidget(rf1label1, 2,0)
+rf1form.addWidget(rf1text1, 2,1)
+rf1form.addWidget(rf1label2, 3,0)
+rf1form.addWidget(rf1text2, 3,1)
+rframe1.setLayout(rf1form)
+
+#Right Frame = Section2
+rframe2 = QFrame()
+rframe2.setFrameShape(QFrame.StyledPanel)
+rf2title = QLabel('Wafer size')
+rf2title.setFont(titlefont)
+rf2label1 = QLabel('Wafer Length X (mm):             ')
+rf2label2 = QLabel('Wafer Length Y (mm):             ')
+rf2text1 = QLineEdit()
+rf2text1.setAccessibleName('rf2text1')
+rf2text1.textChanged(errorcheck)
+rf2text2 = QLineEdit()
+rf2text2.setAccessibleName('rf2text2')
+rf2text2.textChanged(errorcheck)
+rf2form = QGridLayout()
+rf2form.addWidget(rf2title,0,0,2,0)
+rf2form.addWidget(rf2label1, 2,0)
+rf2form.addWidget(rf2text1, 2,1)
+rf2form.addWidget(rf2label2, 3,0)
+rf2form.addWidget(rf2text2, 3,1)
+rframe2.setLayout(rf2form)
+
+
+#Right Frame- Section3
+rframe3 = QFrame()
+rframe3.setFrameShape(QFrame.StyledPanel)
+rf3title = QLabel('Die size')
+rf3title.setFont(titlefont)
+rf3label1 = QLabel('Die Length X (mm):                 ')
+rf3label2 = QLabel('Die Length Y (mm):                 ')
+rf3text1 = QLineEdit()
+rf3text1.setAccessibleName('rf3text1')
+rf3text1.textChanged(errorcheck)
+rf3text2 = QLineEdit()
+rf3text2.setAccessibleName('rf3text2')
+rf3text2.textChanged(errorcheck)
+
+rf3form = QGridLayout()
+rf3form.addWidget(rf3title,0,0,2,0)
+rf3form.addWidget(rf3label1, 2,0)
+rf3form.addWidget(rf3text1, 2,1)
+rf3form.addWidget(rf3label2, 3,0)
+rf3form.addWidget(rf3text2, 3,1)
+rframe3.setLayout(rf3form)
+
+def verifyfields():
+  if(lf1text1.text!='' and lf1text2.text!='' and lf1text3.text!='' and lf2text1.text!='' and lf2text2.text !='' and lf2text3.text !=''
+  and rf1text1.text!='' and rf1text2.text!='' and rf2text1 !='' and rf2text2 !='' and rf3text1 !='' and rf3text2 !=''):
+    return True
+  else:
+    return False
   
-#Fifth Frame
-    frame5 = GUIFrame(root, text='Die size', relief="raised", borderwidth=3)
-    frame5.pack(fill="x",  anchor="n")
-    ttk.Label(frame5.sub_frame, text='                                  Die Length x (mm) :').grid(row=0,column=0,padx=5)
-    e1 = ttk.Entry(frame5.sub_frame)
-    e1.grid(row=0,column=1,padx=5,pady=5)
-    ttk.Label(frame5.sub_frame, text='                                  Die Length y (mm) :').grid(row=1,column=0,padx=5)
-    e2 = ttk.Entry(frame5.sub_frame)
-    e2.grid(row=1,column=1,padx=5,pady=5)
+def button(self):
+  global datalist
+  datalist = []
+  for each in objlist:
+    datalist.append(each.text)
+  print(datalist)
+  
+ok = QPushButton("run Monte Carlo Simulation", rframe3)
+ok.clicked(button)
+#Left Vertical splitter
+leftsplitter = QSplitter(Qt.Vertical)
+leftsplitter.addWidget(lframe1)
+leftsplitter.addWidget(lframe2)
+leftsplitter.addWidget(ok)
+leftsplitter.setSizes([400,400,10])
 
-    def extractval():
-      data = []
-      #extract frist frame
-      data.append(a1.get())
-      data.append(a2.get())
-      data.append(a3.get())
-      #extract second frame
-      data.append(b1.get())
-      data.append(b2.get())
-      data.append(b3.get())
-      #extract third frame
-      data.append(c1.get())
-      data.append(c2.get())
-      #extract fourth frame
-      data.append(d1.get())
-      data.append(d2.get())
-      #extract fifth frame
-      data.append(e1.get())
-      data.append(e2.get())
-      print(data)
-      
-    ttk.Button(root, text = "run MC simulation", command=extractval).pack(pady=10)
-     #    self.toggle_button = ttk.Checkbutton(self.title_frame,width="100", text=text, command=None,
-      #                                      variable=self.show, style ="Toolbutton")   
-    root.title("Monte Carlo Simulations")
-    root.mainloop()</text>
+#Right Vertical Splitter
+rightsplitter = QSplitter(Qt.Vertical)
+rightsplitter.addWidget(rframe1)
+rightsplitter.addWidget(rframe2)
+rightsplitter.addWidget(rframe3)
+rightsplitter.setSizes([400,400, 400])
+
+#Main Window Splitter
+splitter1 = QSplitter(Qt.Horizontal)
+textedit = QTextEdit()
+splitter1.addWidget(leftsplitter)
+splitter1.addWidget(rightsplitter)
+splitter1.setSizes([400,400])
+hbox.addWidget(splitter1)
+
+objlist.append(lf1text1)
+objlist.append(lf1text2)
+objlist.append(lf1text3)
+objlist.append(lf2text1)
+objlist.append(lf2text2)
+objlist.append(lf2text3)
+objlist.append(rf1text1)
+objlist.append(rf1text2)
+objlist.append(rf2text1)
+objlist.append(rf2text2)
+objlist.append(rf3text1)
+objlist.append(rf3text2)
+
+wdg.show()
+
+</text>
 </klayout-macro>
