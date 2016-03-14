@@ -15,8 +15,6 @@
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
-# SiEPIC_EBeam_Verification
-
 """
 This file is part of the SiEPIC_EBeam_PDK
 by Jaspreet Jhoja (c) 2016
