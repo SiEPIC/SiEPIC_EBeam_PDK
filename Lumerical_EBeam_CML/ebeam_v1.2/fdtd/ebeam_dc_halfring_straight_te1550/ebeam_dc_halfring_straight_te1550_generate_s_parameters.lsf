@@ -39,8 +39,16 @@ S24=S42;
 scale_factor=1; # 0.987;
 scale_s_parameters;
 
+<<<<<<< HEAD
 sfile = "ebeam_dc_halfring_straight_te1550"+"_gap=" + num2str(gap*1e9) + "nm_radius=" + num2str(radius*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.dat";
 if (fileexists(sfile)) { rm(sfile);}
 mode_label = "TE";
 mode_ID = "1";
 write_s_parameters;
+=======
+    sfile = "ebeam_dc_halfring_straight_te1550"+"_gap=" + num2str(gap*1e9) + "nm_radius=" + num2str(radius*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.dat";
+    if (fileexists(sfile)) { rm(sfile);}
+    mode_label = "TE";
+    mode_ID = "1";
+    write_s_parameters;
+>>>>>>> lukasc-ubc/master
