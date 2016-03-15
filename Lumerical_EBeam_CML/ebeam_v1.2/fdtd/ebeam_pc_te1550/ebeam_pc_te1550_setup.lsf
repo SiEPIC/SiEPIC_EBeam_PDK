@@ -1,11 +1,15 @@
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
 <<<<<<< HEAD
+=======
+>>>>>>> lukasc-ubc/master
 gap=1e-07;
 radius=5e-06;
 setnamed("::model","gap",gap);
 setnamed("::model","radius",radius);
 save("/Users/lukasc/Documents/ebeam_v1.2/fdtd/ebeam_pc_te1550/ebeam_pc_te1550_100nm_5um.fsp");ebeam_pc_te1550_generate_s_parameters;
+<<<<<<< HEAD
 =======
 >>>>>>> Stashed changes
 gap=1.3e-07;
@@ -17,3 +21,5 @@ save("/Users/zqlu/GitHub/SiEPIC_EBeam_PDK_chris/Lumerical_EBeam_CML/ebeam_v1.2/f
 =======
 >>>>>>> origin/master
 >>>>>>> Stashed changes
+=======
+>>>>>>> lukasc-ubc/master
