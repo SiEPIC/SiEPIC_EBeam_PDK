@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Monte Carlo simulations</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.simulation_submenu.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>"""
+This file is part of the SiEPIC_EBeam_PDK
+by Jaspreet Jhoja (c) 2016
+
+This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simulations.
+
+Version history:
+
+Jaspreet Jhoja 2016/03/18
+ - Integrated with MC scripts
+ - Provides a choice for the type of MC simulation: - mc_dtd and mc_wtw
+ - edit_completed data validation for fields with nm units
+ - instant input validation for other fields
+
+Jaspreet Jhoja 2016/03/13 
+ - Verifies the field input and highlight the unacceptable input.
+ - Does not require tk8.6 and tcl8.6
+
+Jaspreet Jhoja 2016/03/11 
+ - Empty GUI with no functionality.
+ - Requires tk8.6 and tcl 8.6 to work
+ 
+ """
+ 
+from pya import *
+import pya, sys
+
+datalist = [] # list to store data from all fields
+datadict ={} #dictionary storing all info
+
+"""
+Used Following Variables in the data dictionary
+//number_of_simulations
+//within_wafer_width
+//within_wafer_thickness
+//within_wafer_correlation
+//within_die_width
+//within_die_thickness
+//within_die_correlation
+//wafer_sigma_width
+//wafer_sigma_thickness
+//wafer_length_x
+//wafer_length_y
+//die_length_x
+//die_length_y
+"""
+
+objlist = []#list of data objects
+clear = []#12 clears should be there
+topcell = None
+layout = None
+dbu = None
+
+LayerSiN = None
+LayerTextN = None
+LayerPinRecN = None
+LayerDevRecN = None
+LayerFbrTgtN = None
+LayerErrorN = None
+LayerINTERCONNECTN = None
+# initialize the arrays to keep track of layout objects
+optical_components = []
+optical_waveguides = []
+optical_pins = []
+optical_nets = []
+
+wdg = QWidget()
+#wdg = QDialog(pya.Application.instance().main_window())
+wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
+wdg.setWindowTitle("Monte-Carlo Simulation")
+
+if sys.platform.startswith('linux'):
+    # Linux-specific code here...
+  titlefont = QFont("Arial", 11, QFont.Bold, False)
+  
+elif sys.platform.startswith('darwin'):
+    # OSX specific
+  titlefont = QFont("Arial", 13, QFont.Bold, False)
+      
+elif sys.platform.startswith('win'):
+  titlefont = QFont("Arial", 9, QFont.Bold, False)
+
+#titlefont = QFont("Arial", 9, QFont.Bold, False)
+hbox = QVBoxLayout(wdg)
+
+wdg.setFixedSize(650, 450)
+
+def action(obj):
+  try:
+    float(obj.text)
+    obj.setStyleSheet("border: 2px solid green; background-color: white;")
+
+  except Exception:
+    obj.setStyleSheet("border: 2px solid red; background-color: white;")
+
+def editcheck():
+  for each in objlist:
+    if(each.accessibleName == 'lf1text1' or each.accessibleName == 'lf1text2'):
+      if(each.accessibleName == 'lf1text1'):
+        if('/' in each.text):
+          if(each.text[-1]=='/'):
+            None
+          else:
+            a,b = each.text.split('/')
+            lf1text1.setText(str(round(float(a)/float(b),2)))
+      
+      if(each.accessibleName == 'lf1text2'):
+        if('/' in each.text):
+          if(each.text[-1]=='/'):
+            None
+          else:
+            a,b = each.text.split('/')
+            lf1text2.setText(str(round(float(a)/float(b),2)))    
+      
+      action(each)
+
+
+#validate text input
+def errorcheck(self):
+  for each in objlist:
+      action(each)
+      if(each.accessibleName == 'rf2text1'):
+        rf2text2.setText(rf2text1.text)      
+
+#top options frame
+topframe = QFrame()
+topframe.setFrameShape(QFrame.StyledPanel)
+topframe.setStyleSheet("background-color: mintcream;")
+tftitle = QLabel('Type of MC Simulation: ')
+option1 = QRadioButton("Wafer to Wafer Simulation")
+option2 = QRadioButton("Within Wafer Simulation")
+tflabel1 = QLabel('Number of Simulations: ')
+tftext1 = QLineEdit()
+tftext1.setAccessibleName('tftext1')
+tftext1.setAccessibleDescription('number_of_simulations')
+tftext1.textChanged(errorcheck)
+tftext1.setFixedWidth(80)
+tfform = QGridLayout()
+tfform.addWidget(tftitle,0,1)
+tfform.addWidget(option1, 1,2)
+tfform.addWidget(option2, 2,2)
+tfform.addWidget(tflabel1, 3,1)
+tfform.addWidget(tftext1, 3,2,1,10)
+topframe.setLayout(tfform)
+
+
+#Left Frame top section
+lframe1 = QFrame()
+lframe1.setFrameShape(QFrame.StyledPanel)
+lframe1.setStyleSheet("background-color: mintcream;")
+lf1title = QLabel('Within Wafer thickness variations')
+lf1title.setFont(titlefont)
+lf1label1 = QLabel('Sigma RMS for width (nm): ')
+lf1label2 = QLabel('Sigma RMS for thickness (nm): ')
+lf1label3 = QLabel('Correlation length (m): ')
+lf1text1 = QLineEdit()
+lf1text1.setAccessibleName('lf1text1')
+lf1text1.setAccessibleDescription('within_wafer_width')
+lf1text1.editingFinished(editcheck)
+lf1text2 = QLineEdit()
+lf1text2.setAccessibleName('lf1text2')
+lf1text2.setAccessibleDescription('within_wafer_thickness')
+lf1text2.editingFinished(editcheck)
+lf1text3 = QLineEdit()
+lf1text3.setAccessibleName('lf1text3')
+lf1text3.setAccessibleDescription('within_wafer_correlation')
+lf1text3.textChanged(errorcheck)
+lf1form = QGridLayout()
+lf1form.addWidget(lf1title,0,0,2,0)
+lf1form.addWidget(lf1label1, 2,0)
+lf1form.addWidget(lf1text1, 2,1)
+lf1form.addWidget(lf1label2, 3,0)
+lf1form.addWidget(lf1text2, 3,1)
+lf1form.addWidget(lf1label3, 4,0)
+lf1form.addWidget(lf1text3, 4,1)
+
+lframe1.setLayout(lf1form)
+
+#Left Frame bottom section
+lframe2 = QFrame()
+lframe2.setFrameShape(QFrame.StyledPanel)
+lframe2.setStyleSheet("background-color: mintcream;")
+lf2title = QLabel('Within Die variations')
+lf2title.setFont(titlefont)
+lf2label1 = QLabel('Sigma RMS for width (nm): ')
+lf2label2 = QLabel('Sigma RMS for thickness (nm): ')
+lf2label3 = QLabel('Correlation length (m): ')
+lf2text1 = QLineEdit()
+lf2text1.setAccessibleName('lf2text1')
+lf2text1.setAccessibleDescription('within_die_width')
+lf2text1.textChanged(errorcheck)
+lf2text2 = QLineEdit()
+lf2text2.setAccessibleName('lf2text2')
+lf2text2.setAccessibleDescription('within_die_thickness')
+lf2text2.textChanged(errorcheck)
+lf2text3 = QLineEdit()
+lf2text3.setAccessibleName('lf2text3')
+lf2text3.setAccessibleDescription('within_die_correlation')
+lf2text3.textChanged(errorcheck)
+lf2form = QGridLayout()
+lf2form.addWidget(lf2title,0,0,2,0)
+lf2form.addWidget(lf2label1, 2,0)
+lf2form.addWidget(lf2text1, 2,1)
+lf2form.addWidget(lf2label2, 3,0)
+lf2form.addWidget(lf2text2, 3,1)
+lf2form.addWidget(lf2label3, 4,0)
+lf2form.addWidget(lf2text3, 4,1)
+lframe2.setLayout(lf2form)
+
+
+#Right Frame -section1
+rframe1 = QFrame()
+rframe1.setFrameShape(QFrame.StyledPanel)
+rframe1.setStyleSheet("background-color: mintcream;")
+rf1title = QLabel('Wafer mean')
+rf1title.setFont(titlefont)
+rf1label1 = QLabel('Sigma RMS for width (nm): ')
+rf1label2 = QLabel('Sigma RMS for thickness (nm): ')
+rf1text1 = QLineEdit()
+rf1text1.setAccessibleName('rf1text1')
+rf1text1.setAccessibleDescription('wafer_sigma_width')
+rf1text1.textChanged(errorcheck)
+rf1text2 = QLineEdit()
+rf1text2.setAccessibleName('rf1text2')
+rf1text2.setAccessibleDescription('wafer_sigma_thickness')
+rf1text2.textChanged(errorcheck)
+rf1form = QGridLayout()
+rf1form.addWidget(rf1title,0,0,2,0)
+rf1form.addWidget(rf1label1, 2,0)
+rf1form.addWidget(rf1text1, 2,1)
+rf1form.addWidget(rf1label2, 3,0)
+rf1form.addWidget(rf1text2, 3,1)
+rframe1.setLayout(rf1form)
+
+#Right Frame = Section2
+rframe2 = QFrame()
+rframe2.setFrameShape(QFrame.StyledPanel)
+rframe2.setStyleSheet("background-color: mintcream;")
+rf2title = QLabel('Wafer size')
+rf2title.setFont(titlefont)
+rf2label1 = QLabel('Wafer Length X (m):             ')
+rf2label2 = QLabel('Wafer Length Y (m):             ')
+rf2text1 = QLineEdit()
+rf2text1.setAccessibleName('rf2text1')
+rf2text1.setAccessibleDescription('wafer_length_x')
+rf2text1.textChanged(errorcheck)
+rf2text2 = QLineEdit()
+rf2text2.setAccessibleName('rf2text2')
+rf2text2.setAccessibleDescription('wafer_length_y')
+rf2text2.textChanged(errorcheck)
+rf2text2.setEnabled(False)
+rf2form = QGridLayout()
+rf2form.addWidget(rf2title,0,0,2,0)
+rf2form.addWidget(rf2label1, 2,0)
+rf2form.addWidget(rf2text1, 2,1)
+rf2form.addWidget(rf2label2, 3,0)
+rf2form.addWidget(rf2text2, 3,1)
+rframe2.setLayout(rf2form)
+
+
+#Right Frame- Section3
+rframe3 = QFrame()
+rframe3.setFrameShape(QFrame.StyledPanel)
+rframe3.setStyleSheet("background-color: mintcream;")
+rf3title = QLabel('Die size')
+rf3title.setFont(titlefont)
+rf3label1 = QLabel('Die Length X (m):                 ')
+rf3label2 = QLabel('Die Length Y (m):                 ')
+rf3text1 = QLineEdit()
+rf3text1.setAccessibleName('rf3text1')
+rf3text1.setAccessibleDescription('die_length_x')
+rf3text1.textChanged(errorcheck)
+rf3text2 = QLineEdit()
+rf3text2.setAccessibleName('rf3text2')
+rf3text2.setAccessibleDescription('die_length_y')
+rf3text2.textChanged(errorcheck)
+rf3form = QGridLayout()
+rf3form.addWidget(rf3title,0,0,2,0)
+rf3form.addWidget(rf3label1, 2,0)
+rf3form.addWidget(rf3text1, 2,1)
+rf3form.addWidget(rf3label2, 3,0)
+rf3form.addWidget(rf3text2, 3,1)
+rframe3.setLayout(rf3form)
+  
+def button(self):
+  global datalist
+  datalist = []
+  for each in objlist:
+    datalist.append(each.text)
+    datadict[each.accessibleDescription] = each.text
+  if("" in datalist):
+    raise Exception("There are incomplete required fields. Please complete them.")
+  else:
+    global topcell, layout, dbu
+    topcell= None
+    topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    if topcell == None:
+      raise Exception("No cell")
+    layout = topcell.layout()
+    dbu = layout.dbu
+    print(datadict)
+    if(option1.isChecked()== True):
+      print("Starting Wafer to Wafer MC Simulation")
+      mc_wtw(topcell, layout, dbu, datadict)
+    elif(option2.isChecked()==True):
+      print("Starting Within Wafer MC Simulation")
+      mc_dtd(topcell, layout, dbu, datadict)
+  
+  #gui_dtd(topcell, layout, dbu, LayerSiN, LayerTextN, LayerPinRecN, LayerDevRecN, LayerFbrTgtN, LayerErrorN, LayerINTERCONNECTN)
+  
+ok = QPushButton("Run Monte Carlo Simulation", rframe3)
+ok.clicked(button)
+
+#Left Vertical splitter
+leftsplitter = QSplitter(Qt.Vertical)
+leftsplitter.addWidget(lframe1)
+leftsplitter.addWidget(lframe2)
+leftsplitter.addWidget(ok)
+leftsplitter.setSizes([400,400,10])
+
+#Right Vertical Splitter
+rightsplitter = QSplitter(Qt.Vertical)
+rightsplitter.addWidget(rframe1)
+rightsplitter.addWidget(rframe2)
+rightsplitter.addWidget(rframe3)
+rightsplitter.setSizes([400,400, 400])
+
+#Main Window Splitter
+splitter1 = QSplitter(Qt.Horizontal)
+textedit = QTextEdit()
+splitter1.addWidget(leftsplitter)
+splitter1.addWidget(rightsplitter)
+splitter1.setSizes([400,400])
+
+#top frame
+container = QWidget()
+hbox.addWidget(topframe)
+hbox.addWidget(splitter1)
+objlist.append(tftext1)
+objlist.append(lf1text1)
+objlist.append(lf1text2)
+objlist.append(lf1text3)
+objlist.append(lf2text1)
+objlist.append(lf2text2)
+objlist.append(lf2text3)
+objlist.append(rf1text1)
+objlist.append(rf1text2)
+objlist.append(rf2text1)
+objlist.append(rf2text2)
+objlist.append(rf3text1)
+objlist.append(rf3text2)
+
+#Add Data
+option1.setChecked(True)
+#sample data
+sample_data =['2', '15/3', '6/3', '4500e-6', '1.8', '1.3', '14e-6', '1.66', '1.26', '100e-3', '100e-3', '5e-3', '5e-3']
+#filling gui
+for each in range(len(objlist)):
+  objlist[each].setText(sample_data[each])
+
+editcheck()
+
+wdg.show()</text>
+</klayout-macro>
