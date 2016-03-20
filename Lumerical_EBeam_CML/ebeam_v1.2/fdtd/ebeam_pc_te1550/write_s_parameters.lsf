@@ -1,3 +1,43 @@
+# test passivity of S matrix
+make_plot=0;
+FREQ_PTS=101;
+S_norm = matrix(1,FREQ_PTS);
+S_err = S_norm;
+for (ff=1:FREQ_PTS)
+{
+	S=[S11(ff),S12(ff),S13(ff),S14(ff);
+	   S21(ff),S22(ff),S23(ff),S24(ff);
+	   S31(ff),S32(ff),S33(ff),S34(ff);
+	   S41(ff),S42(ff),S43(ff),S44(ff)];
+
+	S_norm(ff) = norm(S);
+	S_err(ff) = max(abs( S-transpose(S)));
+}
+
+if (max(S_err) > 0.05){
+    ? '******* Warning: S parameters violate reciprocity by more than 5% *********';
+}
+
+if (max(S_norm) > 1+1e-6){
+    ? '******* Warning: S parameters not passive *********';
+    ?max(S_norm);
+    
+    ? 'scaled S parameters to make passive';
+    scale_factor = 1/max(S_norm)*0.9999999;
+    scale_s_parameters;
+}
+else {
+    ? '******* S parameters are passive ********'; 
+}
+if (make_plot==1 ){
+    plot(f, S_norm, 'Wavelength (um)', 'Norm |S|', 'g=' + num2str(gap*1e9) +'nm Lc=' + num2str(Lc*1e6) + ' um');
+    plot(c/f*1e6, S_err, 'Wavelength (um)', 'abs(S-transpose(S))', 'Reciprocity');
+}
+
+
+
+
+# prepare data and write
 
 S11_data=[f,abs(S11),unwrap(angle(S11))];
 write(sfile,"('port 1',"+mode_label+','+mode_ID+','+"'port 1',"+mode_ID+','+"'transmission')"
@@ -114,37 +154,3 @@ write(sfile,"('port 4',"+mode_label+','+mode_ID+','+"'port 4',"+mode_ID+','+"'tr
        +",3)"
        +endl+num2str(S44_data)
        );
-
-# test passivity of Smatrix
-make_plot=0;
-FREQ_PTS=101;
-S_norm = matrix(1,FREQ_PTS);
-S_err = S_norm;
-for (ff=1:FREQ_PTS)
-{
-	S=[S11(ff),S12(ff),S13(ff),S14(ff);
-	   S21(ff),S22(ff),S23(ff),S24(ff);
-	   S31(ff),S32(ff),S33(ff),S34(ff);
-	   S41(ff),S42(ff),S43(ff),S44(ff)];
-
-	S_norm(ff) = norm(S);
-	S_err(ff) = max(abs( S-transpose(S)));
-}
-
-if (max(S_err) > 0.05){
-? '******* Warning: S parameters violate reciprocity by more than 5% *********';
-? max(S_err);
-}
-if (max(S_norm) > 1.00){
-? '******* Warning: S parameters not passive *********';
-?max(S_norm);
-}
-else {
-    if (max(S_norm) <1){
-      ? '******* S paramters are passive ********'; 
-    }
-}
-if (make_plot==1 ){
-    plot(f, S_norm, 'Wavelength (um)', 'Norm |S|', 'g=' + num2str(gap*1e9) +'nm Lc=' + num2str(Lc*1e6) + ' um');
-    plot(c/f*1e6, S_err, 'Wavelength (um)', 'abs(S-transpose(S))', 'Reciprocity');
-}
