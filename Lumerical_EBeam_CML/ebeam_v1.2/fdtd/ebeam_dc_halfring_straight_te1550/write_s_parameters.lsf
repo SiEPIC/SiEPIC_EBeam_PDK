@@ -141,7 +141,7 @@ if (max(S_norm) > 1.00){
 }
 else {
     if (max(S_norm) <1){
-      ? '******* S paramters are passive ********'; 
+      ? '******* S parameters are passive ********'; 
     }
 }
 if (make_plot==1 ){
