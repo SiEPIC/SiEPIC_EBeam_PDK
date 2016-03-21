@@ -28,14 +28,10 @@ runanalysis;
 filename = "ebeam_pc_te1550_input_port=" + num2str(input_port) + "_gap=" + num2str(gap*1e9) + "nm_radius=" + num2str(radius*1e6) + "um.ldf";
 loaddata(filename);
 S34=-S12;
-S22=0.1*S22;    # reduce the back reflection, as the mode mismatch loss is much lower in a realistic ring.
 S44=S22;
 S14=-S32;
 S24=S42;
 
-# if necessary, scale S parameters to make passive
-scale_factor=1; # 0.987;
-scale_s_parameters;
 sfile = "ebeam_pc_te1550_gap=" + num2str(gap*1e9) + "nm_radius=" + num2str(radius*1e6) + "um.dat";
 if (fileexists(sfile)) { rm(sfile);}
 mode_label = "TE";

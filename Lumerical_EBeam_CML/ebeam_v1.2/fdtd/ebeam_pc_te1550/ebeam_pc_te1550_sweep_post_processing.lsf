@@ -45,13 +45,10 @@ for (rr=1:length(radius)) {
         file='ebeam_pc_te1550_sweep_radius/'+filename+".ldf";
         loaddata(file);
         S34=-S12;
-        S22=0.1*S22;    # reduce the back reflection, as the mode mismatch loss is much lower in a realistic ring.
         S44=S22;
         S14=-S32;
         S24=S42;
-        # scale S parameters to make passive
-        scale_factor=0.987;
-        scale_s_parameters;
+        
         sfile = "ebeam_pc_te1550_gap=" + num2str(gap(gg)*1e9) + "nm_radius=" + num2str(radius(rr)*1e6) + "um.dat";
         if (fileexists(sfile)) { rm(sfile);}
         mode_label = "TE";
