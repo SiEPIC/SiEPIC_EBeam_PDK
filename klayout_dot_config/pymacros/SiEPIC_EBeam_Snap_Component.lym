@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Snap object using nearest pins</description>
+ <description>Snap component using nearest pins</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -78,11 +78,11 @@ if lv.has_transient_object_selection() == False:
 else:
   # find the transient selection:
   o_transient_iter = lv.each_object_selected_transient()
-  o_transient = o_transient_iter.next() # returns ObjectInstPath[].
+  o_transient = next(o_transient_iter);  # returns ObjectInstPath[].
   
   # Find the selected objects
   o_selection = lv.object_selection   # returns ObjectInstPath[].
-  if len(o_selection) &lt;&gt; 1:
+  if len(o_selection) &lt; 1:
     v = pya.MessageBox.warning("No selection", "Select the object you wish to be moved.", pya.MessageBox.Ok)
   else:
     o_selection = o_selection[0]
@@ -91,8 +91,8 @@ else:
     else:
     
       # we have two instances:
-      print o_transient.inst()
-      print o_selection.inst()
+#      print o_transient.inst()
+#      print o_selection.inst()
       
       # find the instances in the optical_components database; use the x,y coordinates for identification
       x1 = o_transient.inst().trans.disp.x 
