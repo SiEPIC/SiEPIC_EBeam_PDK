@@ -585,6 +585,14 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     r = int(round(self.r/dbu))
     g = int(round(self.g/dbu))
 
+ #   pcell = ly.create_cell("DirectionalCoupler_HalfRing_Straight", "SiEPIC", { "r": self.r, "w": self.w, "g": self.g, "silayer": LayerSi, "bustype": 0 } )
+ #   print ("Cell: pcell: #%s" % pcell.cell_index())
+ #   t = pya.Trans(pya.Trans.R0, 0, 0) 
+ #   instance = self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+ #   t = pya.Trans(pya.Trans.R180, 0, 2*r+2*g+2*w) 
+ #   instance = self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+
+
     # Create the two waveguides
     wg1 = pya.Box(0, -w/2, w+2*r, w/2)
     self.cell.shapes(LayerSiN).insert(wg1)
