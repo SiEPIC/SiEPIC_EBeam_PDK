@@ -1,6 +1,6 @@
 # SiEPIC_EBeam_PDK
 
-- <a href="www.siepic.ubc.ca">SiEPIC</a> EBeam PDK, Library - for silicon photonics layout, design and verification
+- <a href="www.siepic.ubc.ca">SiEPIC</a> EBeam PDK, Library - for silicon photonics layout, design, verification and circuit simulation
 - by Lukas Chrostowski, (c) 2015-2016
 - Package for KLayout, klayout.de (developed on KLayout version 0.24.3, OSX)
 - Instruction on design, layout, fabrication, test, data analysis for silicon photonics provided in the edX course: <a href="http://edx.org/course/silicon-photonics-design-fabrication-ubcx-phot1x">Silicon Photonics Design, Fabrication and Data Analysis</a> and textbook <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">Silicon Photonics Design: From Devices to Systems</a> by Lukas Chrostowski and Michael Hochberg.
@@ -10,6 +10,7 @@
 ##Objectives:
  - Use an open-source layout tool (KLayout) to implement a sophisticated layout design environment for silicon photonics
  - Support for both GUI and script-based layout, or combinations of both.
+ - KLayout-INTERCONNECT integration offers a layout-first design methodology. Inspired by Layout Versus Schematic tools, this PDK includes netlist extraction routines to generate a schematic from the layout. This allows the user to directly simulate from the layout, without needing to create the schematic first. This approach is possibly more appealing to photonics designers who are accustomed to designing physical layouts, rather than schematics. A library of components (layout and compact models) is included in the Process Design Kit, specifically for silicon photonics fabrication via Electron Beam Lithography.
  - Whereas a typical schematic-driven design flow includes a schematic, circuit simulation, layout, and verification (see Chapter 10 of the <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">textbook</a>), the approach taken here is <b>Layout-driven</b>, followed by verification, then a schematic (via a netlist extraction) and simulations.
 
 [![Demo video](http://img.youtube.com/vi/FRmkGjVUIH4/0.jpg)](http://www.youtube.com/watch?v=FRmkGjVUIH4)
@@ -31,10 +32,12 @@
  - Creating a Spice netlist suitable for for circuit simulations. This includes extracting the waveguide length (wg_length) for all waveguides.
  - Menu item "Lumerical INTERCONNECT" will automatically: generate the netlist, launch Lumerical INTERCONNECT to perform the circuit simulations, and pop-up a plot of the transmission spectrum.
 - Waveguide functionality: 
- - Menu item "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
- - Menu item "Shift-W": selected waveguides are converted back to paths.
+ - Hot Key "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
+ - Hot Key "Shift-W": selected waveguides are converted back to paths.
+- Layout object snapping
+ - Hot Key "Shift-O": Snaps the selected object to the one where the mouse is hovering over.
 - EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
-- Monte Carlo simulations of waveguides.
+- Monte Carlo simulations of waveguides, ring resonators built using directional couplers, y-branches.
 
 
 ##Download and Installation instructions:
