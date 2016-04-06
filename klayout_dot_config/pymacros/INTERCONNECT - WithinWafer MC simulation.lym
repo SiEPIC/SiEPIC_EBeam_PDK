@@ -205,22 +205,25 @@ def mc_dtd(topcell, layout, dbu, datadict):
   text_lsf += 'message("Not enough die for simulation"); \n'
   text_lsf += '} \n'
   
-  ######################## add Within die variation (high frequency) ################
-  text_lsf += 'die_cl = %s;  \n' % datadict["within_die_correlation"] # [m], GUI INPUT: within die correlation length
-  text_lsf += 'die_clx = die_cl;  \n'  
-  text_lsf += 'die_cly = die_cl; \n'   
-  text_lsf += 'die_RMS_w = %s;     \n' % datadict["within_die_width"]  # [nm], GUI INPUT: within die Sigma RMS for width
-  text_lsf += 'die_RMS_t = %s;   \n'  % datadict["within_die_thickness"]   # [nm], GUI INPUT: within die Sigma RMS for thickness
-  text_lsf += 'die_Z_thickness = die_RMS_t*randnmatrix(MC_resolution_x,MC_resolution_y);  \n'
-  text_lsf += 'die_F_thickness = exp(-(abs(die_xx)/(die_clx/2)+abs(die_yy)/(die_cly/2))); \n' # exponential filter
-  text_lsf += 'die_uniformity_thickness = real( 2*die_span_x/N/sqrt(die_clx*die_cly)*invfft(fft(die_Z_thickness,1,0)*fft(die_F_thickness,1,0), 1, 0)  );  \n' # wafer created using exponential filter
-  text_lsf += 'die_Z_width = die_RMS_w*randnmatrix(MC_resolution_x,MC_resolution_y);  \n'
-  text_lsf += 'die_F_width = die_F_thickness; \n' # exponential filter
-  text_lsf += 'die_uniformity_width = real( 2*die_span_x/N/sqrt(die_clx*die_cly)*invfft(fft(die_Z_width,1,0)*fft(die_F_width,1,0), 1, 0)  );  \n' # wafer created using exponential filter
-  # Within wafer variation (low frequency) + within die variation (high frequency)
-  text_lsf += 'MC_uniformity_thickness = MC_uniformity_thickness + die_uniformity_thickness;  \n'
-  text_lsf += 'MC_uniformity_width = MC_uniformity_width + die_uniformity_width;  \n'
-  
+  if(datadict['within_die_width']=='' and datadict['within_die_thickness']=='' and datadict['within_die_correlation']==''):
+    None
+  else:
+    ######################## add Within die variation (high frequency) ################
+    text_lsf += 'die_cl = %s;  \n' % datadict["within_die_correlation"] # [m], GUI INPUT: within die correlation length
+    text_lsf += 'die_clx = die_cl;  \n'  
+    text_lsf += 'die_cly = die_cl; \n'   
+    text_lsf += 'die_RMS_w = %s;     \n' % datadict["within_die_width"]  # [nm], GUI INPUT: within die Sigma RMS for width
+    text_lsf += 'die_RMS_t = %s;   \n'  % datadict["within_die_thickness"]   # [nm], GUI INPUT: within die Sigma RMS for thickness
+    text_lsf += 'die_Z_thickness = die_RMS_t*randnmatrix(MC_resolution_x,MC_resolution_y);  \n'
+    text_lsf += 'die_F_thickness = exp(-(abs(die_xx)/(die_clx/2)+abs(die_yy)/(die_cly/2))); \n' # exponential filter
+    text_lsf += 'die_uniformity_thickness = real( 2*die_span_x/N/sqrt(die_clx*die_cly)*invfft(fft(die_Z_thickness,1,0)*fft(die_F_thickness,1,0), 1, 0)  );  \n' # wafer created using exponential filter
+    text_lsf += 'die_Z_width = die_RMS_w*randnmatrix(MC_resolution_x,MC_resolution_y);  \n'
+    text_lsf += 'die_F_width = die_F_thickness; \n' # exponential filter
+    text_lsf += 'die_uniformity_width = real( 2*die_span_x/N/sqrt(die_clx*die_cly)*invfft(fft(die_Z_width,1,0)*fft(die_F_width,1,0), 1, 0)  );  \n' # wafer created using exponential filter
+    # Within wafer variation (low frequency) + within die variation (high frequency)
+    text_lsf += 'MC_uniformity_thickness = MC_uniformity_thickness + die_uniformity_thickness;  \n'
+    text_lsf += 'MC_uniformity_width = MC_uniformity_width + die_uniformity_width;  \n'
+    
   
   #pass die to object
   text_lsf += 'select("::Root Element::%s");  \n' % topcell.name

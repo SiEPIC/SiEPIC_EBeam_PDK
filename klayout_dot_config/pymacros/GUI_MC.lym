@@ -22,6 +22,11 @@ This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simu
 
 Version history:
 
+
+Jaspreet Jhoja 2016/03/19 
+ - Added param varitions for Within Wafer.
+ - 
+ 
 Jaspreet Jhoja 2016/03/18
  - Integrated with MC scripts
  - Provides a choice for the type of MC simulation: - mc_dtd and mc_wtw
@@ -99,7 +104,7 @@ elif sys.platform.startswith('win'):
 #titlefont = QFont("Arial", 9, QFont.Bold, False)
 hbox = QVBoxLayout(wdg)
 
-wdg.setFixedSize(650, 450)
+wdg.setFixedSize(650, 480)
 
 def action(obj):
   try:
@@ -159,13 +164,31 @@ tfform.addWidget(tflabel1, 3,1)
 tfform.addWidget(tftext1, 3,2,1,10)
 topframe.setLayout(tfform)
 
-
+def selection(self):
+  dry248=[5.0,2.0]
+  dry193=[2.59,2.0]
+  immersion193=[2.53,0.44]
+  if(parameters.currentIndex==0):
+    lf1text1.setText(str(dry248[0]))
+    lf1text2.setText(str(dry248[1]))
+  elif(parameters.currentIndex==1):
+    lf1text1.setText(str(dry193[0]))
+    lf1text2.setText(str(dry193[1]))
+  elif(parameters.currentIndex==2):
+    lf1text1.setText(str(immersion193[0]))
+    lf1text2.setText(str(immersion193[1]))
+    
 #Left Frame top section
 lframe1 = QFrame()
 lframe1.setFrameShape(QFrame.StyledPanel)
 lframe1.setStyleSheet("background-color: mintcream;")
-lf1title = QLabel('Within Wafer variations')
+lf1title = QLabel('Within Wafer thickness variations')
 lf1title.setFont(titlefont)
+parameters = QComboBox()
+parameters.addItems(['248 dry litho', '193 dry litho', '193 immersion litho'])
+parameters.currentIndexChanged(selection)
+parameters.setFixedWidth(150)
+parameters.setStyleSheet("background-color: white;") 
 lf1label1 = QLabel('Sigma RMS for width (nm): ')
 lf1label2 = QLabel('Sigma RMS for thickness (nm): ')
 lf1label3 = QLabel('Correlation length (m): ')
@@ -182,7 +205,8 @@ lf1text3.setAccessibleName('lf1text3')
 lf1text3.setAccessibleDescription('within_wafer_correlation')
 lf1text3.textChanged(errorcheck)
 lf1form = QGridLayout()
-lf1form.addWidget(lf1title,0,0,2,0)
+lf1form.addWidget(lf1title,0,0,1,2)
+lf1form.addWidget(parameters,1,0)
 lf1form.addWidget(lf1label1, 2,0)
 lf1form.addWidget(lf1text1, 2,1)
 lf1form.addWidget(lf1label2, 3,0)
@@ -193,11 +217,31 @@ lf1form.addWidget(lf1text3, 4,1)
 lframe1.setLayout(lf1form)
 
 #Left Frame bottom section
+def checkboxstatecheck(self):
+  if(lf2check.isChecked()==False):
+    lf2text1.setEnabled(False)
+    lf2text2.setEnabled(False)
+    lf2text3.setEnabled(False)
+    lf2text1.setStyleSheet("border: 2px solid green; background-color: white;")
+    lf2text2.setStyleSheet("border: 2px solid green; background-color: white;")
+    lf2text3.setStyleSheet("border: 2px solid green; background-color: white;") 
+  else:
+    lf2text1.setEnabled(True)
+    lf2text2.setEnabled(True)
+    lf2text3.setEnabled(True)  
+    action(lf2text1)
+    action(lf2text2)
+    action(lf2text3)
+
 lframe2 = QFrame()
 lframe2.setFrameShape(QFrame.StyledPanel)
 lframe2.setStyleSheet("background-color: mintcream;")
-lf2title = QLabel('Within Die variations')
-lf2title.setFont(titlefont)
+#lf2title = QLabel('Within Die variations')
+#lf2title.setFont(titlefont)
+lf2check = QCheckBox('Within Die variations')
+lf2check.setFont(titlefont)
+lf2check.setChecked(True)
+lf2check.stateChanged(checkboxstatecheck)
 lf2label1 = QLabel('Sigma RMS for width (nm): ')
 lf2label2 = QLabel('Sigma RMS for thickness (nm): ')
 lf2label3 = QLabel('Correlation length (m): ')
@@ -214,7 +258,8 @@ lf2text3.setAccessibleName('lf2text3')
 lf2text3.setAccessibleDescription('within_die_correlation')
 lf2text3.textChanged(errorcheck)
 lf2form = QGridLayout()
-lf2form.addWidget(lf2title,0,0,2,0)
+lf2form.addWidget(lf2check, 0,0,1,0)
+#lf2form.addWidget(lf2title,0,1,1,3)
 lf2form.addWidget(lf2label1, 2,0)
 lf2form.addWidget(lf2text1, 2,1)
 lf2form.addWidget(lf2label2, 3,0)
@@ -304,23 +349,37 @@ def button(self):
   for each in objlist:
     datalist.append(each.text)
     datadict[each.accessibleDescription] = each.text
-  if("" in datalist):
+  
+  #check if all required inputs are present
+  if("" in datalist and lf2check.isChecked()==True):
     raise Exception("There are incomplete required fields. Please complete them.")
-  else:
-    global topcell, layout, dbu
-    topcell= None
-    topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
-    if topcell == None:
-      raise Exception("No cell")
-    layout = topcell.layout()
-    dbu = layout.dbu
-    print(datadict)
-    if(option1.isChecked()== True):
-      print("Starting Wafer to Wafer MC Simulation")
-      mc_wtw(topcell, layout, dbu, datadict)
-    elif(option2.isChecked()==True):
-      print("Starting Within Wafer MC Simulation")
-      mc_dtd(topcell, layout, dbu, datadict)
+  
+  elif("" in datalist and lf2check.isChecked()==False):
+    if(tftext1.text=="" or lf1text1.text=="" or lf1text2.text=="" or lf1text3.text==""
+      or rf1text1.text=="" or rf1text2.text=="" or rf2text1.text==""
+      or rf2text2.text=="" or rf3text1.text=="" or rf3text2.text==""):
+        raise Exception("There are incomplete required fields. Please complete them.")
+
+  #change values accordingly
+  if(lf2check.isChecked()==False):
+    datadict['within_die_width'] = ''
+    datadict['within_die_thickness'] = ''
+    datadict['within_die_correlation'] = ''
+
+  global topcell, layout, dbu
+  topcell= None
+  topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+  if topcell == None:
+    raise Exception("No cell")
+  layout = topcell.layout()
+  dbu = layout.dbu
+  print(datadict)
+  if(option1.isChecked()== True):
+    print("Starting Wafer to Wafer MC Simulation")
+    mc_wtw(topcell, layout, dbu, datadict)
+  elif(option2.isChecked()==True):
+    print("Starting Within Wafer MC Simulation")
+    mc_dtd(topcell, layout, dbu, datadict)
   
   #gui_dtd(topcell, layout, dbu, LayerSiN, LayerTextN, LayerPinRecN, LayerDevRecN, LayerFbrTgtN, LayerErrorN, LayerINTERCONNECTN)
   
@@ -332,7 +391,7 @@ leftsplitter = QSplitter(Qt.Vertical)
 leftsplitter.addWidget(lframe1)
 leftsplitter.addWidget(lframe2)
 leftsplitter.addWidget(ok)
-leftsplitter.setSizes([400,400,10])
+leftsplitter.setSizes([500,400,10])
 
 #Right Vertical Splitter
 rightsplitter = QSplitter(Qt.Vertical)
