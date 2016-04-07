@@ -19,15 +19,19 @@
 
 
 Video of a layout and simulation of a ring resonator circuit:
+
 [![Layout and simulation of a ring resonator circuit](http://img.youtube.com/vi/1E47VP6Fod0/0.jpg)](https://www.youtube.com/watch?v=1E47VP6Fod0)
 
 Monte Carlo simulations of a ring resonator circuit, showing fabrication variations:
+
 [![Monte Carlo simulations of a ring resonator circuit](http://img.youtube.com/vi/gUiBsVRlzPE/0.jpg)](https://www.youtube.com/watch?v=gUiBsVRlzPE)
 
 Layout of a Mach-Zehnder Interferometer:
+
 [![Layout of a Mach-Zehnder Interferometer](http://img.youtube.com/vi/FRmkGjVUIH4/0.jpg)](http://www.youtube.com/watch?v=FRmkGjVUIH4)
 
 Simulations for the MZI:
+
 [![Lumerical INTERCONNECT simulations](http://img.youtube.com/vi/1bVO4bpiO58/0.jpg)](http://www.youtube.com/watch?v=1bVO4bpiO58)
 
 
