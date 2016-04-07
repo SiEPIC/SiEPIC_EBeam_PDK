@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "index_table">
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="deltaw" type="double">0.2e-7</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=210 deltaw=20.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="deltaw" type="double">-0.2e-7</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=210 deltaw=-20.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="deltaw" type="double">0e-07</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=210 deltaw=0.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="deltaw" type="double">0.2e-7</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=220 deltaw=20.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="deltaw" type="double">-0.2e-7</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=220 deltaw=-20.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="deltaw" type="double">0e-07</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=220 deltaw=0.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="deltaw" type="double">0.2e-7</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=230 deltaw=20.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="deltaw" type="double">-0.2e-7</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=230 deltaw=-20.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="deltaw" type="double">0e-07</value>
+    </design>
+    <extracted>
+        <value name="gc_sparam" type="string">GC_TM1550_thickness=230 deltaw=0.txt</value>
+    </extracted>
+</association>
+</lumerical_lookup_table>

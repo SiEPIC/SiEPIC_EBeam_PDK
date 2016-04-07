@@ -255,6 +255,9 @@ for o in object_selection:
             print("updated path (adjusted beginning point): %s" % path_obj )
           optical_pins_sorted1[0] # pin that is closest to the end of path
           if optical_pins_sorted1[0].dist[1] &lt; waveguide_snap_dist and go_wg_end:
+            # add check for angle of pins.
+            # xxxxx
+            
             # Update the path end endpoint to match pin
             points = path_to_points(path_obj)
             # Is this a horizontal or vertical segment; move the whole segment
