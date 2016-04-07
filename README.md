@@ -17,15 +17,18 @@
  - Whereas a typical schematic-driven design flow includes a schematic, circuit simulation, layout, and verification (see Chapter 10 of the <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">textbook</a>), the approach taken here is <b>Layout-driven</b>, followed by verification, then a schematic (via a netlist extraction) and simulations.
  - Read more details in our two SPIE papers: <a href="http://mina.ubc.ca/ref_design-and-simulation-sili">Design and simulation of silicon photonic schematics and layouts</a> and <a href="http://mina.ubc.ca/ref_schematic-driven-silicon-p">Schematic Driven Silicon Photonics Design</a>.
 
-[![Demo video](http://img.youtube.com/vi/FRmkGjVUIH4/0.jpg)](http://www.youtube.com/watch?v=FRmkGjVUIH4)
-
-[![Lumerical INTERCONNECT simulations](http://img.youtube.com/vi/1bVO4bpiO58/0.jpg)](http://www.youtube.com/watch?v=1bVO4bpiO58)
 
 Video of a layout and simulation of a ring resonator circuit:
 [![Layout and simulation of a ring resonator circuit](http://img.youtube.com/vi/1E47VP6Fod0/0.jpg)](https://www.youtube.com/watch?v=1E47VP6Fod0)
 
 Monte Carlo simulations of a ring resonator circuit, showing fabrication variations:
 [![Monte Carlo simulations of a ring resonator circuit](http://img.youtube.com/vi/gUiBsVRlzPE/0.jpg)](https://www.youtube.com/watch?v=gUiBsVRlzPE)
+
+Layout of a Mach-Zehnder Interferometer:
+[![Layout of a Mach-Zehnder Interferometer](http://img.youtube.com/vi/FRmkGjVUIH4/0.jpg)](http://www.youtube.com/watch?v=FRmkGjVUIH4)
+
+Simulations for the MZI:
+[![Lumerical INTERCONNECT simulations](http://img.youtube.com/vi/1bVO4bpiO58/0.jpg)](http://www.youtube.com/watch?v=1bVO4bpiO58)
 
 
 
