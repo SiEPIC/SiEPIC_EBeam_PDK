@@ -213,13 +213,27 @@ for o in object_selection:
         # For both the beginning and end of the path:
         for pin in optical_pins:
           pin.dist = []
-        for path_endpoint in [ points[0], points[len(points)-1] ]:
-          # Calculate the distnace between every pin and each path endpoint
+        for wg_beginning_end in [ 0, 1 ]:
+          # check both the beginning and end of the waveguide.
+          if wg_beginning_end == 0:
+            path_endpoint = points[0]
+            path_endpointb = points[1]
+          else:
+            path_endpoint = points[len(points)-1]
+            path_endpointb = points[len(points)-2]
+          # Calculate the distance between every pin and each path endpoint
           for pin in optical_pins:
-            # this updates "optical_pins" via the "pin" pointer  
-            # print( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )
-            pin.dist.append ( distance_xy ( path_endpoint, [pin.x, pin.y] ) ) 
-          # Find the closest pin for each path endpoint
+            # check if pin / path segment are in the same orientation
+            angle_pin_path = angle_segments(pin.points,[path_endpoint, path_endpointb])
+            if angle_pin_path == 0 or abs(angle_pin_path) == 180:
+              # this updates "optical_pins" via the "pin" pointer  
+              # print( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )
+              pin.dist.append ( distance_xy ( path_endpoint, [pin.x, pin.y] ) ) 
+            else:
+              # if this pin isn't in the correct direction, mark it as infinitely far away.
+              pin.dist.append ( 1e9 ) 
+
+        # Find the closest pin for each path endpoint
         # optical_pins_sorted0[0].dist[0] is the pin distance data sorted in relation to the waveguide beginning:
         optical_pins_sorted0 = sorted(optical_pins, key=lambda  optical_pins0: optical_pins0.dist[0])
         # optical_pins_sorted1[0].dist[1] is the pin distance data sorted in relation to the waveguide end:
