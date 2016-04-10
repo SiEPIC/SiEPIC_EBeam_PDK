@@ -51,6 +51,10 @@ Lukas Chrostowski           2015/12/04
 Lukas Chrostowski           2015/12/9
  - .index() is a list method; replaced Optical_*.idx with .idx
  - Convert all Si paths to waveguides if nothing is selected.
+
+Lukas Chrostowski           2016/05/10
+ - Snap waveguide only to pins with the same orientation; fixes.
+
  
 """
 
@@ -224,7 +228,10 @@ for o in object_selection:
           # Calculate the distance between every pin and each path endpoint
           for pin in optical_pins:
             # check if pin / path segment are in the same orientation
-            angle_pin_path = angle_segments(pin.points,[path_endpoint, path_endpointb])
+            if pin.pin_type==1: # only snap to component pins.
+              angle_pin_path = angle_segments(pin.points,[path_endpoint, path_endpointb])
+            else:
+              angle_pin_path = -1
             if angle_pin_path == 0 or abs(angle_pin_path) == 180:
               # this updates "optical_pins" via the "pin" pointer  
               # print( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>Waveguide length resize</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,9 +9,9 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut>Ctrl+Shift+R</shortcut>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.waveguides_submenu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>"""
@@ -88,7 +88,7 @@ optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
 
 
 if lv.has_transient_object_selection() == False:
-  v = pya.MessageBox.warning("No transient selection", "Hover the mouse (transient selection) over the object to which you wish to snap to.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
+  v = pya.MessageBox.warning("No transient selection", "Hover the mouse (transient selection) over the waveguide you wish to adjust.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
 else:
   # find the transient selection:
   print("found selection")
