@@ -22,24 +22,10 @@ This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simu
 
 Version history:
 
-
-Jaspreet Jhoja 2016/03/19 
- - Added param varitions for Within Wafer.
- - 
- 
-Jaspreet Jhoja 2016/03/18
- - Integrated with MC scripts
- - Provides a choice for the type of MC simulation: - mc_dtd and mc_wtw
- - edit_completed data validation for fields with nm units
- - instant input validation for other fields
-
-Jaspreet Jhoja 2016/03/13 
- - Verifies the field input and highlight the unacceptable input.
- - Does not require tk8.6 and tcl8.6
-
-Jaspreet Jhoja 2016/03/11 
- - Empty GUI with no functionality.
- - Requires tk8.6 and tcl 8.6 to work
+Jaspreet Jhoja 2016/04/10 
+ - Resizes Waveguides with transient selection
+ - Users are required to press Ctrl + Shift + R
+ - Users may experience bugs.
  
  """
  
