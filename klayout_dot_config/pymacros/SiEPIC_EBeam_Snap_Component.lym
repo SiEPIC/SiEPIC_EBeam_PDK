@@ -37,6 +37,7 @@ Lukas Chrostowski           2016/03/08
 """
 
 # Configure variables to draw structures in the presently selected cell:
+mw = pya.Application.instance().main_window()
 lv = pya.Application.instance().main_window().current_view()
 if lv == None:
   raise Exception("No view selected")
@@ -45,6 +46,7 @@ ly = pya.Application.instance().main_window().current_view().active_cellview().l
 if ly == None:
   raise Exception("No layout")
 # find the currently selected cell:
+cv = pya.Application.instance().main_window().current_view().active_cellview()
 topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
 if topcell == None:
   raise Exception("No cell")
@@ -68,6 +70,7 @@ layout_errors = []
 
 # Record a transaction, to enable "undo"
 lv.transaction("Object snapping")
+proceed = True
 
 # extract the circuit netlist from the physical layout:
 optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
@@ -78,66 +81,74 @@ if lv.has_transient_object_selection() == False:
 else:
   # find the transient selection:
   o_transient_iter = lv.each_object_selected_transient()
-  o_transient = next(o_transient_iter);  # returns ObjectInstPath[].
-  
+  o_transient = next(o_transient_iter)  # returns ObjectInstPath[].
+
   # Find the selected objects
   o_selection = lv.object_selection   # returns ObjectInstPath[].
   if len(o_selection) &lt; 1:
     v = pya.MessageBox.warning("No selection", "Select the object you wish to be moved.", pya.MessageBox.Ok)
   else:
     o_selection = o_selection[0]
-    if o_transient == o_selection:
-      v = pya.MessageBox.warning("Same selection", "We need two different objects: one selected, and one transient (hover mouse over).", pya.MessageBox.Ok)
-    else:
+
+    if o_selection.inst().is_regular_array() | o_transient.inst().is_regular_array():
+      v = pya.MessageBox.warning("Array", "Selection was an array. \nThe array was 'exploded' (Edit | Selection | Resolve Array). \nPlease select the objects and try again.", pya.MessageBox.Ok)
+      o_transient.inst().explode()
+      o_selection.inst().explode()
+      proceed = False
+
+    if proceed:
+      if o_transient == o_selection:
+        v = pya.MessageBox.warning("Same selection", "We need two different objects: one selected, and one transient (hover mouse over).", pya.MessageBox.Ok)
+      else:
     
       # we have two instances:
 #      print o_transient.inst()
 #      print o_selection.inst()
       
-      # find the instances in the optical_components database; use the x,y coordinates for identification
-      x1 = o_transient.inst().trans.disp.x 
-      y1 = o_transient.inst().trans.disp.y
-      x2 = o_selection.inst().trans.disp.x
-      y2 = o_selection.inst().trans.disp.y
+        # find the instances in the optical_components database; use the x,y coordinates for identification
+        x1 = o_transient.inst().trans.disp.x 
+        y1 = o_transient.inst().trans.disp.y
+        x2 = o_selection.inst().trans.disp.x
+        y2 = o_selection.inst().trans.disp.y
 
-      idx1 = -1
-      idx2 = -1
-      for o in optical_components:
-        if int(o.x / dbu) == x1 and int(o.y / dbu) == y1:
-          idx1 = o.idx
-        if int(o.x / dbu) == x2 and int(o.y / dbu) == y2:
-          idx2 = o.idx
-      if idx1 &lt; 0 or idx2 &lt; 0:
-        v = pya.MessageBox.warning("Optical components not found", "Optical components not found.", pya.MessageBox.Ok)
-      else:
-        # we have two optical components.  Proceed with alignment
-        
-        # find the closest pins between the two objects; calculate the move/transform required
-        dist = 1e100
-        for p1 in optical_components[idx1].pins:
-          for p2 in optical_components[idx2].pins:
-            # check if both pins are type "1 = component"
-            if optical_pins[p1].pin_type == 1 and  optical_pins[p2].pin_type == 1:
-              # check if pins are in the same orientation
-              angle_p1_p2 = angle_segments(optical_pins[p1].points,optical_pins[p2].points)
-  #            print check_segments_same_direction( optical_pins[p1].points, optical_pins[p2].points )
-              if angle_p1_p2 == 0 or abs(angle_p1_p2) == 180:
-                # find the closest ones
-                dx = optical_pins[p1].x - optical_pins[p2].x
-                dy = optical_pins[p1].y - optical_pins[p2].y
-                dist_comp = dx*dx + dy*dy
-                if dist &gt; dist_comp:
-                  # save this dx/dy as the shortest distance transformation
-                  dist = dist_comp
-                  dx12 = dx
-                  dy12 = dy        
-#        print o_selection.inst().trans.disp.x
-        if dist &lt; 1e100:
-          # Move the selected object
-          trans = pya.Trans(dx12,dy12)
-          o_selection.inst().transform(trans)
+        idx1 = -1
+        idx2 = -1
+        for o in optical_components:
+          if int(o.x / dbu) == x1 and int(o.y / dbu) == y1:
+            idx1 = o.idx
+          if int(o.x / dbu) == x2 and int(o.y / dbu) == y2:
+            idx2 = o.idx
+        if idx1 &lt; 0 or idx2 &lt; 0:
+          v = pya.MessageBox.warning("Optical components not found", "Optical components not found.", pya.MessageBox.Ok)
         else:
-          v = pya.MessageBox.warning("Snapping failed", "Snapping failed.  No matching pins found.", pya.MessageBox.Ok)
+          # we have two optical components.  Proceed with alignment
+        
+          # find the closest pins between the two objects; calculate the move/transform required
+          dist = 1e100
+          for p1 in optical_components[idx1].pins:
+            for p2 in optical_components[idx2].pins:
+              # check if both pins are type "1 = component"
+              if optical_pins[p1].pin_type == 1 and  optical_pins[p2].pin_type == 1:
+                # check if pins are in the same orientation
+                angle_p1_p2 = angle_segments(optical_pins[p1].points,optical_pins[p2].points)
+  #              print check_segments_same_direction( optical_pins[p1].points, optical_pins[p2].points )
+                if angle_p1_p2 == 0 or abs(angle_p1_p2) == 180:
+                  # find the closest ones
+                  dx = optical_pins[p1].x - optical_pins[p2].x
+                  dy = optical_pins[p1].y - optical_pins[p2].y
+                  dist_comp = dx*dx + dy*dy
+                  if dist &gt; dist_comp:
+                    # save this dx/dy as the shortest distance transformation
+                    dist = dist_comp
+                    dx12 = dx
+                    dy12 = dy        
+#          print o_selection.inst().trans.disp.x
+          if dist &lt; 1e100:
+            # Move the selected object
+            trans = pya.Trans(dx12,dy12)
+            o_selection.inst().transform(trans)
+          else:
+            v = pya.MessageBox.warning("Snapping failed", "Snapping failed.  No matching pins found.", pya.MessageBox.Ok)
 
 # Record a transaction, to enable "undo"
 lv.commit()
