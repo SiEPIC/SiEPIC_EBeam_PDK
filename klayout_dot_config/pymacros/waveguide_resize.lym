@@ -86,17 +86,18 @@ lv.transaction("Object resizing")
 # extract the circuit netlist from the physical layout:
 optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
 
-
-if lv.has_transient_object_selection() == False:
-  v = pya.MessageBox.warning("No transient selection", "Hover the mouse (transient selection) over the waveguide you wish to adjust.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
+# Find the selected objects
+o_selection = lv.object_selection   # returns ObjectInstPath[].
+if len(o_selection) &lt;&gt; 1:
+  v = pya.MessageBox.warning("No selection", "Select the waveguide (only one waveguide) you wish to adjust.", pya.MessageBox.Ok)
 else:
-  # find the transient selection:
-  print("found selection")
-  o_transient_iter = lv.each_object_selected_transient()
-  o_transient = next(o_transient_iter)  # returns ObjectInstPath[].
+  o_selection = o_selection[0]
+
+#  o_transient_iter = lv.each_object_selected_transient()
+#  o_transient = next(o_transient_iter)  # returns ObjectInstPath[].
   escape = 0
-  shape = o_transient.shape
-  cell = o_transient.shape.cell
+  shape = o_selection.shape
+  cell = o_selection.shape.cell
   #object_selection = []
   #for inst in topcell.each_inst():
   #  print("Cell: %s" % (inst.cell.basic_name() ) )
@@ -119,8 +120,8 @@ else:
   
   points = path_to_points(shape.path)
   segments = []
-  for i in range(len(points)):
-    if(i&gt;0):
+  for i in range(len(points)-1):
+    if(i&gt;1):
       pair = [points[i-1],points[i]]
       segments.append(pair)
   
@@ -228,9 +229,12 @@ else:
   #lf1text3.setAccessibleDescription('within_wafer_correlation')
   
   def button(self):
+    wdg.close()  # don't want to change the layout while the GUI is open; leads to view problems.
+
     global points, copy_pts, diff
-    copy_pts = copy.deepcopy(points)
+
     index = parameters.currentIndex
+    copy_pts = copy.deepcopy(points)
     p1 = copy_pts[copy_pts.index(segments[index][0])]
     p2 = copy_pts[copy_pts.index(segments[index][1])]
     diff = float(lf1text3.text) - shape.path_length()*dbu
@@ -248,10 +252,15 @@ else:
     path_obj = cell.pcell_parameters_by_name()['path']
     wg_width = path_obj.width
     radius =  cell.pcell_parameters()[1]
+   
     layout_waveguide_abs(topcell, LayerSi, points_mult(copy_pts,dbu), wg_width, radius)
     cell.delete()
-    wdg.destroy()
-    
+
+    # Record a transaction, to enable "undo"
+    lv.commit()
+
+    wdg.destroy()  # destroy GUI when we are completely done.
+     
   
   ok = QPushButton("OK")
   ok.clicked(button)
