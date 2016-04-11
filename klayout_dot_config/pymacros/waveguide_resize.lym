@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>Waveguide length resize</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,9 +9,9 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut>Ctrl+Shift+R</shortcut>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.waveguides_submenu.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>"""
@@ -78,49 +78,80 @@ optical_pins = []
 optical_nets = []
 layout_errors = []
 
-# Record a transaction, to enable "undo"
-lv.transaction("Object resizing")
-
 
 
 # extract the circuit netlist from the physical layout:
 optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
 
-
-if lv.has_transient_object_selection() == False:
-  v = pya.MessageBox.warning("No transient selection", "Hover the mouse (transient selection) over the object to which you wish to snap to.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
+# Find the selected objects
+o_selection = lv.object_selection   # returns ObjectInstPath[].
+if len(o_selection) &lt;&gt; 1:
+  v = pya.MessageBox.warning("No selection", "Select the waveguide (only one waveguide) you wish to adjust.", pya.MessageBox.Ok)
+  is_waveguide = False
 else:
-  # find the transient selection:
-  print("found selection")
-  o_transient_iter = lv.each_object_selected_transient()
-  o_transient = next(o_transient_iter)  # returns ObjectInstPath[].
+  o = o_selection[0]
+
+  if o.is_cell_inst():
+    print("Selected object is a cell.")
+    oinst = o.inst()
+    if oinst.is_pcell():
+      c = oinst.cell
+      if c.basic_name() in Waveguide_Types and c.pcell_parameters_by_name()['layer'] == LayerSi:
+        print("%s on LayerSi." % c.basic_name() )
+        is_waveguide = True
+        trans = oinst.trans
+
+  elif o.shape:
+    print("Selected object is a shape.")
+    c = o.shape.cell
+    if c.basic_name() in Waveguide_Types and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+      # we have a waveguide GUIDING_LAYER selected
+      print("Selected object is a GUIDING_LAYER in %s on LayerSi." % c.basic_name() )
+      trans = o.source_trans().s_trans()
+      o_instpathlen = o.path_length()
+      oinst = o.path_nth(o_instpathlen-1).inst()
+      is_waveguide = True
+
+# We now have a waveguide ROUND_PATH PCell, with variables: o (ObjectInstPath), oinst (Instance), c (Cell)
+if is_waveguide == True:
+  path_obj = c.pcell_parameters_by_name()['path']
+
+  PCell_get_parameters ( c )
+
+
+#  path_length
+  wg_width = c.pcell_parameters_by_name()['path'].width  # in microns
+  # calculate the length of the waveguide using the area / width
+  iter2 = c.begin_shapes_rec(LayerSiN)
+  if iter2.shape().is_polygon():
+    area = iter2.shape().polygon.area()
+    path_length = area / wg_width * dbu * dbu
+  else:
+    print("## ROUND_PATH waveguide, not polygon; bug in code? ##")
+    path_length =  0  # or path_obj.length()
+
+
+#  o_transient_iter = lv.each_object_selected_transient()
+#  o_transient = next(o_transient_iter)  # returns ObjectInstPath[].
   escape = 0
-  shape = o_transient.shape
-  cell = o_transient.shape.cell
-  #object_selection = []
-  #for inst in topcell.each_inst():
-  #  print("Cell: %s" % (inst.cell.basic_name() ) )
-  #  if inst.cell.basic_name() in Waveguide_Types:
-  #    n = len(object_selection)
-  #    object_selection.append( pya.ObjectInstPath() )
-  #    object_selection[n].top = topcell.cell_index()
-  #    object_selection[n].append_path(pya.InstElement.new(inst))
-  # Select the newly added objects
-  #lv.object_selection = object_selection # returns ObjectInstPath[].
+#  shape = o_selection.shape
+#  cell = o_selection.shape.cell
+  cell = c  
   
-  
-  cell.set_property("Waveguide_Type", "ROUND_PATH")
-  Waveguide_Type = cell.property("Waveguide_Type")
-  # Configure the library to use for the waveguide type.
-  if Waveguide_Type == "ROUND_PATH":
-    Waveguide_Lib = "Basic"
+#  cell.set_property("Waveguide_Type", "ROUND_PATH")
+#  Waveguide_Type = cell.property("Waveguide_Type")
+#  # Configure the library to use for the waveguide type.
+#  if Waveguide_Type == "ROUND_PATH":
+#    Waveguide_Lib = "Basic"
   
   
   
-  points = path_to_points(shape.path)
+#  points = path_to_points(shape.path)
+  points = points_mult(path_to_Dpoints(path_obj), 1/dbu)
+    
   segments = []
-  for i in range(len(points)):
-    if(i&gt;0):
+  for i in range(len(points)-1):
+    if(i&gt;1):
       pair = [points[i-1],points[i]]
       segments.append(pair)
   
@@ -199,7 +230,7 @@ else:
   lframe1 = QFrame()
   lframe1.setFrameShape(QFrame.StyledPanel)
   lframe1.setStyleSheet("background-color: white;")
-  lf1title = QLabel('Current Path Length (microns): %s' % str(shape.path_length()*dbu))
+  lf1title = QLabel('Current Path Length (microns): %s' % str(path_length))
   parameters = QComboBox()
   #add vertices as params
   params = []
@@ -228,12 +259,19 @@ else:
   #lf1text3.setAccessibleDescription('within_wafer_correlation')
   
   def button(self):
+    wdg.close()  # don't want to change the layout while the GUI is open; leads to view problems.
+
     global points, copy_pts, diff
-    copy_pts = copy.deepcopy(points)
+
+    # Record a transaction, to enable "undo"
+    lv.transaction("Object resizing")
+
+
     index = parameters.currentIndex
+    copy_pts = copy.deepcopy(points)
     p1 = copy_pts[copy_pts.index(segments[index][0])]
     p2 = copy_pts[copy_pts.index(segments[index][1])]
-    diff = float(lf1text3.text) - shape.path_length()*dbu
+    diff = float(lf1text3.text) - path_length
     diff = diff/dbu
     prop = seg_propagation[index]
     if(prop == "+x" or prop == "-x"):
@@ -245,13 +283,21 @@ else:
       copy_pts[copy_pts.index(segments[index][0])][1] = copy_pts[copy_pts.index(segments[index][0])][1] + diff/2 
       copy_pts[copy_pts.index(segments[index][1])][1] = copy_pts[copy_pts.index(segments[index][1])][1] + diff/2   
     print("pushed", p1, p2)
-    path_obj = cell.pcell_parameters_by_name()['path']
+#    path_obj = cell.pcell_parameters_by_name()['path']
     wg_width = path_obj.width
     radius =  cell.pcell_parameters()[1]
+   
     layout_waveguide_abs(topcell, LayerSi, points_mult(copy_pts,dbu), wg_width, radius)
     cell.delete()
-    wdg.destroy()
-    
+
+    # Clear the layout view selection, since we deleted some objects
+    lv.clear_object_selection()
+
+    # Record a transaction, to enable "undo"
+    lv.commit()
+
+    wdg.destroy()  # destroy GUI when we are completely done.
+     
   
   ok = QPushButton("OK")
   ok.clicked(button)
