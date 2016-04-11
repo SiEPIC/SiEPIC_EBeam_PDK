@@ -18,9 +18,14 @@
 This file is part of the SiEPIC_EBeam_PDK
 by Jaspreet Jhoja (c) 2016
 
-This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simulations.
+This Python file implements a Graphical User Interface(GUI) for Waveguide Resize.
 
 Version history:
+
+Jaspreet Jhoja 2016/04/11
+ - Adjust diff according to Axis direction Fix
+ 
+ 
 
 Jaspreet Jhoja 2016/04/10 
  - Resizes Waveguides with transient selection
@@ -30,7 +35,7 @@ Jaspreet Jhoja 2016/04/10
  """
  
 from pya import *
-import pya, sys, copy
+import pya, sys, copy, gc
 
 datalist = [] # list to store data from all fields
 datadict ={} #dictionary storing all info
@@ -85,7 +90,7 @@ optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
 
 # Find the selected objects
 o_selection = lv.object_selection   # returns ObjectInstPath[].
-if len(o_selection) &lt;&gt; 1:
+if len(o_selection) &lt; 1:
   v = pya.MessageBox.warning("No selection", "Select the waveguide (only one waveguide) you wish to adjust.", pya.MessageBox.Ok)
   is_waveguide = False
 else:
@@ -100,7 +105,8 @@ else:
         print("%s on LayerSi." % c.basic_name() )
         is_waveguide = True
         trans = oinst.trans
-
+    instance = o.inst()
+    
   elif o.shape:
     print("Selected object is a shape.")
     c = o.shape.cell
@@ -111,12 +117,13 @@ else:
       o_instpathlen = o.path_length()
       oinst = o.path_nth(o_instpathlen-1).inst()
       is_waveguide = True
+      
 
 # We now have a waveguide ROUND_PATH PCell, with variables: o (ObjectInstPath), oinst (Instance), c (Cell)
 if is_waveguide == True:
   path_obj = c.pcell_parameters_by_name()['path']
 
-  PCell_get_parameters ( c )
+  #PCell_get_parameters ( c )
 
 
 #  path_length
@@ -148,12 +155,28 @@ if is_waveguide == True:
   
 #  points = path_to_points(shape.path)
   points = points_mult(path_to_Dpoints(path_obj), 1/dbu)
+  
+  
+  #Fix points so that it works second time after the transformation
+  #need to access instance properties.
+  if o.is_cell_inst():
+    inst_string = str(instance)
+    add_x, add_y = inst_string.split(" ")[-1].split(",")
+    add_x = float(add_x)
+    add_y = float(add_y)
+    for each in points:
+      index = points.index(each)
+      points[index][0] = each[0]+add_x
+      points[index][1] = each[1]+add_y
     
+  
   segments = []
-  for i in range(len(points)-1):
-    if(i&gt;1):
+  for i in range(len(points)):
+    if(i&gt;0):
       pair = [points[i-1],points[i]]
       segments.append(pair)
+  
+
   
   seg_orientation = []
   for each in segments:
@@ -198,6 +221,10 @@ if is_waveguide == True:
     print(prop)
     seg_propagation.append(prop)
         # y have same values along x axis
+  segments.pop(0)
+  segments.pop(-1)
+  seg_propagation.pop(0)
+  seg_propagation.pop(-1)
       
   wdg = QWidget()
   #wdg = QDialog(pya.Application.instance().main_window())
@@ -261,7 +288,7 @@ if is_waveguide == True:
   def button(self):
     wdg.close()  # don't want to change the layout while the GUI is open; leads to view problems.
 
-    global points, copy_pts, diff
+    global points, copy_pts, diff, ref_list
 
     # Record a transaction, to enable "undo"
     lv.transaction("Object resizing")
@@ -269,16 +296,23 @@ if is_waveguide == True:
 
     index = parameters.currentIndex
     copy_pts = copy.deepcopy(points)
+    edge = segments[index]
     p1 = copy_pts[copy_pts.index(segments[index][0])]
     p2 = copy_pts[copy_pts.index(segments[index][1])]
     diff = float(lf1text3.text) - path_length
     diff = diff/dbu
     prop = seg_propagation[index]
+    
+    
     if(prop == "+x" or prop == "-x"):
       print("moving x")
+      if(prop == "-x"):
+        diff = -1*diff
       copy_pts[copy_pts.index(segments[index][0])][0] = copy_pts[copy_pts.index(segments[index][0])][0] + diff/2 
       copy_pts[copy_pts.index(segments[index][1])][0] = copy_pts[copy_pts.index(segments[index][1])][0] + diff/2
     elif(prop == "+y" or prop == "-y"):
+      if(prop == "-y"):
+        diff = -1*diff
       print("moving y")
       copy_pts[copy_pts.index(segments[index][0])][1] = copy_pts[copy_pts.index(segments[index][0])][1] + diff/2 
       copy_pts[copy_pts.index(segments[index][1])][1] = copy_pts[copy_pts.index(segments[index][1])][1] + diff/2   
@@ -286,7 +320,7 @@ if is_waveguide == True:
 #    path_obj = cell.pcell_parameters_by_name()['path']
     wg_width = path_obj.width
     radius =  cell.pcell_parameters()[1]
-   
+    #cell.prune_cell()
     layout_waveguide_abs(topcell, LayerSi, points_mult(copy_pts,dbu), wg_width, radius)
     cell.delete()
 
