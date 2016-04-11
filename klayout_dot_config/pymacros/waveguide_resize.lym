@@ -185,6 +185,8 @@ if is_waveguide == True:
     elif(each[0][1] == each[1][1]):
       seg_orientation.append("horizontal")
   
+  seg_orientation.pop(0)
+  seg_orientation.pop(-1)
   
   prop_points = points
   seg_propagation = []
