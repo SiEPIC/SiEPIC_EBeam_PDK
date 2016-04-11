@@ -18,7 +18,7 @@
 This file is part of the SiEPIC_EBeam_PDK
 by Jaspreet Jhoja (c) 2016
 
-This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simulations.
+This Python file implements a waveguide resizing tool.
 
 Version history:
 
@@ -26,6 +26,14 @@ Jaspreet Jhoja 2016/04/10
  - Resizes Waveguides with transient selection
  - Users are required to press Ctrl + Shift + R
  - Users may experience bugs.
+
+Lukas Chrostowski 2016/04/10
+ - bug fixes: layout disappears after GUI closes
+ - selection for PCell vs. GUIDING_PATH; both work
+ - correctly measuring the path length including bends
+ - added Undo functionality
+ - removed 1st/last points.
+ - added to SiEPIC menu
  
  """
  
@@ -77,8 +85,6 @@ optical_waveguides = []
 optical_pins = []
 optical_nets = []
 layout_errors = []
-
-
 
 # extract the circuit netlist from the physical layout:
 optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
@@ -144,10 +150,16 @@ if is_waveguide == True:
 #  if Waveguide_Type == "ROUND_PATH":
 #    Waveguide_Lib = "Basic"
   
-  
-  
+
+  # apply the transformation to points.
+
+  wg_path = points_to_path(points_mult(path_to_Dpoints(path_obj), 1/dbu), wg_width)
+  # get waveguide transformation
+  wg_path_trans = wg_path.transformed(trans)
+
+    
 #  points = path_to_points(shape.path)
-  points = points_mult(path_to_Dpoints(path_obj), 1/dbu)
+  points = points_mult(path_to_Dpoints(wg_path_trans), 1)
     
   segments = []
   for i in range(len(points)-1):
@@ -284,7 +296,6 @@ if is_waveguide == True:
       copy_pts[copy_pts.index(segments[index][1])][1] = copy_pts[copy_pts.index(segments[index][1])][1] + diff/2   
     print("pushed", p1, p2)
 #    path_obj = cell.pcell_parameters_by_name()['path']
-    wg_width = path_obj.width
     radius =  cell.pcell_parameters()[1]
    
     layout_waveguide_abs(topcell, LayerSi, points_mult(copy_pts,dbu), wg_width, radius)
