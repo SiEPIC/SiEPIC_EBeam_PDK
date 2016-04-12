@@ -88,6 +88,7 @@ layout_errors = []
 
 # extract the circuit netlist from the physical layout:
 optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
+is_waveguide = False
 
 # Find the selected objects
 o_selection = lv.object_selection   # returns ObjectInstPath[].
@@ -355,5 +356,10 @@ if is_waveguide == True:
   #Changes:
   #
   
-  wdg.show()</text>
+  wdg.show()
+  
+  
+if not(is_waveguide):
+  v = pya.MessageBox.warning("No waveguide selected", "No waveguide selected.\nPlease select a waveguide.", pya.MessageBox.Ok)
+</text>
 </klayout-macro>

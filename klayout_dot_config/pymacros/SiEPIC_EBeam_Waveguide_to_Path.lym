@@ -177,9 +177,5 @@ lv.commit()
 
 if not(is_waveguide):
   v = pya.MessageBox.warning("No waveguide selected", "No waveguide selected.\nPlease select a waveguide. \nIt will get converted to a path.", pya.MessageBox.Ok)
-else:
-  # Update the net list. Used for future waveguide healing operation.
-  optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
-
 </text>
 </klayout-macro>
