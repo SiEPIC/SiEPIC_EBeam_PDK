@@ -11,7 +11,7 @@
  <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.simulation_submenu.end</menu-path>
+ <menu-path>@toolbar.main_item.end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>"""
@@ -22,10 +22,11 @@ This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simu
 
 Version history:
 
+Jaspreet Jhoja 2016/03/19 
+ - Linked to toolbar - INTERCONNECT.
 
 Jaspreet Jhoja 2016/03/19 
  - Added param varitions for Within Wafer.
- - 
  
 Jaspreet Jhoja 2016/03/18
  - Integrated with MC scripts
@@ -79,6 +80,7 @@ LayerDevRecN = None
 LayerFbrTgtN = None
 LayerErrorN = None
 LayerINTERCONNECTN = None
+
 # initialize the arrays to keep track of layout objects
 optical_components = []
 optical_waveguides = []
