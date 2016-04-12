@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>import pya, subprocess,os ,sys, platform, gc
+version = sys.version
+# Enter your Python code here ..
+a = pya.Action()
+full_path = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
+a.title = "Circuit \nSimulation"
+a.icon = full_path+'/INTERCONNECT_icon.png'
+
+def run_a():
+    print("Running Circuit Simulation")
+    interconnect_circuit_simulation()
+
+
+  
+a.on_triggered(run_a)
+
+menu = pya.Application.instance().main_window().menu()
+menu.insert_item("@toolbar.end", "main_item", a)
+menu.action("@toolbar.main_item.macro_in_menu_2").icon = full_path+'/INTERCONNECT_icon.png'
+
+</text>
+</klayout-macro>
