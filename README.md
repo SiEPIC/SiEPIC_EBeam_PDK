@@ -39,24 +39,27 @@ Simulations for the MZI:
 ##Package includes:
 
 - Process Design Kit (PDK): this package, including fabrication documentation, scripts, etc.
-- PCells: ring resonator; PCell test structure layout with grating couplers and instantiating the ring resonator PCell.
-- Script / Macro to create a layout, including waveguide generation functions.
+- EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
+- PCells: directional couplers, ring resonator, taper, Bragg grating
+- Sample scripts to create a layout, including waveguide generation functions: Mach-Zehnder Interferometer test structures; Ring resonator test structure.
 - GDS Library, updated with marker layers for verification/netlist generation.
 - Verification: 
  - Scanning the layout. Finding waveguides, devices, pins.  
  - Verification: Identifying if there are missing connections, mismatched waveguides, too few points in a bend, etc. 
  - Example layouts using the library for verification (EBeam_LukasChrostowski_E_LVS.gds, SiEPIC_EBeam_PDK_Verification_Check.gds).
+ - Verification for automated measurements
 - Circuit simulations:
  - Netlist generation
  - Creating a Spice netlist suitable for for circuit simulations. This includes extracting the waveguide length (wg_length) for all waveguides.
  - Menu item "Lumerical INTERCONNECT" will automatically: generate the netlist, launch Lumerical INTERCONNECT to perform the circuit simulations, and pop-up a plot of the transmission spectrum.
+ - Monte Carlo simulations, including waveguides, ring resonators built using directional couplers, y-branches, grating couplers.
 - Waveguide functionality: 
  - Hot Key "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
  - Hot Key "Shift-W": selected waveguides are converted back to paths.
+ - Hot Key "Ctrl-Shift-W": measure the length of the selected waveguides.
+ - Hot Key "Ctrl-Shift-R": resize the waveguides, for a given target length.
 - Layout object snapping
  - Hot Key "Shift-O": Snaps the selected object to the one where the mouse is hovering over.
-- EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
-- Monte Carlo simulations of waveguides, ring resonators built using directional couplers, y-branches.
 
 
 
