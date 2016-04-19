@@ -22,6 +22,9 @@ This Python file implements a waveguide resizing tool.
 
 Version history:
 
+Jaspreet Jhoja 2016/04/20 
+ - Resize bug on inverted axis fixed
+
 Jaspreet Jhoja 2016/04/10 
  - Resizes Waveguides with transient selection
  - Users are required to press Ctrl + Shift + R
@@ -92,7 +95,7 @@ is_waveguide = False
 
 # Find the selected objects
 o_selection = lv.object_selection   # returns ObjectInstPath[].
-if len(o_selection) &lt;&gt; 1:
+if len(o_selection) != 1: #No need to do greater than or less than statement as it causes syntax error in windows
   v = pya.MessageBox.warning("No selection", "Select the waveguide (only one waveguide) you wish to adjust.", pya.MessageBox.Ok)
   is_waveguide = False
 else:
@@ -123,8 +126,7 @@ else:
 if is_waveguide == True:
   path_obj = c.pcell_parameters_by_name()['path']
 
-  PCell_get_parameters ( c )
-
+  #PCell_get_parameters ( c ) #This line causes syntax error Do not uncomment this line.
 
 #  path_length
   wg_width = c.pcell_parameters_by_name()['path'].width  # in microns
@@ -137,19 +139,8 @@ if is_waveguide == True:
     print("## ROUND_PATH waveguide, not polygon; bug in code? ##")
     path_length =  0  # or path_obj.length()
 
-
-#  o_transient_iter = lv.each_object_selected_transient()
-#  o_transient = next(o_transient_iter)  # returns ObjectInstPath[].
   escape = 0
-#  shape = o_selection.shape
-#  cell = o_selection.shape.cell
   cell = c  
-  
-#  cell.set_property("Waveguide_Type", "ROUND_PATH")
-#  Waveguide_Type = cell.property("Waveguide_Type")
-#  # Configure the library to use for the waveguide type.
-#  if Waveguide_Type == "ROUND_PATH":
-#    Waveguide_Lib = "Basic"
   
 
   # apply the transformation to points.
@@ -158,23 +149,24 @@ if is_waveguide == True:
   # get waveguide transformation
   wg_path_trans = wg_path.transformed(trans)
 
-    
 #  points = path_to_points(shape.path)
   points = points_mult(path_to_Dpoints(wg_path_trans), dbu)
-    
+
+# Separate the segments of the waveguide
   segments = []
   for i in range(len(points)-1):
     if(i&gt;1):
       pair = [points[i-1],points[i]]
       segments.append(pair)
-  
+
+# Check segment orientation
   seg_orientation = []
   for each in segments:
     if(each[0][0] == each[1][0]):
       seg_orientation.append("vertical")
     elif(each[0][1] == each[1][1]):
       seg_orientation.append("horizontal")
-  
+# prop variable which determines the segment propagation 
   
   prop_points = points
   seg_propagation = []
@@ -252,37 +244,24 @@ if is_waveguide == True:
   for each in range(len(segments)):
 #    params.append("segment %s  points:  %s  - %s" %(str(each), str(tuple(segments[each][0])), str(tuple(segments[each][1]))))
     params.append("segment %s, points: (%s, %s) - (%s, %s)" %(str(each), segments[each][0][0], segments[each][0][1], segments[each][1][0], segments[each][1][1]))
-    
-  
-  
+      
   parameters.addItems(params)
   parameters.currentIndexChanged(selection)
   parameters.setFixedWidth(400)
   parameters.setStyleSheet("background-color: white;") 
   lf1label1 = QLabel('Segment length: ')
-  lf1label2 = QLabel('Segment orientation: ')
-  
-  
+  lf1label2 = QLabel('Segment orientation: ') 
   lf1label3 = QLabel('New target waveguide length (microns): ')
-
   lf1title2 = QLabel('Chose the segment you wish to be moved:')
-
-#  lf1text1 = QLineEdit()
-#  lf1text1.setAccessibleName('lf1text1')
-  #lf1text1.setAccessibleDescription('within_wafer_width')
-#  lf1text2 = QLineEdit()
-#  lf1text2.setAccessibleName('lf1text2')
-  #lf1text2.setAccessibleDescription('within_wafer_thickness')
   lf1text3 = QLineEdit()
   lf1text3.setAccessibleName('lf1text3')
-  #lf1text3.setAccessibleDescription('within_wafer_correlation')
 
   
   def button(self):
     wdg.close()  # don't want to change the layout while the GUI is open; leads to view problems.
 
     global points, copy_pts, diff
-
+    #get current index and segment propagation
     # Record a transaction, to enable "undo"
     lv.transaction("Object resizing")
 
@@ -295,10 +274,15 @@ if is_waveguide == True:
 #    diff = diff/dbu
     prop = seg_propagation[index]
     if(prop == "+x" or prop == "-x"):
+      if(prop == "-x"):
+        diff = diff *-1
       print("moving x")
+      #perform the action based on diff value
       copy_pts[copy_pts.index(segments[index][0])][0] = copy_pts[copy_pts.index(segments[index][0])][0] + diff/2 
       copy_pts[copy_pts.index(segments[index][1])][0] = copy_pts[copy_pts.index(segments[index][1])][0] + diff/2
     elif(prop == "+y" or prop == "-y"):
+      if(prop == "-y"):
+        diff = diff * -1
       print("moving y")
       copy_pts[copy_pts.index(segments[index][0])][1] = copy_pts[copy_pts.index(segments[index][0])][1] + diff/2 
       copy_pts[copy_pts.index(segments[index][1])][1] = copy_pts[copy_pts.index(segments[index][1])][1] + diff/2   
@@ -333,36 +317,18 @@ if is_waveguide == True:
 #  lf1form.addWidget(lf1text2, 5,1)
   lf1form.addWidget(ok, 7,1)
   lframe1.setLayout(lf1form)
-  
-  
-  #ok.clicked(button)
-  
-  #Left Vertical splitter
   leftsplitter = QSplitter(Qt.Vertical)
   leftsplitter.addWidget(lframe1)
-  
-  leftsplitter.setSizes([500,400,10])
-  
-  #Main Window Splitter
+  leftsplitter.setSizes([500,400,10])  
   splitter1 = QSplitter(Qt.Horizontal)
   textedit = QTextEdit()
   splitter1.addWidget(leftsplitter)
   splitter1.setSizes([400,500])
-  
-  #top frame
   container = QWidget()
   hbox.addWidget(splitter1)
-#  objlist.append(lf1text1)
-#  objlist.append(lf1text2)
   objlist.append(lf1text3)
-  
-  #filling gui
-  #for each in range(len(objlist)):
-   # objlist[each].setText(sample_data[each])
   selection(None)
-  #editcheck()
-  #Changes:
-  #
+
   
   wdg.show()
   
