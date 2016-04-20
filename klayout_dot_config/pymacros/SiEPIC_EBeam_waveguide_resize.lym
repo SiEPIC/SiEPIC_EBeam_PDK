@@ -166,8 +166,8 @@ if is_waveguide == True:
       seg_orientation.append("vertical")
     elif(each[0][1] == each[1][1]):
       seg_orientation.append("horizontal")
-# prop variable which determines the segment propagation 
   
+# prop variable which determines the segment propagation 
   prop_points = points
   seg_propagation = []
   #+x, -x , +y , -y
@@ -261,11 +261,11 @@ if is_waveguide == True:
     wdg.close()  # don't want to change the layout while the GUI is open; leads to view problems.
 
     global points, copy_pts, diff
-    #get current index and segment propagation
+
     # Record a transaction, to enable "undo"
     lv.transaction("Object resizing")
 
-
+    #get current index and segment propagation
     index = parameters.currentIndex
     copy_pts = copy.deepcopy(points)
     p1 = copy_pts[copy_pts.index(segments[index][0])]
@@ -281,7 +281,7 @@ if is_waveguide == True:
       copy_pts[copy_pts.index(segments[index][0])][0] = copy_pts[copy_pts.index(segments[index][0])][0] + diff/2 
       copy_pts[copy_pts.index(segments[index][1])][0] = copy_pts[copy_pts.index(segments[index][1])][0] + diff/2
     elif(prop == "+y" or prop == "-y"):
-      if(prop == "-y"):
+      if(prop == "+y"):
         diff = diff * -1
       print("moving y")
       copy_pts[copy_pts.index(segments[index][0])][1] = copy_pts[copy_pts.index(segments[index][0])][1] + diff/2 
