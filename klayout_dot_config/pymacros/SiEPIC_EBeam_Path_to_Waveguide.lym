@@ -169,7 +169,7 @@ if object_selection == []:
 
 
 # Search the layout for the components:
-print("* calling find_all_components() – DevRec")
+print("* calling find_all_components() - DevRec")
 find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
 
 for o in object_selection:
