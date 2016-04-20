@@ -45,7 +45,7 @@ optical_pins = []
 optical_nets = []
 
 # Search the layout for the components and waveguides:
-print("* calling find_all_components() – DevRec")
+print("* calling find_all_components() - DevRec")
 find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
 print("* calling find_all_waveguides()")
 find_all_waveguides(topcell, LayerSiN)
