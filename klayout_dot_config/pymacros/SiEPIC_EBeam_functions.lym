@@ -75,10 +75,6 @@ Lukas Chrostowski           2015/12/9
  - Working towards merging ROUND_PATH and Waveguide_Route, into Waveguide_Route.  
    Provide option for netlist generation (simple, advanced).
    need to identify the Inst for waveguide, in find_all_waveguides, and save in optical_waveguides
-
-Lukas Chrostowski           2016/04/19
- - Support for TM polarization in Netlist and laser
-
 """
 
 SiEPIC_Version = '0.1.6'
@@ -706,7 +702,6 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
         wavelength_start = subcell.pcell_parameters_by_name()["wavelength_start"]
         wavelength_stop = subcell.pcell_parameters_by_name()["wavelength_stop"]
         wavelength_points = subcell.pcell_parameters_by_name()["npoints"]
-        orthogonal_identifier = subcell.pcell_parameters_by_name()["orthogonal_identifier"]
         npins_inside_laser = 0
         for pin in optical_pins:
           if pin.pin_type == 2:  # Optical IO
@@ -731,7 +726,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
   for d in detectors_info2:
     detector_nets.append (d.detector_net)
 
-  return laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier
+  return laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points
     
   
 def find_all_waveguides(cell, layer):
@@ -1129,12 +1124,11 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
   text += '.ends %s\n\n' % (topcell.name)
 
   # Get information about the laser and detectors:
-  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier = \
+  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points = \
         get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
   if laser_net &gt; -1:
     text += '* Optical Network Analyzer:\n'
     text += '.ona input_unit=wavelength input_parameter=start_and_stop\n  + minimum_loss=80\n  + analysis_type=scattering_data\n  + multithreading=user_defined number_of_threads=1\n' 
-    text += '  + orthogonal_identifier=%s\n' % orthogonal_identifier
     text += '  + start=%4.3fe-9\n' % wavelength_start
     text += '  + stop=%4.3fe-9\n' % wavelength_stop
     text += '  + number_of_points=%s\n' % wavelength_points
@@ -1188,7 +1182,7 @@ def netlist_extraction(topcell):
 
   # Search the layout for the components and waveguides:
   print("")
-  print("* calling find_all_components() – DevRec:")
+  print("* calling find_all_components() - DevRec:")
   find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
   clock_find_all_components = time.clock()
 
