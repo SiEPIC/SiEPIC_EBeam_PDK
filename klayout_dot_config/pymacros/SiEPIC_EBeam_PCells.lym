@@ -91,8 +91,6 @@ Lukas Chrostowski           2016/01/17
 Lukas Chrostowski           2016/01/20
  - (sinusoidal) Bragg grating
 
-Lukas Chrostowski           2016/04/19
- - Support for TM polarization in Netlist and laser
 
 """
 
@@ -335,7 +333,7 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
-    print("Done drawing the layout for – DirectionalCoupler_HalfRing_Straight: %.3f-%g" % ( self.r, self.g) )
+    print("Done drawing the layout for - DirectionalCoupler_HalfRing_Straight: %.3f-%g" % ( self.r, self.g) )
 
 
 
@@ -470,7 +468,7 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
-    print("Done drawing the layout for – DirectionalCoupler_HalfRing_Arc: %.3f-%g" % ( self.r, self.g) )
+    print("Done drawing the layout for - DirectionalCoupler_HalfRing_Arc: %.3f-%g" % ( self.r, self.g) )
 
 
 
@@ -643,7 +641,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     if self.textpolygon:
       layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
 
-    print("Done drawing the layout for – DoubleBus_Ring: %.3f-%g" % ( self.r, self.g) )
+    print("Done drawing the layout for - DoubleBus_Ring: %.3f-%g" % ( self.r, self.g) )
 
 
 
@@ -778,7 +776,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 
-    print( "Done drawing the layout for – TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g) )
+    print( "Done drawing the layout for - TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g) )
 
 
 
@@ -880,7 +878,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     points = [ [0, 127*3], [10+2*r+2*g+2*wg_width,127*3], [10+2*r+2*g+2*wg_width, y_ring] ] 
     layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
-    print( "Done drawing the layout for – TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g) )
+    print( "Done drawing the layout for - TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g) )
 
 
 
@@ -915,7 +913,6 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
     self.param("wavelength_start", self.TypeDouble, "Start Wavelength (nm)", default = 1500)
     self.param("wavelength_stop", self.TypeDouble, "Stop Wavelength (nm)", default = 1600)
     self.param("npoints", self.TypeInt, "Number of points", default = 2000)     
-    self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
 
   def can_create_from_shape_impl(self):
@@ -1470,7 +1467,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
 
-#    print("Done drawing the layout for – Waveguide_Bend: %.3f" % ( self.radius) )
+#    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
 
   
 #  def produce_impl(self):
