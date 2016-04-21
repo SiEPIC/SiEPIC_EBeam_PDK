@@ -36,6 +36,10 @@ Zeqin Lu                    2016/2/18
 Jaspreet Jhoja              2016/03/18
  - Integrated the script with MC GUI
  - minor fixes for data parsing
+
+Lukas Chrostowski           2016/04/19
+ - Support for TM polarization in ONA gain
+
      
 """
 
@@ -258,9 +262,9 @@ def mc_dtd(topcell, layout, dbu, datadict):
   if INTERCONNECT_VISUALIZER:
     for i in range(0, num_detectors):
       text_lsf += '  if (simu==1) { mc%s.addparameter("wavelength",wavelength);} \n' % (i+1) 
-      text_lsf += '  mc%s.addattribute("run", getattribute ( getresult("ONA_1", "input %s/mode 1/gain"), "TE gain (dB)") );\n' % (i+1, i+1)
+      text_lsf += '  mc%s.addattribute("run", getattribute( getresult("ONA_1", "input %s/mode 1/gain"), getattribute(getresult("ONA_1", "input %s/mode 1/gain")) ) );\n' % (i+1, i+1, i+1)
   else:
-    text_lsf += '  gain = getattribute( getresult("ONA_1","input 1/mode 1/gain"), "TE gain (dB)" );\n'
+    text_lsf += '  gain = getattribute( getresult("ONA_1","input 1/mode 1/gain"), getattribute(getresult("ONA_1", "input %s/mode 1/gain")) );\n' %( i+1)
     text_lsf += '  plot(wavelength,gain);\n'
     text_lsf += '  holdon;\n'
   

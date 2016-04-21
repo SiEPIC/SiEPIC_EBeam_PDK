@@ -52,7 +52,7 @@ LayerErrorN = ly.layer(LayerError)
 
 # Find the selected objects
 o_selection = lv.object_selection   # returns ObjectInstPath[].
-if len(o_selection) &lt;&gt; 1:
+if len(o_selection) != 1:
   v = pya.MessageBox.warning("No selection", "Select the waveguide (only one waveguide) you wish to measure.", pya.MessageBox.Ok)
   is_waveguide = False
 else:
