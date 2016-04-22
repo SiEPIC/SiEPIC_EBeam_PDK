@@ -1126,25 +1126,25 @@ def connected_component(i,j):
   # offset the waveguide indexes by 1e6 to ensure unique index values
 
   component1_index = optical_components[i].idx
-  print ("component1_index: %s" % component1_index)
-  print ("component1's nets: %s" % optical_components[i].nets)
+  print("component1_index: %s" % component1_index)
+  print("component1's nets: %s" % optical_components[i].nets)
   pin1_index = optical_components[i].pins[j]
   if optical_pins[pin1_index].pin_type == 2:
-    print ("pin is an OpticalIO; stopping.")
+    print("pin is an OpticalIO; stopping.")
   else:
     net_index = optical_pins[pin1_index].net
-    print ("net: %s" % net_index)
+    print("net: %s" % net_index)
 
     net_component1 = optical_nets[net_index].pin1_n
-    print ("net's pin1 component: %s" % net_component1)
+    print("net's pin1 component: %s" % net_component1)
     net_component2 = optical_nets[net_index].pin2_n
-    print ("net's pin2 component: %s" % net_component2)
+    print("net's pin2 component: %s" % net_component2)
     if net_component1 != component1_index &amp; net_component2 == component1_index:
       component2_index = net_component1_index
-      print component2_index
+      print(component2_index)
     if net_component2 != component1_index &amp; net_component1 == component1_index:
       component2_index = net_component2_index
-      print component1_index
+      print(component1_index)
 
 
 def generate_Spice_file(topcell, optical_waveguides, optical_components):
