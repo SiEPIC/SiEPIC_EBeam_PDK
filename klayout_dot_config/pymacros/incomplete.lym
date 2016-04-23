@@ -91,12 +91,16 @@ class connected_object:
   def __init__(self, parent,current, possible_child_nodes):
     self.current_node = current
     self.parent_node = parent
+    self.child_nodes = []
     for each in possible_child_nodes:
       #if each is not current node or parent node then test its relationship
+      result = []
       if(each != current and each!=parent):  
         result = [list(each_item) for each_item in self.function_connected(current, each)]
         if(len(result)&gt;0):
           self.child_nodes.append(each)
+    
+    self.update_nodes(self.child_nodes)
         
   # function to check if two components/waveguides are connected
   def function_connected(self,a,b):
@@ -122,14 +126,22 @@ class connected_object:
     #gc's the first one is the pin
       for i in component.pins:
         component_pins.append([optical_pins[i].x, optical_pins[i].y])
-    
     return component_pins
-  
+    
+  def set_parent_node(self, parent):
+    self.parent_node = parent
+    
+  def update_nodes(self, children):
+    for each in children:
+      for item in list_of_obj:
+        if(each == item.current_node):
+          item.set_parent_node(self.current_node)
+          break
 
 #result = [list(each) for each in function_connected(optical_waveguides[0], optical_components[3])]
 #if there are items in result then they are connected
-for each in temp_list:
-  current = each
+for each_item in temp_list:
+  current = each_item
   parent = None
 #find if its parent is in the list_of_obj
   for each_obj in list_of_obj:
@@ -139,5 +151,101 @@ for each in temp_list:
   #add the object to list_of_obj
   list_of_obj.append(connected_object(parent, current, temp_list))
 
+
+#Modified interconnect detector
+def find_io_pins(topcell, optical_pins):
+  send_out = []    
+  layout = topcell.layout()
+  LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
+  # Find the laser and detectors in the layout.
+  iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
+  while not(iter1.at_end()):
+    subcell = iter1.cell()             # cell (component) to which this shape belongs
+    if iter1.shape().is_box():
+      box = iter1.shape().box.transformed(iter1.itrans())
+      if iter1.cell().basic_name() == "LumericalINTERCONNECT_Detector":
+        send_out.append([box, "DETECTOR"])        
+      if iter1.cell().basic_name() == "LumericalINTERCONNECT_Laser":
+        send_out.append([box, "LASER"])
+    iter1.next()
+  return send_out
+  
+lumerical_list = find_io_pins(topcell, optical_pins)
+##Check which ones are connected to detector and which ones are not.
+
+
+#take apart grating couplers as they are the only ones connected to an input or output:
+gc_list = [[each,each.pins] for each in optical_components if(each.component == 'ebeam_gc_te1550')]
+
+#make detector or laser string as a parent_node of the extracted gcs
+for items in lumerical_list:
+  x_ = []
+  y_ = []
+  if(items[0].p1.x &lt; items[0].p2.x): 
+    x_ = [items[0].p1.x, items[0].p2.x]
+  else:
+    x_ = [items[0].p2.x, items[0].p1.x]
+  
+  if(items[0].p1.y &lt; items[0].p2.y):
+    y_ = [items[0].p1.y, items[0].p2.y]
+  else:
+    y_ = [items[0].p2.y, items[0].p1.y]
+        
+  for each_item in gc_list:
+    for pin in each_item[1]:
+      if(optical_pins[pin].x &gt; x_[0] and optical_pins[pin].x &lt; x_[1] and optical_pins[pin].y &gt; y_[0] and optical_pins[pin].y &lt; y_[1]):
+        gc_ = each_item[0]
+        for i in range(len(list_of_obj)):
+          if(list_of_obj[i].current_node == gc_):
+            list_of_obj[i].set_parent_node(items[1])
+            print(gc_)
+        break
+  
+  
+#Make groups based on the connections of nodes
+#make a copy
+grouped_items = []
+copied_nodes = set(list_of_obj)
+
+while copied_nodes:
+  #get a random node
+  random_node = copied_nodes.pop()
+  
+  #create a set to store all the connected nodes
+  group = set([random_node])
+  
+  #store the iterable items
+  queue = [random_node]
+  
+  while queue:
+    
+    #get first element from the list
+    qnode = queue.pop(0)
+    
+    #get child nodes
+    children = qnode.child_nodes
+    
+    new_children = set()
+    #form a set of child nodes with their corresponding connected_object objects
+    for each in list_of_obj:
+      if(each.current_node in children):
+        new_children.update([each])
+    
+    #remove children already opened
+    new_children.difference_update(group)
+    
+    #remove the remaining nodes from the global set
+    copied_nodes.difference_update(new_children)
+    
+    #add them to the group of connected nodes
+    group.update(new_children)
+    
+    #add them to the queue
+    queue.extend(new_children)
+  
+  grouped_items.append(group)
+  
+  #add these to a group
+grouped_list = [list(each) for each in grouped_items]
 </text>
 </klayout-macro>
