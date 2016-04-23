@@ -250,13 +250,122 @@ temp_group_list = [list(each) for each in grouped_items]
 
 final_group_list=[]
 #remove the groups with no detectors/lasers and store them in final_group_list
-def final_action():
-  global final_group_list
-  for each in temp_group_list:
+for each in temp_group_list:
     if(any(x.parent_node == "DETECTOR" or x.parent_node == "LASER" for x in each) == True):
       temp = [i.current_node for i in each]
       final_group_list = final_group_list + temp
 
-#perform final action
-final_action()</text>
+
+#get separate lists of fetched optical_waveguides and optical_components
+optical_waveguideF = []
+optical_componentF = []
+
+for each in final_group_list:
+  if(isinstance(each,Optical_waveguide)):
+    optical_waveguideF.append(each)
+  elif(isinstance(each,Optical_component)):
+    optical_componentF.append(each)
+
+
+
+
+##COPY PASTES THE FOLLOWING CODE TO TEST WHETHER IT GENERATES SPICE FILE W/ THE 
+##"generate_Spice_file" FUNCTION
+
+def gen_ui():
+  global wdg
+  
+  # If the window is already here, destroy it and start over again.
+  if 'wdg' in globals():
+    if wdg is not None and not wdg.destroyed():
+      wdg.destroy()
+  global wtext
+
+  def button_clicked(checked):
+    """ Event handler: "OK" button clicked """
+    wdg.destroy()
+
+  wdg = pya.QDialog(pya.Application.instance().main_window())
+
+  wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
+  wdg.setWindowTitle("SiEPIC-EBeam-PDK Verification and Netlist Generation")
+
+  wdg.resize(1200, 2500)
+  wdg.move(1, 1)
+
+  grid = pya.QGridLayout(wdg)
+
+  windowlabel1 = pya.QLabel(wdg)
+  windowlabel1.setText("Verification output:")
+  wtext = pya.QTextEdit(wdg)
+  wtext.enabled = True
+  wtext.setText('')
+  wtext.LineWrapMode = pya.QTextEdit.NoWrap
+
+  ok = pya.QPushButton("OK", wdg)
+  ok.clicked(button_clicked)   # attach the event handler
+  netlist = pya.QPushButton("Netlist Export", wdg) # not implemented
+
+  grid.addWidget(windowlabel1, 0, 0, 1, 3)
+  grid.addWidget(wtext, 1, 1, 3, 3)
+  grid.addWidget(netlist, 4, 2)
+  grid.addWidget(ok, 4, 3)
+
+  grid.setRowStretch(3, 1)
+  grid.setColumnStretch(1, 1)
+
+  wdg.show()
+
+import time
+gen_ui()
+
+if 'wtext' in globals():
+  wtext.insertHtml('Running SiEPIC-EBeam-PDK Verification and Netlist Generation.&lt;br&gt;')
+  wtext.insertHtml('* KLayout SiEPIC_EBeam_PDK v%s, %s.&lt;br&gt;' % (SiEPIC_Version, time.strftime("%Y-%m-%d %H:%M:%S") ) )
+clock_start = time.clock()
+
+# Output the Spice netlist:
+text_Spice,_ = generate_Spice_file(topcell, optical_waveguideF, optical_componentF)
+if 'wtext' in globals():
+  wtext.insertPlainText(text_Spice)
+clock_netlist = time.clock()
+
+
+# Find the automated measurement coordinates:
+if 'wtext' in globals():
+  wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
+print("")
+print("Automated measurement coordinates: ")
+print("")
+t = find_automated_measurement_labels(topcell, LayerTextN)
+if 'wtext' in globals():
+  wtext.insertHtml (t)
+clock_automated_measurements = time.clock()
+
+if 'wtext' in globals():
+
+  wtext.insertHtml('&lt;br&gt;CPU time for searching layout: find_all_components %s, find_all_waveguides %s&lt;br&gt;' \
+  % (clock_find_all_components-clock_start, clock_find_all_waveguides-clock_find_all_components) )
+
+  wtext.insertHtml('&lt;br&gt;CPU time for identify_all_nets %s&lt;br&gt;' \
+  % (clock_identify_all_nets-clock_find_all_components) )
+
+  wtext.insertHtml('&lt;br&gt;CPU time for verification: check_components %s, check_waveguides %s, check_connectivity %s&lt;br&gt;' \
+  % (clock_check_components-clock_identify_all_nets, clock_check_waveguides-clock_check_components, clock_check_connectivity-clock_check_waveguides) )
+
+  wtext.insertHtml('&lt;br&gt;CPU time for Spice netlist %s, automated measurements %s&lt;br&gt;' \
+  % (clock_netlist-clock_verify_layout, clock_automated_measurements-clock_netlist) )
+
+  wtext.insertHtml('&lt;br&gt;total CPU time: %s. &lt;br&gt;' % (time.clock() - clock_start) )
+
+
+# Done
+if 'wtext' in globals():
+  wtext.insertHtml('&lt;br&gt;Done.&lt;br&gt;')
+  
+print("")
+print("Done. ")
+print("")
+
+#generate_Spice_file(topcell, optical_waveguideF, optical_componentF)</text>
 </klayout-macro>
