@@ -18,18 +18,22 @@
 
 report("DRC")
 
-## minimum feature size of 60nm
+# Layers:
 LayerSi=input(1,0)
-LayerSi.width(0.06).output("Silicon_width","minimum feature size violation")
-
 DevRec=input(68,0)
+LayerFP=input(99)
 
+# minimum feature size of 60nm
+LayerSi.width(0.06).output("Si_width","Si minimum feature size violation; min 60 nm")
+
+LayerSi.space(0.06).output("Si_space","Si minimum space violation; min 60 nm")
+
+# Check device overlaps
 overlaps = DevRec.merged(2)
 output(overlaps, "Devices","Devices cannot be overlapping")
 
-## make sure the devices are within the floor plan layer region;
-boundary=input(99)
-LayerSi.outside(boundary).output("Boundary","devices are out of boundary")
+# make sure the devices are within the floor plan layer region;
+LayerSi.outside(LayerFP).output("Boundary","devices are out of boundary")
 
 
 </text>
