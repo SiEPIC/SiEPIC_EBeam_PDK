@@ -245,7 +245,15 @@ while copied_nodes:
   
   grouped_items.append(group)
   
-  #add these to a group
-grouped_list = [list(each) for each in grouped_items]
+#make a list of groups
+temp_group_list = [list(each) for each in grouped_items]
+
+final_group_list=[]
+#remove the groups with no detectors/lasers and store them in final_group_list
+def final_action():
+  global final_group_list
+  for each in temp_group_list:
+    if(any(x.parent_node == "DETECTOR" or x.parent_node == "LASER" for x in each) == True):
+      final_group_list = final_group_list + each
 </text>
 </klayout-macro>
