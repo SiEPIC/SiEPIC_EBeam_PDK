@@ -672,6 +672,9 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
       self.detector_net = detector_net
       self.detector_number = detector_number
   detectors_info = []  
+  
+  # default is the 1st polarization
+  orthogonal_identifier = 1
       
   # Find the laser and detectors in the layout.
   iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
