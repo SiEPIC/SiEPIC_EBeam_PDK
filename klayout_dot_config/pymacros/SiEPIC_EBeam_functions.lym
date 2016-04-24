@@ -75,6 +75,10 @@ Lukas Chrostowski           2015/12/9
  - Working towards merging ROUND_PATH and Waveguide_Route, into Waveguide_Route.  
    Provide option for netlist generation (simple, advanced).
    need to identify the Inst for waveguide, in find_all_waveguides, and save in optical_waveguides
+
+Lukas Chrostowski           2016/04/19
+ - Support for TM polarization in Netlist and laser
+
 """
 
 SiEPIC_Version = '0.1.6'
@@ -668,6 +672,9 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
       self.detector_net = detector_net
       self.detector_number = detector_number
   detectors_info = []  
+  
+  # default is the 1st polarization
+  orthogonal_identifier = 1
       
   # Find the laser and detectors in the layout.
   iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
@@ -702,6 +709,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
         wavelength_start = subcell.pcell_parameters_by_name()["wavelength_start"]
         wavelength_stop = subcell.pcell_parameters_by_name()["wavelength_stop"]
         wavelength_points = subcell.pcell_parameters_by_name()["npoints"]
+        orthogonal_identifier = subcell.pcell_parameters_by_name()["orthogonal_identifier"]
         npins_inside_laser = 0
         for pin in optical_pins:
           if pin.pin_type == 2:  # Optical IO
@@ -726,7 +734,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
   for d in detectors_info2:
     detector_nets.append (d.detector_net)
 
-  return laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points
+  return laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier
     
   
 def find_all_waveguides(cell, layer):
@@ -1049,6 +1057,104 @@ def find_optical_IO_pins(optical_pins):
   return pins_text
 
 
+
+def generate_short_Spice_file(topcell, optical_waveguides, optical_components):
+  # variant of generate_Spice_file
+  # - only return components that are connected to the laser.
+  
+  # list all Optical_component objects from an array
+  # input array, optical_components
+  # example output:         
+  # X_grating_coupler_1 N$7 N$6 grating_coupler library="custom/genericcml" sch_x=-1.42 sch_y=-0.265 sch_r=0 sch_f=false
+
+  text = '* Spice output from KLayout SiEPIC_EBeam_PDK v%s, %s.\n\n' % (SiEPIC_Version, strftime("%Y-%m-%d %H:%M:%S") )
+
+
+  Lumerical_schematic_scaling = 5e-2
+#  Lumerical_schematic_scaling = 20e-2
+
+  # convert KLayout GDS rotation/flip to Lumerical INTERCONNECT
+  # KLayout defines mirror as an x-axis flip, whereas INTERCONNECT does y-axis flip
+  # KLayout defines rotation as counter-clockwise, whereas INTERCONNECT does clockwise
+  # input is KLayout Rotation,Flip; output is INTERCONNECT:
+  KLayoutInterconnectRotFlip = \
+      {(0, False):[0, False], \
+       (90, False):[270, False], \
+       (180, False):[180, False], \
+       (270, False):[90, False], \
+       (0, True):[180,True], \
+       (90, True):[90, True], \
+       (180, True):[0,True], \
+       (270, True):[270, False]}
+
+  from time import strftime 
+  
+
+  # Get information about the laser and detectors:
+  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points = \
+        get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
+  if laser_net &gt; -1:
+    pass
+    
+    
+    # example of finding a component connected to optical_components(i)
+    # from pin j:
+    i,j=1,0
+    component1_index = optical_components[i].idx
+    pin1_index = optical_components[i].pins[j]
+    net_index = optical_pins[pin1_index].net
+    net_component1 = optical_nets[net_index].pin1_n
+    net_component2 = optical_nets[net_index].pin2_n
+    if net_component1 != component1_index &amp; net_component2 == component1_index:
+      component2_index = net_component1_index
+    if net_component2 != component1_index &amp; net_component1 == component1_index:
+      component2_index = net_component2_index
+
+
+    text += '* Optical Network Analyzer:\n'
+    text += '.ona input_unit=wavelength input_parameter=start_and_stop\n  + minimum_loss=80\n  + analysis_type=scattering_data\n  + multithreading=user_defined number_of_threads=1\n' 
+    text += '  + start=%4.3fe-9\n' % wavelength_start
+    text += '  + stop=%4.3fe-9\n' % wavelength_stop
+    text += '  + number_of_points=%s\n' % wavelength_points
+    for i in range(0,len(detector_nets)):
+      text += '  + input(%s)=%s,N$%s\n' % (i+1, topcell.name, detector_nets[i])
+    text += '  + output=%s,N$%s\n' % (topcell.name, laser_net)
+
+    # main circuit
+    text += '%s%s %s sch_x=-1 sch_y=-1\n\n' % (topcell.name, opticalIO_pins, topcell.name)
+
+  return text, len(detector_nets)
+
+def connected_component(i,j):
+  # find a component connected to optical_components(i) from pin j:
+  
+  # find all connected components and waveguides, starting at component i
+  # need to make a graph containing only components and their connections.
+  # our SiEPIC data structures has components &amp; waveguides, which need to be merged.
+  # offset the waveguide indexes by 1e6 to ensure unique index values
+
+  component1_index = optical_components[i].idx
+  print("component1_index: %s" % component1_index)
+  print("component1's nets: %s" % optical_components[i].nets)
+  pin1_index = optical_components[i].pins[j]
+  if optical_pins[pin1_index].pin_type == 2:
+    print("pin is an OpticalIO; stopping.")
+  else:
+    net_index = optical_pins[pin1_index].net
+    print("net: %s" % net_index)
+
+    net_component1 = optical_nets[net_index].pin1_n
+    print("net's pin1 component: %s" % net_component1)
+    net_component2 = optical_nets[net_index].pin2_n
+    print("net's pin2 component: %s" % net_component2)
+    if net_component1 != component1_index &amp; net_component2 == component1_index:
+      component2_index = net_component1_index
+      print(component2_index)
+    if net_component2 != component1_index &amp; net_component1 == component1_index:
+      component2_index = net_component2_index
+      print(component1_index)
+
+
 def generate_Spice_file(topcell, optical_waveguides, optical_components):
   # list all Optical_component objects from an array
   # input array, optical_components
@@ -1124,11 +1230,12 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components):
   text += '.ends %s\n\n' % (topcell.name)
 
   # Get information about the laser and detectors:
-  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points = \
+  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier = \
         get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
   if laser_net &gt; -1:
     text += '* Optical Network Analyzer:\n'
     text += '.ona input_unit=wavelength input_parameter=start_and_stop\n  + minimum_loss=80\n  + analysis_type=scattering_data\n  + multithreading=user_defined number_of_threads=1\n' 
+    text += '  + orthogonal_identifier=%s\n' % orthogonal_identifier
     text += '  + start=%4.3fe-9\n' % wavelength_start
     text += '  + stop=%4.3fe-9\n' % wavelength_stop
     text += '  + number_of_points=%s\n' % wavelength_points
@@ -1182,7 +1289,7 @@ def netlist_extraction(topcell):
 
   # Search the layout for the components and waveguides:
   print("")
-  print("* calling find_all_components() – DevRec:")
+  print("* calling find_all_components() - DevRec:")
   find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
   clock_find_all_components = time.clock()
 
