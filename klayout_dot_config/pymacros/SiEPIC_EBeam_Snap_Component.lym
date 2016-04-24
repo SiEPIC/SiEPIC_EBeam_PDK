@@ -119,7 +119,7 @@ else:
           if int(o.x / dbu) == x2 and int(o.y / dbu) == y2:
             idx2 = o.idx
         if idx1 &lt; 0 or idx2 &lt; 0:
-          v = pya.MessageBox.warning("Optical components not found", "Optical components not found.", pya.MessageBox.Ok)
+          v = pya.MessageBox.warning("Optical components not found", "Optical components not found.\nNote: snapping only functions on components on the same hierarchy level (not on sub-cells).", pya.MessageBox.Ok)
         else:
           # we have two optical components.  Proceed with alignment
         
