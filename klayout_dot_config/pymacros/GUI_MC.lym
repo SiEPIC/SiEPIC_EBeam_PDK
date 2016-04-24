@@ -22,10 +22,11 @@ This Python file implements a Graphical User Interface(GUI) for Monte-Carlo Simu
 
 Version history:
 
+Jaspreet Jhoja 2016/04/13 
+ - Linked to toolbar - INTERCONNECT.
 
 Jaspreet Jhoja 2016/03/19 
  - Added param varitions for Within Wafer.
- - 
  
 Jaspreet Jhoja 2016/03/18
  - Integrated with MC scripts
@@ -40,6 +41,9 @@ Jaspreet Jhoja 2016/03/13
 Jaspreet Jhoja 2016/03/11 
  - Empty GUI with no functionality.
  - Requires tk8.6 and tcl 8.6 to work
+
+Lukas Chrostowski           2016/04/19
+ - Fix for GUI bug (try...)
  
  """
  
@@ -79,6 +83,7 @@ LayerDevRecN = None
 LayerFbrTgtN = None
 LayerErrorN = None
 LayerINTERCONNECTN = None
+
 # initialize the arrays to keep track of layout objects
 optical_components = []
 optical_waveguides = []
@@ -107,12 +112,16 @@ hbox = QVBoxLayout(wdg)
 wdg.setFixedSize(650, 480)
 
 def action(obj):
-  try:
-    float(obj.text)
+  if obj.text == '':
+    obj.setStyleSheet("border: 2px solid red; background-color: white;")
+  else:
     obj.setStyleSheet("border: 2px solid green; background-color: white;")
 
-  except Exception:
-    obj.setStyleSheet("border: 2px solid red; background-color: white;")
+#  try:
+#    float(obj.text)
+#    obj.setStyleSheet("border: 2px solid green; background-color: white;")
+#  except Exception:
+#    obj.setStyleSheet("border: 2px solid red; background-color: white;")
 
 def editcheck():
   for each in objlist:
