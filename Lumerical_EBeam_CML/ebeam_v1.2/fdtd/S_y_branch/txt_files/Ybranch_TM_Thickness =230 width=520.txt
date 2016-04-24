@@ -1,0 +1,11 @@
+Center wavelength: 1.54839e-06
+Mesh accuracy: 3
+1to2 power at center wavelength (Input1): 48.0393%.
+1to3 power at center wavelength (Input1): 48.0376%.
+                              Loss (Input1): 3.92315%.
+2to1 power at center wavelength (Input2): 48.1568%.
+2to3 power at center wavelength (Input2): 0.0623127%.
+                              Loss (Input2): 51.7809%.
+3to1 power at center wavelength (Input3): 48.1397%.
+3to2 power at center wavelength (Input3): 0.0626757%.
+                              Loss (Input3): 51.7976%.
