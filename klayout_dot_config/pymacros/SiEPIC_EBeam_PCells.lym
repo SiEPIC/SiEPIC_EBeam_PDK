@@ -91,6 +91,9 @@ Lukas Chrostowski           2016/01/17
 Lukas Chrostowski           2016/01/20
  - (sinusoidal) Bragg grating
 
+Lukas Chrostowski           2016/04/19
+ - Support for TM polarization in Netlist and laser
+
 
 """
 
@@ -913,6 +916,7 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
     self.param("wavelength_start", self.TypeDouble, "Start Wavelength (nm)", default = 1500)
     self.param("wavelength_stop", self.TypeDouble, "Stop Wavelength (nm)", default = 1600)
     self.param("npoints", self.TypeInt, "Number of points", default = 2000)     
+    self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
 
   def can_create_from_shape_impl(self):

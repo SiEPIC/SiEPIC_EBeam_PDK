@@ -1286,7 +1286,7 @@ def netlist_extraction(topcell):
 
   # Search the layout for the components and waveguides:
   print("")
-  print("* calling find_all_components() – DevRec:")
+  print("* calling find_all_components() - DevRec:")
   find_all_components(topcell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
   clock_find_all_components = time.clock()
 
