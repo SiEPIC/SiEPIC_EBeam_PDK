@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>from pya import *
+import pya, sys, copy
+
+topcell = None
+layout = None
+dbu = None
+
+LayerSiN = None
+LayerTextN = None
+LayerPinRecN = None
+LayerDevRecN = None
+LayerFbrTgtN = None
+LayerErrorN = None
+LayerINTERCONNECTN = None
+# initialize the arrays to keep track of layout objects
+# Configure variables to draw structures in the presently selected cell:
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+# find the currently selected cell:
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if topcell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = ly.dbu
+
+# Define layers based on PDK_functions:
+LayerSiN = ly.layer(LayerSi)
+LayerPinRecN = ly.layer(LayerPinRec)
+LayerDevRecN = ly.layer(LayerDevRec)
+LayerFbrTgtN = ly.layer(LayerFbrTgt)
+LayerErrorN = ly.layer(LayerError)
+
+# initialize the arrays to keep track of layout objects
+reset_Optical_classes()
+optical_components = []
+optical_waveguides = []
+optical_pins = []
+optical_nets = []
+layout_errors = []
+
+# extract the circuit netlist from the physical layout:
+optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
+
+# create a list of all the waveguides and components
+temp_list = optical_waveguides + optical_components
+
+
+
+"""
+####JUST FOR REF. DELETE AFTER USE#####
+
+Component        pins   x   y
+ebeam_gc_te1550 [1, 0] 3.0 14.0
+ebeam_gc_te1550 [3, 2] 3.0 141.0
+ebeam_y_1550 [4, 5, 6] 10.4 141.0
+ebeam_y_1550 [7, 8, 9] 10.4 14.0
+
+They should get same pins for waveguides and components
+tuples are not equal to lists
+"""
+
+#a list to store connected objects
+list_of_obj = []
+
+class connected_object:
+  current_node = None
+  parent_node = None
+  child_nodes = []
+  
+  def __init__(self, parent,current, possible_child_nodes):
+    self.current_node = current
+    self.parent_node = parent
+    self.child_nodes = []
+    for each in possible_child_nodes:
+      #if each is not current node or parent node then test its relationship
+      result = []
+      if(each != current and each!=parent):  
+        result = [list(each_item) for each_item in self.function_connected(current, each)]
+        if(len(result)&gt;0):
+          self.child_nodes.append(each)
+    
+    self.update_nodes(self.child_nodes)
+        
+  # function to check if two components/waveguides are connected
+  def function_connected(self,a,b):
+    pins_a = self.return_pins(a)
+    pins_b = self.return_pins(b)
+    lists = [pins_a, pins_b]
+    g = set.intersection(*[set(tuple(x) for x in y) for y in lists])
+    return g
+    
+  #extract pins' coordinates of a component
+  def return_pins(self,component):
+    component_pins = []
+    #if it is a waveguide
+    if(isinstance(component, Optical_waveguide)== True):
+      first_pt = component.points[0]
+      last_pt = component.points[-1]
+      for each in optical_pins:
+        if([each.x,each.y] == first_pt or [each.x, each.y] == last_pt):
+          component_pins.append([each.x, each.y])
+    
+    # if it is not a waveguide
+    elif(isinstance(component, Optical_component)== True):
+    #gc's the first one is the pin
+      for i in component.pins:
+        component_pins.append([optical_pins[i].x, optical_pins[i].y])
+    return component_pins
+    
+  def set_parent_node(self, parent):
+    self.parent_node = parent
+    
+  def update_nodes(self, children):
+    for each in children:
+      for item in list_of_obj:
+        if(each == item.current_node):
+          item.set_parent_node(self.current_node)
+          break
+
+#result = [list(each) for each in function_connected(optical_waveguides[0], optical_components[3])]
+#if there are items in result then they are connected
+for each_item in temp_list:
+  current = each_item
+  parent = None
+#find if its parent is in the list_of_obj
+  for each_obj in list_of_obj:
+    if(current in each_obj.child_nodes):
+      parent = each_obj
+      break
+  #add the object to list_of_obj
+  list_of_obj.append(connected_object(parent, current, temp_list))
+
+
+#Modified interconnect detector
+def find_io_pins(topcell, optical_pins):
+  send_out = []    
+  layout = topcell.layout()
+  LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
+  # Find the laser and detectors in the layout.
+  iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
+  while not(iter1.at_end()):
+    subcell = iter1.cell()             # cell (component) to which this shape belongs
+    if iter1.shape().is_box():
+      box = iter1.shape().box.transformed(iter1.itrans())
+      if iter1.cell().basic_name() == "LumericalINTERCONNECT_Detector":
+        send_out.append([box, "DETECTOR"])        
+      if iter1.cell().basic_name() == "LumericalINTERCONNECT_Laser":
+        send_out.append([box, "LASER"])
+    iter1.next()
+  return send_out
+  
+lumerical_list = find_io_pins(topcell, optical_pins)
+##Check which ones are connected to detector and which ones are not.
+
+
+#take apart grating couplers as they are the only ones connected to an input or output:
+gc_list = [[each,each.pins] for each in optical_components if(each.component == 'ebeam_gc_te1550')]
+
+#make detector or laser string as a parent_node of the extracted gcs
+for items in lumerical_list:
+  x_ = []
+  y_ = []
+  if(items[0].p1.x &lt; items[0].p2.x): 
+    x_ = [items[0].p1.x, items[0].p2.x]
+  else:
+    x_ = [items[0].p2.x, items[0].p1.x]
+  
+  if(items[0].p1.y &lt; items[0].p2.y):
+    y_ = [items[0].p1.y, items[0].p2.y]
+  else:
+    y_ = [items[0].p2.y, items[0].p1.y]
+        
+  for each_item in gc_list:
+    for pin in each_item[1]:
+      if(optical_pins[pin].x &gt; x_[0] and optical_pins[pin].x &lt; x_[1] and optical_pins[pin].y &gt; y_[0] and optical_pins[pin].y &lt; y_[1]):
+        gc_ = each_item[0]
+        for i in range(len(list_of_obj)):
+          if(list_of_obj[i].current_node == gc_):
+            list_of_obj[i].set_parent_node(items[1])
+            print(gc_)
+        break
+  
+  
+#Make groups based on the connections of nodes
+#make a copy
+grouped_items = []
+copied_nodes = set(list_of_obj)
+
+while copied_nodes:
+  #get a random node
+  random_node = copied_nodes.pop()
+  
+  #create a set to store all the connected nodes
+  group = set([random_node])
+  
+  #store the iterable items
+  queue = [random_node]
+  
+  while queue:
+    
+    #get first element from the list
+    qnode = queue.pop(0)
+    
+    #get child nodes
+    children = qnode.child_nodes
+    
+    new_children = set()
+    #form a set of child nodes with their corresponding connected_object objects
+    for each in list_of_obj:
+      if(each.current_node in children):
+        new_children.update([each])
+    
+    #remove children already opened
+    new_children.difference_update(group)
+    
+    #remove the remaining nodes from the global set
+    copied_nodes.difference_update(new_children)
+    
+    #add them to the group of connected nodes
+    group.update(new_children)
+    
+    #add them to the queue
+    queue.extend(new_children)
+  
+  grouped_items.append(group)
+  
+#make a list of groups
+temp_group_list = [list(each) for each in grouped_items]
+
+final_group_list=[]
+#remove the groups with no detectors/lasers and store them in final_group_list
+for each in temp_group_list:
+    if(any(x.parent_node == "DETECTOR" or x.parent_node == "LASER" for x in each) == True):
+      temp = [i.current_node for i in each]
+      final_group_list = final_group_list + temp
+
+
+#get separate lists of fetched optical_waveguides and optical_components
+optical_waveguideF = []
+optical_componentF = []
+
+for each in final_group_list:
+  if(isinstance(each,Optical_waveguide)):
+    optical_waveguideF.append(each)
+  elif(isinstance(each,Optical_component)):
+    optical_componentF.append(each)
+
+
+
+
+##COPY PASTES THE FOLLOWING CODE TO TEST WHETHER IT GENERATES SPICE FILE W/ THE 
+##"generate_Spice_file" FUNCTION
+
+def gen_ui():
+  global wdg
+  
+  # If the window is already here, destroy it and start over again.
+  if 'wdg' in globals():
+    if wdg is not None and not wdg.destroyed():
+      wdg.destroy()
+  global wtext
+
+  def button_clicked(checked):
+    """ Event handler: "OK" button clicked """
+    wdg.destroy()
+
+  wdg = pya.QDialog(pya.Application.instance().main_window())
+
+  wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
+  wdg.setWindowTitle("SiEPIC-EBeam-PDK Verification and Netlist Generation")
+
+  wdg.resize(1200, 2500)
+  wdg.move(1, 1)
+
+  grid = pya.QGridLayout(wdg)
+
+  windowlabel1 = pya.QLabel(wdg)
+  windowlabel1.setText("Verification output:")
+  wtext = pya.QTextEdit(wdg)
+  wtext.enabled = True
+  wtext.setText('')
+  wtext.LineWrapMode = pya.QTextEdit.NoWrap
+
+  ok = pya.QPushButton("OK", wdg)
+  ok.clicked(button_clicked)   # attach the event handler
+  netlist = pya.QPushButton("Netlist Export", wdg) # not implemented
+
+  grid.addWidget(windowlabel1, 0, 0, 1, 3)
+  grid.addWidget(wtext, 1, 1, 3, 3)
+  grid.addWidget(netlist, 4, 2)
+  grid.addWidget(ok, 4, 3)
+
+  grid.setRowStretch(3, 1)
+  grid.setColumnStretch(1, 1)
+
+  wdg.show()
+
+import time
+gen_ui()
+
+if 'wtext' in globals():
+  wtext.insertHtml('Running SiEPIC-EBeam-PDK Verification and Netlist Generation.&lt;br&gt;')
+  wtext.insertHtml('* KLayout SiEPIC_EBeam_PDK v%s, %s.&lt;br&gt;' % (SiEPIC_Version, time.strftime("%Y-%m-%d %H:%M:%S") ) )
+clock_start = time.clock()
+
+# Output the Spice netlist:
+text_Spice,_ = generate_Spice_file(topcell, optical_waveguideF, optical_componentF)
+if 'wtext' in globals():
+  wtext.insertPlainText(text_Spice)
+clock_netlist = time.clock()
+
+
+# Find the automated measurement coordinates:
+if 'wtext' in globals():
+  wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
+print("")
+print("Automated measurement coordinates: ")
+print("")
+t = find_automated_measurement_labels(topcell, LayerTextN)
+if 'wtext' in globals():
+  wtext.insertHtml (t)
+clock_automated_measurements = time.clock()
+
+if 'wtext' in globals():
+
+  wtext.insertHtml('&lt;br&gt;CPU time for searching layout: find_all_components %s, find_all_waveguides %s&lt;br&gt;' \
+  % (clock_find_all_components-clock_start, clock_find_all_waveguides-clock_find_all_components) )
+
+  wtext.insertHtml('&lt;br&gt;CPU time for identify_all_nets %s&lt;br&gt;' \
+  % (clock_identify_all_nets-clock_find_all_components) )
+
+  wtext.insertHtml('&lt;br&gt;CPU time for verification: check_components %s, check_waveguides %s, check_connectivity %s&lt;br&gt;' \
+  % (clock_check_components-clock_identify_all_nets, clock_check_waveguides-clock_check_components, clock_check_connectivity-clock_check_waveguides) )
+
+  wtext.insertHtml('&lt;br&gt;CPU time for Spice netlist %s, automated measurements %s&lt;br&gt;' \
+  % (clock_netlist-clock_verify_layout, clock_automated_measurements-clock_netlist) )
+
+  wtext.insertHtml('&lt;br&gt;total CPU time: %s. &lt;br&gt;' % (time.clock() - clock_start) )
+
+
+# Done
+if 'wtext' in globals():
+  wtext.insertHtml('&lt;br&gt;Done.&lt;br&gt;')
+  
+print("")
+print("Done. ")
+print("")
+
+#generate_Spice_file(topcell, optical_waveguideF, optical_componentF)</text>
+</klayout-macro>
