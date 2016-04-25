@@ -114,12 +114,13 @@ else:
         idx1 = -1
         idx2 = -1
         for o in optical_components:
-          if int(o.x / dbu) == x1 and int(o.y / dbu) == y1:
+#          print("optical_components compare: x: %s %s %s, y: %s %s %s" %(  int(round(o.x / dbu)), x1, x2, int(round(o.y / dbu)), y1, y2 )  ) 
+          if int(round(o.x / dbu)) == x1 and int(round(o.y / dbu)) == y1:
             idx1 = o.idx
-          if int(o.x / dbu) == x2 and int(o.y / dbu) == y2:
+          if int(round(o.x / dbu)) == x2 and int(round(o.y / dbu)) == y2:
             idx2 = o.idx
         if idx1 &lt; 0 or idx2 &lt; 0:
-          v = pya.MessageBox.warning("Optical components not found", "Optical components not found.", pya.MessageBox.Ok)
+          v = pya.MessageBox.warning("Optical components not found", "Optical components not found.\nNote: snapping only functions on components on the same hierarchy level (not on sub-cells).", pya.MessageBox.Ok)
         else:
           # we have two optical components.  Proceed with alignment
         

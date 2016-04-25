@@ -14,7 +14,11 @@
  <menu-path>tools_menu.drc.end</menu-path>
  <interpreter>dsl</interpreter>
  <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
- <text># Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
+ <text># Basic DRC deck for SiEPIC_EBeam_PDK
+# Lukas Chrostowski, 2016
+
+# Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
+# http://klayout.de/doc/manual/drc_basic.html
 
 report("DRC")
 
