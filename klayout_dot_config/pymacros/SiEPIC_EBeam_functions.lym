@@ -1067,6 +1067,7 @@ def generate_short_Spice_file(topcell, optical_waveguides, optical_components):
   # example output:         
   # X_grating_coupler_1 N$7 N$6 grating_coupler library="custom/genericcml" sch_x=-1.42 sch_y=-0.265 sch_r=0 sch_f=false
 
+  from time import strftime 
   text = '* Spice output from KLayout SiEPIC_EBeam_PDK v%s, %s.\n\n' % (SiEPIC_Version, strftime("%Y-%m-%d %H:%M:%S") )
 
 
@@ -1087,7 +1088,6 @@ def generate_short_Spice_file(topcell, optical_waveguides, optical_components):
        (180, True):[0,True], \
        (270, True):[270, False]}
 
-  from time import strftime 
   
 
   # Get information about the laser and detectors:
