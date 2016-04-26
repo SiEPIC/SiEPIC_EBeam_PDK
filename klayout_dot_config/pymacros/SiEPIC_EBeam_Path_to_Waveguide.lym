@@ -58,7 +58,9 @@ Lukas Chrostowski           2016/04/10
 Jaspreet &amp; Lukas            2016/04/22
  - warning if one path segment has insufficient length to accommodate the bend radius
 
- 
+Jaspreet Jhoja              2016/04/26
+- warning if first and last segments are not manhattan
+
 """
 
 import pya
