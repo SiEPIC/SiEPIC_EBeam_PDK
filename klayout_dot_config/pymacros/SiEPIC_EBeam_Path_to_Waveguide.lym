@@ -194,6 +194,29 @@ for o in object_selection:
         num_points = path_obj.num_points()
         points = path_to_points(path_obj)
         
+        ####Check if the first and last segments are manhattan
+        ##if yes then keep OK = -1
+        ##if not then keep it 0
+        if OK == -1:
+          manhattan_check = []
+          for i in range(len(points)):
+            if(i==1 or points[i] == points[-1]):
+             if(points[i][0] == points[i-1][0] or points[i][1] == points[i-1][1]):
+              manhattan_check.append("checked")
+          #if there are two checks in list then it passed the test
+          if(len(manhattan_check)==2):
+            None
+          else:
+            warning_window = pya.QMessageBox()
+            warning_window.setText("Warning: Waveguide segments are not manhattan.")
+            warning_window.setInformativeText("Do you want to Proceed?")
+            warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
+            warning_window.setDefaultButton(pya.QMessageBox.Yes)
+            response = warning_window.exec_()        
+            if(response == pya.QMessageBox.Cancel):
+              OK = 0
+              break
+
         #Checks if any segment is less than the radius value
         # only do this the first time (OK not pushed yet)
         if OK == -1:
@@ -208,10 +231,6 @@ for o in object_selection:
             if(response == pya.QMessageBox.Cancel):
               OK = 0
               break
-#            try:
-#                1 / 0
-#            except ZeroDivisionError as e:
-#                raise Exception('Check path and try again') from e
             else:
               OK = 1
         
