@@ -131,7 +131,7 @@ if sys.platform.startswith('linux'):
   if string.find(version,"2.") &gt; -1:
     import commands
     print("Running INTERCONNECT")
-    commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
+    commands.getstatusoutput('/opt/lumerical/interconnect/bin/interconnect -run %s' % filename2)
 
 elif sys.platform.startswith('darwin'):
   # OSX specific
