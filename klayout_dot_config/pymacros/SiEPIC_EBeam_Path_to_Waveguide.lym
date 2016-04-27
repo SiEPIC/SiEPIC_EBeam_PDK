@@ -175,7 +175,9 @@ if object_selection == []:
 print("* calling find_all_components() - DevRec")
 find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
 
-OK = -1
+OKa = -1 # for manhattan check
+OKb = -1 # for radius check
+
 for o in object_selection:
   if o.is_cell_inst():
     print("Selected object is a cell, rather than a path.  Please select a path.")
@@ -199,7 +201,7 @@ for o in object_selection:
         ####Check if the first and last segments are manhattan
         ##if yes then keep OK = -1
         ##if not then keep it 0
-        if OK == -1:
+        if OKa == -1:
           manhattan_check = []
           for i in range(len(points)):
             if(i==1 or points[i] == points[-1]):
@@ -210,31 +212,33 @@ for o in object_selection:
             None
           else:
             warning_window = pya.QMessageBox()
-            warning_window.setText("Warning: Waveguide segments are not manhattan.")
+            warning_window.setText("Warning: Waveguide segments (first, last) are not Manhattan (vertical, horizontal).")
             warning_window.setInformativeText("Do you want to Proceed?")
             warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
             warning_window.setDefaultButton(pya.QMessageBox.Yes)
             response = warning_window.exec_()        
             if(response == pya.QMessageBox.Cancel):
-              OK = 0
+              OKa = 0
               break
+            else:
+              OKa = 1
 
         #Checks if any segment is less than the radius value
         # only do this the first time (OK not pushed yet)
-        if OK == -1:
+        if OKb == -1:
           segment_length = [sqrt((points[i][0]- points[i-1][0])**2 + (points[i][1] - points[i-1][1])**2) for i in range(len(points)) if i&gt;0]
           if(all(each &gt;= radius/dbu for each in segment_length) == False):
             warning_window = pya.QMessageBox()
-            warning_window.setText("Warning: One of the waveguide segments has insufficient length to accommodate the radius.")
+            warning_window.setText("Warning: One of the waveguide segments has insufficient length to accommodate the desired bend radius.")
             warning_window.setInformativeText("Do you want to Proceed?")
             warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
             warning_window.setDefaultButton(pya.QMessageBox.Yes)
             response = warning_window.exec_()        
             if(response == pya.QMessageBox.Cancel):
-              OK = 0
+              OKb = 0
               break
             else:
-              OK = 1
+              OKb = 1
         
         print("ORIGINAL PTS",points)
         if num_points == 2:
