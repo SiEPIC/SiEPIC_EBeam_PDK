@@ -47,7 +47,7 @@ LayerSi.outside(LayerFP).output("Boundary","devices are out of boundary")
 # Metal heater, M1
 LayerM1=input(11,0)
 LayerM1.width(3.0).output("M1_width","M1 minimum feature size violation; min 3 micron")
-LayerM1.space(3.0).output("M1_space","M1 minimum space violation; min 3 micron")
+LayerM1.space(10.0).output("M1_space","M1 minimum space violation; min 10 micron")
 
 # Metal routing/contact, M2
 LayerM2=input(12,0)
