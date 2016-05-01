@@ -44,7 +44,10 @@ Jaspreet Jhoja 2016/03/11
 
 Lukas Chrostowski           2016/04/19
  - Fix for GUI bug (try...)
- 
+
+Jaspreet Jhoja              2016/05/01
+ - Added Checkables for generating histograms for FSR, gain and Wavelength
+
  """
  
 from pya import *
@@ -69,7 +72,7 @@ Used Following Variables in the data dictionary
 //die_length_x
 //die_length_y
 """
-
+checklist = [] #list of histogram data objects
 objlist = []#list of data objects
 clear = []#12 clears should be there
 topcell = None
@@ -114,14 +117,11 @@ wdg.setFixedSize(650, 480)
 def action(obj):
   if obj.text == '':
     obj.setStyleSheet("border: 2px solid red; background-color: white;")
-  else:
+  try:
+    float(obj.text)
     obj.setStyleSheet("border: 2px solid green; background-color: white;")
-
-#  try:
-#    float(obj.text)
-#    obj.setStyleSheet("border: 2px solid green; background-color: white;")
-#  except Exception:
-#    obj.setStyleSheet("border: 2px solid red; background-color: white;")
+  except Exception:
+    obj.setStyleSheet("border: 2px solid red; background-color: white;")
 
 def editcheck():
   for each in objlist:
@@ -170,7 +170,7 @@ tfform.addWidget(tftitle,0,1)
 tfform.addWidget(option1, 1,2)
 tfform.addWidget(option2, 2,2)
 tfform.addWidget(tflabel1, 3,1)
-tfform.addWidget(tftext1, 3,2,1,10)
+tfform.addWidget(tftext1, 3,2)
 topframe.setLayout(tfform)
 
 def selection(self):
@@ -278,6 +278,33 @@ lf2form.addWidget(lf2text3, 4,1)
 lframe2.setLayout(lf2form)
 
 
+
+
+#Right Frame -section0
+rframe0 = QFrame()
+rframe0.setFrameShape(QFrame.StyledPanel)
+rframe0.setStyleSheet("background-color: mintcream;")
+rf0title = QLabel('Generate Histograms')
+rf0title.setFont(titlefont)
+##Added histograms suppor
+rf0hist1 = QCheckBox('Free Spectral Range')
+rf0hist1.setAccessibleDescription('hist_fsr')
+rf0hist1.setChecked(True)
+rf0hist2 = QCheckBox('Gain')
+rf0hist2.setAccessibleDescription('hist_gain')
+
+rf0hist3 = QCheckBox('Wavelength')
+rf0hist3.setAccessibleDescription('hist_wavelength')
+
+rf0form = QGridLayout()
+rf0form.addWidget(rf0title,0,0)
+rf0form.addWidget(rf0hist1,1,0)
+rf0form.addWidget(rf0hist2,2,0)
+rf0form.addWidget(rf0hist3,3,0)
+rframe0.setLayout(rf0form)
+
+
+
 #Right Frame -section1
 rframe1 = QFrame()
 rframe1.setFrameShape(QFrame.StyledPanel)
@@ -353,12 +380,16 @@ rf3form.addWidget(rf3text2, 3,1)
 rframe3.setLayout(rf3form)
   
 def button(self):
-  global datalist
+  global datalist, checklist
   datalist = []
   for each in objlist:
     datalist.append(each.text)
     datadict[each.accessibleDescription] = each.text
   
+  #Add checklist data
+  for each in checklist:
+    datadict[each.accessibleDescription] = each.checked
+
   #check if all required inputs are present
   if("" in datalist and lf2check.isChecked()==True):
     raise Exception("There are incomplete required fields. Please complete them.")
@@ -390,6 +421,7 @@ def button(self):
     print("Starting Within Wafer MC Simulation")
     mc_dtd(topcell, layout, dbu, datadict)
   
+
   #gui_dtd(topcell, layout, dbu, LayerSiN, LayerTextN, LayerPinRecN, LayerDevRecN, LayerFbrTgtN, LayerErrorN, LayerINTERCONNECTN)
   
 ok = QPushButton("Run Monte Carlo Simulation", rframe3)
@@ -397,17 +429,19 @@ ok.clicked(button)
 
 #Left Vertical splitter
 leftsplitter = QSplitter(Qt.Vertical)
+leftsplitter.addWidget(topframe)
 leftsplitter.addWidget(lframe1)
 leftsplitter.addWidget(lframe2)
 leftsplitter.addWidget(ok)
-leftsplitter.setSizes([500,400,10])
+leftsplitter.setSizes([400,500,400,10])
 
 #Right Vertical Splitter
 rightsplitter = QSplitter(Qt.Vertical)
+rightsplitter.addWidget(rframe0)
 rightsplitter.addWidget(rframe1)
 rightsplitter.addWidget(rframe2)
 rightsplitter.addWidget(rframe3)
-rightsplitter.setSizes([400,400, 400])
+rightsplitter.setSizes([550,400,400, 400])
 
 #Main Window Splitter
 splitter1 = QSplitter(Qt.Horizontal)
@@ -418,7 +452,7 @@ splitter1.setSizes([400,400])
 
 #top frame
 container = QWidget()
-hbox.addWidget(topframe)
+#hbox.addWidget(topframe)
 hbox.addWidget(splitter1)
 objlist.append(tftext1)
 objlist.append(lf1text1)
@@ -433,6 +467,10 @@ objlist.append(rf2text1)
 objlist.append(rf2text2)
 objlist.append(rf3text1)
 objlist.append(rf3text2)
+
+checklist.append(rf0hist1)
+checklist.append(rf0hist2)
+checklist.append(rf0hist3)
 
 #Add Data
 option1.setChecked(True)
