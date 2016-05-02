@@ -131,7 +131,7 @@ if sys.platform.startswith('linux'):
   if string.find(version,"2.") &gt; -1:
     import commands
     print("Running INTERCONNECT")
-    commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
+    commands.getstatusoutput('/opt/lumerical/interconnect/bin/interconnect -run %s' % filename2)
 
 elif sys.platform.startswith('darwin'):
   # OSX specific
@@ -145,7 +145,27 @@ elif sys.platform.startswith('win'):
   # Windows specific code here
   import subprocess
   print("Running INTERCONNECT")
-  subprocess.Popen(args=['C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe', '-run', filename2], shell=True)
+  #check Interconnect installation directory
+  file_path_a = 'C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe'
+  file_path_b = 'C:\\Program Files (x86)\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe'
   
+  if(os.path.isfile(file_path_a)==True):
+    subprocess.Popen(args=[file_path_a, '-run', filename2], shell=True)
+    
+  elif(os.path.isfile(file_path_b)==True):
+    subprocess.Popen(args=[file_path_b, '-run', filename2], shell=True)
+  
+  else:
+    warning_window = pya.QMessageBox()
+    warning_window.setText("Warning: The program could not find INTERCONNECT.")
+    warning_window.setInformativeText("Do you want to specify it manually?")
+    warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
+    warning_window.setDefaultButton(pya.QMessageBox.Yes)
+    response = warning_window.exec_()        
+    if(response == pya.QMessageBox.Yes):
+      dialog = pya.QFileDialog()
+      path = str(dialog.getOpenFileName())
+      path = path.replace('/', '\\')
+      subprocess.Popen(args=[path, '-run', filename2], shell=True)
 </text>
 </klayout-macro>
