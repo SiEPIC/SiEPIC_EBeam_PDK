@@ -8,7 +8,7 @@
  <doc/>
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
- <shortcut/>
+ <shortcut>`</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
  <menu-path>siepic_menu.verification_submenu.end</menu-path>
