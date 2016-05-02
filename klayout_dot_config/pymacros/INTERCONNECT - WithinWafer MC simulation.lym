@@ -40,7 +40,9 @@ Jaspreet Jhoja              2016/03/18
 Lukas Chrostowski           2016/04/19
  - Support for TM polarization in ONA gain
 
-     
+Jaspreet and Lukas             2016/05/01
+ - Support for histograms of FSR, Gain and Wavelength
+
 """
 
 
@@ -247,8 +249,19 @@ def mc_dtd(topcell, layout, dbu, datadict):
       text_lsf += 'mc%s = matrixdataset("mc%s"); # initialize visualizer data, mc%s \n' % (i+1, i+1, i+1)
   text_lsf += 'seed=randreset; \n'
   text_lsf += 'N_total = %s;  \n'  % datadict["number_of_simulations"]  #  GUI INPUT: number of simulations
+  
+  ###Define histograms datasets
+  if(datadict["hist_fsr"]==True):
+    text_lsf += 'fsr_dataset = matrix(1,N_total,1);\n'
+  if(datadict["hist_wavelength"]==True):
+    text_lsf += 'freq_dataset = matrix(1,N_total,1);\n'
+  if(datadict["hist_gain"]==True):
+    text_lsf += 'gain_dataset = matrix(1,N_total,1);\n'
+  
   text_lsf += 'for (simu=1;simu&lt;=N_total;simu=simu+1) {   \n'
   text_lsf += '  switchtodesign; \n'
+  text_lsf += 'setnamed("ONA_1","peak analysis", "single");\n'
+  
   text_lsf += '  select("::Root Element");  \n'
   text_lsf += '  set("die_num",simu);  \n'
   text_lsf += '  run;\n'
@@ -267,13 +280,50 @@ def mc_dtd(topcell, layout, dbu, datadict):
     text_lsf += '  gain = getattribute( getresult("ONA_1","input 1/mode 1/gain"), getattribute(getresult("ONA_1", "input %s/mode 1/gain")) );\n' %( i+1)
     text_lsf += '  plot(wavelength,gain);\n'
     text_lsf += '  holdon;\n'
-  
+    
+#add simulation data to their corresponding datalists  
+  if(datadict["hist_fsr"]==True):
+      text_lsf += 'fsr_select = getresult("ONA_1", "input 1/mode 1/peak/free spectral range");\n'
+      text_lsf += 'fsr_dataset(1,simu) = real(fsr_select.getattribute("TE free spectral range (m)"));\n'
+
+  if(datadict["hist_wavelength"]==True):
+      text_lsf += 'freq_dataset(1,simu) = getresult("ONA_1", "input 1/mode 1/peak/frequency");\n'
+
+  if(datadict["hist_gain"]==True):
+      text_lsf += 'gain_select = getresult("ONA_1", "input 1/mode 1/peak/gain");\n'
+      text_lsf += 'gain_dataset(1,simu) = real(gain_select.getattribute("TE gain (dB)"));\n'
+
+
   text_lsf += '}\n'
   if INTERCONNECT_VISUALIZER:
     for i in range(0, num_detectors):
       text_lsf += 'visualize(mc%s);\n' % (i+1)
   
-  
+#### Display Histograms for the selected components
+#FSR
+  if(datadict["hist_fsr"]==True):
+      text_lsf += 'dataset = fsr_dataset*1e9;\n'  #select fsr dataset defined above
+      text_lsf += 'bin_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n' #define number of bins according to the number of data
+      text_lsf += 'histc_data = histogram(dataset, bin_hist, 1);\n' #generate histogram datapoints with the datapoint and the last parameter is 1 which defines the category as bar plot type
+      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Free Spectral Range (nm)", "Count", "Histogram - FSR");\n'#plot data
+      text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n' #define plot legends
+      
+#wavelength
+  if(datadict["hist_wavelength"]==True):
+      text_lsf += 'dataset = freq_dataset*1e9;\n'
+      text_lsf += 'num_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n'
+      text_lsf += 'histc_data = histogram(dataset, num_hist, 1);\n'
+      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Wavelength (nm)", "Count", "Histogram - Peak wavelength");\n'
+      text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n'
+
+#Gain
+  if(datadict["hist_gain"]==True):
+      text_lsf += 'dataset = gain_dataset;\n'
+      text_lsf += 'num_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n'
+      text_lsf += 'histc_data = histogram(dataset, num_hist, 1);\n'
+      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Gain (dB)", "Count", "Histogram - Peak gain");\n'
+      text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n'
+
   file.write (text_lsf)
   file.close()
   
