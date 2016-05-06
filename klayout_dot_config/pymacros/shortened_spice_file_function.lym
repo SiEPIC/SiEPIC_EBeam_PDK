@@ -115,121 +115,140 @@
   lumerical_list = find_io_pins(topcell, optical_pins)
   
   
+  #Check if there is one laser
+  Proceed = 0
+  laser_count = len([1 for each in lumerical_list if(each[1]=='LASER')])
+  if(laser_count==1):
+    Proceed = 1
   
-  #extract grating couplers as they are the only ones connected to an input or output:
-  gc_list = [[each,each.pins] for each in optical_components if(each.component == 'ebeam_gc_te1550')]
-  
-  #make detector or laser string as a parent_node of the extracted gcs which will be used as a reference
-  #to identify connected GCs
-  
-  for items in lumerical_list:
-    x_ = []
-    y_ = []
-    if(items[0].p1.x &lt; items[0].p2.x): 
-      x_ = [items[0].p1.x, items[0].p2.x]
-    else:
-      x_ = [items[0].p2.x, items[0].p1.x]
+  if(Proceed == 0):
+    #show error and teminate
+    try:
+       pya.MessageBox.warning("Check Laser Error", "There is more than one Laser in the layout.\nPlease make sure that there is only one laser.", pya.MessageBox.Ok)
+       raise ValueError("IGNORE THIS ERROR. MANUALLY RAISED")
+    except Exception:
+      sys.exit(1)
+
+  #we need to raise an error rather than showing a message box warning because it would not stop the code from running and will throw errors in the script we
+  #are running this code from
+    #pya.MessageBox.warning("Check Laser Error", "There is more than one Laser in the layout.\nPlease make sure that there is only one laser.", pya.MessageBox.Ok)
     
-    if(items[0].p1.y &lt; items[0].p2.y):
-      y_ = [items[0].p1.y, items[0].p2.y]
-    else:
-      y_ = [items[0].p2.y, items[0].p1.y]
-          
-    for each_item in gc_list:
-      for pin in each_item[1]:
-        if(optical_pins[pin].x &gt; x_[0] and optical_pins[pin].x &lt; x_[1] and optical_pins[pin].y &gt; y_[0] and optical_pins[pin].y &lt; y_[1]):
-          gc_ = each_item[0]
-          for i in range(len(list_of_obj)):
-            if(list_of_obj[i].current_node == gc_):
-              list_of_obj[i].set_parent_node(items[1])
-              print(gc_)
-          break
-    
-    
-  #Make groups based on the connections of nodes
-  #make a copy
-  grouped_items = []
-  copied_nodes = set(list_of_obj)
-  
-  while copied_nodes:
-    #get a random node
-    random_node = copied_nodes.pop()
-    
-    #create a set to store all the connected nodes
-    group = set([random_node])
-    
-    #store the iterable items
-    queue = [random_node]
-    
-    while queue:
+  elif(Proceed == 1):
       
-      #get first element from the list
-      qnode = queue.pop(0)
-      
-      #get child nodes
-      children = qnode.child_nodes
-      
-      new_children = set()
-      #form a set of child nodes with their corresponding connected_object objects
-      for each in list_of_obj:
-        if(each.current_node in children):
-          new_children.update([each])
-      
-      #remove children already opened
-      new_children.difference_update(group)
-      
-      #remove the remaining nodes from the global set
-      copied_nodes.difference_update(new_children)
-      
-      #add them to the group of connected nodes
-      group.update(new_children)
-      
-      #add them to the queue
-      queue.extend(new_children)
+    #extract grating couplers as they are the only ones connected to an input or output:
+    gc_list = [[each,each.pins] for each in optical_components if(each.component == 'ebeam_gc_te1550')]
     
-    grouped_items.append(group)
+    #make detector or laser string as a parent_node of the extracted gcs which will be used as a reference
+    #to identify connected GCs
     
-  #make a list of groups
-  temp_group_list = [list(each) for each in grouped_items]
-  
-  final_group_list=[]
-  #remove the groups with no detectors/lasers and store them in final_group_list
-  for each in temp_group_list:
-      if(any(x.parent_node == "DETECTOR" or x.parent_node == "LASER" for x in each) == True):
-        temp = [i.current_node for i in each]
-        final_group_list = final_group_list + temp
-  
-  
-  #get separate lists of fetched optical_waveguides and optical_components
-  optical_waveguideF = []
-  optical_componentF = []
-  
-  for each in final_group_list:
-    if(isinstance(each,Optical_waveguide)):
-      optical_waveguideF.append(each)
-    elif(isinstance(each,Optical_component)):
-      optical_componentF.append(each)
-  
+    for items in lumerical_list:
+      x_ = []
+      y_ = []
+      if(items[0].p1.x &lt; items[0].p2.x): 
+        x_ = [items[0].p1.x, items[0].p2.x]
+      else:
+        x_ = [items[0].p2.x, items[0].p1.x]
+      
+      if(items[0].p1.y &lt; items[0].p2.y):
+        y_ = [items[0].p1.y, items[0].p2.y]
+      else:
+        y_ = [items[0].p2.y, items[0].p1.y]
+            
+      for each_item in gc_list:
+        for pin in each_item[1]:
+          if(optical_pins[pin].x &gt; x_[0] and optical_pins[pin].x &lt; x_[1] and optical_pins[pin].y &gt; y_[0] and optical_pins[pin].y &lt; y_[1]):
+            gc_ = each_item[0]
+            for i in range(len(list_of_obj)):
+              if(list_of_obj[i].current_node == gc_):
+                list_of_obj[i].set_parent_node(items[1])
+                print(gc_)
+            break
+      
+      
+    #Make groups based on the connections of nodes
+    #make a copy
+    grouped_items = []
+    copied_nodes = set(list_of_obj)
     
-  ##COPY PASTES THE FOLLOWING CODE TO TEST WHETHER IT GENERATES SPICE FILE W/ THE 
-  ##"generate_Spice_file" FUNCTION  
-  
-  #Keep only the connected pins
-  pins_indexes = [] #indexes of pins to keep
-  for each in final_group_list:
-    if(isinstance(each,Optical_component)):
-      pins_indexes = each.pins + pins_indexes
-  #now remove the pins which are not associated with the connected group
-  optical_pinsF = []
-  for each in optical_pins:
-    if(each.idx in pins_indexes):
-      optical_pinsF.append(each)
-       
-  optical_pins = []
-  optical_pins = optical_pinsF
-  
-  
-  # Output the Spice netlist:
-  return generate_Spice_file(topcell, optical_waveguideF, optical_componentF)
+    while copied_nodes:
+      #get a random node
+      random_node = copied_nodes.pop()
+      
+      #create a set to store all the connected nodes
+      group = set([random_node])
+      
+      #store the iterable items
+      queue = [random_node]
+      
+      while queue:
+        
+        #get first element from the list
+        qnode = queue.pop(0)
+        
+        #get child nodes
+        children = qnode.child_nodes
+        
+        new_children = set()
+        #form a set of child nodes with their corresponding connected_object objects
+        for each in list_of_obj:
+          if(each.current_node in children):
+            new_children.update([each])
+        
+        #remove children already opened
+        new_children.difference_update(group)
+        
+        #remove the remaining nodes from the global set
+        copied_nodes.difference_update(new_children)
+        
+        #add them to the group of connected nodes
+        group.update(new_children)
+        
+        #add them to the queue
+        queue.extend(new_children)
+      
+      grouped_items.append(group)
+      
+    #make a list of groups
+    temp_group_list = [list(each) for each in grouped_items]
+    
+    final_group_list=[]
+    #remove the groups with no detectors/lasers and store them in final_group_list
+    for each in temp_group_list:
+        if(any(x.parent_node == "DETECTOR" or x.parent_node == "LASER" for x in each) == True):
+          temp = [i.current_node for i in each]
+          final_group_list = final_group_list + temp
+    
+    
+    #get separate lists of fetched optical_waveguides and optical_components
+    optical_waveguideF = []
+    optical_componentF = []
+    
+    for each in final_group_list:
+      if(isinstance(each,Optical_waveguide)):
+        optical_waveguideF.append(each)
+      elif(isinstance(each,Optical_component)):
+        optical_componentF.append(each)
+    
+      
+    ##COPY PASTES THE FOLLOWING CODE TO TEST WHETHER IT GENERATES SPICE FILE W/ THE 
+    ##"generate_Spice_file" FUNCTION  
+    
+    #Keep only the connected pins
+    pins_indexes = [] #indexes of pins to keep
+    for each in final_group_list:
+      if(isinstance(each,Optical_component)):
+        pins_indexes = each.pins + pins_indexes
+    #now remove the pins which are not associated with the connected group
+    optical_pinsF = []
+    for each in optical_pins:
+      if(each.idx in pins_indexes):
+        optical_pinsF.append(each)
+         
+    optical_pins = []
+    optical_pins = optical_pinsF
+    
+    
+    # Output the Spice netlist:
+    return generate_Spice_file(topcell, optical_waveguideF, optical_componentF)
 </text>
 </klayout-macro>
