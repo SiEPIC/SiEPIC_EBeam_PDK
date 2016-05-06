@@ -115,7 +115,7 @@ else:
     Waveguide_Type = Waveguide_Types[0]
   else:
     lv.transaction("Path to Waveguide: waveguide type selection")
-    print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
+    print("Waveguide Type taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Waveguide_Type, cell.name) )
     cell.set_property("Waveguide_Type", Waveguide_Type)
     lv.commit()
 
