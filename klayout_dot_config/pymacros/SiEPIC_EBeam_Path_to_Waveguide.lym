@@ -110,7 +110,14 @@ if Waveguide_Type and Waveguide_Type in Waveguide_Types:
 else:
   Waveguide_Type = pya.InputDialog.ask_item("Waveguide Type", "Choose the type of waveguide to use.  \nThe value will be saved as a user property in cell {%s}." % cell.name, Waveguide_Types, 0)
   print("Waveguide type taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Waveguide_Type, cell.name) )
-  cell.set_property("Waveguide_Type", Waveguide_Type)
+  # Record a transaction, to enable "undo"
+  if Waveguide_Type == None:
+    Waveguide_Type = Waveguide_Types[0]
+  else:
+    lv.transaction("Path to Waveguide: waveguide type selection")
+    print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
+    cell.set_property("Waveguide_Type", Waveguide_Type)
+    lv.commit()
 
 # Configure the library to use for the waveguide type.
 if Waveguide_Type == "ROUND_PATH":
@@ -131,9 +138,11 @@ else:
   if radius == None:
     radius = 10
   else:
+    lv.transaction("Path to Waveguide: waveguide radius selection")
     print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
     cell.set_property("radius", str(radius))
-      
+    lv.commit()
+
 # How close must a waveguide be to a pin for it to snap:
 waveguide_snap_dist = 10
 
@@ -372,7 +381,7 @@ for o in object_selection:
 n_deleted = len(to_delete)
 
 if n_deleted == 0:
-  if OK != 0:
+  if (OKa != 0) &amp; (OKb != 0):
     v = pya.MessageBox.warning("No path selected", "No path selected.\nPlease select a path. \nIt will get converted to a waveguide.", pya.MessageBox.Ok)
 else:
 
