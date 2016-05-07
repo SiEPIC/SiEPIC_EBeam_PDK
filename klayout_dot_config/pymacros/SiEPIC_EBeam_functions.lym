@@ -1155,7 +1155,7 @@ def connected_component(i,j):
       print(component1_index)
 
 
-def generate_Spice_file(topcell, optical_waveguides, optical_components):
+def generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins):
   # list all Optical_component objects from an array
   # input array, optical_components
   # example output:         
