@@ -97,7 +97,7 @@ def mc_dtd(topcell, layout, dbu, datadict):
   optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
     
   # Output the Spice netlist:
-  text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
+  text_Spice, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
   print(text_Spice)
   
   if sys.platform.startswith("win"):
