@@ -1155,7 +1155,7 @@ def connected_component(i,j):
       print(component1_index)
 
 
-def generate_Spice_file(topcell, optical_waveguides, optical_components):
+def generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins):
   # list all Optical_component objects from an array
   # input array, optical_components
   # example output:         
@@ -1657,5 +1657,23 @@ def waveguide_set_target_length():
   # - Dialog prompts user for a target length, and to click on an edge to select shape and edge to move
   # - Newton search: calculate length (area method) then move edge; technique is general for any waveguide curve function
   pass
-    </text>
+    
+def check_pdk_directory():
+  import os
+  #file list
+  file_list = []
+  #get username
+  username = os.path.dirname(os.path.realpath(__file__)).split('\\')[2]
+  #get path to global directory
+  path = r"C:\Users\%s\AppData\Roaming\KLayout (64bit)\pymacros"%(username)
+  for dirName, subdirList, fileList in os.walk(path):
+    for fname in fileList:
+        file_list.append('%s' % fname)
+  for each in file_list:
+    #check if SiEPIC functions file is in the list
+    if('SiEPIC_EBeam_functions' in each):
+      #show warning message
+      pya.MessageBox.warning("Incorrect File Directory", "PDK installed in the Global folder.\nIt should be installed in the KLayout Configuration folder: \n"+ r"C:\Users\%s\KLayout\pymacros"%(username), pya.MessageBox.Ok)
+
+  </text>
 </klayout-macro>
