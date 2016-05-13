@@ -136,7 +136,8 @@
   elif(Proceed == 1):
       
     #extract grating couplers as they are the only ones connected to an input or output:
-    gc_list = [[each,each.pins] for each in optical_components if(each.component == 'ebeam_gc_te1550')]
+    gc_list = [[each,each.pins] for each in optical_components if('_gc_' in each.component)]
+#    print(gc_list[0][0].component])
     
     #make detector or laser string as a parent_node of the extracted gcs which will be used as a reference
     #to identify connected GCs
