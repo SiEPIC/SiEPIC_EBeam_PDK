@@ -79,6 +79,9 @@ Lukas Chrostowski           2015/12/9
 Lukas Chrostowski           2016/04/19
  - Support for TM polarization in Netlist and laser
 
+Lukas Chrostowski           2016/05/20
+ - flag_waveguide_error, flag_component_error: verification flags on the layout are removed
+
 """
 
 SiEPIC_Version = '0.1.6'
@@ -1327,7 +1330,7 @@ def flag_waveguide_error(dpoints, text, optical_waveguide, topcell):
   layout_errors.append(Layout_error(text, x, y) )
   print(text)
   if 'wtext' in globals():
-    topcell.shapes(LayerErrorN).insert(path)
+#    topcell.shapes(LayerErrorN).insert(path)
     wtext.insertHtml('%s&lt;br&gt;' %text)
 
 
@@ -1439,7 +1442,7 @@ def flag_component_error(box, text, x, y):
   layout_errors.append(Layout_error(text, x, y) )
   print(text)
   if 'wtext' in globals():
-    topcell.shapes(LayerErrorN).insert(box)
+#    topcell.shapes(LayerErrorN).insert(box)
     wtext.insertHtml('%s&lt;br&gt;' %text)
 
 
