@@ -103,9 +103,9 @@ shape = cell.shapes(TextLayerN).insert(text)
 shape.text_size = 3*dbu
 
 # Ring resonator PCell
-r = 5
+r = 3
 wg_width = 0.5
-g = 0.1
+g = 0.05
 pcell = ly.create_cell("DirectionalCoupler_HalfRing_Straight", "SiEPIC", { "r": r, "w": wg_width, "g": g, "silayer": LayerSi, "bustype": 0 } )
 print ("Cell: pcell: #%s" % pcell.cell_index())
 y_ring = 127*3/2
