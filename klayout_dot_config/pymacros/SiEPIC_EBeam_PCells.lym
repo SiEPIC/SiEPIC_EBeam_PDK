@@ -747,6 +747,7 @@ def layout_arc_wg_dbu(cell, LayerSiN, x, y, r, w, theta_start, theta_stop):
   for i in range(npoints, -1, -1):
     pts.append(pya.Point.from_dpoint(pya.DPoint((x+(r-w/2)*cos(i*da+th))/1, (y+(r-w/2)*sin(i*da+th))/1)))
   cell.shapes(LayerSiN).insert(pya.Polygon(pts))
+  return [pts[0], pts[-1]]
 
 
 def layout_Ring(cell, layer, x, y, r, w, npoints):
@@ -2141,7 +2142,201 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
 
     return "ebeam_taper_te1550(" + ('%.3f-%.3f-%.3f' % (self.wg_width1,self.wg_width2,self.wg_length) ) + ")"
 
+#classify this coee
+class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the DirectionalCoupler_SeriesRings.
+  Consists of a 4 racetrack resonators.
+  """
+  def __init__(self):
 
+    # Important: initialize the super class
+    super(DirectionalCoupler_SeriesRings, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g1", self.TypeDouble, "Gap between In-through side (Lower) and first resonator", default = 0.2)
+    self.param("g2", self.TypeDouble, "Gap between first and second resonator", default = 0.2)
+    self.param("g3", self.TypeDouble, "Gap between second and third resonator", default = 0.2)
+    self.param("g4", self.TypeDouble, "Gap between third and fourth resonator", default = 0.2)
+    self.param("g5", self.TypeDouble, "Gap between fourth resonator and Drop-Add side (Upper)", default = 0.2)  
+    self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
+    self.param("L", self.TypeDouble, "straight path length for 3rd and 4th resonator", default = 0.0)
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "DirectionalCoupler_SeriesRings(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    from math import pi, cos, sin
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    TextLayerN = ly.layer(self.textl)
+
+    
+    w = int(round(self.w/dbu))
+    r = int(round(self.r/dbu))
+    Lc = int(round(self.Lc/dbu))
+    L = int(round(self.L/dbu))
+    g1 = int(round(self.g1/dbu))
+    g2 = int(round(self.g2/dbu))
+    g3 = int(round(self.g3/dbu))
+    g4 = int(round(self.g4/dbu))
+    g5 = int(round(self.g5/dbu))
+
+    x = 0
+    y = 0
+    
+    #Through In Sections
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w,  90,180)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 360,270)
+    if Lc &gt; 0:
+      wg1 = pya.Box(x-Lc/2, obj1[-1].y, x+Lc/2, obj1[-1].y + w)
+      self.cell.shapes(LayerSiN).insert(wg1)
+    
+    y = y + w+ g1 + 2*r
+    
+    #racetrack a
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 90, 270)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 90)
+    if Lc &gt; 0:
+      a1 = pya.Box(x-Lc/2, obj1[-1].y, x+Lc/2, obj1[-1].y + w)
+      self.cell.shapes(LayerSiN).insert(a1)
+      a2 = pya.Box(x-Lc/2, obj2[-1].y, x+Lc/2, obj2[-1].y - w)
+      self.cell.shapes(LayerSiN).insert(a2)
+    
+    y = y + w + g2 + 2*r
+    
+    #racetrack b
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 90, 270)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 90)
+    if Lc &gt; 0:
+      a1 = pya.Box(x-Lc/2, obj1[-1].y, x+Lc/2, obj1[-1].y + w)
+      self.cell.shapes(LayerSiN).insert(a1)
+      a2 = pya.Box(x-Lc/2, obj2[-1].y, x+Lc/2, obj2[-1].y - w)
+      self.cell.shapes(LayerSiN).insert(a2)
+    
+    y = y + w + g3 + 2*r
+    #racetrack c
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 90)
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y+L, r, w, 90, 180)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y+L, r, w, 0, 90)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 360)
+    if Lc &gt; 0:
+      a1 = pya.Box(x-Lc/2, obj1[-1].y, x+Lc/2, obj1[-1].y + w)
+      self.cell.shapes(LayerSiN).insert(a1)
+      a2 = pya.Box(x-Lc/2, obj2[-1].y, x+Lc/2, obj2[-1].y - w)
+      self.cell.shapes(LayerSiN).insert(a2)
+    
+    if L &gt;0:
+      a1 = pya.Box(obj1[-1].x - r - w/2 , obj2[-1].y + r-w/2, obj1[-1].x - r + w/2 , obj2[-1].y + r + L - w/2)
+      self.cell.shapes(LayerSiN).insert(a1)
+      a2 = pya.Box(obj2[-1].x + r - w/2 , obj2[-1].y + r-w/2, obj2[-1].x + r + w/2 , obj2[-1].y + r + L - w/2)
+      self.cell.shapes(LayerSiN).insert(a2)
+    
+    
+    y = y + w + g4 + 2*r + L
+    #racetrack d
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 90)
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y+L, r, w, 90, 180)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y+L, r, w, 0, 90)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 360)
+    if Lc &gt; 0:
+      a1 = pya.Box(x-Lc/2, obj1[-1].y, x+Lc/2, obj1[-1].y + w)
+      self.cell.shapes(LayerSiN).insert(a1)
+      a2 = pya.Box(x-Lc/2, obj2[-1].y, x+Lc/2, obj2[-1].y - w)
+      self.cell.shapes(LayerSiN).insert(a2)
+    
+    if L &gt;0:
+      a1 = pya.Box(obj1[-1].x - r - w/2 , obj2[-1].y + r-w/2, obj1[-1].x - r + w/2 , obj2[-1].y + r + L - w/2)
+      self.cell.shapes(LayerSiN).insert(a1)
+      a2 = pya.Box(obj2[-1].x + r - w/2 , obj2[-1].y + r-w/2, obj2[-1].x + r + w/2 , obj2[-1].y + r + L - w/2)
+      self.cell.shapes(LayerSiN).insert(a2)
+      
+    y = y + w + g5 + 2*r + L
+    #racetrack d
+    obj1 = layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 90)
+    obj2 = layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 360)
+    if Lc &gt; 0:
+      a1 = pya.Box(x-Lc/2, obj2[-1].y, x+Lc/2, obj2[-1].y - w)
+      self.cell.shapes(LayerSiN).insert(a1)
+    
+        # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+        
+        # Pins on the Drop - Add side:
+    pin = pya.Path([pya.Point(-r-Lc/2, y+pin_length/2), pya.Point(-r-Lc/2, y-pin_length/2)], w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(-r-Lc/2, y)
+    text = pya.Text ("pin2", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    
+    pin = pya.Path([pya.Point(r+Lc/2, y+pin_length/2), pya.Point(r+Lc/2, y-pin_length/2)], w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(r+Lc/2, y)
+    text = pya.Text ("pin4", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    
+    
+    
+        # Create the waveguide
+    #wg1 = pya.Box(-r-w/2-w-Lc/2, -w/2, r+w/2+w+Lc/2, w/2)
+    #cell.shapes(LayerSiN).insert(wg1)
+    
+        # Pins on the In - Through side:
+    pin = pya.Path([pya.Point(-r-Lc/2, 0+pin_length/2), pya.Point(-r-Lc/2, 0-pin_length/2)], w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(-r-Lc/2, 0)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    
+    pin = pya.Path([pya.Point(r+Lc/2, 0+pin_length/2), pya.Point(r+Lc/2, 0-pin_length/2)], w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(r+Lc/2, 0)
+    text = pya.Text ("pin3", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    
+        # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    dev = pya.Box(-r-w/2-w-Lc/2, -w/2-w, r+w/2+w+Lc/2, y )
+    self.cell.shapes(LayerDevRecN).insert(dev)
+    
+        # Compact model information
+    t = pya.Trans(r/4, 0)
+    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.017/dbu
+    t = pya.Trans(r/4, r/4)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_dc_seriesrings', t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.017/dbu
+    t = pya.Trans(r/4, r/2)
+      #  text = pya.Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% (self.w,self.g,int(self.r)), t)
+    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu'% (self.w,self.g,int(self.r)), t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.017/dbu
+    
+    print("Done drawing the layout for - DirectionalCoupler_SeriesRings: %.3f-%g" % (self.r, self.g) )
 
 
 class SiEPIC(pya.Library):
@@ -2172,6 +2367,8 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("ebeam_taper_te1550", ebeam_taper_te1550())
     self.layout().register_pcell("SWG_waveguide", SWG_waveguide())
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
+    self.layout().register_pcell("DirectionalCoupler_SeriesRings", DirectionalCoupler_SeriesRings())
+    
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
