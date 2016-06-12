@@ -98,6 +98,9 @@ Lukas Chrostowski           2016/05/27
  - SWG_waveguide
  - SWG_to_strip_waveguide
 
+Lukas Chrostowski           2016/06/11
+ - spiral
+
 """
 
 import pya
@@ -107,6 +110,178 @@ import math
 MODULE_NUMPY = False
 
 dbu = 0.001
+
+
+class spiral(pya.PCellDeclarationHelper):
+  """
+  Input: 
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(spiral, self).__init__()
+
+    # declare the parameters
+    self.param("length", self.TypeDouble, "Target Waveguide length", default = 10.0)     
+    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5)     
+    self.param("min_radius", self.TypeDouble, "Minimum radius (microns)", default = 5)     
+    self.param("wg_spacing", self.TypeDouble, "Waveguide spacing (microns)", default = 1)     
+    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "spiral_%s-%.3f-%.3f-%.3f" % \
+    (self.length, self.wg_width, self.min_radius, self.wg_spacing)
+  
+  def coerce_parameters_impl(self):
+    pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return False
+    
+  def produce_impl(self):
+  
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+
+    LayerSi = self.layer
+    LayerSiN = ly.layer(LayerSi)
+    LayerSiSPN = ly.layer(LayerSiSP)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+
+    # draw spiral
+    from math import pi, cos, sin, log, sqrt
+    
+    # Archimedes spiral
+    # r = b + a * theta
+    b = self.min_radius
+    spacing = self.wg_spacing+self.wg_width;
+    a = 2*spacing/(2*pi)
+
+
+    # area, length, turn tracking for spiral
+    area = 0
+    spiral_length = 0
+    turn = -1
+    
+    while spiral_length &lt; self.length:
+      turn +=1
+
+      # Spiral #1
+      pts = []
+      # local radius:
+      r = 2*b + a * turn * 2 * pi - self.wg_width/2
+      # number of points per circle:
+      npoints = int(points_per_circle(r))
+      # increment, in radians, for each point:
+      da = 2 * pi / npoints  
+      # draw the inside edge of spiral
+      for i in range(0, npoints+1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(pya.Point.from_dpoint(pya.DPoint(xa/dbu, ya/dbu)))
+      # draw the outside edge of spiral
+      r = 2*b + a * turn * 2 * pi + self.wg_width/2
+      npoints = int(points_per_circle(r))
+      da = 2 * pi / npoints  
+      for i in range(npoints, -1, -1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(pya.Point.from_dpoint(pya.DPoint(xa/dbu, ya/dbu)))
+      polygon = pya.Polygon(pts)
+      area += polygon.area()
+      self.cell.shapes(LayerSiN).insert(polygon)
+
+      # Spiral #2
+      pts = []
+      # local radius:
+      r = 2*b + a * turn * 2 * pi - self.wg_width/2 - spacing
+      # number of points per circle:
+      npoints = int(points_per_circle(r))
+      # increment, in radians, for each point:
+      da = 2 * pi / npoints  
+      # draw the inside edge of spiral
+      for i in range(0, npoints+1):
+        t = i*da + pi
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(pya.Point.from_dpoint(pya.DPoint(xa/dbu, ya/dbu)))
+      # draw the outside edge of spiral
+      r = 2*b + a * turn * 2 * pi + self.wg_width/2  - spacing
+      npoints = int(points_per_circle(r))
+      da = 2 * pi / npoints  
+      for i in range(npoints, -1, -1):
+        t = i*da + pi
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(pya.Point.from_dpoint(pya.DPoint(xa/dbu, ya/dbu)))
+      polygon = pya.Polygon(pts)
+      area += polygon.area()
+      self.cell.shapes(LayerSiN).insert(polygon)
+
+      # waveguide length:
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
+      print("spiral length: %s" % spiral_length)
+
+
+    # Centre S-shape connecting waveguide        
+    layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
+    layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
+    
+
+    # Pins on the waveguide:
+    pin_length = 200
+    x = -(2*b + a * (turn+1) * 2 * pi)/dbu
+    w = self.wg_width / dbu
+    t = pya.Trans(x,0)
+    pin = pya.Path([pya.Point(0,-pin_length/2), pya.Point(0,pin_length/2)], w)
+    pin_t = pin.transformed(t)
+    self.cell.shapes(LayerPinRecN).insert(pin_t)
+    text = pya.Text ("pin2", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    x = (2*b + a * (turn+1) * 2 * pi)/dbu
+    t = pya.Trans(x,0)
+    pin = pya.Path([pya.Point(0,-pin_length/2), pya.Point(0,pin_length/2)], w)
+    pin_t = pin.transformed(t)
+    self.cell.shapes(LayerPinRecN).insert(pin_t)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Compact model information
+    t = pya.Trans(0, 0)
+    text = pya.Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = pya.Trans(0, w*2)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_wg_strip_1550', t)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = pya.Trans(0, -w*2)
+    text = pya.Text \
+      ('Spice_param:wg_length=%.3fu wg_width=%.3fu min_radius=%.3fu wg_spacing=%.3fu' %\
+      (spiral_length, self.wg_width, (self.min_radius), self.wg_spacing), t )
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    npoints = int(points_per_circle(x) /100 )
+    da = 2 * pi / npoints # increment, in radians
+    r=abs(x) + 2 * self.wg_width/dbu
+    pts = []
+    for i in range(0, npoints+1):
+      pts.append(pya.Point.from_dpoint(pya.DPoint(r*cos(i*da), r*sin(i*da))))
+    self.cell.shapes(LayerDevRecN).insert(pya.Polygon(pts))
+
 
 
 
@@ -2172,6 +2347,7 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("ebeam_taper_te1550", ebeam_taper_te1550())
     self.layout().register_pcell("SWG_waveguide", SWG_waveguide())
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
+    self.layout().register_pcell("spiral", spiral())
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.

@@ -516,12 +516,12 @@ def points_per_circle(radius):
   # radius in microns
 #  import numpy as n
   error=0.5e-3 # 0.5 nm
-  if radius &gt; 0:
+  if radius &gt; 0.1:
     th = math.acos(2 * (1 - error / radius)**2 - 1)
     num_vertices = math.ceil(2*math.pi/th)
     return num_vertices
   else:
-    return 10
+    return 100
 
 def path_to_points(path):
   # function to convert a KLayout Path object to an array of points
