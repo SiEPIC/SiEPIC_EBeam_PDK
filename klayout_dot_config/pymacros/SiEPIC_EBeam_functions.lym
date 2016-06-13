@@ -419,14 +419,18 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       # find pin labels that are inside the path:
       for p1 in range(0,len(pin_info2)):
         for p2 in range(0,len(path_shape)):
-          check_text_in_pin = check_point_in_segment( \
-            pya.Point( *path_points[p2][0] ), \
-            pya.Point( *path_points[p2][1] ), \
-            pya.Point( pin_info2[p1].pin_x, pin_info2[p1].pin_y ) )
+          # Check if the pin text label is somewhere along the pin path
+#          check_text_in_pin = check_point_in_segment( \
+#            pya.Point( *path_points[p2][0] ), \
+#            pya.Point( *path_points[p2][1] ), \
+#            pya.Point( pin_info2[p1].pin_x, pin_info2[p1].pin_y ) )
+          # Check if the pin text label is exactly in the middle of pin path
+          points = path_points[p2]  
+          x = (points[0][0]+points[1][0])/2   # midpoint of pin path
+          y = (points[0][1]+points[1][1])/2
+          check_text_in_pin = ( x == pin_info2[p1].pin_x ) &amp; \
+                              ( y == pin_info2[p1].pin_y )
           if check_text_in_pin:
-            points = path_points[p2]  
-            x = (points[0][0]+points[1][0])/2   # midpoint of pin path
-            y = (points[0][1]+points[1][1])/2
             pin_idx = len(optical_pins)
             optical_pins.append (Optical_pin (pin_idx, points, component_idx, x, y, 1, pin_info2[p1].pin_text) )
             optical_components[component_idx].npins += 1
@@ -865,6 +869,7 @@ def check_segments_collinear_overlapping( segment1, segment2 ):
     segment2 = [ c, d ]
     print(check_segments_collinear_overlapping( segment1, segment2 ))
   """  
+
   # check for one of the segment2 points being inside segment1
   check_between1 = check_point_in_segment( segment1[0], segment1[1], segment2[0] ) | \
                   check_point_in_segment( segment1[0], segment1[1], segment2[1] )
@@ -874,8 +879,9 @@ def check_segments_collinear_overlapping( segment1, segment2 ):
 
   # check that they have the same direction
   is_slope_equal = check_segments_same_direction( segment1, segment2 )
+#  print( "check_segments_collinear_overlapping: %s, %s, %s, %s: %s, %s, %s" % (segment1[0], segment1[1], segment2[0], segment2[1], check_between1, check_between2, is_slope_equal) )
   
-  return check_between1 and check_between2 and is_slope_equal
+  return (check_between1 or check_between2) and is_slope_equal
 
 
 def identify_all_nets(optical_pins, optical_waveguides, optical_components):
@@ -907,6 +913,7 @@ def identify_all_nets(optical_pins, optical_waveguides, optical_components):
       y1 = (p1.points[0][1]+p1.points[1][1])/2
       x2 = (p2.points[0][0]+p2.points[1][0])/2   # midpoint of pin path
       y2 = (p2.points[0][1]+p2.points[1][1])/2
+      #print("compare (%s, %s) - (%s, %s): %s %s, %s" % (x1, y1, x2, y2, (x1 == x2), (y1 == y2), check) )
       check2 = (x1 == x2) and (y1 == y2)
       if check and check2:  # found connected pins:
         # make a new optical net

@@ -81,7 +81,7 @@ dbu = 1 / ly.dbu
 
 # clean all cells within "cell"
 ly.prune_subcells(cell.cell_index(), 10)
-delete_extra_top_cells(cell)
+#delete_extra_top_cells(cell)
 
 # Layer mapping:
 LayerSi = pya.LayerInfo(1, 0)
