@@ -1947,6 +1947,11 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     
     # Pins on the bus waveguide side:
     pin_length = 200
+    if length &lt; pin_length+1:
+      pin_length = int(length/3)
+      pin_length = math.ceil(pin_length / 2.) * 2
+    if pin_length == 0:
+      pin_length = 2
 
     t = pya.Trans(-length/2,0)
     pin = pya.Path([pya.Point(-pin_length/2, 0), pya.Point(pin_length/2, 0)], w)
