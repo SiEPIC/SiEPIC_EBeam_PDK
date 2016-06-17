@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Launch Lumerical INTERCONNECT</description>
+ <description>Update netlist in Lumerical INTERCONNECT</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -19,19 +19,16 @@
 
 """
 This file is part of the SiEPIC_EBeam_PDK
-by Lukas Chrostowski (c) 2015
+by Lukas Chrostowski (c) 2016
 
 This Python file extract the circuit netlist from the physical layout, saves it to Spice file, 
 and launches Lumerical INTERCONNECT for circuit simulations.
 
 Version history:
 
-Lukas Chrostowski           2015/11/19
- - initial version
- - generating a Spice netlist including Optical Network Analyzer; launch Lumerical INTERCONNECT simulation
-
 Lukas Chrostowski           2016/06/11
- - save INTERCONNECT file.
+ - initial version
+ - ask user for INTERCONNECT project, generate netlist, launch INTERCONNECT and update.
   
 """
 
@@ -46,6 +43,20 @@ import sys
 version = sys.version
 
 import string
+
+if 'filename_icp' in globals():
+  pass
+else:
+  filename_icp = "."
+
+# Ask user for the INTERCONNECT project to update:
+v=pya.FileDialog.ask_open_file_names("Update INTERCONNECT project",filename_icp,"INTERCONNECT Project (*.icp)")
+if v==None:
+  import sys
+  sys.exit()
+else:
+  filename_icp = v[0]
+
 
 SIMULATION = 1    # Regular INTERCONNECT simulation
 
@@ -102,7 +113,6 @@ else:
   filename = '/tmp/%s_main.spi' % topcell.name
   filename_subckt = '/tmp/%s.spi' % topcell.name
   filename2 = '/tmp/%s.lsf' % topcell.name
-  filename_icp = '/tmp/%s.icp' % topcell.name
 
 text_Spice_main += '.INCLUDE %s\n\n' % (filename_subckt)
 
@@ -116,16 +126,9 @@ file.close()
 
 # Write the Lumerical INTERCONNECT start-up script.
 file = open(filename2, 'w')
-text_lsf = 'switchtolayout;\n'
-text_lsf += 'deleteall;\n'
-text_lsf += 'importnetlist("%s");\n' % filename
-text_lsf += 'addproperty("::Root Element::%s", "MC_uniformity_thickness", "wafer", "Matrix");\n' % topcell.name
-text_lsf += 'addproperty("::Root Element::%s", "MC_uniformity_width", "wafer", "Matrix");\n' % topcell.name
-text_lsf += 'addproperty("::Root Element::%s", "MC_grid", "wafer", "Number");\n' % topcell.name 
-text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_x", "wafer", "Number");\n' % topcell.name
-text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_y", "wafer", "Number");\n' % topcell.name
-text_lsf += 'addproperty("::Root Element::%s", "MC_non_uniform", "wafer", "Number");\n'  % topcell.name
-text_lsf += 'save("%s");\n' % filename_icp
+text_lsf = 'load("%s");\n' % (filename_icp)
+text_lsf += 'switchtolayout;\n'
+text_lsf += 'importnetlist("%s", "%s");\n' % (topcell.name, filename_subckt)
 text_lsf += 'run;\n'
 for i in range(0, num_detectors):
   text_lsf += 't%s = getresult("ONA_1", "input %s/mode 1/gain");\n' % (i+1, i+1)
