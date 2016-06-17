@@ -29,6 +29,9 @@ Version history:
 Lukas Chrostowski           2015/11/19
  - initial version
  - generating a Spice netlist including Optical Network Analyzer; launch Lumerical INTERCONNECT simulation
+
+Lukas Chrostowski           2016/06/11
+ - save INTERCONNECT file.
   
 """
 
@@ -83,7 +86,7 @@ optical_waveguides, optical_components = \
   
 # Output the Spice netlist:
 #text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
-text_Spice, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
+text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
 print(text_Spice)
 
 if sys.platform.startswith("win"):
@@ -91,15 +94,23 @@ if sys.platform.startswith("win"):
   folder_name = app.application_data_path()
   if not os.path.isdir(folder_name+'/tmp'):
     os.makedirs(folder_name+"/tmp")
-  filename = folder_name + '/tmp/%s.spi' % topcell.name
+  filename = folder_name + '/tmp/%s_main.spi' % topcell.name
+  filename_subckt = folder_name + '/tmp/%s.spi' % topcell.name
   filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
 else: 
 
-  filename = '/tmp/%s.spi' % topcell.name
+  filename = '/tmp/%s_main.spi' % topcell.name
+  filename_subckt = '/tmp/%s.spi' % topcell.name
   filename2 = '/tmp/%s.lsf' % topcell.name
+  filename_icp = '/tmp/%s.icp' % topcell.name
+
+text_Spice_main += '.INCLUDE %s\n\n' % (filename_subckt)
 
 # Write the Spice netlist to file
 file = open(filename, 'w')
+file.write (text_Spice_main)
+file.close()
+file = open(filename_subckt, 'w')
 file.write (text_Spice)
 file.close()
 
@@ -114,6 +125,7 @@ text_lsf += 'addproperty("::Root Element::%s", "MC_grid", "wafer", "Number");\n'
 text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_x", "wafer", "Number");\n' % topcell.name
 text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_y", "wafer", "Number");\n' % topcell.name
 text_lsf += 'addproperty("::Root Element::%s", "MC_non_uniform", "wafer", "Number");\n'  % topcell.name
+text_lsf += 'save("%s");\n' % filename_icp
 text_lsf += 'run;\n'
 for i in range(0, num_detectors):
   text_lsf += 't%s = getresult("ONA_1", "input %s/mode 1/gain");\n' % (i+1, i+1)

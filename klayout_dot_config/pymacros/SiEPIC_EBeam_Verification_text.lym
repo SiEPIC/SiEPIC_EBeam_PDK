@@ -64,7 +64,9 @@ Lukas Chrostowski           2015/11/19
 Lukas Chrostowski           2015/11/21
  - adding Results Database (rdb) and Marker Database Browser, for error viewing
 
-S
+Lukas Chrostowski           2016/06/11
+ - minor fix for short spice file output
+
  
 """
 
@@ -209,7 +211,7 @@ clock_verify_layout = time.clock()
 
 
 # Output the Spice netlist:
-text_Spice,_ = generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins)
+text_Spice,text_Spice_main,_ = generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins)
 if 'wtext' in globals():
   wtext.insertPlainText(text_Spice)
 clock_netlist = time.clock()
