@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Automated measurement coordinate extraction</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut>`</shortcut>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.verification_submenu.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# SiEPIC_EBeam_AutomatedMeasurements
+
+"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2015
+
+This Python file finds all the automated measurement labels,
+e.g., opt_in_TE_1550_device_LukasChrostowski_MZI1 
+
+
+NOTE: after changing the code, the macro needs to be rerun to install the new
+implementation. The macro is also set to "auto run" to install the PCell 
+when KLayout is run.
+
+Version history:
+
+Lukas Chrostowski           2015/11/13
+  - new simplified version using KLayout's built-in recursive shape iterator
+  
+"""
+
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+LayerTextN = topcell.layout().layer(LayerText)
+
+
+
+def gen_ui():
+  global wdg
+  if 'wdg' in globals():
+    if wdg is not None and not wdg.destroyed():
+      wdg.destroy()
+  global wtext
+
+  def button_clicked(checked):
+    """ Event handler: "OK" button clicked """
+    wdg.destroy()
+
+  wdg = pya.QDialog(pya.Application.instance().main_window())
+
+  wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
+  wdg.setWindowTitle("SiEPIC-EBeam-PDK: Automated measurement coordinate extraction")
+
+  wdg.resize(1000, 500)
+  wdg.move(1, 1)
+
+  grid = pya.QGridLayout(wdg)
+
+  windowlabel1 = pya.QLabel(wdg)
+  windowlabel1.setText("output:")
+  wtext = pya.QTextEdit(wdg)
+  wtext.enabled = True
+  wtext.setText('')
+
+  ok = pya.QPushButton("OK", wdg)
+  ok.clicked(button_clicked)   # attach the event handler
+  netlist = pya.QPushButton("Save", wdg) # not implemented
+
+  grid.addWidget(windowlabel1, 0, 0, 1, 3)
+  grid.addWidget(wtext, 1, 1, 3, 3)
+  grid.addWidget(netlist, 4, 2)
+  grid.addWidget(ok, 4, 3)
+
+  grid.setRowStretch(3, 1)
+  grid.setColumnStretch(1, 1)
+
+  wdg.show()
+
+
+
+# Create a GUI for the output:
+gen_ui()
+print(wdg)
+wtext.insertHtml('&lt;br&gt;* Automated measurement coordinates:&lt;br&gt;&lt;br&gt;')
+
+# Find the automated measurement coordinates:
+t = find_automated_measurement_labels(topcell, LayerTextN)
+wtext.insertHtml (t)
+
+
+
+</text>
+</klayout-macro>
