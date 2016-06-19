@@ -9,7 +9,7 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>true</show-in-menu>
+ <show-in-menu>false</show-in-menu>
  <group-name>SiEPIC</group-name>
  <menu-path>siepic_menu.verification_submenu.end</menu-path>
  <interpreter>python</interpreter>

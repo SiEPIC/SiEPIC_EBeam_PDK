@@ -30,6 +30,9 @@ Jaspreet Jhoja       2016/04/12
  - SiEPIC simulation menu items show up in toolbar menu
  - Monte Carlo shows up only in the toolbar.
   
+Lukas Chrostowski           2015/11/21
+ - menu fix and added "update netlist"
+  
 """
 
 import pya, os, copy
@@ -60,6 +63,10 @@ def trig_primary():
 def trig_secondary():
   menu_obj = get_menu_objects()
   menu_obj[0].trigger()
+
+def trig_third():
+  menu_obj = get_menu_objects()
+  menu_obj[2].trigger()
   
 #add each item to the main toolbar
 primary_item = pya.Action()
@@ -67,13 +74,25 @@ primary_item.title = "Circuit \nSimulation"
 menu.insert_item("@toolbar.end", "main_item", primary_item)
 primary_item.on_triggered(trig_primary)
 
+primary_item2 = pya.Action()
+primary_item2.title = "INTERCONNECT Circuit Simulation"
+menu.insert_item("@toolbar.main_item.end", "main_item1", primary_item2)
+primary_item2.on_triggered(trig_primary)
+
 secondary_item = pya.Action()
-secondary_item.title = "Monte Carlo \nSimulations"
-menu.insert_item("@toolbar.main_item.end", "main_item", secondary_item)
+secondary_item.title = "INTERCONNECT Monte Carlo Simulations"
+menu.insert_item("@toolbar.main_item.end", "main_item2", secondary_item)
 secondary_item.on_triggered(trig_secondary)
+
+third_item = pya.Action()
+third_item.title = "INTERCONNECT Update Netlist"
+menu.insert_item("@toolbar.main_item.end", "main_item3", third_item)
+third_item.on_triggered(trig_third)
 
 #adding icons
 primary_item.icon = full_path+'/INTERCONNECT_icon.png'    
+primary_item2.icon = full_path+'/INTERCONNECT_icon.png'    
 secondary_item.icon = full_path+'/INTERCONNECT_icon.png' 
+third_item.icon = full_path+'/INTERCONNECT_icon.png' 
 </text>
 </klayout-macro>
