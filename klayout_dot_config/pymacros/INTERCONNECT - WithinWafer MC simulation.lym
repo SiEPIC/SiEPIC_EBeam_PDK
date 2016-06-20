@@ -97,7 +97,7 @@ def mc_dtd(topcell, layout, dbu, datadict):
   optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
     
   # Output the Spice netlist:
-  text_Spice, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
+  text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
   print(text_Spice)
   
   if sys.platform.startswith("win"):
@@ -105,17 +105,25 @@ def mc_dtd(topcell, layout, dbu, datadict):
     folder_name = app.application_data_path()
     if not os.path.isdir(folder_name+'/tmp'):
       os.makedirs(folder_name+"/tmp")
-    filename = folder_name + '/tmp/%s.spi' % topcell.name
+    filename = folder_name + '/tmp/%s_main.spi' % topcell.name
+    filename_subckt = folder_name + '/tmp/%s.spi' % topcell.name
     filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
   else: 
   
-    filename = '/tmp/%s.spi' % topcell.name
+    filename = '/tmp/%s_main.spi' % topcell.name
+    filename_subckt = '/tmp/%s.spi' % topcell.name
     filename2 = '/tmp/%s.lsf' % topcell.name
   
+  text_Spice_main += '.INCLUDE %s\n\n' % (filename_subckt)
+
   # Write the Spice netlist to file
   file = open(filename, 'w')
+  file.write (text_Spice_main)
+  file.close()
+  file = open(filename_subckt, 'w')
   file.write (text_Spice)
   file.close()
+
   
   # Write the Lumerical INTERCONNECT start-up script.
   file = open(filename2, 'w')
@@ -260,7 +268,7 @@ def mc_dtd(topcell, layout, dbu, datadict):
   
   text_lsf += 'for (simu=1;simu&lt;=N_total;simu=simu+1) {   \n'
   text_lsf += '  switchtodesign; \n'
-  text_lsf += 'setnamed("ONA_1","peak analysis", "single");\n'
+  text_lsf += '  setnamed("ONA_1","peak analysis", "single");\n'
   
   text_lsf += '  select("::Root Element");  \n'
   text_lsf += '  set("die_num",simu);  \n'
