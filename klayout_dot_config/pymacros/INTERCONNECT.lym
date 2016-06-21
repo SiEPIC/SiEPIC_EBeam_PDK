@@ -90,15 +90,14 @@ text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell,
 print(text_Spice)
 
 if sys.platform.startswith("win"):
-
   folder_name = app.application_data_path()
   if not os.path.isdir(folder_name+'/tmp'):
     os.makedirs(folder_name+"/tmp")
   filename = folder_name + '/tmp/%s_main.spi' % topcell.name
   filename_subckt = folder_name + '/tmp/%s.spi' % topcell.name
   filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
+  filename_icp = folder_name + '/tmp/%s.icp' % topcell.name
 else: 
-
   filename = '/tmp/%s_main.spi' % topcell.name
   filename_subckt = '/tmp/%s.spi' % topcell.name
   filename2 = '/tmp/%s.lsf' % topcell.name
