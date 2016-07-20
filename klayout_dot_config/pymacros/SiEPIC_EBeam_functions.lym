@@ -1138,7 +1138,8 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
            ( "wg" + str(o.idx), nets_str, o.component, o.library, \
              eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
              eng_str(x * Lumerical_schematic_scaling), eng_str(y * Lumerical_schematic_scaling), \
-             str(o.points).replace('[','(').replace(']',')')  )
+             #str(o.points).replace('[','(').replace(']',')')  )   # format of waveguide section points
+             str(o.points).replace(', ',',')  )   # change format, delete space    
     text_subckt += '%s\n' %t
 
   text_subckt += '.ends %s\n\n' % (topcell.name)
