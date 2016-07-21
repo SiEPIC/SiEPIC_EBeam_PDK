@@ -4,7 +4,7 @@
 # script file: ebeam_pc_te1550_generate_s_parameters.lsf
 #
 # Copyright 2016 Lumerical Solutions
-# Modified by Chris Lu, UBC
+# Modified by Jaspreet Jhoja & Chris Lu, UBC
 ###########################################################
 
 
@@ -14,7 +14,7 @@ input_port=1;
 setnamed('::model','input_port',input_port);
 run;
 runanalysis;
-filename = "ebeam_dc_seriesrings_input_port=" + num2str(input_port) + "_gap=" + num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6)+ "nm_radius2=" + num2str(radius*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.ldf";
+filename = "ebeam_dc_seriesrings_input_port=" + num2str(input_port) + "_gap="+ num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6) + "um_radius2=" + num2str(radius2*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.ldf";
 loaddata(filename);
 S33=S11;
 S43=-S21;
@@ -27,7 +27,7 @@ input_port=2;
 setnamed('::model','input_port',input_port);
 run;
 runanalysis;
-filename = "ebeam_dc_seriesrings_input_port=" + num2str(input_port) + "_gap=" + num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6)+ "nm_radius2=" + num2str(radius*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.ldf";
+filename = "ebeam_dc_seriesrings_input_port=" + num2str(input_port) + "_gap="+ num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6) + "um_radius2=" + num2str(radius2*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.ldf";
 loaddata(filename);
 S34=-S12;
 S22=0.1*S22;    # reduce the back reflection, as the mode mismatch loss is much lower in a realistic ring.
@@ -38,8 +38,7 @@ S24=S42;
 # if necessary, scale S parameters to make passive
 scale_factor=1; # 0.987;
 scale_s_parameters;
-
-    sfile = "ebeam_dc_seriesrings"+"_gap=" + num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6)+ "nm_radius2=" + num2str(radius*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.dat";
+    sfile = "ebeam_dc_seriesrings_gap=" + num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6) + "um_radius2=" + num2str(radius2*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.dat";
     if (fileexists(sfile)) { rm(sfile);}
     mode_label = "TE";
     mode_ID = "1";
