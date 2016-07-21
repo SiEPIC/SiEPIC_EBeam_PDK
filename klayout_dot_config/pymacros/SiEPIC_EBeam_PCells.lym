@@ -2335,8 +2335,8 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
-    self.param("r2", self.TypeDouble, "Radius of Upper Ring", default = 10)
-    self.param("r1", self.TypeDouble, "Radius of Lower Ring", default = 10)
+    self.param("r2", self.TypeDouble, "Radius of Upper Ring", default = 3)
+    self.param("r1", self.TypeDouble, "Radius of Lower Ring", default = 3)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)

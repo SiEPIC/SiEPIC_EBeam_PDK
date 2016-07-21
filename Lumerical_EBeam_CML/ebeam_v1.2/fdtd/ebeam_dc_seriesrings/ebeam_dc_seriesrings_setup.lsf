@@ -1,0 +1,7 @@
+gap=1e-007;
+radius1=5e-006;
+radius=5e-006;
+setnamed("::model","gap",gap);
+setnamed("::model","radius1",radius1);
+setnamed("::model","radius",radius2);
+save("C:/Users/Jai/Documents/GitHub/SiEPIC_EBeam_PDK/Lumerical_EBeam_CML/ebeam_v1.2/fdtd/ebeam_dc_seriesrings/ebeam_dc_seriesrings_100nm_5nm_5um.fsp");ebeam_dc_seriesrings_generate_s_parameters;
