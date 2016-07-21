@@ -1,10 +1,10 @@
 ############################################################
 # Confidential Information:
 #
-# script file: ebeam_pc_te1550_generate_s_parameters.lsf
+# script file: ebeam_dc_seriesrings_generate_s_parameters.lsf
 #
 # Copyright 2016 Lumerical Solutions
-# Modified by Chris Lu, UBC
+# Modified by Jaspreet Jhoja and Chris Lu, UBC
 ###########################################################
 
 
