@@ -2447,7 +2447,7 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
     shape.text_size =  r*0.017
     t = pya.Trans(((r1+r2)/2)/4, ((r1+r2)/2)/2)
   #  text = pya.Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% ( w, g,int( r)), t)
-    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius1=%.3fu radius2=%.3fu'% ( w, g,int( r1), int(r2)), t)
+    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius1=%.3fu radius2=%.3fu'% ( self.w, self.g,int( self.r1), int(self.r2)), t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size =  r*0.017
 
