@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>"""
+This file is part of the SiEPIC_EBeam_PDK
+by Jaspreet Jhoja (c) 2016
+
+This Python file extracts the elements from the SiEPIC simulations menu and add it as a toolbar item group.
+
+Version history:
+
+Jaspreet Jhoja       2016/04/13
+ - items show up in both SiEPIC menu and toolbar menu
+ - No need to make any changes to the scripts.
+
+Jaspreet Jhoja       2016/04/12
+ - SiEPIC simulation menu items show up in toolbar menu
+ - Monte Carlo shows up only in the toolbar.
+  
+Lukas Chrostowski           2015/11/21
+ - menu fix and added "update netlist"
+  
+"""
+
+import pya, os, copy
+
+#get menu instance
+menu = pya.Application.instance().main_window().menu()
+
+#get items in the simulation siepic menu
+def get_menu_objects():
+  menu = pya.Application.instance().main_window().menu()
+  menu_items =  menu.items("siepic_menu.simulation_submenu")
+  menu_objects = []
+  for each in menu_items:
+    obj = menu.action(each)
+    menu_objects.append(obj)
+  return menu_objects
+
+menu_obj = get_menu_objects()
+
+#get full path to the folder
+full_path = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
+
+#add triggers for each object
+def trig_primary():
+  menu_obj = get_menu_objects()
+  menu_obj[1].trigger()
+  
+def trig_secondary():
+  menu_obj = get_menu_objects()
+  menu_obj[0].trigger()
+
+def trig_third():
+  menu_obj = get_menu_objects()
+  menu_obj[2].trigger()
+  
+#add each item to the main toolbar
+primary_item = pya.Action()
+primary_item.title = "Circuit \nSimulation"
+menu.insert_item("@toolbar.end", "main_item", primary_item)
+primary_item.on_triggered(trig_primary)
+
+primary_item2 = pya.Action()
+primary_item2.title = "INTERCONNECT Circuit Simulation"
+menu.insert_item("@toolbar.main_item.end", "main_item1", primary_item2)
+primary_item2.on_triggered(trig_primary)
+
+secondary_item = pya.Action()
+secondary_item.title = "INTERCONNECT Monte Carlo Simulations"
+menu.insert_item("@toolbar.main_item.end", "main_item2", secondary_item)
+secondary_item.on_triggered(trig_secondary)
+
+third_item = pya.Action()
+third_item.title = "INTERCONNECT Update Netlist"
+menu.insert_item("@toolbar.main_item.end", "main_item3", third_item)
+third_item.on_triggered(trig_third)
+
+#adding icons
+primary_item.icon = full_path+'/INTERCONNECT_icon.png'    
+primary_item2.icon = full_path+'/INTERCONNECT_icon.png'    
+secondary_item.icon = full_path+'/INTERCONNECT_icon.png' 
+third_item.icon = full_path+'/INTERCONNECT_icon.png' 
+</text>
+</klayout-macro>

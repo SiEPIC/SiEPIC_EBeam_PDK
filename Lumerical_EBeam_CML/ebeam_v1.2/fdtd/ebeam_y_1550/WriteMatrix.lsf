@@ -1,0 +1,56 @@
+# Write Matrix:
+# Author: Sarah Li
+# Writes a complete n x n matrix of sparameters
+# for a n port device to its sparameter file
+#
+# Input:
+#   sparamFileName = output sparameter file name
+#   portNumber = # of ports 
+#   inMode = input mode ('TE' or 'TM')
+#   inModeNum = input mode number (1 for TE and 2 for TM)
+#   outMode = output mode ('TE' or 'TM')
+#   outModeNum = output mode number (1 for TE and 2 for TM)
+#   freqPts = # of frequency points
+#   f = frequency vector
+#   SMatrix = input Sparameter matrix (frequencyPts) x (portNumber^2) 
+#
+
+#SMatrix has iterators ij, i = row index, j = column index
+for(j = 1; j <= portNumber; j = j+1)
+{
+  colIncrement = (j-1)*portNumber;
+  for(i = 1; i <= portNumber; i = i+1) 
+  {
+    rowIncrement = (i-1);
+    # DEBUG
+    # ?size(SMatrix);
+    # ?colIncrement + rowIncrement + 2;
+    # # ?SMatrix(1:freqPts, colIncrement + rowIncrement + 2);
+    # ?length(abs(SMatrix(1:freqPts, colIncrement + rowIncrement + 1)));
+    # ?length(unwrap(angle(SMatrix(1:freqPts, colIncrement + rowIncrement + 1))));
+    
+    # retrieve Sij data
+    Sij_data = [
+      f, 
+      abs(SMatrix(1:freqPts, colIncrement + rowIncrement + 1)), 
+      unwrap(angle(SMatrix(1:freqPts, colIncrement + rowIncrement + 1)))
+    ];
+    # output Port
+    outPort = "'port "+num2str(i)+ "'";
+    # input Port
+    inPort = "'port "+num2str(j)+ "'";
+    write(sparamFileName,"(" 
+          + outPort +","
+          + outMode + ","
+          + outModeNum + ","
+          + inPort + ","
+          + inModeNum + ",'transmission')"
+          + endl+"("
+          + num2str(length(f))
+          + ",3)"
+          + endl + num2str(Sij_data)
+    );
+  }
+}
+
+

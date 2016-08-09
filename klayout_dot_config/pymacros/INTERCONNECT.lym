@@ -29,6 +29,9 @@ Version history:
 Lukas Chrostowski           2015/11/19
  - initial version
  - generating a Spice netlist including Optical Network Analyzer; launch Lumerical INTERCONNECT simulation
+
+Lukas Chrostowski           2016/06/11
+ - save INTERCONNECT file.
   
 """
 
@@ -82,23 +85,31 @@ optical_waveguides, optical_components = \
   terminate_all_disconnected_pins(optical_pins, optical_waveguides, optical_components)
   
 # Output the Spice netlist:
-text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
+#text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
+text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
 print(text_Spice)
 
 if sys.platform.startswith("win"):
-
   folder_name = app.application_data_path()
   if not os.path.isdir(folder_name+'/tmp'):
     os.makedirs(folder_name+"/tmp")
-  filename = folder_name + '/tmp/%s.spi' % topcell.name
+  filename = folder_name + '/tmp/%s_main.spi' % topcell.name
+  filename_subckt = folder_name + '/tmp/%s.spi' % topcell.name
   filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
+  filename_icp = folder_name + '/tmp/%s.icp' % topcell.name
 else: 
-
-  filename = '/tmp/%s.spi' % topcell.name
+  filename = '/tmp/%s_main.spi' % topcell.name
+  filename_subckt = '/tmp/%s.spi' % topcell.name
   filename2 = '/tmp/%s.lsf' % topcell.name
+  filename_icp = '/tmp/%s.icp' % topcell.name
+
+text_Spice_main += '.INCLUDE %s\n\n' % (filename_subckt)
 
 # Write the Spice netlist to file
 file = open(filename, 'w')
+file.write (text_Spice_main)
+file.close()
+file = open(filename_subckt, 'w')
 file.write (text_Spice)
 file.close()
 
@@ -113,6 +124,7 @@ text_lsf += 'addproperty("::Root Element::%s", "MC_grid", "wafer", "Number");\n'
 text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_x", "wafer", "Number");\n' % topcell.name
 text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_y", "wafer", "Number");\n' % topcell.name
 text_lsf += 'addproperty("::Root Element::%s", "MC_non_uniform", "wafer", "Number");\n'  % topcell.name
+text_lsf += 'save("%s");\n' % filename_icp
 text_lsf += 'run;\n'
 for i in range(0, num_detectors):
   text_lsf += 't%s = getresult("ONA_1", "input %s/mode 1/gain");\n' % (i+1, i+1)
@@ -131,7 +143,7 @@ if sys.platform.startswith('linux'):
   if string.find(version,"2.") &gt; -1:
     import commands
     print("Running INTERCONNECT")
-    commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
+    commands.getstatusoutput('/opt/lumerical/interconnect/bin/interconnect -run %s' % filename2)
 
 elif sys.platform.startswith('darwin'):
   # OSX specific
@@ -145,7 +157,27 @@ elif sys.platform.startswith('win'):
   # Windows specific code here
   import subprocess
   print("Running INTERCONNECT")
-  subprocess.Popen(args=['C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe', '-run', filename2], shell=True)
+  #check Interconnect installation directory
+  file_path_a = 'C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe'
+  file_path_b = 'C:\\Program Files (x86)\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe'
   
+  if(os.path.isfile(file_path_a)==True):
+    subprocess.Popen(args=[file_path_a, '-run', filename2], shell=True)
+    
+  elif(os.path.isfile(file_path_b)==True):
+    subprocess.Popen(args=[file_path_b, '-run', filename2], shell=True)
+  
+  else:
+    warning_window = pya.QMessageBox()
+    warning_window.setText("Warning: The program could not find INTERCONNECT.")
+    warning_window.setInformativeText("Do you want to specify it manually?")
+    warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
+    warning_window.setDefaultButton(pya.QMessageBox.Yes)
+    response = warning_window.exec_()        
+    if(response == pya.QMessageBox.Yes):
+      dialog = pya.QFileDialog()
+      path = str(dialog.getOpenFileName())
+      path = path.replace('/', '\\')
+      subprocess.Popen(args=[path, '-run', filename2], shell=True)
 </text>
 </klayout-macro>

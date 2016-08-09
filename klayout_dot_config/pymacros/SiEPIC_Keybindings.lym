@@ -34,6 +34,11 @@ module MyMacro
 
   include RBA
 
+  mw = RBA::Application::instance.main_window
+
+  mw.message('Running *SiEPIC configuration; message should disappear if successful.',10000)
+
+
   
   # KEY BINDINGS
 
@@ -142,6 +147,8 @@ module MyMacro
   RBA::Application.instance.set_config('rdb-marker-color','#ff0000')
   RBA::Application.instance.set_config('rdb-marker-line-width','8')
   RBA::Application.instance.set_config('default-layer-properties', File.join(RBA::Application.instance.application_data_path(),'libraries','klayout_Layers_EBeam.lyp') )
+
+  mw.message('*SiEPIC configuration complete - good luck on your design!',5000)
 
 end
 </text>

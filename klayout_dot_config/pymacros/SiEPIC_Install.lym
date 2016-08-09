@@ -52,9 +52,9 @@ if app.get_config("SiEPIC-config-initialized") == '':
   keybindings.replace("edit_menu.mode_menu.instance:''","edit_menu.mode_menu.instance:I")
   print(keybindings)
   # consider setting key bindings here.
-  print("SiEPIC EBeam PDK – now installed")
+  print("SiEPIC EBeam PDK - now installed")
 else:
-  print("SiEPIC EBeam PDK – already installed")
+  print("SiEPIC EBeam PDK - already installed")
 """
 
 mw = pya.Application.instance().main_window()

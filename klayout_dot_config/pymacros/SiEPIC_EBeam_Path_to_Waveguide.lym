@@ -11,7 +11,7 @@
  <shortcut>W</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.waveguides_submenu.end</menu-path>
+ <menu-path>siepic_menu.waveguides_submenu.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
@@ -51,11 +51,20 @@ Lukas Chrostowski           2015/12/04
 Lukas Chrostowski           2015/12/9
  - .index() is a list method; replaced Optical_*.idx with .idx
  - Convert all Si paths to waveguides if nothing is selected.
- 
+
+Lukas Chrostowski           2016/04/10
+ - Snap waveguide only to pins with the same orientation; fixes.
+
+Jaspreet &amp; Lukas            2016/04/22
+ - warning if one path segment has insufficient length to accommodate the bend radius
+
+Jaspreet Jhoja              2016/04/26
+- warning if first and last segments are not manhattan
+
 """
 
 import pya
-
+from math import *
 
 
 # Configure variables to draw structures in the presently selected cell:
@@ -91,8 +100,6 @@ optical_nets = []
 reset_Optical_classes()
 
 
-# Record a transaction, to enable "undo"
-lv.transaction("Path to Waveguide")
 
 
 # Waveguide type is specified using a "User Properties" defined via the Cells window.
@@ -103,7 +110,14 @@ if Waveguide_Type and Waveguide_Type in Waveguide_Types:
 else:
   Waveguide_Type = pya.InputDialog.ask_item("Waveguide Type", "Choose the type of waveguide to use.  \nThe value will be saved as a user property in cell {%s}." % cell.name, Waveguide_Types, 0)
   print("Waveguide type taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Waveguide_Type, cell.name) )
-  cell.set_property("Waveguide_Type", Waveguide_Type)
+  # Record a transaction, to enable "undo"
+  if Waveguide_Type == None:
+    Waveguide_Type = Waveguide_Types[0]
+  else:
+    lv.transaction("Path to Waveguide: waveguide type selection")
+    print("Waveguide Type taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Waveguide_Type, cell.name) )
+    cell.set_property("Waveguide_Type", Waveguide_Type)
+    lv.commit()
 
 # Configure the library to use for the waveguide type.
 if Waveguide_Type == "ROUND_PATH":
@@ -124,9 +138,11 @@ else:
   if radius == None:
     radius = 10
   else:
+    lv.transaction("Path to Waveguide: waveguide radius selection")
     print("Radius taken from the InputDialog = %s; for next time, saved in cell {%s}." % (radius, cell.name) )
     cell.set_property("radius", str(radius))
-      
+    lv.commit()
+
 # How close must a waveguide be to a pin for it to snap:
 waveguide_snap_dist = 10
 
@@ -165,8 +181,11 @@ if object_selection == []:
 
 
 # Search the layout for the components:
-print("* calling find_all_components() – DevRec")
+print("* calling find_all_components() - DevRec")
 find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN)
+
+OKa = -1 # for manhattan check
+OKb = -1 # for radius check
 
 for o in object_selection:
   if o.is_cell_inst():
@@ -187,6 +206,50 @@ for o in object_selection:
         path_obj = o.shape.path
         num_points = path_obj.num_points()
         points = path_to_points(path_obj)
+        
+        ####Check if the first and last segments are manhattan
+        ##if yes then keep OK = -1
+        ##if not then keep it 0
+        if OKa == -1:
+          manhattan_check = []
+          for i in range(len(points)):
+            if(i==1 or points[i] == points[-1]):
+             if(points[i][0] == points[i-1][0] or points[i][1] == points[i-1][1]):
+              manhattan_check.append("checked")
+          #if there are two checks in list then it passed the test
+          if(len(manhattan_check)==2):
+            None
+          else:
+            warning_window = pya.QMessageBox()
+            warning_window.setText("Warning: Waveguide segments (first, last) are not Manhattan (vertical, horizontal).")
+            warning_window.setInformativeText("Do you want to Proceed?")
+            warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
+            warning_window.setDefaultButton(pya.QMessageBox.Yes)
+            response = warning_window.exec_()        
+            if(response == pya.QMessageBox.Cancel):
+              OKa = 0
+              break
+            else:
+              OKa = 1
+
+        #Checks if any segment is less than the radius value
+        # only do this the first time (OK not pushed yet)
+        if OKb == -1:
+          segment_length = [sqrt((points[i][0]- points[i-1][0])**2 + (points[i][1] - points[i-1][1])**2) for i in range(len(points)) if i&gt;0]
+          if(all(each &gt;= radius/dbu for each in segment_length) == False):
+            warning_window = pya.QMessageBox()
+            warning_window.setText("Warning: One of the waveguide segments has insufficient length to accommodate the desired bend radius.")
+            warning_window.setInformativeText("Do you want to Proceed?")
+            warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
+            warning_window.setDefaultButton(pya.QMessageBox.Yes)
+            response = warning_window.exec_()        
+            if(response == pya.QMessageBox.Cancel):
+              OKb = 0
+              break
+            else:
+              OKb = 1
+        
+        print("ORIGINAL PTS",points)
         if num_points == 2:
           # insert two mid-points in the path so that:
           #  1) it can later be split into two nets
@@ -224,7 +287,10 @@ for o in object_selection:
           # Calculate the distance between every pin and each path endpoint
           for pin in optical_pins:
             # check if pin / path segment are in the same orientation
-            angle_pin_path = angle_segments(pin.points,[path_endpoint, path_endpointb])
+            if pin.pin_type==1: # only snap to component pins.
+              angle_pin_path = angle_segments(pin.points,[path_endpoint, path_endpointb])
+            else:
+              angle_pin_path = -1
             if angle_pin_path == 0 or abs(angle_pin_path) == 180:
               # this updates "optical_pins" via the "pin" pointer  
               # print( "path endpoint: %s, pin %s: %s" % (path_endpoint, pin.n, [pin.x, pin.y] ) )
@@ -289,6 +355,11 @@ for o in object_selection:
             path_obj = pya.Path(a1, path_obj.width)
             print("updated path (adjusted end point): %s" % path_obj )
 
+        # only do this for the first waveguide
+        if to_delete == []:
+          # Record a transaction, to enable "undo"
+          lv.transaction("Path to Waveguide")
+
         # Convert the path to a waveguide
         wg_path = points_to_Dpath( points_mult(path_to_points(path_obj),dbu), wg_width)
         param = { "npoints": points_per_circle(radius), "radius": radius, "path": wg_path, "layer": LayerSi }
@@ -306,25 +377,25 @@ for o in object_selection:
         # Mark the path for deletion:
         to_delete.append(shape_obj)  
 
+
 n_deleted = len(to_delete)
-for t in to_delete:
-  t.delete()
-        
-# Clear the layout view selection, since we deleted some objects (but others may be selected still):
-lv.clear_object_selection()
-
-# Select the newly added objects
-lv.object_selection = new_selection
-
-# Record a transaction, to enable "undo"
-lv.commit()
-
 
 if n_deleted == 0:
-  v = pya.MessageBox.warning("No path selected", "No path selected.\nPlease select a path. \nIt will get converted to a waveguide.", pya.MessageBox.Ok)
+  if (OKa != 0) &amp; (OKb != 0):
+    v = pya.MessageBox.warning("No path selected", "No path selected.\nPlease select a path. \nIt will get converted to a waveguide.", pya.MessageBox.Ok)
+else:
 
-# Save the optical_waveguides for future heal operations
-#optical_waveguides_registered = [] # check if this exists...
-#optical_waveguides_registered.append(optical_waveguides)
+  for t in to_delete:
+    t.delete()
+        
+  # Clear the layout view selection, since we deleted some objects (but others may be selected still):
+  lv.clear_object_selection()
+
+  # Select the newly added objects
+  lv.object_selection = new_selection
+
+  # Record a transaction, to enable "undo"
+  lv.commit()
+
 </text>
 </klayout-macro>

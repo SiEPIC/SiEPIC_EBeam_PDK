@@ -1,0 +1,60 @@
+###---------GC S-parameter Generation---------------
+
+switchtolayout;
+
+#from waveguide to fiber
+select("waveguide_source");
+set("enabled",true);
+select("fiber::mode");
+set("enabled",false);
+
+select("::model");
+set("output",true);
+
+run;
+
+S = getresult("::model","S");
+
+S22 = S.S22;     
+S12 = S.S12;
+
+switchtolayout;
+select("waveguide_source");
+set("enabled",false);
+select("fiber::mode");
+set("enabled",true);
+select("::model");
+set("output",false);
+run;
+
+S = getresult("::model","S");
+
+S11 = S.S11;
+S21 = S.S21;
+f = S.f;
+
+S11 = transpose(S11);
+S22 = transpose(S22);
+S12 = transpose(S12);
+S21 = transpose(S21);
+
+# export S paratemeter for INTERCONNECT
+Sdata = [ f, transpose(abs(S11)), #
+transpose(unwrap(angle(S11))),#
+transpose(abs(S21)),transpose(unwrap(angle(S21))),# 
+transpose(abs(S12)),transpose(unwrap(angle(S12))),#
+transpose(abs(S22)),transpose(unwrap(angle(S22)))];
+
+
+filename = "S_para_TM1550_Test.txt";
+
+#cd ("/ubc/ece/home/lc/grads/yunw/Interconnects");
+
+
+if(fileexists(filename)) 
+{ rm(filename); }
+format long;
+write(filename,num2str(Sdata));
+format short;
+
+
