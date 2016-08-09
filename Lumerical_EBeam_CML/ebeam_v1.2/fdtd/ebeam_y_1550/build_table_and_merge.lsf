@@ -1,0 +1,66 @@
+########################################################################################
+# DEVELOPER: Zeqin Lu, University of British Columbia
+########################################################################################
+# Build lookup table
+
+filename = "y_lookup_table.xml";
+table = "index_table";
+
+design = cell(2);
+extracted = cell(1);
+
+#open file to write table
+lookupopen( filename, table );
+
+wg_thickness=[210;220;230];
+
+wg_width=[480;500;520];
+
+for (tt=1:3){
+       for (ww=1:3){ 
+
+                temp_filename = "Ybranch_Thickness ="+num2str(wg_thickness(tt))+ " width=" + num2str(wg_width(ww)) + ".sparam";
+                design{1} = struct;
+                design{1}.name = "width";
+                design{1}.value = wg_width(ww);
+                 
+                design{2} = struct;
+                design{2}.name = "height";
+                design{2}.value = wg_thickness(tt);
+                
+                #extracted (output results)
+                
+                extracted{1} = struct;
+                extracted{1}.name = "y_sparam";
+                extracted{1}.value = temp_filename;
+                
+                
+                lookupwrite(filename,design,extracted);
+
+        }
+}
+
+lookupclose(filename);
+
+#####################################################
+# Merge TE and TM mode Sparameters into folder: y_branch_source/.
+
+for (tt=1:3){
+       for (ww=1:3){ 
+
+                    fileTE = "sparam_files/Ybranch_TE_Thickness ="+num2str(wg_thickness(tt))+ " width=" + num2str(wg_width(ww)) + ".sparam";
+                    TE_Sparam=read(fileTE);
+                    fileTM = "sparam_files/Ybranch_TM_Thickness ="+num2str(wg_thickness(tt))+ " width=" + num2str(wg_width(ww)) + ".sparam";
+                    TM_Sparam=read(fileTM);
+                    
+                    filename = "y_branch_source/Ybranch_Thickness ="+num2str(wg_thickness(tt))+ " width=" + num2str(wg_width(ww)) + ".sparam";
+                    
+                    if (fileexists(filename)) {
+                      rm(filename);        # remove file if exist
+                    }
+                    
+                    write(filename,TE_Sparam);
+                    write(filename,TM_Sparam);
+
+        }
+}

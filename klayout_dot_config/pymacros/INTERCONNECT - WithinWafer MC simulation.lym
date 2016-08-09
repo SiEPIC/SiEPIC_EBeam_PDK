@@ -36,7 +36,13 @@ Zeqin Lu                    2016/2/18
 Jaspreet Jhoja              2016/03/18
  - Integrated the script with MC GUI
  - minor fixes for data parsing
-     
+
+Lukas Chrostowski           2016/04/19
+ - Support for TM polarization in ONA gain
+
+Jaspreet and Lukas             2016/05/01
+ - Support for histograms of FSR, Gain and Wavelength
+
 """
 
 
@@ -91,7 +97,7 @@ def mc_dtd(topcell, layout, dbu, datadict):
   optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
     
   # Output the Spice netlist:
-  text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
+  text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
   print(text_Spice)
   
   if sys.platform.startswith("win"):
@@ -99,17 +105,25 @@ def mc_dtd(topcell, layout, dbu, datadict):
     folder_name = app.application_data_path()
     if not os.path.isdir(folder_name+'/tmp'):
       os.makedirs(folder_name+"/tmp")
-    filename = folder_name + '/tmp/%s.spi' % topcell.name
+    filename = folder_name + '/tmp/%s_main.spi' % topcell.name
+    filename_subckt = folder_name + '/tmp/%s.spi' % topcell.name
     filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
   else: 
   
-    filename = '/tmp/%s.spi' % topcell.name
+    filename = '/tmp/%s_main.spi' % topcell.name
+    filename_subckt = '/tmp/%s.spi' % topcell.name
     filename2 = '/tmp/%s.lsf' % topcell.name
   
+  text_Spice_main += '.INCLUDE %s\n\n' % (filename_subckt)
+
   # Write the Spice netlist to file
   file = open(filename, 'w')
+  file.write (text_Spice_main)
+  file.close()
+  file = open(filename_subckt, 'w')
   file.write (text_Spice)
   file.close()
+
   
   # Write the Lumerical INTERCONNECT start-up script.
   file = open(filename2, 'w')
@@ -243,8 +257,19 @@ def mc_dtd(topcell, layout, dbu, datadict):
       text_lsf += 'mc%s = matrixdataset("mc%s"); # initialize visualizer data, mc%s \n' % (i+1, i+1, i+1)
   text_lsf += 'seed=randreset; \n'
   text_lsf += 'N_total = %s;  \n'  % datadict["number_of_simulations"]  #  GUI INPUT: number of simulations
+  
+  ###Define histograms datasets
+  if(datadict["hist_fsr"]==True):
+    text_lsf += 'fsr_dataset = matrix(1,N_total,1);\n'
+  if(datadict["hist_wavelength"]==True):
+    text_lsf += 'freq_dataset = matrix(1,N_total,1);\n'
+  if(datadict["hist_gain"]==True):
+    text_lsf += 'gain_dataset = matrix(1,N_total,1);\n'
+  
   text_lsf += 'for (simu=1;simu&lt;=N_total;simu=simu+1) {   \n'
   text_lsf += '  switchtodesign; \n'
+  text_lsf += '  setnamed("ONA_1","peak analysis", "single");\n'
+  
   text_lsf += '  select("::Root Element");  \n'
   text_lsf += '  set("die_num",simu);  \n'
   text_lsf += '  run;\n'
@@ -258,18 +283,55 @@ def mc_dtd(topcell, layout, dbu, datadict):
   if INTERCONNECT_VISUALIZER:
     for i in range(0, num_detectors):
       text_lsf += '  if (simu==1) { mc%s.addparameter("wavelength",wavelength);} \n' % (i+1) 
-      text_lsf += '  mc%s.addattribute("run", getattribute ( getresult("ONA_1", "input %s/mode 1/gain"), "TE gain (dB)") );\n' % (i+1, i+1)
+      text_lsf += '  mc%s.addattribute("run", getattribute( getresult("ONA_1", "input %s/mode 1/gain"), getattribute(getresult("ONA_1", "input %s/mode 1/gain")) ) );\n' % (i+1, i+1, i+1)
   else:
-    text_lsf += '  gain = getattribute( getresult("ONA_1","input 1/mode 1/gain"), "TE gain (dB)" );\n'
+    text_lsf += '  gain = getattribute( getresult("ONA_1","input 1/mode 1/gain"), getattribute(getresult("ONA_1", "input %s/mode 1/gain")) );\n' %( i+1)
     text_lsf += '  plot(wavelength,gain);\n'
     text_lsf += '  holdon;\n'
-  
+    
+#add simulation data to their corresponding datalists  
+  if(datadict["hist_fsr"]==True):
+      text_lsf += 'fsr_select = getresult("ONA_1", "input 1/mode 1/peak/free spectral range");\n'
+      text_lsf += 'fsr_dataset(1,simu) = real(fsr_select.getattribute("TE free spectral range (m)"));\n'
+
+  if(datadict["hist_wavelength"]==True):
+      text_lsf += 'freq_dataset(1,simu) = getresult("ONA_1", "input 1/mode 1/peak/frequency");\n'
+
+  if(datadict["hist_gain"]==True):
+      text_lsf += 'gain_select = getresult("ONA_1", "input 1/mode 1/peak/gain");\n'
+      text_lsf += 'gain_dataset(1,simu) = real(gain_select.getattribute("TE gain (dB)"));\n'
+
+
   text_lsf += '}\n'
   if INTERCONNECT_VISUALIZER:
     for i in range(0, num_detectors):
       text_lsf += 'visualize(mc%s);\n' % (i+1)
   
-  
+#### Display Histograms for the selected components
+#FSR
+  if(datadict["hist_fsr"]==True):
+      text_lsf += 'dataset = fsr_dataset*1e9;\n'  #select fsr dataset defined above
+      text_lsf += 'bin_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n' #define number of bins according to the number of data
+      text_lsf += 'histc_data = histogram(dataset, bin_hist, 1);\n' #generate histogram datapoints with the datapoint and the last parameter is 1 which defines the category as bar plot type
+      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Free Spectral Range (nm)", "Count", "Histogram - FSR");\n'#plot data
+      text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n' #define plot legends
+      
+#wavelength
+  if(datadict["hist_wavelength"]==True):
+      text_lsf += 'dataset = freq_dataset*1e9;\n'
+      text_lsf += 'num_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n'
+      text_lsf += 'histc_data = histogram(dataset, num_hist, 1);\n'
+      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Wavelength (nm)", "Count", "Histogram - Peak wavelength");\n'
+      text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n'
+
+#Gain
+  if(datadict["hist_gain"]==True):
+      text_lsf += 'dataset = gain_dataset;\n'
+      text_lsf += 'num_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n'
+      text_lsf += 'histc_data = histogram(dataset, num_hist, 1);\n'
+      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Gain (dB)", "Count", "Histogram - Peak gain");\n'
+      text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n'
+
   file.write (text_lsf)
   file.close()
   
@@ -280,7 +342,7 @@ def mc_dtd(topcell, layout, dbu, datadict):
     if string.find(version,"2.") &gt; -1:
       import commands
       print("Running INTERCONNECT")
-      commands.getstatusoutput('/CMC/tools/lumerical/INTERCONNECT-5.0.527/bin/interconnect')
+      commands.getstatusoutput('/opt/lumerical/interconnect/bin/interconnect -run %s' % filename2)
   
   elif sys.platform.startswith('darwin'):
     # OSX specific
@@ -294,7 +356,28 @@ def mc_dtd(topcell, layout, dbu, datadict):
     # Windows specific code here
     import subprocess
     print("Running INTERCONNECT")
-    subprocess.Popen(args=['C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe', '-run', filename2], shell=True)
     
+    #check Interconnect installation directory
+    file_path_a = 'C:\\Program Files\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe'
+    file_path_b = 'C:\\Program Files (x86)\\Lumerical\\INTERCONNECT\\bin\\interconnect.exe'
+  
+    if(os.path.isfile(file_path_a)==True):
+      subprocess.Popen(args=[file_path_a, '-run', filename2], shell=True)
+    
+    elif(os.path.isfile(file_path_b)==True):
+      subprocess.Popen(args=[file_path_b, '-run', filename2], shell=True)
+  
+    else:
+      warning_window = pya.QMessageBox()
+      warning_window.setText("Warning: The program could not find INTERCONNECT.")
+      warning_window.setInformativeText("Do you want to specify it manually?")
+      warning_window.setStandardButtons(pya.QMessageBox.Yes | pya.QMessageBox.Cancel);
+      warning_window.setDefaultButton(pya.QMessageBox.Yes)
+      response = warning_window.exec_()        
+      if(response == pya.QMessageBox.Yes):
+        dialog = pya.QFileDialog()
+        path = str(dialog.getOpenFileName())
+        path = path.replace('/', '\\')
+        subprocess.Popen(args=[path, '-run', filename2], shell=True)
 </text>
 </klayout-macro>

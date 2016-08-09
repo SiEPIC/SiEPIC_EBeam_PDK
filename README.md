@@ -1,10 +1,12 @@
 # SiEPIC_EBeam_PDK
 
 - <a href="www.siepic.ubc.ca">SiEPIC</a> EBeam PDK, Library - for silicon photonics layout, design, verification and circuit simulation
-- by Lukas Chrostowski, (c) 2015-2016
+- by <a href="https://ca.linkedin.com/in/chrostowski">Lukas Chrostowski</a>, (c) 2015-2016, with contributions by: <a href="https://ca.linkedin.com/in/zeqin-lu-13a52394">Zeqin Lu</a>, <a href="https://uk.linkedin.com/in/jaspreet-jhoja-00a56b64">Jaspreet Jhoja</a>, <a href="https://ca.linkedin.com/in/121comeon">Xu Wang</a>, <a href="https://ca.linkedin.com/in/jonas-flückiger-92a4831">Jonas Flueckiger</a>.
 - Package for KLayout, klayout.de (developed on KLayout version 0.24.3, OSX)
 - Instruction on design, layout, fabrication, test, data analysis for silicon photonics provided in the edX course: <a href="http://edx.org/course/silicon-photonics-design-fabrication-ubcx-phot1x">Silicon Photonics Design, Fabrication and Data Analysis</a> and textbook <a href="http://www.cambridge.org/ca/academic/subjects/engineering/electronic-optoelectronic-devices-and-nanotechnology/silicon-photonics-design-devices-systems">Silicon Photonics Design: From Devices to Systems</a> by Lukas Chrostowski and Michael Hochberg.
 - Fabrication runs via Electron Beam Lithography are available, including <a href="https://www.linkedin.com/pulse/openebl-fabrication-test-passive-silicon-photonic-lukas-chrostowski">openEBL</a> fabrication.
+- Citing this work:  Lukas Chrostowski, Zeqin Lu, Jonas Flueckiger, Xu Wang, Jackson Klein, Amy Liu, Jaspreet Jhoja, James Pond,
+"<a href="http://mina.ubc.ca/ref_design-and-simulation-sili">Design and simulation of silicon photonic schematics and layouts</a>," Proc. SPIE 9891, Silicon Photonics and Photonic Integrated Circuits V, 989114 (May 13, 2016); doi:10.1117/12.2230376.
 
 ##Download and Installation instructions:
  - <a href="https://github.com/lukasc-ubc/SiEPIC_EBeam_PDK/wiki/Installation-instructions">SiEPIC_EBeam_PDK download and installation instructions</a> on the wiki page.  
@@ -39,24 +41,27 @@ Simulations for the MZI:
 ##Package includes:
 
 - Process Design Kit (PDK): this package, including fabrication documentation, scripts, etc.
-- PCells: ring resonator; PCell test structure layout with grating couplers and instantiating the ring resonator PCell.
-- Script / Macro to create a layout, including waveguide generation functions.
+- EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
+- PCells: directional couplers, ring resonator, taper, Bragg grating
+- Sample scripts to create a layout, including waveguide generation functions: Mach-Zehnder Interferometer test structures; Ring resonator test structure.
 - GDS Library, updated with marker layers for verification/netlist generation.
 - Verification: 
  - Scanning the layout. Finding waveguides, devices, pins.  
  - Verification: Identifying if there are missing connections, mismatched waveguides, too few points in a bend, etc. 
  - Example layouts using the library for verification (EBeam_LukasChrostowski_E_LVS.gds, SiEPIC_EBeam_PDK_Verification_Check.gds).
+ - Verification for automated measurements
 - Circuit simulations:
  - Netlist generation
  - Creating a Spice netlist suitable for for circuit simulations. This includes extracting the waveguide length (wg_length) for all waveguides.
  - Menu item "Lumerical INTERCONNECT" will automatically: generate the netlist, launch Lumerical INTERCONNECT to perform the circuit simulations, and pop-up a plot of the transmission spectrum.
+ - Monte Carlo simulations, including waveguides, ring resonators built using directional couplers, y-branches, grating couplers.
 - Waveguide functionality: 
  - Hot Key "W": selected paths are first snapped to the nearest pins, then converted to waveguides.
  - Hot Key "Shift-W": selected waveguides are converted back to paths.
+ - Hot Key "Ctrl-Shift-W": measure the length of the selected waveguides.
+ - Hot Key "Ctrl-Shift-R": resize the waveguides, for a given target length.
 - Layout object snapping
  - Hot Key "Shift-O": Snaps the selected object to the one where the mouse is hovering over.
-- EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
-- Monte Carlo simulations of waveguides, ring resonators built using directional couplers, y-branches.
 
 
 
