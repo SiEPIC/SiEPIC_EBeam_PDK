@@ -101,6 +101,8 @@ Lukas Chrostowski           2016/05/27
 Lukas Chrostowski           2016/06/11
  - spiral
 
+S. Preble                   2016/08/26
+ - Double Bus Ring Pin's shifted - text now is in the middle of the pin path
 """
 
 import pya
@@ -1024,33 +1026,33 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
-    pin = pya.Path([pya.Point(0, 0), pya.Point(pin_length, 0)], w)
+    pin = pya.Path([pya.Point(-pin_length/2, 0), pya.Point(pin_length/2, 0)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = pya.Trans(0, 0)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.1/dbu
+    shape.text_size = 0.4/dbu
 
-    pin = pya.Path([pya.Point(w+2*r-pin_length, 0), pya.Point(w+2*r, 0)],w )
+    pin = pya.Path([pya.Point(w+2*r-pin_length/2, 0), pya.Point(w+2*r+pin_length/2, 0)],w )
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(w+2*r-pin_length, 0)
+    t = pya.Trans(w+2*r, 0)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.1/dbu
+    shape.text_size = 0.4/dbu
 
-    pin = pya.Path([pya.Point(0, y_offset), pya.Point(pin_length, y_offset)], w)
+    pin = pya.Path([pya.Point(-pin_length/2, y_offset), pya.Point(pin_length/2, y_offset)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = pya.Trans(0, y_offset)
     text = pya.Text ("pin3", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.1/dbu
+    shape.text_size = 0.4/dbu
 
-    pin = pya.Path([pya.Point(w+2*r-pin_length, y_offset), pya.Point(w+2*r, y_offset)], w)
+    pin = pya.Path([pya.Point(w+2*r-pin_length/2, y_offset), pya.Point(w+2*r+pin_length/2, y_offset)], w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(w+2*r-pin_length, y_offset)
+    t = pya.Trans(w+2*r, y_offset)
     text = pya.Text ("pin4", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.1/dbu
+    shape.text_size = 0.4/dbu
 
 
     # Create the device recognition layer
