@@ -1,0 +1,47 @@
+############################################################
+# Confidential Information:
+#
+# script file: ebeam_dc_seriesrings_generate_s_parameters.lsf
+#
+# Copyright 2016 Lumerical Solutions
+
+# Modified by Jaspreet Jhoja and Chris Lu, UBC
+
+###########################################################
+
+
+# run two simulations with different input ports and merge S parameters
+switchtolayout;
+input_port=1;
+setnamed('::model','input_port',input_port);
+run;
+runanalysis;
+filename = "ebeam_dc_seriesrings_input_port=" + num2str(input_port) + "_gap="+ num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6) + "um_radius2=" + num2str(radius2*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.ldf";
+loaddata(filename);
+S33=S11;
+S43=-S21;
+S13=S31;
+S23=-S41;
+
+switchtolayout;
+
+input_port=2;
+setnamed('::model','input_port',input_port);
+run;
+runanalysis;
+filename = "ebeam_dc_seriesrings_input_port=" + num2str(input_port) + "_gap="+ num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6) + "um_radius2=" + num2str(radius2*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.ldf";
+loaddata(filename);
+S34=-S12;
+S22=0.1*S22;    # reduce the back reflection, as the mode mismatch loss is much lower in a realistic ring.
+S44=S22;
+S14=-S32;
+S24=S42;
+
+# if necessary, scale S parameters to make passive
+scale_factor=1; # 0.987;
+scale_s_parameters;
+    sfile = "ebeam_dc_seriesrings_gap=" + num2str(gap*1e9) + "nm_radius1=" + num2str(radius1*1e6) + "um_radius2=" + num2str(radius2*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.dat";
+    if (fileexists(sfile)) { rm(sfile);}
+    mode_label = "TE";
+    mode_ID = "1";
+    write_s_parameters;
