@@ -1,0 +1,11 @@
+gap=1e-007;
+radius1=3e-006;
+radius2=3e-006;
+wg_width=5e-007;
+wg_thickness=2.2e-007;
+setnamed("::model","gap",gap);
+setnamed("::model","radius1",radius1);
+setnamed("::model","radius2",radius2);
+setnamed("::model","si_thickness",wg_thickness);
+setnamed("::model","wg_width",wg_width);
+save("C:/Users/Jai/Documents/GitHub/SiEPIC_EBeam_PDK/Lumerical_EBeam_CML/ebeam_v1.2/fdtd/ebeam_dc_seriesrings/ebeam_dc_seriesrings_gap=100nm_radius1=3um_radius2=3um_width=500nm_thickness=220nm.fsp");ebeam_dc_seriesrings_generate_s_parameters;exit(2);
