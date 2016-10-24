@@ -137,14 +137,14 @@ def mc_dtd(topcell, layout, dbu, datadict):
   text_lsf += 'addproperty("::Root Element", "N", "wafer", "Number");\n'  
   text_lsf += 'addproperty("::Root Element", "die_num", "wafer", "Number");\n' 
   text_lsf += 'addproperty("::Root Element", "wafer_length", "wafer", "Number");\n'   
-    
   text_lsf += 'addproperty("::Root Element::%s", "MC_uniformity_thickness", "wafer", "Matrix");\n' % topcell.name
   text_lsf += 'addproperty("::Root Element::%s", "MC_uniformity_width", "wafer", "Matrix");\n' % topcell.name
   text_lsf += 'addproperty("::Root Element::%s", "MC_grid", "wafer", "Number");\n' % topcell.name
   text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_x", "wafer", "Number");\n'  % topcell.name
   text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_y", "wafer", "Number");\n' % topcell.name
   text_lsf += 'addproperty("::Root Element::%s", "MC_non_uniform", "wafer", "Number");\n'  % topcell.name
-  
+  text_lsf += 'select("::Root Element::%s");\n'  % topcell.name
+  text_lsf += 'set("MC_non_uniform",99);\n' 
   ############################## Wafer generation ###########################################
   text_lsf += 'wafer_length = %s;  \n'  % datadict["wafer_length_x"]  # [m], GUI INPUT: wafer length
   text_lsf += 'wafer_cl = %s;  \n' % datadict["within_wafer_correlation"]  # [m],  GUI INPUT: wafer correlation length
