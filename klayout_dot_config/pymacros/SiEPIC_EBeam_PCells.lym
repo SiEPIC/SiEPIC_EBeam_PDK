@@ -230,13 +230,15 @@ class spiral(pya.PCellDeclarationHelper):
 
       # waveguide length:
       spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
-      print("spiral length: %s" % spiral_length)
 
 
     # Centre S-shape connecting waveguide        
     layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
     layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
     
+    # waveguide length including S-Shape:
+    spiral_length = spiral_length + 2 * pi * self.min_radius
+    print("spiral length: %s" % spiral_length)
 
     # Pins on the waveguide:
     pin_length = 200
