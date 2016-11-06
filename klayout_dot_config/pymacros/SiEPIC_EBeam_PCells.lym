@@ -129,6 +129,7 @@ class spiral(pya.PCellDeclarationHelper):
     self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5)     
     self.param("min_radius", self.TypeDouble, "Minimum radius (microns)", default = 5)     
     self.param("wg_spacing", self.TypeDouble, "Waveguide spacing (microns)", default = 1)     
+    self.param("spiral_ports", self.TypeInt, "Ports on the same side? 0/1", default = 0)
     self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
@@ -230,13 +231,46 @@ class spiral(pya.PCellDeclarationHelper):
 
       # waveguide length:
       spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
-      print("spiral length: %s" % spiral_length)
 
+    if self.spiral_ports:
+      # Spiral #1 extra 1/2 arm
+      turn = turn + 1
+      pts = []
+      # local radius:
+      r = 2*b + a * turn * 2 * pi - self.wg_width/2
+      # number of points per circle:
+      npoints = int(points_per_circle(r))
+      # increment, in radians, for each point:
+      da = pi / npoints  
+      # draw the inside edge of spiral
+      for i in range(0, npoints+1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(pya.Point.from_dpoint(pya.DPoint(xa/dbu, ya/dbu)))
+      # draw the outside edge of spiral
+      r = 2*b + a * turn * 2 * pi + self.wg_width/2
+      npoints = int(points_per_circle(r))
+      da = pi / npoints  
+      for i in range(npoints, -1, -1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(pya.Point.from_dpoint(pya.DPoint(xa/dbu, ya/dbu)))
+      polygon = pya.Polygon(pts)
+      area += polygon.area()
+      self.cell.shapes(LayerSiN).insert(polygon)
+      turn = turn - 1
+      # waveguide length:
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
 
     # Centre S-shape connecting waveguide        
     layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
     layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
     
+    # waveguide length including S-Shape:
+    spiral_length = spiral_length + 2 * pi * self.min_radius
+    print("spiral length: %s" % spiral_length)
 
     # Pins on the waveguide:
     pin_length = 200
@@ -250,7 +284,10 @@ class spiral(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    x = (2*b + a * (turn+1) * 2 * pi)/dbu
+    if self.spiral_ports:
+      x = -(2*b + a * (turn+1.5) * 2 * pi)/dbu
+    else:
+      x = (2*b + a * (turn+1) * 2 * pi)/dbu
     t = pya.Trans(x,0)
     pin = pya.Path([pya.Point(0,-pin_length/2), pya.Point(0,pin_length/2)], w)
     pin_t = pin.transformed(t)
@@ -276,14 +313,16 @@ class spiral(pya.PCellDeclarationHelper):
     shape.text_size = 0.1/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    x = abs(x)
     npoints = int(points_per_circle(x) /100 )
     da = 2 * pi / npoints # increment, in radians
-    r=abs(x) + 2 * self.wg_width/dbu
+    r=x + 2 * self.wg_width/dbu
     pts = []
     for i in range(0, npoints+1):
       pts.append(pya.Point.from_dpoint(pya.DPoint(r*cos(i*da), r*sin(i*da))))
     self.cell.shapes(LayerDevRecN).insert(pya.Polygon(pts))
 
+    print("spiral done.")
 
 
 
@@ -752,7 +791,11 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     shape.text_size = self.r*0.017/dbu
     t = pya.Trans(r/4, r/2)
   #  text = pya.Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% (self.w,self.g,int(self.r)), t)
+<<<<<<< HEAD
     text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'% (self.w,self.g,int(self.r), self.Lc), t)
+=======
+    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu'% (self.w,self.g,self.r), t)
+>>>>>>> lukasc-ubc/master
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
@@ -887,7 +930,7 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = pya.Trans(r/4, r/2)
-    text = pya.Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% (self.w,self.g,int(self.r)), t)
+    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu'% (self.w,self.g,self.r), t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
