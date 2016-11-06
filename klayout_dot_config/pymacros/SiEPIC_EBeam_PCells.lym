@@ -791,11 +791,11 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     shape.text_size = self.r*0.017/dbu
     t = pya.Trans(r/4, r/2)
   #  text = pya.Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% (self.w,self.g,int(self.r)), t)
-<<<<<<< HEAD
-    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'% (self.w,self.g,int(self.r), self.Lc), t)
-=======
-    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu'% (self.w,self.g,self.r), t)
->>>>>>> lukasc-ubc/master
+
+    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'% (self.w,self.g,self.r,self.Lc), t)
+
+ #   text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu'% (self.w,self.g,self.r), t)
+
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
@@ -930,7 +930,7 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = pya.Trans(r/4, r/2)
-    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu'% (self.w,self.g,self.r), t)
+    text = pya.Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'(self.w,self.g,self.r,self.Lc), t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
