@@ -47,7 +47,9 @@ Lukas Chrostowski           2016/04/19
 
 Jaspreet Jhoja              2016/05/01
  - Added Checkables for generating histograms for FSR, gain and Wavelength
-
+ 
+Zeqin Lu  2016/11/06
+ - Update MC simulation settings and simulation procedures.
  """
  
 from pya import *
@@ -214,8 +216,8 @@ parameters.addItems(['248 nm dry litho', '193 nm dry litho', '193 nm immersion l
 parameters.currentIndexChanged(selection)
 parameters.setFixedWidth(150)
 parameters.setStyleSheet("background-color: white;") 
-lf1label1 = QLabel('Sigma RMS for width variation (nm): ')
-lf1label2 = QLabel('Sigma RMS for thickness variation (nm): ')
+lf1label1 = QLabel('Standard deviation for width variation (nm): ')
+lf1label2 = QLabel('Standard deviation for thickness variation (nm): ')
 lf1label3 = QLabel('Correlation length for width variation (m): ')
 lf1label4 = QLabel('Correlation length for thickness variation (m): ')
 lf1text1 = QLineEdit()
@@ -274,8 +276,8 @@ lf2check = QCheckBox('Within Die variations')
 lf2check.setFont(titlefont)
 lf2check.setChecked(True)
 lf2check.stateChanged(checkboxstatecheck)
-lf2label1 = QLabel('Sigma RMS for width (nm): ')
-lf2label2 = QLabel('Sigma RMS for thickness (nm): ')
+lf2label1 = QLabel('Standard deviation for width (nm): ')
+lf2label2 = QLabel('Standard deviation for thickness (nm): ')
 lf2label3 = QLabel('Correlation length (m): ')
 lf2text1 = QLineEdit()
 lf2text1.setAccessibleName('lf2text1')
@@ -335,8 +337,8 @@ rframe1.setFrameShape(QFrame.StyledPanel)
 rframe1.setStyleSheet("background-color: mintcream;")
 rf1title = QLabel('Wafer to wafer variation')
 rf1title.setFont(titlefont)
-rf1label1 = QLabel('Sigma RMS for width variation (nm): ')
-rf1label2 = QLabel('Sigma RMS for thickness variation (nm): ')
+rf1label1 = QLabel('Standard deviation for width variation (nm): ')
+rf1label2 = QLabel('Standard deviation for thickness variation (nm): ')
 rf1text1 = QLineEdit()
 rf1text1.setAccessibleName('rf1text1')
 rf1text1.setAccessibleDescription('wafer_sigma_width')
