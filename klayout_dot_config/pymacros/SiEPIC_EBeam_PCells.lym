@@ -107,6 +107,9 @@ S. Preble                   2016/08/26
 Lukas Chrostowski           2016/11/06
  - waveguide bump, to provide a tiny path length increase
 
+Lukas Chrostowski           2016/11/06
+ - adding capability to Ignore optical IOs in simulations: added as an option in the Laser.
+
 """
 
 import pya
@@ -162,12 +165,12 @@ class waveguide_bump(pya.PCellDeclarationHelper):
     dbu = self.layout.dbu
     ly = self.layout
 
+
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
     LayerSiSPN = ly.layer(LayerSiSP)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    LayerTextN = ly.layer(LayerText)
 
 
     # draw spiral
@@ -226,11 +229,7 @@ class waveguide_bump(pya.PCellDeclarationHelper):
       (waveguide_length, self.wg_width), t )
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    
-    t = pya.Trans(length/4/dbu, -w*2)
-    text = pya.Text ('Delta L = %3.1f nm' % ((waveguide_length-length)*1e3), t)
-    shape = self.cell.shapes(LayerTextN).insert(text)
-    shape.text_size = 0.9/dbu
+
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     box1 = pya.Box(0, -w*3, length/dbu, w*3+(2*r*(1-cos(theta/180.0*pi)))/dbu)
@@ -1504,6 +1503,7 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
     self.param("wavelength_stop", self.TypeDouble, "Stop Wavelength (nm)", default = 1600)
     self.param("npoints", self.TypeInt, "Number of points", default = 2000)     
     self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
+    self.param("ignoreOpticalIOs", self.TypeInt, "Ignore optical IOs in simulations (1=Ignore, 0=Include)", default = 0)
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
 
   def can_create_from_shape_impl(self):
@@ -1540,6 +1540,11 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
 
     t = pya.Trans(-width/2+3/dbu, height/2-12/dbu)
     text = pya.Text ("Number of points: %s" % ( self.npoints), t)
+    shape = self.cell.shapes(LayerINTERCONNECTN).insert(text)
+    shape.text_size = 1.5/dbu
+
+    t = pya.Trans(-width/2+3/dbu, height/2-16/dbu)
+    text = pya.Text ("Ignore optical IOs in simulations: %s" % ( self.ignoreOpticalIOs), t)
     shape = self.cell.shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
