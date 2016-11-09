@@ -221,7 +221,7 @@ class waveguide_bump(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = pya.Trans(0, w*2)
-    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_wg_strip_1550', t)
+    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = pya.Trans(0, -w*2)
@@ -232,7 +232,7 @@ class waveguide_bump(pya.PCellDeclarationHelper):
     shape.text_size = 0.1/dbu
 
     t = pya.Trans(self.length / dbu /6, -w*2)
-    text = pya.Text ('dL = %.1f nm' % ((waveguide_length-length)*1000), t)
+    text = pya.Text ('dL = %.4f um' % ((waveguide_length-length)), t)
     shape = self.cell.shapes(LayerTextN).insert(text)
     shape.text_size = 0.6/dbu
 
