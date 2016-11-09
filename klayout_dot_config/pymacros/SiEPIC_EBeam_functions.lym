@@ -82,6 +82,9 @@ Lukas Chrostowski           2016/04/19
 Lukas Chrostowski           2016/05/20
  - flag_waveguide_error, flag_component_error: verification flags on the layout are removed
 
+Lukas Chrostowski           2016/11/06
+ - adding capability to Ignore optical IOs in simulations: added as an option in the Laser.
+
 """
 
 SiEPIC_Version = '0.1.6'
@@ -667,7 +670,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
   returns: parameters, nets in order
   
   usage:
-  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points = get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
+  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, ignoreOpticalIOs = get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
   """
   
   layout = topcell.layout()
@@ -717,6 +720,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
         wavelength_stop = subcell.pcell_parameters_by_name()["wavelength_stop"]
         wavelength_points = subcell.pcell_parameters_by_name()["npoints"]
         orthogonal_identifier = subcell.pcell_parameters_by_name()["orthogonal_identifier"]
+        ignoreOpticalIOs = subcell.pcell_parameters_by_name()["ignoreOpticalIOs"]
         npins_inside_laser = 0
         for pin in optical_pins:
           if pin.pin_type == 2:  # Optical IO
@@ -741,7 +745,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
   for d in detectors_info2:
     detector_nets.append (d.detector_net)
 
-  return laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier
+  return laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier, ignoreOpticalIOs
     
   
 def find_all_waveguides(cell, layer):
@@ -1099,6 +1103,10 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
 #wtext.insertHtml('.subckt %s %s:&lt;br&gt;' % ( topcell.name, find_optical_IO_pins(optical_pins) ))
   opticalIO_pins = find_optical_IO_pins(optical_pins)  
   text_subckt += '.subckt %s%s\n' % (topcell.name, opticalIO_pins)
+
+  # Get information about the laser and detectors:
+  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier, ignoreOpticalIOs = \
+        get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
   
   for o in optical_components:
   
@@ -1116,8 +1124,22 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
 #    t = '%s %s %s library="%s" lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
 #         ( "X"+o.component+"_"+str(o.idx), nets_str, o.component, o.library, str (o.x * 1e-6), o.y * 1e-6, o.x, o.y, rotate, flip)
 #    t = '  %s %s %s library="%s" %s $X=%s $Y=%s sch_x=%s sch_y=%s %s%s'  % \
+    
+    # Check to see if this component is an Optical IO type.
+    pinIOtype = 0
+    for p in o.pins:
+      if optical_pins[p].pin_type == 2:
+        pinIOtype = 1        
+    if ignoreOpticalIOs and pinIOtype:
+      # Replace the Grating Coupler or Edge Coupler with a 0-length waveguide.
+      component1 = "ebeam_wg_strip_1550"
+      params1 = "wg_length=0u wg_width=0.500u"
+    else:
+      component1 =  o.component 
+      params1 = o.params
+      
     t = '  %s %s %s library="%s" %s lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
-         ( o.component+"_"+str(o.idx), nets_str, o.component, o.library, o.params, \
+         ( component1 +"_"+str(o.idx), nets_str, component1, o.library, params1, \
          eng_str(o.x * 1e-6), eng_str(o.y * 1e-6), \
          eng_str(o.x * Lumerical_schematic_scaling), eng_str(o.y * Lumerical_schematic_scaling), \
          rotate, flip)
@@ -1144,9 +1166,6 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
 
   text_subckt += '.ends %s\n\n' % (topcell.name)
 
-  # Get information about the laser and detectors:
-  laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier = \
-        get_LumericalINTERCONNECT_analyzers(topcell, optical_pins)
   if laser_net &gt; -1:
     text_main += '* Optical Network Analyzer:\n'
     text_main += '.ona input_unit=wavelength input_parameter=start_and_stop\n  + minimum_loss=80\n  + analysis_type=scattering_data\n  + multithreading=user_defined number_of_threads=1\n' 
