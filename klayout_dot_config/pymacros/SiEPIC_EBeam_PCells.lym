@@ -171,6 +171,7 @@ class waveguide_bump(pya.PCellDeclarationHelper):
     LayerSiSPN = ly.layer(LayerSiSP)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
+    LayerTextN = ly.layer(LayerText)
 
 
     # draw spiral
@@ -230,6 +231,10 @@ class waveguide_bump(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
+    t = pya.Trans(self.length / dbu /6, -w*2)
+    text = pya.Text ('dL = %.1f nm' % ((waveguide_length-length)*1000), t)
+    shape = self.cell.shapes(LayerTextN).insert(text)
+    shape.text_size = 0.6/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     box1 = pya.Box(0, -w*3, length/dbu, w*3+(2*r*(1-cos(theta/180.0*pi)))/dbu)
