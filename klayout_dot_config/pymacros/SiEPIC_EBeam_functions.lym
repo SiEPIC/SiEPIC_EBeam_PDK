@@ -1518,7 +1518,7 @@ def check_waveguides(rdb, optical_waveguides, topcell, error_layer):
   rdb_cat_id_wg_path.description = "Waveguide path: Only 2 points allowed in a path. Convert to a waveguide (ROUND_PATH) if necessary."
 
   rdb_cat_id_wg_radius = rdb.create_category(rdb_cat_id_wg, "Radius")
-  rdb_cat_id_wg_radius.description = "Not enough space to accommodate the desired bend radius for the waveguide end."
+  rdb_cat_id_wg_radius.description = "Not enough space to accommodate the desired bend radius for the waveguide."
 
   rdb_cat_id_wg_bendpts = rdb.create_category(rdb_cat_id_wg, "Bend points")
   rdb_cat_id_wg_bendpts.description = "Waveguide bend should have more points per circle."
