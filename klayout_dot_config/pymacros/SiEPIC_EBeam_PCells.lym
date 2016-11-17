@@ -359,7 +359,7 @@ class spiral(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSiN).insert(polygon)
 
       # waveguide length:
-      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
 
     if self.spiral_ports:
       # Spiral #1 extra 1/2 arm
@@ -391,14 +391,12 @@ class spiral(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSiN).insert(polygon)
       turn = turn - 1
       # waveguide length:
-      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
 
     # Centre S-shape connecting waveguide        
     layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
     layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
     
-    # waveguide length including S-Shape:
-    spiral_length = spiral_length + 2 * pi * self.min_radius
     print("spiral length: %s" % spiral_length)
 
     # Pins on the waveguide:
