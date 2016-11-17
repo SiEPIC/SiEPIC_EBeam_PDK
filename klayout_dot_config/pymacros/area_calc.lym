@@ -109,7 +109,7 @@ $layer_area_menu = MenuAction.new( "Compute Selected Layer Area", "" ) do
 
   cc = CellCount::new(cv.layout, cv.cell)
 
-  t = "Area of layers in mm^2:\n\n"
+  t = "Area of layers:\n\n"
 
   sel_layers.each do |l|
 
@@ -132,7 +132,8 @@ $layer_area_menu = MenuAction.new( "Compute Selected Layer Area", "" ) do
         atot += cc.inst_count(c) * a
       end
 
-      t += sprintf("  %-10s\t", l.current.source(true).to_s) + sprintf("%.6f", (atot * cv.layout.dbu * cv.layout.dbu / 1e6)) + "\n"
+      t += sprintf("  %-10s\t", l.current.source(true).to_s) + sprintf("%.6f", (atot * cv.layout.dbu * cv.layout.dbu / 1e6)) + " mm^2\n"
+      t += sprintf("  %-10s\t", l.current.source(true).to_s) + sprintf("%.6f", (atot * cv.layout.dbu * cv.layout.dbu      )) + " µm^2\n"
 
     end
 
