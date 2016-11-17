@@ -284,6 +284,7 @@ class spiral(pya.PCellDeclarationHelper):
     LayerSiSPN = ly.layer(LayerSiSP)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
+    LayerTextN = ly.layer(LayerText)
 
     # draw spiral
     from math import pi, cos, sin, log, sqrt
@@ -358,7 +359,7 @@ class spiral(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSiN).insert(polygon)
 
       # waveguide length:
-      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
 
     if self.spiral_ports:
       # Spiral #1 extra 1/2 arm
@@ -390,14 +391,12 @@ class spiral(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSiN).insert(polygon)
       turn = turn - 1
       # waveguide length:
-      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * b
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
 
     # Centre S-shape connecting waveguide        
     layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
     layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
     
-    # waveguide length including S-Shape:
-    spiral_length = spiral_length + 2 * pi * self.min_radius
     print("spiral length: %s" % spiral_length)
 
     # Pins on the waveguide:
@@ -425,6 +424,10 @@ class spiral(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
+    t = pya.Trans(-abs(x), 0)
+    text = pya.Text ('Length=%.3fu' % spiral_length, t)
+    shape = self.cell.shapes(LayerTextN).insert(text)
+    shape.text_size = abs(x)/8
     t = pya.Trans(0, 0)
     text = pya.Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = self.cell.shapes(LayerDevRecN).insert(text)
