@@ -18,14 +18,11 @@ FONTSIZE =  13; % font size for the figures;
 % Script will process all experimental data from the following folder, and
 % write a report PDF file here.
 %folder_name = uigetdir('','Select root folder for the experimental data')
-
-folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2015_10';
-%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_02_UW';
-%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/test';
+%folder_name = '/Users/lukasc/SiEPIC_EBeam_PDK/PCM/D2016_10_ANT';
+%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_08_ANT';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_05';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_07';
-%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_08_ANT';
-%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_10_ANT';
+folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_02_UW';
 
 folder_name_linux = regexprep (folder_name,'\s|)|(', '\\$0');
 %system(['ls ' folder_name_linux  ]);
@@ -36,7 +33,7 @@ polarizations = {'TE', 'TM'};
 
 % filename conventions for each PCM:
 filetype_wg_loss = 'LukasC_SpiralWG';  % replace with PCM_Spiral
-UncertaintyMax_wg_loss = 50;
+UncertaintyMax_wg_loss = 30;
 
 % At what wavelength do you want to find out the Loss of the DUT
 lambda0 = 1.55e-6;
@@ -82,7 +79,6 @@ for i = 1:length(folders)
     folder = folders{i};
     if length(folder) > 0
         folder_linux = regexprep (folder,'\s|)|(', '\\$0');
-        disp (['Folder: ' folder ]);
         for pol = 1:length(polarizations)
             polarization = char(polarizations(pol));
             [~,files] = system( ['find ' folder_linux ' -type f -name \*' ...
@@ -190,8 +186,8 @@ global FONTSIZE MAKE_PLOTS lambda0
 % check if regress function is present. This is part of the statistics toolbox.
 Error_Intervals = exist('regress');
 
-dB_threshold = -60; % minimum dB, average over the data, to use data.
-dB_threshold_diff =-20;  % consider only data that is dB_threshold_diff below the peaks
+dB_threshold = -50; % minimum dB, average over the data, to use data.
+dB_threshold_diff = -20;  % consider only data that is dB_threshold_diff below the peaks
 Loss_unit = 'dB/cm';
 
 % filetype_wg_loss = 'LukasC_SpiralWG';
@@ -241,17 +237,17 @@ for i=1:length(files)
 %    size(max(smooth(scandata.power,101),2))
 %    powers(end+1,:) = max(smooth(scandata.power,101));
 end
+mean(powers); 
 [~,i]=max(sum(powers_av,1));
 PORT=i(1);
 
 % find data that has high-enough power measured, smoothed max:
 powers_max = [];
 for i=1:length(files)
-    load(files{i});                             % Load the data
-    powers_max(i) = max(smooth(scandata.power(100:end-100,PORT),101));
-    %figure;plot(smooth(scandata.power(:,PORT),101))
+    powers_max(i) = max(smooth(scandata.power(:,PORT),101));
 end
-m = find(powers_max > dB_threshold);
+m = find(powers_max > dB_threshold)
+files
 files = {files{m}};
 
 
@@ -318,7 +314,7 @@ if length(files) > 0
         if MAKE_PLOTS
             %            plot (lambda*1e6, amplitude_poly(:,i), 'LineWidth',2);
             ax.ColorOrderIndex = i;
-            plot (lambda_good*1e6, amplitude_poly_good(:,i), 'k--','LineWidth',4);
+            plot (lambda_good*1e6, amplitude_poly_good(:,i), '--','LineWidth',4);
             % legend entries
 %            LegendText(2*i-1)=cellstr(['raw data: ' strrep(files{i},'_','\_')]);
 %            LegendText(2*i)=cellstr(['fit data: ' strrep(files{i},'_','\_')]);
