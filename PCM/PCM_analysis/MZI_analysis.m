@@ -1,4 +1,6 @@
 
+%MZI*oneside2*
+
 % Read data files from experiments, extract ng
 % variables in MKS units.
 function main()
