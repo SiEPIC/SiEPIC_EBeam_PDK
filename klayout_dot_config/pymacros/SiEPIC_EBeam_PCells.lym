@@ -174,7 +174,6 @@ class waveguide_bump(pya.PCellDeclarationHelper):
     LayerTextN = ly.layer(LayerText)
 
 
-    # draw spiral
     from math import pi, cos, sin, log, sqrt
     
     x = 0
