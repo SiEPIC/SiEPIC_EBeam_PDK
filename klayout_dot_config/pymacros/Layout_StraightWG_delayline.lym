@@ -15,7 +15,6 @@
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text># Python script
-# Layout_DoubleBus_RingResonator
 
 """
 This file is part of the SiEPIC_EBeam_PDK
