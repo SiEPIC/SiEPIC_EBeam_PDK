@@ -182,6 +182,15 @@ set("z min", FDTD_zmin);
 set("z max", FDTD_zmax);
 set("mesh accuracy", mesh_accuracy);
 set("simulation time",sim_time);
+set("same settings on all boundaries",0);
+set("pml layers",[16, 16, 8, 16, 8, 8]);
+# if we are doing a single-mode simulation, we can use symmetry (box & oxide):
+if (mode_selection == 1) {
+ set("z min bc", "symmetric");
+}
+if (mode_selection == 2) {
+ set("z min bc", "anti-symmetric");
+}
 
 setglobalsource ("wavelength start", wavelength_start);
 setglobalsource ("wavelength stop", wavelength_stop);
