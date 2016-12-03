@@ -28,7 +28,7 @@ DevRec=input(68,0)
 LayerFP=input(99)
 
 # minimum feature size of 60nm
-LayerSi.width(0.06).output("Si_width","Si minimum feature size violation; min 60 nm")
+LayerSi.width(0.06, angle_limit(80)).output("Si_width","Si minimum feature size violation; min 60 nm")
 
 LayerSi.space(0.06).output("Si_space","Si minimum space violation; min 60 nm")
 
