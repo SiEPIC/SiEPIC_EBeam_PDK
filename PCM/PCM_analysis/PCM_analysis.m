@@ -27,6 +27,7 @@ FONTSIZE =  13; % font size for the figures;
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_08_ANT';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_10_ANT';
 folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_ANT';
+folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_UW';
 
 folder_name_linux = regexprep (folder_name,'\s|)|(', '\\$0');
 %system(['ls ' folder_name_linux  ]);
