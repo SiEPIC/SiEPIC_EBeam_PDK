@@ -526,7 +526,7 @@ def points_per_circle(radius):
   if radius &gt; 0.1:
     th = math.acos(2 * (1 - error / radius)**2 - 1)
     num_vertices = math.ceil(2*math.pi/th)
-    return num_vertices
+    return int(num_vertices)
   else:
     return 100
 
