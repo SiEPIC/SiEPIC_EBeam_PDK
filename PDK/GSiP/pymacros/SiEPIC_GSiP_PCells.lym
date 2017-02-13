@@ -44,9 +44,10 @@ when KLayout is run.
 Version history:
 
  Anthony Park				2016/11/01
- - Laval_Ring_Moda(Add-drop Ring Modulator version 2, with straight waveguides)
-
- Lukas Chrostowski                   2017/02/10
+ - Ring_Modulator_DB (Add-drop Ring Modulator version 2, with straight waveguides)
+ - Ring_Filter_DB
+ 
+ Lukas Chrostowski         2017/02/10
  - updates to Ring modulator PCell; added electrical pins, declared some variables
  
 
@@ -280,6 +281,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     layout_arc_wg_dbu(self.cell, LayervlN, x0,y0, r_vl/2.0, r_vl, 0,360)
     layout_arc_wg_dbu(self.cell, LayerPinRecN, x0,y0, r_vl/2.0, r_vl, 0,360)
     shapes(LayerPinRecN).insert(pya.Text ("elec1a", pya.Trans(x0,y0))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(pya.Box(x0-w_via/2, y0-w_via/2, x0+w_via/2, y0+w_via/2))
     # top contact (N, cathode):
     boxVL1 = pya.Box(x0-w_via/2, y0 +  r_vc2 +  w_vc/2 + int(round(2.0/dbu)), x0+w_via/2, y0 + r_vc2 +  w_vc/2 + int(round(2.0/dbu))+ h_via)
     shapes(LayervlN).insert(boxVL1)

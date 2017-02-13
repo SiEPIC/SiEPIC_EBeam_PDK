@@ -396,7 +396,7 @@ class spiral(pya.PCellDeclarationHelper):
     layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
     layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
     
-    print("spiral length: %s" % spiral_length)
+    print("spiral length: %s microns" % spiral_length)
 
     # Pins on the waveguide:
     pin_length = 200
