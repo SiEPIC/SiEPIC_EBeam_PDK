@@ -85,6 +85,11 @@ Lukas Chrostowski           2016/05/20
 Lukas Chrostowski           2016/11/06
  - adding capability to Ignore optical IOs in simulations: added as an option in the Laser.
 
+Lukas Chrostowski           2017/02/12
+ - adding electrical pin capability.  
+   For now, don’t consider the electrical wiring connectivity nor electrical pads.
+   Assume that each electrical pin is connected to the outside (subckt)
+
 """
 
 SiEPIC_Version = '0.1.6'
@@ -158,15 +163,17 @@ class Optical_component:
         self.rotate = rotate       # instance rotation, 0, 90, 180, 270
         self.library = library     # compact model library
         self.nets = []             # nets connected to component
-        self.npins = 0             # number of pin
-        self.pins = []             # an array of all the pins
+        self.npins = 0             # number of pins
+        self.pins = []             # an array of all the optical pins
+        self.nepins = 0            # number of epins
+        self.epins = []            # an array of all the electrical pins
         self.params = params       # Spice parameters
 
 def print_Optical_components(optical_components):
   print("Optical_components:")
   for o in optical_components:
-    print("#%s: %s / %s, (%s, %s), nets %s, npins %s, pins %s" %\
-        (o.idx, o.component, o.instance, o.x, o.y, o.nets, o.npins, o.pins) )
+    print("#%s: %s / %s, (%s, %s), nets %s, npins %s, pins %s, nepins %s, epins %s" %\
+        (o.idx, o.component, o.instance, o.x, o.y, o.nets, o.npins, o.pins, o.nepins, o.epins) )
         
 # definition for the optical waveguide class
 class Optical_waveguide:
@@ -398,7 +405,8 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
       iter2 = subcell.begin_shapes_rec(LayerPinRecN)
       pin_info1 = []  # array for Pin_info
       path_points=[]
-      path_shape=[]
+      path_shape=[]   # for optical pins
+      box_shape=[]    # for electrical pins
       while not(iter2.at_end()):
         # Find text label for PinRec, to get the port numbers
         if iter2.shape().is_text():
@@ -406,22 +414,27 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
           texto= texto.transformed(iter1.itrans())
           x = texto.x
           y = texto.y
-          #print( "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y) )
+#          print( "PinRec label: %s at (%s, %s)" % (iter2.shape().text, x, y) )
           pin_info1.append(Pin_info(iter2.shape().text.string, x, y))
         if iter2.shape().is_path():
-          path= iter2.shape().path.transformed(iter2.itrans())
-          path= path.transformed(iter1.itrans())
+          # assume this is an optical pin
+          path= iter2.shape().path.transformed(iter2.itrans()).transformed(iter1.itrans())
           points = path_to_points(path)  
-          #print( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
+#          print( "%s: PinRec in cell {%s}, path -- %s"   % (i, iter2.cell().name, path) )
           path_points.append(points)
           path_shape.append(iter2.shape())
+        if iter2.shape().is_box():
+          # assume this is an electrical pin
+          box = iter2.shape().box.transformed(iter2.itrans()).transformed(iter1.itrans())
+          box_shape.append(box)
+#          print( "%s: PinRec in cell {%s}, box -- %s"   % (i, iter2.cell().name, box) )
         iter2.next()
       # Sort pin text labels
       pin_info2 = sorted(pin_info1, key=lambda  pin_info0: pin_info0.pin_text)
-
-      # find pin labels that are inside the path:
+      
+      # find pin labels that are inside the DevRec shape:
       for p1 in range(0,len(pin_info2)):
-        for p2 in range(0,len(path_shape)):
+        for p2 in range(0,len(path_shape)):  # (optical)
           # Check if the pin text label is somewhere along the pin path
 #          check_text_in_pin = check_point_in_segment( \
 #            pya.Point( *path_points[p2][0] ), \
@@ -440,6 +453,19 @@ def find_all_components(cell, LayerDevRecN, LayerPinRecN, LayerFbrTgtN):
             optical_components[component_idx].pins.append( pin_idx )
             print("%s: PinRec (text=%s) in cell {%s}, component #%s, path -- %s"   \
               % (i, pin_info2[p1].pin_text, iter2.cell().name, component_idx, path_to_points(path_shape[p2].path)) )
+        for p2 in range(0,len(box_shape)):
+          # Check if the pin text label is inside the DevRec pin box (electrical)
+          print('epin x: %s, %s, %s' % (pin_info2[p1].pin_x,box_shape[p2].left,box_shape[p2].right))
+          print('epin y: %s, %s, %s' % (pin_info2[p1].pin_y,box_shape[p2].bottom,box_shape[p2].top))
+          if (pin_info2[p1].pin_x &gt; box_shape[p2].left) &amp; \
+             (pin_info2[p1].pin_x &lt; box_shape[p2].right) &amp; \
+             (pin_info2[p1].pin_y &gt; box_shape[p2].bottom) &amp; \
+             (pin_info2[p1].pin_y &lt; box_shape[p2].top):
+            optical_components[component_idx].nepins += 1
+            optical_components[component_idx].epins.append(pin_info2[p1].pin_text  )
+            print("%s: PinRec (text=%s) in cell {%s}, component #%s, box -- %s"   \
+              % (i, pin_info2[p1].pin_text, iter2.cell().name, component_idx, box_shape[p2]) )
+          
 
       # reserve space for netlist for this component, based on the number of pins.
       optical_components[component_idx].nets = [-1] * (optical_components[component_idx].npins)
@@ -690,7 +716,7 @@ def get_LumericalINTERCONNECT_analyzers(topcell, optical_pins):
   iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
   n_laser = 0
   laser_net = -1
-  wavelength_start, wavelength_stop, wavelength_points = 0,0,0
+  wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier, ignoreOpticalIOs = 0,0,0,0,0
   n_detector = 0
   while not(iter1.at_end()):
     subcell = iter1.cell()             # cell (component) to which this shape belongs
@@ -1102,7 +1128,13 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
 
 #wtext.insertHtml('.subckt %s %s:&lt;br&gt;' % ( topcell.name, find_optical_IO_pins(optical_pins) ))
   opticalIO_pins = find_optical_IO_pins(optical_pins)  
-  text_subckt += '.subckt %s%s\n' % (topcell.name, opticalIO_pins)
+  # find electrical IO pins
+  electricalIO_pins = ""
+  for o in optical_components:
+    for p in o.epins:  # electrical pins
+      electricalIO_pins += " N$" + o.component +'_' + str(o.idx) + '_' + p
+  # create the top subckt:
+  text_subckt += '.subckt %s%s%s\n' % (topcell.name, electricalIO_pins, opticalIO_pins)
 
   # Get information about the laser and detectors:
   laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier, ignoreOpticalIOs = \
@@ -1111,7 +1143,9 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   for o in optical_components:
   
     nets_str = ""
-    for n in o.nets:
+    for p in o.epins:  # electrical pins
+      nets_str += " N$" + o.component +'_' + str(o.idx) + '_' + p
+    for n in o.nets:  # optical nets
       nets_str += " N$" + str(n)
 
     trans = KLayoutInterconnectRotFlip[(o.rotate, o.flip)]
