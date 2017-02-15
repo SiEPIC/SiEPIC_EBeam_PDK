@@ -1172,12 +1172,14 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
       component1 =  o.component 
       params1 = o.params
       
-    t = '  %s %s %s library="%s" %s lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s'  % \
-         ( component1 +"_"+str(o.idx), nets_str, component1, o.library, params1, \
+    text_subckt += ' %s %s %s ' % ( component1 +"_"+str(o.idx), nets_str, component1 ) 
+    if o.library != None:
+      text_subckt += 'library="%s" ' % o.library
+    text_subckt += '%s lay_x=%s lay_y=%s sch_x=%s sch_y=%s %s%s\n' % \
+       ( params1,
          eng_str(o.x * 1e-6), eng_str(o.y * 1e-6), \
          eng_str(o.x * Lumerical_schematic_scaling), eng_str(o.y * Lumerical_schematic_scaling), \
          rotate, flip)
-    text_subckt += '%s\n' %t
 
   # list all Optical_waveguides objects from an array
   # input array, optical_waveguides
