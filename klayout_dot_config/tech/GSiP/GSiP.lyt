@@ -2,9 +2,8 @@
 <technology>
  <name>GSiP</name>
  <description/>
- <base-path>/Users/lukasc/SiEPIC_EBeam_PDK/PDK/GSiP</base-path>
  <original-base-path/>
- <layer-properties_file>libraries/GSiP_layer_properties.lyp</layer-properties_file>
+ <layer-properties_file>libraries/klayout_Layers_GSiP.lyp</layer-properties_file>
  <add-other-layers>true</add-other-layers>
  <layer-map/>
  <create-other-layers>true</create-other-layers>
