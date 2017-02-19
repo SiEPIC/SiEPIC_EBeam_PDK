@@ -57,3 +57,6 @@ docs/_build/
 target/
 
 *.ldf
+
+*.DS_Store
+.DS_Store

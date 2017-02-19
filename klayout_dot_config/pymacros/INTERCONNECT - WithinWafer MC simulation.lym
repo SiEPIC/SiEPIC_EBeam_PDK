@@ -312,25 +312,23 @@ def mc_dtd(topcell, layout, dbu, datadict):
   if(datadict["hist_fsr"]==True):
       text_lsf += 'dataset = fsr_dataset*1e9;\n'  #select fsr dataset defined above
       text_lsf += 'bin_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n' #define number of bins according to the number of data
-      text_lsf += 'histc_data = histogram(dataset, bin_hist, 1);\n' #generate histogram datapoints with the datapoint and the last parameter is 1 which defines the category as bar plot type
-      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Free Spectral Range (nm)", "Count", "Histogram - FSR");\n'#plot data
+      text_lsf += 'histc(dataset, bin_hist, "Free Spectral Range (nm)", "Count", "Histogram - FSR");\n' #generate histogram 
       text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n' #define plot legends
       
 #wavelength
   if(datadict["hist_wavelength"]==True):
       text_lsf += 'dataset = freq_dataset*1e9;\n'
       text_lsf += 'num_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n'
-      text_lsf += 'histc_data = histogram(dataset, num_hist, 1);\n'
-      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Wavelength (nm)", "Count", "Histogram - Peak wavelength");\n'
+      text_lsf += 'histc(dataset, bin_hist, "Wavelength (nm)", "Count", "Histogram - Peak wavelength");\n'
       text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n'
 
 #Gain
   if(datadict["hist_gain"]==True):
       text_lsf += 'dataset = gain_dataset;\n'
       text_lsf += 'num_hist = max( [ 10, (max(dataset)-min(dataset)) / std(dataset) * 10 ]);\n'
-      text_lsf += 'histc_data = histogram(dataset, num_hist, 1);\n'
-      text_lsf += 'out = plotxy(histc_data(1:length(histc_data)/2,1),histc_data(1:length(histc_data)/2,2), "Gain (dB)", "Count", "Histogram - Peak gain");\n'
+      text_lsf += 'histc(dataset, bin_hist, "Gain (dB)", "Count", "Histogram - Peak gain");\n'
       text_lsf += 'legend("Mean: " + num2str(mean(dataset)) + ", Std Dev: " + num2str(std(dataset)));\n'
+
 
   file.write (text_lsf)
   file.close()
