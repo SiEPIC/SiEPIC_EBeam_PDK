@@ -932,7 +932,7 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(r/4, r/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight_te1550', t)
+    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(r/4, r/2)
