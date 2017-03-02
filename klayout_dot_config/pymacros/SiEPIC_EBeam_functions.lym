@@ -1334,22 +1334,9 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
   #Check if there is one laser
   Proceed = 0
   laser_count = len([1 for each in lumerical_list if(each[1]=='LASER')])
+
   if(laser_count==1):
     Proceed = 1
-  
-  if(Proceed == 0):
-    #show error and teminate
-    try:
-       pya.MessageBox.warning("Check Laser Error", "There is more than one Laser in the layout.\nPlease make sure that there is only one laser.", pya.MessageBox.Ok)
-       raise ValueError("IGNORE THIS ERROR. MANUALLY RAISED")
-    except Exception:
-      sys.exit(1)
-
-  #we need to raise an error rather than showing a message box warning because it would not stop the code from running and will throw errors in the script we
-  #are running this code from
-    #pya.MessageBox.warning("Check Laser Error", "There is more than one Laser in the layout.\nPlease make sure that there is only one laser.", pya.MessageBox.Ok)
-    
-  elif(Proceed == 1):
       
     #extract grating couplers as they are the only ones connected to an input or output:
     gc_list = [[each,each.pins] for each in optical_components if('_gc_' in each.component)]
@@ -1468,6 +1455,31 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
     # Output the Spice netlist:
     return generate_Spice_file(topcell, optical_waveguideF, optical_componentF, optical_pins)
 
+  if(laser_count==0):
+
+    v = pya.MessageBox.warning("Check Laser Question", "There is no Laser defined in the layout.\nOne laser and at least one detector are required to perform a circuit simulation; add them and try again (click ABORT).\nAlternatively, the circuit can be exported as-is but the sources will need to be defined manually within INTERCONNECT (click YES).", pya.MessageBox.Abort + pya.MessageBox.Yes)
+    Proceed = 1
+    if v == pya.MessageBox.Abort:
+      try:
+        pass
+        raise ValueError("IGNORE THIS ERROR. MANUALLY RAISED")
+      except Exception:
+        sys.exit(1)
+    if v == pya.MessageBox.Yes:
+      return generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins)
+    
+  if(laser_count&gt;1):
+    #show error and teminate
+    try:
+       pya.MessageBox.warning("Check Laser Error", "There is more than one Laser in the layout.\nPlease make sure that there is only one laser.", pya.MessageBox.Ok)
+       raise ValueError("IGNORE THIS ERROR. MANUALLY RAISED")
+    except Exception:
+      sys.exit(1)
+
+  #we need to raise an error rather than showing a message box warning because it would not stop the code from running and will throw errors in the script we
+  #are running this code from
+    #pya.MessageBox.warning("Check Laser Error", "There is more than one Laser in the layout.\nPlease make sure that there is only one laser.", pya.MessageBox.Ok)
+    
 
 
 
