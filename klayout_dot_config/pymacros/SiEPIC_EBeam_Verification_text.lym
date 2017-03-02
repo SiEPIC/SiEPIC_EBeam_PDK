@@ -8,7 +8,7 @@
  <doc/>
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
- <shortcut/>
+ <shortcut>N</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
  <menu-path>siepic_menu.verification_submenu.end</menu-path>
@@ -211,9 +211,10 @@ clock_verify_layout = time.clock()
 
 
 # Output the Spice netlist:
-text_Spice,text_Spice_main,_ = generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins)
+text_subckt,text_Spice_main,_ = generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins)
 if 'wtext' in globals():
-  wtext.insertPlainText(text_Spice)
+  wtext.insertPlainText(text_Spice_main)
+  wtext.insertPlainText(text_subckt)
 clock_netlist = time.clock()
 
 

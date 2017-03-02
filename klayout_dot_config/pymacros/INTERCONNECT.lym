@@ -124,6 +124,8 @@ text_lsf += 'addproperty("::Root Element::%s", "MC_grid", "wafer", "Number");\n'
 text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_x", "wafer", "Number");\n' % topcell.name
 text_lsf += 'addproperty("::Root Element::%s", "MC_resolution_y", "wafer", "Number");\n' % topcell.name
 text_lsf += 'addproperty("::Root Element::%s", "MC_non_uniform", "wafer", "Number");\n'  % topcell.name
+text_lsf += 'select("::Root Element::%s");\n' % topcell.name
+text_lsf += 'set("run setup script",2);\n'
 text_lsf += 'save("%s");\n' % filename_icp
 text_lsf += 'run;\n'
 for i in range(0, num_detectors):
