@@ -47,7 +47,9 @@ Lukas Chrostowski           2016/04/19
 
 Jaspreet Jhoja              2016/05/01
  - Added Checkables for generating histograms for FSR, gain and Wavelength
-
+ 
+Zeqin Lu  2016/11/06
+ - Update MC simulation settings and simulation procedures.
  """
  
 from pya import *
@@ -112,7 +114,7 @@ elif sys.platform.startswith('win'):
 #titlefont = QFont("Arial", 9, QFont.Bold, False)
 hbox = QVBoxLayout(wdg)
 
-wdg.setFixedSize(650, 480)
+wdg.setFixedSize(850, 480)
 
 def action(obj):
   print(obj.text)
@@ -161,21 +163,32 @@ def errorcheck(self):
 topframe = QFrame()
 topframe.setFrameShape(QFrame.StyledPanel)
 topframe.setStyleSheet("background-color: mintcream;")
-tftitle = QLabel('Type of MC Simulation: ')
-option1 = QRadioButton("Wafer to Wafer Simulation")
-option2 = QRadioButton("Within Wafer Simulation")
-tflabel1 = QLabel('Number of Simulations: ')
+tftitle = QLabel('Monte Carlo iteration setting: ')
+#option1 = QRadioButton("Wafer to Wafer Simulation")
+#option2 = QRadioButton("Within Wafer Simulation")
+
+tflabel1 = QLabel('Number of testing wafer')
 tftext1 = QLineEdit()
 tftext1.setAccessibleName('tftext1')
-tftext1.setAccessibleDescription('number_of_simulations')
+tftext1.setAccessibleDescription('number_of_wafer')
 tftext1.textChanged(errorcheck)
 tftext1.setFixedWidth(80)
+
+tflabel2 = QLabel('Number of testing die per wafer')
+tftext2 = QLineEdit()
+tftext2.setAccessibleName('tftext2')
+tftext2.setAccessibleDescription('number_of_die')
+tftext2.textChanged(errorcheck)
+tftext2.setFixedWidth(80)
+
 tfform = QGridLayout()
 tfform.addWidget(tftitle,0,1)
-tfform.addWidget(option1, 1,2)
-tfform.addWidget(option2, 2,2)
-tfform.addWidget(tflabel1, 3,1)
-tfform.addWidget(tftext1, 3,2)
+#tfform.addWidget(option1, 1,2)
+#tfform.addWidget(option2, 2,2)
+tfform.addWidget(tflabel1, 1,1)
+tfform.addWidget(tftext1, 1,2)
+tfform.addWidget(tflabel2, 2,1)
+tfform.addWidget(tftext2, 2,2)
 topframe.setLayout(tfform)
 
 def selection(self):
@@ -196,16 +209,17 @@ def selection(self):
 lframe1 = QFrame()
 lframe1.setFrameShape(QFrame.StyledPanel)
 lframe1.setStyleSheet("background-color: mintcream;")
-lf1title = QLabel('Within Wafer thickness variations')
+lf1title = QLabel('Within wafer variations')
 lf1title.setFont(titlefont)
 parameters = QComboBox()
-parameters.addItems(['248 dry litho', '193 dry litho', '193 immersion litho'])
+parameters.addItems(['248 nm dry litho', '193 nm dry litho', '193 nm immersion litho'])
 parameters.currentIndexChanged(selection)
 parameters.setFixedWidth(150)
 parameters.setStyleSheet("background-color: white;") 
-lf1label1 = QLabel('Sigma RMS for width (nm): ')
-lf1label2 = QLabel('Sigma RMS for thickness (nm): ')
-lf1label3 = QLabel('Correlation length (m): ')
+lf1label1 = QLabel('Standard deviation for width variation (nm): ')
+lf1label2 = QLabel('Standard deviation for thickness variation (nm): ')
+lf1label3 = QLabel('Correlation length for width variation (m): ')
+lf1label4 = QLabel('Correlation length for thickness variation (m): ')
 lf1text1 = QLineEdit()
 lf1text1.setAccessibleName('lf1text1')
 lf1text1.setAccessibleDescription('within_wafer_width')
@@ -216,8 +230,12 @@ lf1text2.setAccessibleDescription('within_wafer_thickness')
 lf1text2.editingFinished(editcheck)
 lf1text3 = QLineEdit()
 lf1text3.setAccessibleName('lf1text3')
-lf1text3.setAccessibleDescription('within_wafer_correlation')
+lf1text3.setAccessibleDescription('within_wafer_correlation_width')
 lf1text3.textChanged(errorcheck)
+lf1text4 = QLineEdit()
+lf1text4.setAccessibleName('lf1text4')
+lf1text4.setAccessibleDescription('within_wafer_correlation_thickness')
+lf1text4.textChanged(errorcheck)
 lf1form = QGridLayout()
 lf1form.addWidget(lf1title,0,0,1,2)
 lf1form.addWidget(parameters,1,0)
@@ -227,6 +245,8 @@ lf1form.addWidget(lf1label2, 3,0)
 lf1form.addWidget(lf1text2, 3,1)
 lf1form.addWidget(lf1label3, 4,0)
 lf1form.addWidget(lf1text3, 4,1)
+lf1form.addWidget(lf1label4, 5,0)
+lf1form.addWidget(lf1text4, 5,1)
 
 lframe1.setLayout(lf1form)
 
@@ -256,8 +276,8 @@ lf2check = QCheckBox('Within Die variations')
 lf2check.setFont(titlefont)
 lf2check.setChecked(True)
 lf2check.stateChanged(checkboxstatecheck)
-lf2label1 = QLabel('Sigma RMS for width (nm): ')
-lf2label2 = QLabel('Sigma RMS for thickness (nm): ')
+lf2label1 = QLabel('Standard deviation for width (nm): ')
+lf2label2 = QLabel('Standard deviation for thickness (nm): ')
 lf2label3 = QLabel('Correlation length (m): ')
 lf2text1 = QLineEdit()
 lf2text1.setAccessibleName('lf2text1')
@@ -280,7 +300,8 @@ lf2form.addWidget(lf2label2, 3,0)
 lf2form.addWidget(lf2text2, 3,1)
 lf2form.addWidget(lf2label3, 4,0)
 lf2form.addWidget(lf2text3, 4,1)
-lframe2.setLayout(lf2form)
+
+#lframe2.setLayout(lf2form)
 
 
 
@@ -314,10 +335,10 @@ rframe0.setLayout(rf0form)
 rframe1 = QFrame()
 rframe1.setFrameShape(QFrame.StyledPanel)
 rframe1.setStyleSheet("background-color: mintcream;")
-rf1title = QLabel('Wafer mean')
+rf1title = QLabel('Wafer to wafer variation')
 rf1title.setFont(titlefont)
-rf1label1 = QLabel('Sigma RMS for width (nm): ')
-rf1label2 = QLabel('Sigma RMS for thickness (nm): ')
+rf1label1 = QLabel('Standard deviation for width variation (nm): ')
+rf1label2 = QLabel('Standard deviation for thickness variation (nm): ')
 rf1text1 = QLineEdit()
 rf1text1.setAccessibleName('rf1text1')
 rf1text1.setAccessibleDescription('wafer_sigma_width')
@@ -435,12 +456,15 @@ def button(self):
     layout = topcell.layout()
     dbu = layout.dbu
     print(datadict)
-    if(option1.isChecked()== True):
-      print("Starting Wafer to Wafer MC Simulation")
-      mc_wtw(topcell, layout, dbu, datadict)
-    elif(option2.isChecked()==True):
-      print("Starting Within Wafer MC Simulation")
-      mc_dtd(topcell, layout, dbu, datadict)
+    print("Starting MC Simulation")
+    mc_interconnect(topcell, layout, dbu, datadict);
+    
+#    if(option1.isChecked()== True):
+#      print("Starting Wafer to Wafer MC Simulation")
+#      mc_wtw(topcell, layout, dbu, datadict)
+#    elif(option2.isChecked()==True):
+#      print("Starting Within Wafer MC Simulation")
+#      mc_dtd(topcell, layout, dbu, datadict)
   
 
   #gui_dtd(topcell, layout, dbu, LayerSiN, LayerTextN, LayerPinRecN, LayerDevRecN, LayerFbrTgtN, LayerErrorN, LayerINTERCONNECTN)
@@ -452,9 +476,9 @@ ok.clicked(button)
 leftsplitter = QSplitter(Qt.Vertical)
 leftsplitter.addWidget(topframe)
 leftsplitter.addWidget(lframe1)
-leftsplitter.addWidget(lframe2)
+#leftsplitter.addWidget(lframe2)
 leftsplitter.addWidget(ok)
-leftsplitter.setSizes([400,500,400,10])
+leftsplitter.setSizes([400,500,200,10])
 
 #Right Vertical Splitter
 rightsplitter = QSplitter(Qt.Vertical)
@@ -476,9 +500,11 @@ container = QWidget()
 #hbox.addWidget(topframe)
 hbox.addWidget(splitter1)
 objlist.append(tftext1)
+objlist.append(tftext2)
 objlist.append(lf1text1)
 objlist.append(lf1text2)
 objlist.append(lf1text3)
+objlist.append(lf1text4)
 objlist.append(lf2text1)
 objlist.append(lf2text2)
 objlist.append(lf2text3)
@@ -494,9 +520,9 @@ checklist.append(rf0hist2)
 checklist.append(rf0hist3)
 
 #Add Data
-option1.setChecked(True)
+#option1.setChecked(True)
 #sample data
-sample_data =['2', '15/3', '6/3', '4500e-6', '1.8', '1.3', '14e-6', '1.66', '1.26', '100e-3', '100e-3', '5e-3', '5e-3']
+sample_data =['1', '2', '15/3', '6/3', '4500e-6','4500e-6', '1.8', '1.3', '14e-6', '1.66', '1.26', '100e-3', '100e-3', '5e-3', '5e-3']
 #filling gui
 for each in range(len(objlist)):
   objlist[each].setText(sample_data[each])
