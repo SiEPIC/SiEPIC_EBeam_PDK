@@ -1132,13 +1132,13 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   # find electrical IO pins
   electricalIO_pins = ""
   DCsources = "" # string to create DC sources for each pin
-  Vn = 0
+  Vn = 1
   SINGLE_DC_SOURCE = 1  # attach all electrical pins to the same DC source (1), or to individual DC sources (0).
   for o in optical_components:
     for p in o.epins:  # electrical pins
       NetName = " N$" + o.component +'_' + str(o.idx) + '_' + p
       electricalIO_pins += NetName
-      DCsources += str(Vn) + NetName + " 0 dcsource amplitude=0 \n"
+      DCsources += "N" + str(Vn) + NetName + " 0 dcsource amplitude=0 \n"
       if SINGLE_DC_SOURCE == 0:
         Vn += 1
       
