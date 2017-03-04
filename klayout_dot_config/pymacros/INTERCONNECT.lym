@@ -97,7 +97,17 @@ if sys.platform.startswith("win"):
   filename_subckt = folder_name + '/tmp/%s.spi' % topcell.name
   filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
   filename_icp = folder_name + '/tmp/%s.icp' % topcell.name
-else: 
+elif sys.platform.startswith("linux"):
+  import getpass
+  username=getpass.getuser()
+  tmp_folder='/tmp/klayout_SiEPIC_EBeam_PDK_%s' % username
+  if not os.path.isdir(tmp_folder):
+    os.makedirs(tmp_folder)
+  filename = '%s/%s_main.spi' % (tmp_folder, topcell.name)
+  filename_subckt = '%s/%s.spi' % (tmp_folder, topcell.name)
+  filename2 = '%s/%s.lsf' % (tmp_folder, topcell.name)
+  filename_icp = '%s/%s.icp' % (tmp_folder, topcell.name)
+else:
   filename = '/tmp/%s_main.spi' % topcell.name
   filename_subckt = '/tmp/%s.spi' % topcell.name
   filename2 = '/tmp/%s.lsf' % topcell.name
