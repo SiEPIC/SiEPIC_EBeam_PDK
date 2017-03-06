@@ -8,7 +8,7 @@
  <doc/>
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
- <shortcut>Ctrl+Shift+W</shortcut>
+ <shortcut>Alt+Shift+W</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
  <menu-path>siepic_menu.waveguides_submenu.end</menu-path>
