@@ -56,6 +56,13 @@ if topcell == None:
 layout = topcell.layout()
 dbu = layout.dbu
 
+# Save the layout prior to running simulations
+pya.Application.instance().main_window().cm_save()
+layout_filename = pya.Application.instance().main_window().current_view().active_cellview().filename()
+if len(layout_filename) == 0:
+  raise Exception("Please save your layout before running the simulation")
+
+
 # initialize the arrays to keep track of layout objects
 optical_components = []
 optical_waveguides = []
