@@ -49,6 +49,10 @@ import string
 
 SIMULATION = 1    # Regular INTERCONNECT simulation
 
+
+if pya.Application.instance().main_window().current_view() == None:
+  raise Exception("Please create a layout before running a simulation.")
+
 # find the currently selected cell:
 topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
 if topcell == None:
