@@ -1,0 +1,5 @@
+? "Foundry A Silicon Photonics Process";
+Si_Full_Height = 220e-9;
+Si_Slab_Height = 70e-9;
+N_doping = 5e+17 * 1e6;
+P_doping = 7e+17 * 1e6;

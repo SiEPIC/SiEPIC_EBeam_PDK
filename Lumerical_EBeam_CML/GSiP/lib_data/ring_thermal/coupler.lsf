@@ -1,0 +1,106 @@
+s_filename = %local path% + '/lib_data/ring_thermal/' + "coupler_" + process + "_w" + num2str(wg_width*1e9) + "_r" + num2str(radius*1e9) + "_g" + num2str(coupling_gap*1e9) + "_l" + num2str(coupling_length*1e9) + "nm.dat";
+if (!fileexists(s_filename)) {
+    f1 = opensession("fdtd");
+    ?fsp_filename = %local path% + '/lib_data/ring_thermal/coupler.fsp';
+    api_script = "";
+    api_script = api_script + 'load("' + fsp_filename + '");' + endl;
+    putremotedata(f1,'s_filename',s_filename);
+    putremotedata(f1,'wg_width',wg_width);
+    putremotedata(f1,'radius',radius);
+    putremotedata(f1,'coupling_gap',coupling_gap);
+    putremotedata(f1,'coupling_length',coupling_length);
+    putremotedata(f1,'Si_Full_Height',Si_Full_Height);
+    putremotedata(f1,'Si_Slab_Height',Si_Slab_Height);    
+    api_script = api_script + '
+        switchtolayout;
+        setnamed("::model","wg_width",wg_width);
+        setnamed("::model","radius",radius);
+        setnamed("::model","coupling_gap",coupling_gap);
+        setnamed("::model","coupling_length",coupling_length);
+        setnamed("::model","Si_Full_Height",Si_Full_Height);
+        setnamed("::model","Si_Slab_Height",Si_Slab_Height);
+        ? "Coupler: ";
+        ? "Step 1: Input port in the straight waveguide";
+        setnamed("::model","input_port",1);
+        run;
+        select("expansion_2");
+        set("mode selection","user select");
+        seteigensolver("bent waveguide", 1);
+        seteigensolver("bend radius",radius);
+        seteigensolver("bend orientation",90);
+        updatemodes(1);
+        select("expansion_4");
+        set("mode selection","user select");
+        seteigensolver("bent waveguide", 1);
+        seteigensolver("bend radius",radius);
+        seteigensolver("bend orientation",90);
+        updatemodes(1);
+        Port1=getresult("expansion_1","expansion for Port1expansion");
+        Port3=getresult("expansion_3","expansion for Port3expansion");
+        Port2=getresult("expansion_2","expansion for Port2expansion");
+        Port4=getresult("expansion_4","expansion for Port4expansion");
+        f=Port1.f;                
+        S11=Port1.b/Port1.a;
+        S21=(Port2.b*sqrt(Port2.N)) / (Port1.a*sqrt(Port1.N));
+        S31=Port3.a/Port1.a;
+        S41=(Port4.a*sqrt(Port4.N)) / (Port1.a*sqrt(Port1.N));
+        index_cf=length(f)/2+0.5;
+        ? "    Center wavelength: " + num2str( c/f(index_cf) );
+        ? "    Through (Input1): " + num2str(abs(S31(index_cf))^2*100) + "%.";
+        ? "    Coupling (Input1): " + num2str(abs(S41(index_cf))^2*100) + "%.";
+        ? "    Reflection (Input1): " + num2str(abs(S11(index_cf))^2*100) + "%.";
+        ? "    Crosstalk (Input1): " + num2str(abs(S21(index_cf))^2*100) + "%.";
+        ? "    Loss (Input1): " + num2str(100-abs(S11(index_cf))^2*100-abs(S21(index_cf))^2*100-abs(S31(index_cf))^2*100-abs(S41(index_cf))^2*100) + "%.";
+        
+        switchtolayout;
+        ? "Step 2: Input port in the bend waveguide";
+        setnamed("::model","input_port",2);
+        run;
+        select("expansion_2");
+        set("mode selection","user select");
+        seteigensolver("bent waveguide", 1);
+        seteigensolver("bend radius",radius);
+        seteigensolver("bend orientation",90);
+        updatemodes(1);
+        select("expansion_4");
+        set("mode selection","user select");
+        seteigensolver("bent waveguide", 1);
+        seteigensolver("bend radius",radius);
+        seteigensolver("bend orientation",90);
+        updatemodes(1);
+        Port1=getresult("expansion_1","expansion for Port1expansion");
+        Port3=getresult("expansion_3","expansion for Port3expansion");
+        Port2=getresult("expansion_2","expansion for Port2expansion");
+        Port4=getresult("expansion_4","expansion for Port4expansion");
+        S12=(Port1.b*sqrt(Port1.N)) / (Port2.a*sqrt(Port2.N));
+        S22=Port2.b/Port2.a;
+        S32=(Port3.a*sqrt(Port3.N)) / (Port2.a*sqrt(Port2.N));
+        S42=Port4.a/Port2.a;
+        ? "    Through (Input2): " + num2str(abs(S42(index_cf))^2*100) + "%.";
+        ? "    Coupling (Input2): " + num2str(abs(S32(index_cf))^2*100) + "%.";
+        ? "    Reflection (Input2): " + num2str(abs(S22(index_cf))^2*100) + "%.";
+        ? "    Crosstalk (Input2): " + num2str(abs(S12(index_cf))^2*100) + "%.";
+        ? "    Loss (Input2): " + num2str(100-abs(S12(index_cf))^2*100-abs(S22(index_cf))^2*100-abs(S32(index_cf))^2*100-abs(S42(index_cf))^2*100) + "%.";
+        
+        switchtolayout;
+        
+        S33=S11;
+        S43=S21;
+        S13=S31;
+        S23=S41;
+        S34=S12;
+        S44=S22;
+        S14=S32;
+        S24=S42;        
+        
+        if (fileexists(s_filename)) { rm(s_filename);}
+        mode_label = "TE";
+        mode_ID = "1";
+        format long;
+        write_s_parameters;
+        format short;
+
+    ';
+    evalremote(f1,api_script);
+    closesession(f1);
+}
