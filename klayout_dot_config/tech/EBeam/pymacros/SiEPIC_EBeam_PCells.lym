@@ -113,6 +113,9 @@ Lukas Chrostowski           2016/11/06
 Lukas Chrostowski           2017/02/14
  - renaming "SiEPIC" PCells library to "SiEPIC-EBeam PCells", update for Waveguide_Route
  - code simplifications: pya.Box -&gt; Box
+
+Lukas Chrostowski           2017/03/08
+ - S-Bend - Waveguide_SBend
  
 """
 
@@ -133,7 +136,7 @@ Trans = pya.Trans
 LayerInfo = pya.LayerInfo
 
 
-class waveguide_bump(pya.PCellDeclarationHelper):
+class Waveguide_SBend(pya.PCellDeclarationHelper):
   """
   Input: 
   """
@@ -143,7 +146,167 @@ class waveguide_bump(pya.PCellDeclarationHelper):
 
 
     # Important: initialize the super class
-    super(waveguide_bump, self).__init__()
+    super(Waveguide_SBend, self).__init__()
+
+
+    # declare the parameters
+    self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
+    self.param("height", self.TypeDouble, "Waveguide offset height", default = 2)     
+    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5)     
+    self.param("radius", self.TypeDouble, "Waveguide bend radius (microns)", default = 5)     
+    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Waveguide_SBend_%s-%.3f" % \
+    (self.length, self.wg_width)
+  
+  def coerce_parameters_impl(self):
+    pass
+
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return False
+    
+  def produce_impl(self):
+  
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+
+
+    LayerSi = self.layer
+    LayerSiN = ly.layer(LayerSi)
+    LayerSiSPN = ly.layer(LayerSiSP)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    LayerTextN = ly.layer(LayerText)
+
+
+    from math import pi, cos, sin, log, sqrt, acos
+    
+    length = self.length / dbu
+    w = self.wg_width / dbu
+    r = self.radius / dbu
+    h = self.height / dbu
+    theta = acos((r-abs(h/2))/r)*180/pi
+    x = 2*r*sin(theta/180.0*pi)
+    straight_l = (length - x)/2
+
+    # define the cell origin as the left side of the waveguide sbend
+
+    if (straight_l &gt;= 0):
+      circle_fraction = abs(theta) / 360.0
+      npoints = int(points_per_circle(r*dbu) * circle_fraction)
+      if npoints == 0:
+        npoints = 1
+      da = 2 * pi / npoints * circle_fraction # increment, in radians
+      x1=straight_l
+      x2=length-straight_l
+
+      if h&gt;0:
+        y1=r
+        theta_start1 = 270
+        y2=h-r
+        theta_start2 = 90
+        pts = []
+        th1 = theta_start1 / 360.0 * 2 * pi
+        th2 = theta_start2 / 360.0 * 2 * pi
+        pts.append(Point.from_dpoint(pya.DPoint(0,w/2)))
+        pts.append(Point.from_dpoint(pya.DPoint(0,-w/2)))
+        for i in range(0, npoints+1): # lower left
+          pts.append(Point.from_dpoint(pya.DPoint((x1+(r+w/2)*cos(i*da+th1))/1, (y1+(r+w/2)*sin(i*da+th1))/1)))
+        for i in range(npoints, -1, -1): # lower right
+          pts.append(Point.from_dpoint(pya.DPoint((x2+(r-w/2)*cos(i*da+th2))/1, (y2+(r-w/2)*sin(i*da+th2))/1)))
+        pts.append(Point.from_dpoint(pya.DPoint(length,h-w/2)))
+        pts.append(Point.from_dpoint(pya.DPoint(length,h+w/2)))
+        for i in range(0, npoints+1): # upper right
+         pts.append(Point.from_dpoint(pya.DPoint((x2+(r+w/2)*cos(i*da+th2))/1, (y2+(r+w/2)*sin(i*da+th2))/1)))
+        for i in range(npoints, -1, -1): # upper left
+          pts.append(Point.from_dpoint(pya.DPoint((x1+(r-w/2)*cos(i*da+th1))/1, (y1+(r-w/2)*sin(i*da+th1))/1)))
+        self.cell.shapes(LayerSiN).insert(Polygon(pts))
+      else:
+        y1=-r
+        theta_start1 = 90-theta
+        y2=r+h
+        theta_start2 = 270-theta
+        pts = []
+        th1 = theta_start1 / 360.0 * 2 * pi
+        th2 = theta_start2 / 360.0 * 2 * pi
+        pts.append(Point.from_dpoint(pya.DPoint(length,h-w/2)))
+        pts.append(Point.from_dpoint(pya.DPoint(length,h+w/2)))
+        for i in range(npoints, -1, -1): # upper right
+          pts.append(Point.from_dpoint(pya.DPoint((x2+(r-w/2)*cos(i*da+th2))/1, (y2+(r-w/2)*sin(i*da+th2))/1)))
+        for i in range(0, npoints+1): # upper left
+          pts.append(Point.from_dpoint(pya.DPoint((x1+(r+w/2)*cos(i*da+th1))/1, (y1+(r+w/2)*sin(i*da+th1))/1)))
+        pts.append(Point.from_dpoint(pya.DPoint(0,w/2)))
+        pts.append(Point.from_dpoint(pya.DPoint(0,-w/2)))
+        for i in range(npoints, -1, -1): # lower left
+          pts.append(Point.from_dpoint(pya.DPoint((x1+(r-w/2)*cos(i*da+th1))/1, (y1+(r-w/2)*sin(i*da+th1))/1)))
+        for i in range(0, npoints+1): # lower right
+         pts.append(Point.from_dpoint(pya.DPoint((x2+(r+w/2)*cos(i*da+th2))/1, (y2+(r+w/2)*sin(i*da+th2))/1)))
+        self.cell.shapes(LayerSiN).insert(Polygon(pts))
+      
+    
+    waveguide_length = (2*pi*r*(2*theta/360.0)+straight_l*2)*dbu
+
+    # Pins on the waveguide:
+    pin_length = 200
+    x = self.length / dbu
+    t = Trans(x,h)
+    pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
+    pin_t = pin.transformed(t)
+    shapes(LayerPinRecN).insert(pin_t)
+    text = Text ("pin2", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    x = 0
+    t = Trans(x,0)
+    pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
+    pin_t = pin.transformed(t)
+    shapes(LayerPinRecN).insert(pin_t)
+    text = Text ("pin1", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+
+    # Compact model information
+    t = Trans(0, 0)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = Trans(0, w*2)
+    text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = Trans(0, -w*2)
+    text = Text \
+      ('Spice_param:wg_length=%.3fu wg_width=%.3fu' %\
+      (waveguide_length, self.wg_width), t )
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    box1 = Box(0, min(-w*3,h-w*3), length, max(w*3,h+w*3))
+    shapes(LayerDevRecN).insert(box1)
+
+
+class Waveguide_bump(pya.PCellDeclarationHelper):
+  """
+  Input: 
+  """
+
+
+  def __init__(self):
+
+
+    # Important: initialize the super class
+    super(Waveguide_bump, self).__init__()
 
 
     # declare the parameters
@@ -160,7 +323,7 @@ class waveguide_bump(pya.PCellDeclarationHelper):
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "waveguide_bump_%s-%.3f" % \
+    return "Waveguide_bump_%s-%.3f" % \
     (self.length, self.wg_width)
   
   def coerce_parameters_impl(self):
@@ -1106,6 +1269,8 @@ def layout_arc_wg_dbu(cell, LayerSiN, x, y, r, w, theta_start, theta_stop):
   
   circle_fraction = abs(theta_stop-theta_start) / 360.0
   npoints = int(points_per_circle(r*dbu) * circle_fraction)
+  if npoints==0:
+    npoints = 1
   da = 2 * pi / npoints * circle_fraction # increment, in radians
   pts = []
   th = theta_start / 360.0 * 2 * pi
@@ -2684,8 +2849,8 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring2", TestStruct_DoubleBus_Ring2())
-    self.layout().register_pcell("LumericalINTERCONNECT_Laser", LumericalINTERCONNECT_Laser())
-    self.layout().register_pcell("LumericalINTERCONNECT_Detector", LumericalINTERCONNECT_Detector())
+#    self.layout().register_pcell("LumericalINTERCONNECT_Laser", LumericalINTERCONNECT_Laser())
+#    self.layout().register_pcell("LumericalINTERCONNECT_Detector", LumericalINTERCONNECT_Detector())
     self.layout().register_pcell("Waveguide_Bend", Waveguide_Bend())
     self.layout().register_pcell("Waveguide_Route", Waveguide_Route())
     self.layout().register_pcell("Waveguide_Route_simple", Waveguide_Route_simple())
@@ -2696,7 +2861,8 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
     self.layout().register_pcell("spiral", spiral())
     self.layout().register_pcell("DirectionalCoupler_SeriesRings", DirectionalCoupler_SeriesRings())
-    self.layout().register_pcell("waveguide_bump", waveguide_bump())
+    self.layout().register_pcell("Waveguide_bump", Waveguide_bump())
+    self.layout().register_pcell("Waveguide_SBend", Waveguide_SBend())
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
