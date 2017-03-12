@@ -49,12 +49,23 @@ import string
 
 SIMULATION = 1    # Regular INTERCONNECT simulation
 
+
+if pya.Application.instance().main_window().current_view() == None:
+  raise Exception("Please create a layout before running a simulation.")
+
 # find the currently selected cell:
 topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
 if topcell == None:
   raise Exception("No cell")
 layout = topcell.layout()
 dbu = layout.dbu
+
+# Save the layout prior to running simulations
+pya.Application.instance().main_window().cm_save()
+layout_filename = pya.Application.instance().main_window().current_view().active_cellview().filename()
+if len(layout_filename) == 0:
+  raise Exception("Please save your layout before running the simulation")
+
 
 # initialize the arrays to keep track of layout objects
 optical_components = []
@@ -97,7 +108,17 @@ if sys.platform.startswith("win"):
   filename_subckt = folder_name + '/tmp/%s.spi' % topcell.name
   filename2 = folder_name + '/tmp/%s.lsf' % topcell.name
   filename_icp = folder_name + '/tmp/%s.icp' % topcell.name
-else: 
+elif sys.platform.startswith("linux"):
+  import getpass
+  username=getpass.getuser()
+  tmp_folder='/tmp/klayout_SiEPIC_EBeam_PDK_%s' % username
+  if not os.path.isdir(tmp_folder):
+    os.makedirs(tmp_folder)
+  filename = '%s/%s_main.spi' % (tmp_folder, topcell.name)
+  filename_subckt = '%s/%s.spi' % (tmp_folder, topcell.name)
+  filename2 = '%s/%s.lsf' % (tmp_folder, topcell.name)
+  filename_icp = '%s/%s.icp' % (tmp_folder, topcell.name)
+else:
   filename = '/tmp/%s_main.spi' % topcell.name
   filename_subckt = '/tmp/%s.spi' % topcell.name
   filename2 = '/tmp/%s.lsf' % topcell.name
