@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>SiEPIC GSiP PCells</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># SiEPIC_GSiP_PCells
+
+"""
+This file is part of the SiEPIC GSiP PDK
+by Lukas Chrostowski (c) 2017
+
+This Python file implements a library called "SiEPIC-GSiP" 
+
+
+*******
+PCells:
+*******
+
+1) Double-bus (add-drop) ring resonator filter
+class Ring_Filter_DB
+
+2) Double-bus (add-drop) ring modulator
+class Ring_Modulator_DB
+
+Also includes additional functions:
+1) code for an arc segment
+def layout_arc_wg_segmented_dbu
+
+NOTE: after changing the code, the macro needs to be rerun to install the new
+implementation. The macro is also set to "auto run" to install the PCell 
+when KLayout is run.
+
+Version history:
+
+ Anthony Park				2016/11/01
+ - Ring_Modulator_DB (Add-drop Ring Modulator version 2, with straight waveguides)
+ - Ring_Filter_DB
+ 
+ Lukas Chrostowski         2017/02/10
+ - updates to Ring modulator PCell; added electrical pins, declared some variables
+ 
+
+"""
+
+import pya
+import math
+
+#import numpy as n
+MODULE_NUMPY = False
+
+dbu = 0.001
+
+
+# Create aliases for KLayout Python API methods:
+Box = pya.Box
+Point = pya.Point
+Polygon = pya.Polygon
+Text = pya.Text
+Trans = pya.Trans
+LayerInfo = pya.LayerInfo
+    
+
+class Ring_Modulator_DB(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for ring modulator.
+  Consists of a ring with 2 straight waveguides
+  With pn junction and heater
+  """
+  def __init__(self):
+
+    super(Ring_Modulator_DB, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("gmon", self.TypeDouble, "GapMonitor", default = 0.5)
+    self.param("si3layer", self.TypeLayer, "SiEtch2(Rib) Layer", default = LayerInfo(3, 0))
+    self.param("nlayer", self.TypeLayer, "N Layer", default = LayerInfo(20, 0))
+    self.param("player", self.TypeLayer, "P Layer", default = LayerInfo(21, 0))
+    self.param("nplayer", self.TypeLayer, "Np Layer", default = LayerInfo(22, 0))
+    self.param("pplayer", self.TypeLayer, "Pp Layer", default = LayerInfo(23, 0))
+    self.param("npplayer", self.TypeLayer, "Npp Layer", default = LayerInfo(24, 0))
+    self.param("ppplayer", self.TypeLayer, "Ppp Layer", default = LayerInfo(25, 0))
+    self.param("vclayer", self.TypeLayer, "VC Layer", default = LayerInfo(40, 0))
+    self.param("m1layer", self.TypeLayer, "M1 Layer", default = LayerInfo(41, 0))
+    self.param("vllayer", self.TypeLayer, "VL Layer", default = LayerInfo(44, 0))
+    self.param("mllayer", self.TypeLayer, "ML Layer", default = LayerInfo(45, 0))
+    self.param("mhlayer", self.TypeLayer, "MH Layer", default = LayerInfo(47, 0))
+    self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(66, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Ring_Modulator_DB(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+    from math import pi, cos, sin
+    
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+    
+    LayerSi = self.silayer
+    LayerSi3 = ly.layer(self.si3layer)
+    LayerSiN = ly.layer(LayerSi)
+    LayernN = ly.layer(self.nlayer)
+    LayerpN = ly.layer(self.player)
+    LayernpN = ly.layer(self.nplayer)
+    LayerppN = ly.layer(self.pplayer)
+    LayernppN = ly.layer(self.npplayer)
+    LayerpppN = ly.layer(self.ppplayer)
+    LayervcN = ly.layer(self.vclayer)
+    Layerm1N = ly.layer(self.m1layer)
+    LayervlN = ly.layer(self.vllayer)
+    LayermlN = ly.layer(self.mllayer)
+    LayermhN = ly.layer(self.mhlayer)
+    TextLayerN = ly.layer(self.textl)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+
+    
+    # Define variables for the Modulator
+    # Variables for the Si waveguide
+    w = self.w/dbu
+    r = self.r/dbu
+    g = self.g/dbu
+    gmon = self.gmon/dbu
+    
+    #Variables for the N layer
+    w_1 = 2.0/dbu  #same for N, P, N+, P+ layer
+    r_n = (self.r - 1.0)/dbu
+    
+    #Variables for the P layer
+    r_p = (self.r + 1.0)/dbu
+     
+    #Variables for the N+layer
+    r_np = (self.r - 1.5)/dbu
+    
+    #Variables for the P+layer
+    r_pp = (self.r + 1.5)/dbu
+
+    #Variables for the N++ layer
+    w_2 = 5.5/dbu  #same for N++, P++ layer
+    r_npp = (self.r - 3.75)/dbu
+
+    #Variables for the P+layer
+    r_ppp = (self.r + 3.75)/dbu
+
+    #Variables for the VC layer
+    w_vc = 4.0/dbu
+    r_vc1 = (self.r - 3.75)/dbu
+    r_vc2 = (self.r + 3.75)/dbu
+   
+    #Variables for the M1 layer
+    w_m1_in = (r_vc1 + w_vc/2.0 + 0.5/dbu)
+    r_m1_in = (r_vc1 + w_vc/2.0 + 0.5/dbu) /2.0
+    w_m1_out = 6.0/dbu
+    r_m1_out = (self.r + 4.25)/dbu
+    
+    #Variables for the VL layer
+    #r_vl =  w_m1_in/2.0 -  2.1/dbu
+    r_vl =  r_vc1 - w_vc/2.0 - 2.01/dbu
+    if r_vl &lt; 1.42/dbu:
+      r_vl = 1.42/dbu
+      w_vc = (self.r-1.75)/dbu - (r_vl + 2.01)
+      r_vc1 = (self.r-1.75)/dbu - w_vc/2.0
+      r_vc2 = (self.r+1.75)/dbu + w_vc/2.0
+      w_2 = (r-w/2.0 - 0.75/dbu) - (r_vc1 - w_vc/2.0 - 0.75) # same for N++, P++ layer
+      r_npp = ((r-w/2.0 - 0.75/dbu) + (r_vc1 - w_vc/2.0 - 0.75))/2.0
+      r_ppp = 2*(self.r)/dbu - r_npp
+    w_via = 5.0/dbu
+    h_via = 5.0/dbu
+
+    # Variables for the SiEtch2 layer  (Slab)
+    w_Si3 = w_m1_out + 2*(r_m1_out)+ 0/dbu
+    h_Si3 = w_Si3
+    taper_bigend =  2/dbu
+    taper_smallend =  0.3/dbu
+    taper_length =  5/dbu
+
+    #Variables for the MH layer
+    w_mh = 2.0/dbu
+    r_mh = self.r/dbu
+    r_mh_in = r_mh - w_mh/2.0
+    
+    #Define Ring centre   
+    x0 = r + w/2
+    y0 = r + g + w 
+
+    ######################
+    # Generate the layout:
+   
+    # Create the ring resonator
+    npoints = points_per_circle(self.r)
+    layout_Ring(self.cell, LayerSiN, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, npoints)
+    
+    # Create the two waveguides
+    wg1 = Box(x0 - (w_Si3 / 2 + taper_length), -w/2, x0 + (w_Si3 / 2 + taper_length), w/2)
+    shapes(LayerSiN).insert(wg1)
+    y_offset = 2*r + g + gmon + 2*w
+    wg2 = Box(x0 - (w_Si3 / 2 + taper_length), y_offset-w/2, x0 + (w_Si3 / 2 + taper_length), y_offset+w/2)
+    shapes(LayerSiN).insert(wg2)
+
+    
+    #Create the SiEtch2 (Slab) layer
+    boxSi3 = Box(x0-w_Si3/2.0, y0 - h_Si3/2.0, x0+w_Si3/2.0, y0 + h_Si3/2.0)
+    shapes(LayerSi3).insert(boxSi3)
+    pin1pts = [Point(x0-w_Si3/2.0,-taper_bigend/2.0), Point(x0-w_Si3/2.0-taper_length,-taper_smallend/2.0), Point(x0-w_Si3/2.0-taper_length,taper_smallend/2.0), Point(x0-w_Si3/2.0, taper_bigend/2.0)]
+    pin2pts = [Point(x0+w_Si3/2.0,-taper_bigend/2.0), Point(x0+w_Si3/2.0+taper_length,-taper_smallend/2.0), Point(x0+w_Si3/2.0+taper_length,taper_smallend/2.0), Point(x0+w_Si3/2.0,+taper_bigend/2.0)]
+    pin3pts = [Point(x0-w_Si3/2.0,y_offset-taper_bigend/2.0), Point(x0-w_Si3/2.0-taper_length,y_offset-taper_smallend/2.0), Point(x0-w_Si3/2.0-taper_length,y_offset+taper_smallend/2.0), Point(x0-w_Si3/2.0,y_offset+ taper_bigend/2.0)]
+    pin4pts = [Point(x0+w_Si3/2.0,y_offset-taper_bigend/2.0), Point(x0+w_Si3/2.0+taper_length,y_offset-taper_smallend/2.0), Point(x0+w_Si3/2.0+taper_length,y_offset+taper_smallend/2.0), Point(x0+w_Si3/2.0,y_offset+taper_bigend/2.0)]
+    shapes(LayerSi3).insert(Polygon(pin1pts))
+    shapes(LayerSi3).insert(Polygon(pin2pts))
+    shapes(LayerSi3).insert(Polygon(pin3pts))
+    shapes(LayerSi3).insert(Polygon(pin4pts))
+    
+    # arc angles
+    # doping:
+    angle_min_doping = -35
+    angle_max_doping = 215
+    # VC contact:
+    angle_min_VC = angle_min_doping + 8
+    angle_max_VC = angle_max_doping - 8
+    # M1:
+    angle_min_M1 = angle_min_VC - 4
+    angle_max_M1 = angle_max_VC + 4
+    # MH:
+    angle_min_MH = -75.0
+    angle_max_MH = 255
+
+    #Create the N Layer
+    layout_arc_wg_dbu(self.cell, LayernN, x0,y0, r_n, w_1, angle_min_doping, angle_max_doping)
+
+    #Create the P Layer
+    layout_arc_wg_dbu(self.cell, LayerpN, x0,y0, r_p, w_1, angle_min_doping, angle_max_doping)
+    
+    #Create the N+ Layer
+    layout_arc_wg_dbu(self.cell, LayernpN, x0,y0, r_np, w_1, angle_min_doping, angle_max_doping)
+
+    #Create the P+ Layer
+    layout_arc_wg_dbu(self.cell, LayerppN, x0,y0, r_pp, w_1, angle_min_doping, angle_max_doping)
+    
+    #Create the N++ Layer
+    layout_arc_wg_dbu(self.cell, LayernppN, x0,y0, r_npp, w_2, angle_min_doping, angle_max_doping)
+
+    #Create the P+ +Layer
+    # layout_arc_wg_dbu(self.cell, LayerpppN, x0,y0, r_ppp, w_2, angle_min_doping, angle_max_doping)
+    layout_arc_wg_segmented_dbu(self.cell, LayerpppN, x0,y0, r_ppp, w_2, angle_min_doping, angle_max_doping, y_offset,w, 0.75/dbu)
+    
+    #Create the VC Layer
+    layout_arc_wg_dbu(self.cell, LayervcN, x0,y0, r_vc1, w_vc, angle_min_VC,angle_max_VC)
+    # layout_arc_wg_dbu(self.cell, LayervcN, x0,y0, r_vc2, w_vc, -30,210)
+    layout_arc_wg_segmented_dbu(self.cell, LayervcN, x0,y0, r_vc2, w_vc, angle_min_VC,angle_max_VC, y_offset,w, 1.5/dbu)
+    
+        
+    #Create the M1 Layer
+    layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
+    layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in/2.0, w_m1_in/2.0, 0,360)
+    layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_out, w_m1_out, angle_min_M1,angle_max_M1)
+    boxM11 = Box(x0-w_via, y0 + r_m1_out + w_m1_out-h_via, x0+w_via, y0 + r_m1_out + w_m1_out+h_via)
+    shapes(Layerm1N).insert(boxM11)
+    
+    #Create the ML Layer
+    layout_arc_wg_dbu(self.cell, LayermlN, x0,y0, r_m1_in/2.0, w_m1_in/2.0, 0,360)
+    
+    #Create the VL Layer, as well as the electrical PinRec geometries
+    # centre contact (P, anode):
+    layout_arc_wg_dbu(self.cell, LayervlN, x0,y0, r_vl/2.0, r_vl, 0,360)
+    layout_arc_wg_dbu(self.cell, LayerPinRecN, x0,y0, r_vl/2.0, r_vl, 0,360)
+    shapes(LayerPinRecN).insert(Text ("elec1a", Trans(x0,y0))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Box(x0-w_via/2, y0-w_via/2, x0+w_via/2, y0+w_via/2))
+    # top contact (N, cathode):
+    boxVL1 = Box(x0-w_via/2, y0 +  r_vc2 +  w_vc/2 + 2.0/dbu, x0+w_via/2, y0 + r_vc2 +  w_vc/2 + 2.0/dbu+ h_via)
+    shapes(LayervlN).insert(boxVL1)
+    shapes(LayerPinRecN).insert(boxVL1)
+    shapes(LayerPinRecN).insert(Text ("elec1c", Trans(x0,y0 + r_vc2 +  w_vc/2 + 2.0/dbu+ h_via/2))).text_size = 0.5/dbu
+    # heater contacts
+    boxVL3 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 2.5/dbu, -w/2.0 -  10/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 7.5/dbu, -w/2.0 -  5/dbu)
+    shapes(LayervlN).insert(boxVL3)
+    shapes(LayerPinRecN).insert(boxVL3)
+    shapes(LayerPinRecN).insert(Text ("elec2h2", Trans(x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
+    boxVL4 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 7.5/dbu, -w/2.0 -  10/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi) - 2.5/dbu, -w/2.0 -  5/dbu)
+    shapes(LayervlN).insert(boxVL4)
+    shapes(LayerPinRecN).insert(boxVL4)
+    shapes(LayerPinRecN).insert(Text ("elec2h1", Trans(x0-(r_mh_in)*cos(angle_min_MH/180*pi) - 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
+
+    #Create the MH Layer
+    layout_arc_wg_dbu(self.cell, LayermhN, x0,y0, r_mh, w_mh, angle_min_MH, angle_max_MH)
+    boxMH1 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + w_mh, y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
+    shapes(LayermhN).insert(boxMH1)
+    boxMH2 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)  - w_mh, -w/2.0 -  2.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
+    shapes(LayermhN).insert(boxMH2)
+    boxMH3 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  12.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 10/dbu, -w/2.0 -  2.5/dbu)
+    shapes(LayermhN).insert(boxMH3)
+    boxMH4 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 10/dbu, -w/2.0 -  12.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu)
+    shapes(LayermhN).insert(boxMH4)
+    #print("x0 value, cos value: %.3f-%g" % ( x0, (r_mh_in)*cos(75/180*pi)) )
+    
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    pin = pya.Path([Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, 0), Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, 0)], w)
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt1", Trans(x0 - (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
+
+    pin = pya.Path([Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, 0), Point(x0 + (w_Si3 / 2 + taper_length) + pin_length/2, 0)],w )
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt2", Trans(x0 + (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
+
+    pin = pya.Path([Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, y_offset), Point(x0 - (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)], w)
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt3", Trans(x0 - (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
+
+    pin = pya.Path([Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, y_offset), Point(x0 + (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)],w )
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt4", Trans(x0 + (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
+
+    # Create the device recognition layer
+    dev = Box(x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu, x0 + (w_Si3 / 2 + taper_length), y0 + r_m1_out + w_m1_out+h_via )
+    shapes(LayerDevRecN).insert(dev)
+
+    # Compact model information
+    shape = shapes(LayerDevRecN).insert(Text('Lumerical_INTERCONNECT_library=Design kits/GSiP', \
+      Trans(0, 0))).text_size = 0.3/dbu
+    shapes(LayerDevRecN).insert(Text ('Lumerical_INTERCONNECT_component=Ring_Modulator_DB', \
+      Trans(0, w*2))).text_size = 0.3/dbu
+    shapes(LayerDevRecN).insert(Text \
+      ('Spice_param:radius=%.3fu wg_width=%.3fu gap=%.3fu gap_monitor=%.3fu' %\
+      (self.r, self.w, self.g, self.gmon), \
+      Trans(0, -w*2) ) ).text_size = 0.3/dbu
+    
+    # Add a polygon text description
+    if self.textpolygon:
+      layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
+
+    # Reference publication:
+    shapes(TextLayerN).insert(Text ("Ref: Raphael Dube-Demers, JLT, 2015", Trans(x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu+4.0/dbu))).text_size = 0.7/dbu
+    shapes(TextLayerN).insert(Text ("http://dx.doi.org/10.1109/JLT.2015.2462804", Trans(x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu+1.0/dbu))).text_size = 0.7/dbu
+
+
+
+    print("Done drawing the layout for - Ring_Modulator_DB: %.3f-%g" % ( self.r, self.g) )
+
+
+
+class Ring_Filter_DB(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for thermally tunable ring filter.
+  """
+  def __init__(self):
+
+    super(Ring_Filter_DB, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("gmon", self.TypeDouble, "GapMonitor", default = 0.5)
+    self.param("si3layer", self.TypeLayer, "SiEtch2(Rib) Layer", default = LayerInfo(3, 0))
+    self.param("vllayer", self.TypeLayer, "VL Layer", default = LayerInfo(44, 0))
+    self.param("mllayer", self.TypeLayer, "ML Layer", default = LayerInfo(45, 0))
+    self.param("mhlayer", self.TypeLayer, "MH Layer", default = LayerInfo(47, 0))
+    self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(66, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Ring_Filter_DB(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+    from math import pi, cos, sin
+    
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+    
+    LayerSi = self.silayer
+    LayerSi3 = ly.layer(self.si3layer)
+    LayerSiN = ly.layer(LayerSi)
+    LayervlN = ly.layer(self.vllayer)
+    LayermlN = ly.layer(self.mllayer)
+    LayermhN = ly.layer(self.mhlayer)
+    TextLayerN = ly.layer(self.textl)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+
+    
+    # Define variables for the Modulator
+    # Variables for the Si waveguide
+    w = self.w/dbu
+    r = self.r/dbu
+    g = self.g/dbu
+    gmon = self.gmon/dbu
+    
+    #Variables for the N layer
+    w_1 = 2.0/dbu  #same for N, P, N+, P+ layer
+    r_n = (self.r - 1.0)/dbu
+
+    #Variables for the VC layer
+    w_vc = 4.0/dbu
+    r_vc1 = (self.r - 3.75)/dbu
+    r_vc2 = (self.r + 3.75)/dbu
+   
+    #Variables for the M1 layer
+    w_m1_in = (r_vc1 + w_vc/2.0 + 0.5/dbu)
+    r_m1_in = (r_vc1 + w_vc/2.0 + 0.5/dbu) /2.0
+    w_m1_out = 6.0/dbu
+    r_m1_out = (self.r + 4.25)/dbu
+    
+    #Variables for the VL layer
+    r_vl =  w_m1_in/2.0 -  2.1/dbu
+    w_via = 5.0/dbu
+    h_via = 5.0/dbu
+
+    # Variables for the SiEtch2 layer  (Slab)
+    w_Si3 = w_m1_out + 2*(r_m1_out)+ 0/dbu
+    h_Si3 = w_Si3
+    taper_bigend =  2/dbu
+    taper_smallend =  0.3/dbu
+    taper_length =  5/dbu
+
+    #Variables for the MH layer
+    w_mh = 2.0/dbu
+    r_mh = self.r/dbu
+    r_mh_in = r_mh - w_mh/2.0
+    
+    #Define Ring centre   
+    x0 = r + w/2
+    y0 = r + g + w 
+
+    ######################
+    # Generate the layout:
+   
+    # Create the ring resonator
+    npoints = points_per_circle(self.r)
+    layout_Ring(self.cell, LayerSiN, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, npoints)
+    
+    # Create the two waveguides
+    wg1 = Box(x0 - (w_Si3 / 2 + taper_length), -w/2, x0 + (w_Si3 / 2 + taper_length), w/2)
+    shapes(LayerSiN).insert(wg1)
+    y_offset = 2*r + g + gmon + 2*w
+    wg2 = Box(x0 - (w_Si3 / 2 + taper_length), y_offset-w/2, x0 + (w_Si3 / 2 + taper_length), y_offset+w/2)
+    shapes(LayerSiN).insert(wg2)
+
+    
+    #Create the SiEtch2 (Slab) layer
+    boxSi3 = Box(x0-w_Si3/2.0, y0 - h_Si3/2.0, x0+w_Si3/2.0, y0 + h_Si3/2.0)
+    shapes(LayerSi3).insert(boxSi3)
+    pin1pts = [Point(x0-w_Si3/2.0,-taper_bigend/2.0), Point(x0-w_Si3/2.0-taper_length,-taper_smallend/2.0), Point(x0-w_Si3/2.0-taper_length,taper_smallend/2.0), Point(x0-w_Si3/2.0, taper_bigend/2.0)]
+    pin2pts = [Point(x0+w_Si3/2.0,-taper_bigend/2.0), Point(x0+w_Si3/2.0+taper_length,-taper_smallend/2.0), Point(x0+w_Si3/2.0+taper_length,taper_smallend/2.0), Point(x0+w_Si3/2.0,+taper_bigend/2.0)]
+    pin3pts = [Point(x0-w_Si3/2.0,y_offset-taper_bigend/2.0), Point(x0-w_Si3/2.0-taper_length,y_offset-taper_smallend/2.0), Point(x0-w_Si3/2.0-taper_length,y_offset+taper_smallend/2.0), Point(x0-w_Si3/2.0,y_offset+ taper_bigend/2.0)]
+    pin4pts = [Point(x0+w_Si3/2.0,y_offset-taper_bigend/2.0), Point(x0+w_Si3/2.0+taper_length,y_offset-taper_smallend/2.0), Point(x0+w_Si3/2.0+taper_length,y_offset+taper_smallend/2.0), Point(x0+w_Si3/2.0,y_offset+taper_bigend/2.0)]
+    shapes(LayerSi3).insert(Polygon(pin1pts))
+    shapes(LayerSi3).insert(Polygon(pin2pts))
+    shapes(LayerSi3).insert(Polygon(pin3pts))
+    shapes(LayerSi3).insert(Polygon(pin4pts))
+    
+    # arc angles
+    # doping:
+    angle_min_doping = -35
+    angle_max_doping = 215
+    # VC contact:
+    angle_min_VC = angle_min_doping + 8
+    angle_max_VC = angle_max_doping - 8
+    # M1:
+    angle_min_M1 = angle_min_VC - 4
+    angle_max_M1 = angle_max_VC + 4
+    # MH:
+    angle_min_MH = -75.0
+    angle_max_MH = 255
+    
+    #Create the VL Layer, as well as the electrical PinRec geometries
+    # heater contacts
+    boxVL3 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 2.5/dbu, -w/2.0 -  10/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 7.5/dbu, -w/2.0 -  5/dbu)
+    shapes(LayervlN).insert(boxVL3)
+    shapes(LayerPinRecN).insert(boxVL3)
+    shapes(LayerPinRecN).insert(Text ("elec2h2", Trans(x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
+    boxVL4 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 7.5/dbu, -w/2.0 -  10/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi) - 2.5/dbu, -w/2.0 -  5/dbu)
+    shapes(LayervlN).insert(boxVL4)
+    shapes(LayerPinRecN).insert(boxVL4)
+    shapes(LayerPinRecN).insert(Text ("elec2h1", Trans(x0-(r_mh_in)*cos(angle_min_MH/180*pi) - 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
+
+    #Create the MH Layer
+    layout_arc_wg_dbu(self.cell, LayermhN, x0,y0, r_mh, w_mh, angle_min_MH, angle_max_MH)
+    boxMH1 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + w_mh, y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
+    shapes(LayermhN).insert(boxMH1)
+    boxMH2 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)  - w_mh, -w/2.0 -  2.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
+    shapes(LayermhN).insert(boxMH2)
+    boxMH3 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  12.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 10/dbu, -w/2.0 -  2.5/dbu)
+    shapes(LayermhN).insert(boxMH3)
+    boxMH4 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 10/dbu, -w/2.0 -  12.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu)
+    shapes(LayermhN).insert(boxMH4)
+    #print("x0 value, cos value: %.3f-%g" % ( x0, (r_mh_in)*cos(75/180*pi)) )
+    
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    pin = pya.Path([Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, 0), Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, 0)], w)
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt1", Trans(x0 - (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
+
+    pin = pya.Path([Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, 0), Point(x0 + (w_Si3 / 2 + taper_length) + pin_length/2, 0)],w )
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt2", Trans(x0 + (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
+
+    pin = pya.Path([Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, y_offset), Point(x0 - (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)], w)
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt3", Trans(x0 - (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
+
+    pin = pya.Path([Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, y_offset), Point(x0 + (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)],w )
+    shapes(LayerPinRecN).insert(pin)
+    shapes(LayerPinRecN).insert(Text ("opt4", Trans(x0 + (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
+
+    # Create the device recognition layer
+    dev = Box(x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu, x0 + (w_Si3 / 2 + taper_length), y0 + r_m1_out + w_m1_out+h_via )
+    shapes(LayerDevRecN).insert(dev)
+
+    # Compact model information
+    shape = shapes(LayerDevRecN).insert(Text('Lumerical_INTERCONNECT_library=Design kits/GSiP', \
+      Trans(0, 0))).text_size = 0.3/dbu
+    shapes(LayerDevRecN).insert(Text ('Lumerical_INTERCONNECT_component=Ring_Filter_DB', \
+      Trans(0, w*2))).text_size = 0.3/dbu
+    shapes(LayerDevRecN).insert(Text \
+      ('Spice_param:radius=%.3fu wg_width=%.3fu gap=%.3fu gap_monitor=%.3fu' %\
+      (self.r, self.w, self.g, self.gmon), \
+      Trans(0, -w*2) ) ).text_size = 0.3/dbu
+    
+    # Add a polygon text description
+    if self.textpolygon:
+      layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
+
+    print("Done drawing the layout for Ring_Filter_DB: %.3f-%g" % ( self.r, self.g) )
+
+def layout_arc_wg_segmented_dbu(cell, LayerSiN, x, y, r, w, theta_start, theta_stop, yoffset, wgw, gap):
+  # function to draw an arc of waveguide
+  # cell: layout cell to place the layout
+  # LayerSiN: which layer to use
+  # x, y: location of the origin
+  # r: radius
+  # w: waveguide width
+  # length units in dbu
+  # theta_start, theta_stop: angles for the arc
+  # angles in degrees
+  # yoffset indicates the waveguide location at which the break occurs
+  # wgw indicates the waveguide width where the break occurs
+  # gap indicates gap where the break occurs
+   
+  from math import pi, cos, sin
+
+  dbu = cell.layout().dbu
+  
+  circle_fraction = abs(theta_stop-theta_start) / 360.0
+  npoints = int(points_per_circle(r*dbu) * circle_fraction)
+  da = 2 * pi / npoints * circle_fraction # increment, in radians
+  pts = []
+  th = theta_start / 360.0 * 2 * pi
+  for i in range(0, npoints+1):
+    pts.append(Point.from_dpoint(pya.DPoint((x+(r+w/2)*cos(i*da+th))/1, (y+(r+w/2)*sin(i*da+th))/1)))
+  for i in range(npoints, -1, -1):
+    pts.append(Point.from_dpoint(pya.DPoint((x+(r-w/2)*cos(i*da+th))/1, (y+(r-w/2)*sin(i*da+th))/1)))
+  #cell.shapes(LayerSiN).insert(Polygon(pts))
+ 
+  a = pya.Region(Polygon(pts))
+  b = pya.Region(Box(x-r-w/2, yoffset-wgw/2 - gap, x+r+w/2, yoffset+wgw/2 + gap))
+  
+  #c = xor(a,b)
+  c = a-b
+
+  d1 = pya.Region(Box(x+ r - w - 3.0/dbu, yoffset-wgw/2 - 4/3*2*gap, x+ r - w, yoffset+wgw/2 + 2*gap))
+  d2 = pya.Region(Box(x- r + w, yoffset-wgw/2 - 4/3*2*gap, x- r + w +3.0/dbu, yoffset+wgw/2 + 2*gap))
+  d = d1 + d2
+  
+  e = c - d
+  cell.shapes(LayerSiN).insert(c)
+
+
+class SiEPIC_GSiP(pya.Library):
+  """
+  The library where we will put the PCell into 
+  """
+
+  def __init__(self):
+
+    print("Initializing SiEPIC GSiP PCells library.")
+  
+    # Set the description
+    self.description = "GSiP PCells"
+    
+	
+    # Create the PCell declarations
+    self.layout().register_pcell("Ring_Modulator_DB", Ring_Modulator_DB())
+    self.layout().register_pcell("Ring_Filter_DB", Ring_Filter_DB())
+    # Register the library
+    # If a library with that name already existed, it will be replaced then.
+    self.register("SiEPIC-GSiP PCells")
+ 
+# Instantiate and register the library
+SiEPIC_GSiP()
+
+</text>
+</klayout-macro>

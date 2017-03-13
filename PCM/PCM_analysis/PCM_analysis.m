@@ -19,13 +19,15 @@ FONTSIZE =  13; % font size for the figures;
 % write a report PDF file here.
 %folder_name = uigetdir('','Select root folder for the experimental data')
 
-folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2015_10';
+%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2015_10';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_02_UW';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/test';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_05';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_07';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_08_ANT';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_10_ANT';
+folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_ANT';
+folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_UW';
 
 folder_name_linux = regexprep (folder_name,'\s|)|(', '\\$0');
 %system(['ls ' folder_name_linux  ]);
@@ -35,7 +37,10 @@ folder_name_linux = regexprep (folder_name,'\s|)|(', '\\$0');
 polarizations = {'TE', 'TM'};
 
 % filename conventions for each PCM:
-filetype_wg_loss = 'LukasC_SpiralWG';  % replace with PCM_Spiral
+filetype_wg_loss = 'LukasC_SpiralWG';
+filetype_wg_loss = 'PCM_PCM_SpiralWG';
+filetype_wg_lossN = {'PCM_PCM_SpiralWG', 'PCM_PCM_StraightWGloss'};
+filetype_wg_loss_descriptions = {'Spiral waveguide propagation loss', 'Straight waveguide propagation loss'};
 UncertaintyMax_wg_loss = 50;
 
 % At what wavelength do you want to find out the Loss of the DUT
@@ -57,70 +62,73 @@ fprintf(fid,'%s\n\n','Report for Silicon Photonics chip, Process Control Module'
 fprintf(fid,'%s\n',  '*************************');
 fclose(fid);
 
-
-% find all the sub-folders
-[~,list]=system(['find ' folder_name_linux ' -type d ']);
-
-
-%%%%%%%%%%%%%%%%%%%%%%
-% waveguide propagation loss
-Table_WG_Loss=table;
-% find all the PCM files, and iterate through all the folders
-[~,files]=system(['find ' folder_name_linux ' -type f -name \*' filetype_wg_loss '\*.mat ']);
-files=regexp(files, '[\f\n\r]', 'split');
-%files=strsplit(files)
-%return;
-folders = {};
-for i=1:length(files)
-    f=cell2mat(files(i));
-    [pathstr,name,ext] = fileparts(f);
-    folders{end+1} = pathstr;
-end
-folders = unique(folders);
-count=0;
-for i = 1:length(folders)
-    folder = folders{i};
-    if length(folder) > 0
-        folder_linux = regexprep (folder,'\s|)|(', '\\$0');
-        disp (['Folder: ' folder ]);
-        for pol = 1:length(polarizations)
-            polarization = char(polarizations(pol));
-            [~,files] = system( ['find ' folder_linux ' -type f -name \*' ...
-                filetype_wg_loss '\*' polarization '\*.mat '] );
-            files=regexp(files, '[\f\n\r]', 'split'); files={files{~cellfun(@isempty,files)}};
-            if length(files) > 0
-                [Loss, SlopeError95CI, Loss_unit] = wg_loss_analysis(files,polarization,filetype_wg_loss);
-                if SlopeError95CI < UncertaintyMax_wg_loss
-                    T=table;
-                    T.Name = categorical({strrep(folder,folder_name,'')});
-                    T.Loss = Loss;
-                    T.err = categorical({'+/-'});
-                    T.CI95 = SlopeError95CI;
-                    T.Unit = categorical({Loss_unit});
-                    T.Pol = categorical({polarization});
-                    Table_WG_Loss = [Table_WG_Loss;T];
+for ll = 1:length(filetype_wg_lossN)
+    filetype_wg_loss = filetype_wg_lossN{ll};
+    filetype_wg_loss_description = filetype_wg_loss_descriptions{ll};
+    
+    % find all the sub-folders
+    [~,list]=system(['find ' folder_name_linux ' -type d ']);
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%
+    % waveguide propagation loss
+    Table_WG_Loss=table;
+    % find all the PCM files, and iterate through all the folders
+    [~,files]=system(['find ' folder_name_linux ' -type f -name \*' filetype_wg_loss '\*.mat ']);
+    files=regexp(files, '[\f\n\r]', 'split');
+    %files=strsplit(files)
+    %return;
+    folders = {};
+    for i=1:length(files)
+        f=cell2mat(files(i));
+        [pathstr,name,ext] = fileparts(f);
+        folders{end+1} = pathstr;
+    end
+    folders = unique(folders);
+    count=0;
+    for i = 1:length(folders)
+        folder = folders{i};
+        if length(folder) > 0
+            folder_linux = regexprep (folder,'\s|)|(', '\\$0');
+            disp (['Folder: ' folder ]);
+            for pol = 1:length(polarizations)
+                polarization = char(polarizations(pol));
+                [~,files] = system( ['find ' folder_linux ' -type f -name \*' ...
+                    filetype_wg_loss '\*' polarization '\*.mat '] );
+                files=regexp(files, '[\f\n\r]', 'split'); files={files{~cellfun(@isempty,files)}};
+                if length(files) > 0
+                    [Loss, SlopeError95CI, Loss_unit] = wg_loss_analysis(files,polarization,filetype_wg_loss,filetype_wg_loss_description);
+                    if SlopeError95CI < UncertaintyMax_wg_loss
+                        T=table;
+                        T.Name = categorical({strrep(folder,folder_name,'')});
+                        T.Loss = Loss;
+                        T.err = categorical({'+/-'});
+                        T.CI95 = SlopeError95CI;
+                        T.Unit = categorical({Loss_unit});
+                        T.Pol = categorical({polarization});
+                        Table_WG_Loss = [Table_WG_Loss;T];
+                    end
                 end
             end
         end
     end
+    T=Table_WG_Loss(Table_WG_Loss.Pol=='TE',:)
+    if size(T)>0
+        LOG('');
+        LOG([filetype_wg_loss_description ', TE:']);
+        LOG(regexprep(evalc('disp(T)'),'<.*?>',''));  % convert table to plain text
+        LOG(['Mean TE: ' num2str(mean(T.Loss)) ' ' char(T.Unit(1))]);
+        LOG('');
+    end
+    T=Table_WG_Loss(Table_WG_Loss.Pol=='TM',:)
+    if size(T) >0
+        LOG('');
+        LOG([filetype_wg_loss_description ', TM:']);
+        LOG(regexprep(evalc('disp(T)'),'<.*?>',''));  % convert table to plain text
+        LOG(['Mean TM: ' num2str(mean(T.Loss)) ' ' char(T.Unit(1))  ]);
+        LOG('');
+    end
 end
-T=Table_WG_Loss(Table_WG_Loss.Pol=='TE',:)
-if size(T)>0
-    LOG('');
-    LOG('Spiral waveguid propagation loss, TE:');
-    LOG(regexprep(evalc('disp(T)'),'<.*?>',''));  % convert table to plain text
-    LOG(['Mean TE: ' num2str(mean(T.Loss)) ' ' char(T.Unit(1))]);
-    LOG('');
-end
-T=Table_WG_Loss(Table_WG_Loss.Pol=='TM',:)
-if size(T) >0
-    LOG('');
-    LOG('Spiral waveguid propagation loss, TM:');
-    LOG(regexprep(evalc('disp(T)'),'<.*?>',''));  % convert table to plain text
-    LOG(['Mean TM: ' num2str(mean(T.Loss)) ' ' char(T.Unit(1))  ]);
-    LOG('');
-end
-
 system(['a2ps -o - ' report_filename_linux '.txt'  '  | ps2pdf - ' report_filename_linux '_000.pdf']);
 system (['gs -q -sPAPERSIZE=letter -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=' report_filename_linux '.pdf ' report_filename_linux '_*.pdf']);
 system ([ 'rm ' report_filename_linux '_*.pdf' ] );
@@ -170,7 +178,7 @@ system([ '/Library/TeX/texbin/pdfcrop ' pdf_linux ' ' pdf_linux '.pdf  > /dev/nu
 
 end
 
-function [Loss, SlopeError95CI, Loss_unit] = wg_loss_analysis (files,polarization,filetype_wg_loss)
+function [Loss, SlopeError95CI, Loss_unit] = wg_loss_analysis (files,polarization,filetype_wg_loss, filetype_wg_loss_description)
 % This script analyzes experimental data to determine the Loss
 % of a device under test (DUT), e.g., YBranch, using the cut-back method.
 % The layout is several (e.g., 4) circuits each consisting of N devices in
@@ -197,7 +205,7 @@ Loss_unit = 'dB/cm';
 % filetype_wg_loss = 'LukasC_SpiralWG';
 
 % Identify the name of the Device Under Test.
-deviceName = ['Spiral waveguide (' polarization ')'];
+deviceName = [filetype_wg_loss_description ' (' polarization ')'];
 
 % At what wavelength do you want to find out the Loss of the DUT
 %lambda0 = 1.55e-6;
@@ -227,19 +235,19 @@ if ~exist(files{1})
         a=websave(files{i},url{i},'dl', '1'); % get data from Dropbox
     end
 else
-    %    disp 'Loading files from local disk'
+    disp 'Loading files from local disk'
 end
 
 % determine which PORT is used, by finding the port with the highest power
 % in all measurements
-powers_av = []; 
+powers_av = [];
 for i=1:length(files)
     load(files{i});                             % Load the data
     powers_av(end+1,:) = mean(scandata.power);
-%    size(mean(scandata.power))
-%    size(scandata.power)
-%    size(max(smooth(scandata.power,101),2))
-%    powers(end+1,:) = max(smooth(scandata.power,101));
+    %    size(mean(scandata.power))
+    %    size(scandata.power)
+    %    size(max(smooth(scandata.power,101),2))
+    %    powers(end+1,:) = max(smooth(scandata.power,101));
 end
 [~,i]=max(sum(powers_av,1));
 PORT=i(1);
@@ -253,7 +261,6 @@ for i=1:length(files)
 end
 m = find(powers_max > dB_threshold);
 files = {files{m}};
-
 
 if length(files) > 0
     % extract the length of spiral from the filename
@@ -271,10 +278,10 @@ if length(files) > 0
     end
     
     
-    % load data, Plot all the raw data 
+    % load data, Plot all the raw data
     % find a zoomed in wavelength range, based on data above the noise
     min_lambda_index=0; max_lambda_index=inf;
-    amplitude=[]; LegendText={}; 
+    amplitude=[]; LegendText={};
     if MAKE_PLOTS; FIG=figure; end
     for i=1:length(files)
         load(files{i});                             % Load the data
@@ -285,7 +292,7 @@ if length(files) > 0
             ax=gca;
             % legend entries
             LegendText(i)=cellstr(['Length: ' num2str(Num(i)) ' cm']);
-%            LegendText(i)=cellstr(['raw data: ' strrep(files{i},'_','\_')]);
+            %            LegendText(i)=cellstr(['raw data: ' strrep(files{i},'_','\_')]);
         end
         ind=find(amplitude(:,i)> max(dB_threshold, max(amplitude(:,i))+dB_threshold_diff) );
         if min(ind) > min_lambda_index
@@ -301,9 +308,9 @@ if length(files) > 0
     % curve-fit each to a polynomial
     amplitude_good=[]; amplitude_poly=[]; amplitude_poly_good=[];
     for i=1:length(files)
-%        load(files{i});                             % Load the data
- %       lambda = scandata.wavelength';              % wavelength
- %       amplitude(:,i) = scandata.power(:,PORT);    % detector data
+        %        load(files{i});                             % Load the data
+        %       lambda = scandata.wavelength';              % wavelength
+        %       amplitude(:,i) = scandata.power(:,PORT);    % detector data
         %        ind=find(amplitude(:,i)> max(dB_threshold, max(amplitude(:,i))+dB_threshold_diff) );
         %        ind=find(amplitude(:,i)> dB_threshold);
         amplitude_good(:,i) = amplitude(ind,i);
@@ -320,8 +327,8 @@ if length(files) > 0
             ax.ColorOrderIndex = i;
             plot (lambda_good*1e6, amplitude_poly_good(:,i), 'k--','LineWidth',4);
             % legend entries
-%            LegendText(2*i-1)=cellstr(['raw data: ' strrep(files{i},'_','\_')]);
-%            LegendText(2*i)=cellstr(['fit data: ' strrep(files{i},'_','\_')]);
+            %            LegendText(2*i-1)=cellstr(['raw data: ' strrep(files{i},'_','\_')]);
+            %            LegendText(2*i)=cellstr(['fit data: ' strrep(files{i},'_','\_')]);
         end
         
     end
