@@ -61,6 +61,16 @@ Jaspreet &amp; Lukas            2016/04/22
 Jaspreet Jhoja              2016/04/26
 - warning if first and last segments are not manhattan
 
+Lukas Chrostowski           2017/02/14
+- Fix for incorrect warning issued for a straight segment waveguide containing coincident points
+- remove the addition of 2 coincident vertices in a straight segment waveguide 
+  (coincident points not allowed in GDS)
+- improvement for 2 vertex path (segment): 
+   1) if the two pins are Manhattan, make a straight waveguide.
+   2) if the two pins are not Manhattan, insert 2 extra vertices in the middle, 
+      and then proceed to snap both ends with two 90º bends.
+
+
 """
 
 import pya
@@ -123,7 +133,7 @@ else:
 if Waveguide_Type == "ROUND_PATH":
   Waveguide_Lib = "Basic"
 elif Waveguide_Type == "Waveguide_Route":
-  Waveguide_Lib = "SiEPIC"
+  Waveguide_Lib = "SiEPIC-EBeam PCells"
 
 
 # Waveguide radius should be specified in the cell in which the Path_to_Waveguide is called
@@ -211,7 +221,10 @@ for o in object_selection:
         ##if yes then keep OK = -1
         ##if not then keep it 0
         if OKa == -1:
-          manhattan_check = []
+          if len(points) == 2:
+            manhattan_check = ["checked"]
+          else:
+            manhattan_check = []
           for i in range(len(points)):
             if(i==1 or points[i] == points[-1]):
              if(points[i][0] == points[i-1][0] or points[i][1] == points[i-1][1]):
@@ -236,7 +249,7 @@ for o in object_selection:
         # only do this the first time (OK not pushed yet)
         if OKb == -1:
           segment_length = [sqrt((points[i][0]- points[i-1][0])**2 + (points[i][1] - points[i-1][1])**2) for i in range(len(points)) if i&gt;0]
-          if(all(each &gt;= radius/dbu for each in segment_length) == False):
+          if(all( (each &gt;= radius/dbu) or (each == 0) for each in segment_length) == False):
             warning_window = pya.QMessageBox()
             warning_window.setText("Warning: One of the waveguide segments has insufficient length to accommodate the desired bend radius.")
             warning_window.setInformativeText("Do you want to Proceed?")
@@ -249,23 +262,6 @@ for o in object_selection:
             else:
               OKb = 1
         
-        print("ORIGINAL PTS",points)
-        if num_points == 2:
-          # insert two mid-points in the path so that:
-          #  1) it can later be split into two nets
-          #  2) to allow for waveguide snapping, move an edge, not just endpoint.
-          a1 = []
-          count =0
-          for p in points:
-            a1.append (pya.Point(p[0], p[1]))
-            count += 1
-            if count == 1:
-              # add a point:
-              a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
-              a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
-          # Update the path
-          path_obj = pya.Path(a1, path_obj.width)
-          print("updated path (inserted mid-point): %s" % path_obj )
         # Waveguide parameters
         wg_type = 0
         bend_pts = 0
@@ -316,6 +312,24 @@ for o in object_selection:
             else:
               # End is closest, don't touch the beginning
               go_wg_beginning = False
+          dx = optical_pins_sorted0[0].x - optical_pins_sorted1[0].x
+          dy = optical_pins_sorted0[0].y - optical_pins_sorted1[0].y
+          if (num_points == 2) &amp; ( (dx != 0) and (dy != 0) ) :
+            # insert two mid-points in the path so that:
+            #  - to allow for waveguide snapping, move an edge, not just endpoint.
+            print("ORIGINAL PTS",points)
+            a1 = []
+            count =0
+            for p in points:
+              a1.append (pya.Point(p[0], p[1]))
+              count += 1
+              if count == 1:
+                # add a point:
+                a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
+                a1.append( pya.Point( (points[0][0] + points[1][0])/2, (points[0][1] + points[1][1])/2 )  )
+            # Update the path
+            path_obj = pya.Path(a1, path_obj.width)
+            print("updated path (inserted mid-point): %s" % path_obj )              
           if optical_pins_sorted0[0].dist[0] &lt; waveguide_snap_dist and go_wg_beginning:
             # Update the path beginning endpoint to match pin
             points = path_to_points(path_obj)

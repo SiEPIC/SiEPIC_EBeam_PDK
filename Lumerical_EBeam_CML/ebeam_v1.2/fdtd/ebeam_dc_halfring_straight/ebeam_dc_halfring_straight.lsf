@@ -22,13 +22,13 @@
 # define simulation parameters:
 #  - 1 to check if the simulation is working 
 #  - 3 or 4 for accurate simulation
-#mesh_accuracy=3;
+mesh_accuracy=1;
 
 # define which modes we should simulate:
 #  - 1 = TE, will result in a 3x3 matrix
 #  - 2 = TM, will result in a 3x3 matrix
 #  - 1:2 = {TE, TM}, will result in a 6x6 matrix
-#mode_selection = 1;
+mode_selection=1;
 
 # S-Parameter output file:
 #s_filename = "ebeam_dc_halfring_straight.dat";
@@ -36,8 +36,8 @@
 # Wavelength range and number of points:
 #wavelength_start = 1.5e-6;   
 #wavelength_stop = 1.6e-6;  
-frequency_points_monitor=1001;
-frequency_points_expansion=10;
+frequency_points_monitor=101;
+frequency_points_expansion=11;
 
 # define design parameters       
 #gap=5e-08;
