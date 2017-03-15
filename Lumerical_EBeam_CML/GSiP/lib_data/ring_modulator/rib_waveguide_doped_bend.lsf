@@ -3,6 +3,9 @@
 doped_wg_filename = %local path% + '/lib_data/ring_modulator/' + "rib_waveguide_doped_bend_" + process + "_w" + num2str(wg_width*1e9) + "nm_r" + num2str(radius*1e9) + "nm_c" + num2str(junction_clearance*1e9) + "nm_o" + num2str(junction_offset*1e9) + "nm.ldf";
 dneff_filename = %local path% + '/lib_data/ring_modulator/' + "ring_modulator_" + process + "_w" + num2str(wg_width*1e9) + "nm_r" + num2str(radius*1e9) + "nm_c" + num2str(junction_clearance*1e9) + "nm_o" + num2str(junction_offset*1e9) + "nm.dat";
 
+?"Checking for file: " + doped_wg_filename;
+?"Checking for file: " + dneff_filename;
+
 if ((fileexists(doped_wg_filename))&(fileexists(dneff_filename))) {
     ? "Loading existing simulation data.";
     loaddata(doped_wg_filename);
