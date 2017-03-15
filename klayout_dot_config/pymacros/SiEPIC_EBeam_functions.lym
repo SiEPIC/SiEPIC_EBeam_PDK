@@ -1223,8 +1223,12 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
     text_main += '  + output=%s,N$%s\n' % (topcell.name, laser_net)
 
   # main circuit
-  text_main += '%s %s %s %s sch_x=-1 sch_y=-1\n\n' % (topcell.name, electricalIO_pins, opticalIO_pins, topcell.name)
-  
+  text_main += '%s %s %s %s sch_x=-1 sch_y=-1 ' % (topcell.name, electricalIO_pins, opticalIO_pins, topcell.name)
+  if len(DCsources) &gt; 0:
+    text_main += 'sch_r=270\n\n'
+  else:
+    text_main += '\n\n'
+
   text_main += DCsources
   
   print(text_main)
