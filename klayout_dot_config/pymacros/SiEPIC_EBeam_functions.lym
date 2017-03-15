@@ -1345,7 +1345,9 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
     Proceed = 1
       
     #extract grating couplers as they are the only ones connected to an input or output:
-    gc_list = [[each,each.pins] for each in optical_components if('_gc_' in each.component)]
+#    gc_list = [[each,each.pins] for each in optical_components if('_gc_' in each.component)]
+#   revised version which includes all couplers (pin_type = 2) including edge couplers.
+    gc_list = [[optical_components[each.component_idx], optical_components[each.component_idx].pins] for each in optical_pins if ( each.pin_type == 2) ]
 #    print(gc_list[0][0].component])
     
     #make detector or laser string as a parent_node of the extracted gcs which will be used as a reference
