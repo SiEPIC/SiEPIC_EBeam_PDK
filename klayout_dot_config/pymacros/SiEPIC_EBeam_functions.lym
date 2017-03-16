@@ -1152,6 +1152,12 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
       
   # create the top subckt:
   text_subckt += '.subckt %s%s%s\n' % (topcell.name, electricalIO_pins, opticalIO_pins)
+  text_subckt += '.param MC_uniformity_width=0 \n' # assign MC settings before importing netlist components
+  text_subckt += '.param MC_uniformity_thickness=0 \n' 
+  text_subckt += '.param MC_resolution_x=100 \n' 
+  text_subckt += '.param MC_resolution_y=100 \n' 
+  text_subckt += '.param MC_grid=10e-6 \n' 
+  text_subckt += '.param MC_non_uniform=99 \n' 
 
   # Get information about the laser and detectors:
   laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier, ignoreOpticalIOs = \
