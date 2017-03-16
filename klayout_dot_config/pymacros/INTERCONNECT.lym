@@ -49,6 +49,10 @@ import string
 
 SIMULATION = 1    # Regular INTERCONNECT simulation
 
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+
 
 if pya.Application.instance().main_window().current_view() == None:
   raise Exception("Please create a layout before running a simulation.")
@@ -101,18 +105,18 @@ optical_waveguides, optical_components = \
 # Trim Netlist setting is saved in a "User Properties" defined via the Cells window.
 # if missing, a dialog is presented.
 Trim_Netlist_options = ['Export full circuit', 'Trim netlist by finding components connected to the Laser']
-Trim_Netlist = cell.property("Trim_Netlist")
+Trim_Netlist = topcell.property("Trim_Netlist")
 if Trim_Netlist and Trim_Netlist in Trim_Netlist_options:
-  print("Trim_Netlist {%s}, taken from cell {%s}" % (Trim_Netlist, cell.name) )
+  print("Trim_Netlist {%s}, taken from cell {%s}" % (Trim_Netlist, topcell.name) )
 else:
-  Trim_Netlist = pya.InputDialog.ask_item("Trim_Netlist", "Do you want to export the complete circuit, or trim the netlist?  \nYour preference will be saved as a user property in cell {%s}." % cell.name, Trim_Netlist_options, 0)
+  Trim_Netlist = pya.InputDialog.ask_item("Trim_Netlist", "Do you want to export the complete circuit, or trim the netlist?  \nYour preference will be saved as a user property in cell {%s}." % topcell.name, Trim_Netlist_options, 0)
   if Trim_Netlist == None:
     Trim_Netlist = Trim_Netlist_options[0]
   else:
     # Record a transaction, to enable "undo"
     lv.transaction("Trim_Netlist selection")
-    print("Trim_Netlist taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Trim_Netlist, cell.name) )
-    cell.set_property("Trim_Netlist", Trim_Netlist)
+    print("Trim_Netlist taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Trim_Netlist, topcell.name) )
+    topcell.set_property("Trim_Netlist", Trim_Netlist)
     lv.commit()
 
 # Output the Spice netlist:
