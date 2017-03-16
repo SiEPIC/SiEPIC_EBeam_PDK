@@ -124,7 +124,7 @@ def mc_interconnect(topcell, layout, dbu, datadict):
     print("Trim_Netlist {%s}, taken from cell {%s}" % (Trim_Netlist, topcell.name) )
   else:
     Trim_Netlist = pya.InputDialog.ask_item("Trim_Netlist", "Do you want to export the complete circuit, or trim the netlist?  \nYour preference will be saved as a user property in cell {%s}." % topcell.name, Trim_Netlist_options, 0)
-   if Trim_Netlist == None:
+    if Trim_Netlist == None:
       Trim_Netlist = Trim_Netlist_options[0]
     else:
       # Record a transaction, to enable "undo"
