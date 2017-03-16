@@ -172,9 +172,21 @@ elif sys.platform.startswith('darwin'):
   # OSX specific
   if string.find(version,"2.7.") &gt; -1:
     import commands
+    home = os.path.expanduser("~")
+    if ~os.path.exists(home + "/.bash_profile"):
+      text_bash =  '\n'
+      text_bash += '# Setting PATH for Lumerical API\n'
+      text_bash += 'export PATH=/Applications/Lumerical/FDTD\ Solutions/FDTD\ Solutions.app/Contents/MacOS:$PATH\n'
+      text_bash += 'export PATH=/Applications/Lumerical/MODE\ Solutions/MODE\ Solutions.app/Contents/MacOS:$PATH\n'
+      text_bash += 'export PATH=/Applications/Lumerical/DEVICE/DEVICE.app/Contents/MacOS:$PATH\n'
+      text_bash += 'export PATH=/Applications/Lumerical/INTERCONNECT/INTERCONNECT.app/Contents/MacOS:$PATH\n'
+      text_bash +=  '\n'
+      file = open(home + "/.bash_profile", 'w')
+      file.write (text_bash)
+      file.close()
     print("Running INTERCONNECT")
     #commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
-    commands.getstatusoutput('open -n /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
+    commands.getstatusoutput('source ~/.bash_profile; open -n /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
 
 elif sys.platform.startswith('win'):
   # Windows specific code here
