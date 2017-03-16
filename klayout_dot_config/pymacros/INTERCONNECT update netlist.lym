@@ -67,9 +67,11 @@ if topcell == None:
 layout = topcell.layout()
 dbu = layout.dbu
 
-# Save the layout prior to running simulations
-pya.Application.instance().main_window().cm_save()
-layout_filename = pya.Application.instance().main_window().current_view().active_cellview().filename()
+# Save the layout prior to running simulations, if there are changes.
+mw = pya.Application.instance().main_window()
+if mw.manager().has_undo():
+  mw.cm_save()
+layout_filename = mw.current_view().active_cellview().filename()
 if len(layout_filename) == 0:
   raise Exception("Please save your layout before running the simulation")
 
