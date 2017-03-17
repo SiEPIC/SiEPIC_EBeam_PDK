@@ -1104,8 +1104,46 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   # example output:         
   # X_grating_coupler_1 N$7 N$6 grating_coupler library="custom/genericcml" sch_x=-1.42 sch_y=-0.265 sch_r=0 sch_f=false
 
-  Lumerical_schematic_scaling = 5e-2
+
+  # Determine the positions of all the components, in order to determine scaling
+  sch_positions = []
+  for o in optical_components:
+    print ([ o.x, o.y ])
+    sch_positions.append ([ o.x, o.y ])
+  for o in optical_waveguides:
+    x,y = xy_mean_mult(o.points, dbu)
+    print ([ x,y ])
+    sch_positions.append ([ x,y ])
+  sch_distances = []
+  for j in range(len(sch_positions)):
+    for k in range(j+1,len(sch_positions)):
+      dist = distance_xy ( sch_positions[j], sch_positions[k] )
+      sch_distances.append ( dist )
+
+  # find minimum distance between objects, but skip the closest x %, to make the layout more compact
+  # e.g., terminators connected to ring resonators are very close.
+  # not implemented...
+
+  sch_distances.sort()
+  print(sch_distances)
+
+  # remove any 0 distances:
+  while 0.0 in sch_distances: sch_distances.remove(0.0)
+  print(sch_distances)
+  
+  # scaling based on nearest neighbour:
+  Lumerical_schematic_scaling = min(sch_distances) * 10
+  print (Lumerical_schematic_scaling)
+
+  # but if the layout is too big, limit the size
+  MAX_size = 0.05
+  if max(sch_distances)*Lumerical_schematic_scaling &gt; MAX_size:
+    Lumerical_schematic_scaling = MAX_size / max(sch_distances) 
+  print (Lumerical_schematic_scaling)
+
+#  Lumerical_schematic_scaling = 5e-2
 #  Lumerical_schematic_scaling = 20e-2
+#  Lumerical_schematic_scaling = 5e-3
 
   # convert KLayout GDS rotation/flip to Lumerical INTERCONNECT
   # KLayout defines mirror as an x-axis flip, whereas INTERCONNECT does y-axis flip
@@ -1212,14 +1250,18 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   for o in optical_waveguides:
     nets_str = "N$%s N$%s" %(o.net1, o.net2)
     x,y = xy_mean_mult(o.points, dbu)
+    wg_angle =  ( 360- int(round(angle_segment ( [o.points[0], o.points[len(o.points)-1]] ) / 90) * 90) ) % 360
+    print(wg_angle)
+    
 #    t = '%s %s %s library="%s" wg_length=%s wg_width=%s lay_x=%s lay_y=%s sch_x=%5.3f sch_y=%5.3f'  % \
 #           ( "Xwg" + str(o.idx), nets_str, o.component, o.library, eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
 #             eng_str(x * 1e-6), eng_str(y * 1e-6), x, y)
-    t = '  %s %s %s library="%s" wg_length=%s wg_width=%s sch_x=%s sch_y=%s points="%s"'  % \
+    t = '  %s %s %s library="%s" wg_length=%s wg_width=%s sch_x=%s sch_y=%s sch_r=%s points="%s"'  % \
            ( "wg" + str(o.idx), nets_str, o.component, o.library, \
              eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
              eng_str(x * Lumerical_schematic_scaling), eng_str(y * Lumerical_schematic_scaling), \
              #str(o.points).replace('[','(').replace(']',')')  )   # format of waveguide section points
+             str(wg_angle), \
              str(o.points).replace(', ',',')  )   # change format, delete space    
     text_subckt += '%s\n' %t
 
