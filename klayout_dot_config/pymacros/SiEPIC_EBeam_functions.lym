@@ -1123,12 +1123,13 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   # not implemented...
 
   sch_distances.sort()
-
+  print("Distances between components: %s" % sch_distances)
+  
   # remove any 0 distances:
   while 0.0 in sch_distances: sch_distances.remove(0.0)
   
   # scaling based on nearest neighbour:
-  Lumerical_schematic_scaling = min(sch_distances) * 10
+  Lumerical_schematic_scaling = 0.0006 / min(sch_distances)
 
   # but if the layout is too big, limit the size
   MAX_size = 0.05
