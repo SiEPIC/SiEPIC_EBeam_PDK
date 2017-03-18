@@ -9,7 +9,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">ebeam_dc_halfring_straight_gap=100nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=100nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
         </extracted>
     </association>
     <association>
