@@ -116,7 +116,9 @@ Lukas Chrostowski           2017/02/14
 
 Lukas Chrostowski           2017/03/08
  - S-Bend - Waveguide_SBend
- 
+
+Lukas Chrostowski           2017/03/18
+ - ebeam_dc_halfring_straight, with TE/TM support.  Zeqin Lu adding CML for this component. 
 """
 
 import pya
@@ -1004,7 +1006,7 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
-    self.param("mode", self.TypeInt, "Optical mode - Orthogonal identifier (1=TE, 2=TM)", default = 1)     
+    self.param("mode", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
