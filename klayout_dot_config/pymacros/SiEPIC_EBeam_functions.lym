@@ -1104,8 +1104,42 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   # example output:         
   # X_grating_coupler_1 N$7 N$6 grating_coupler library="custom/genericcml" sch_x=-1.42 sch_y=-0.265 sch_r=0 sch_f=false
 
-  Lumerical_schematic_scaling = 5e-2
+
+  # Determine the positions of all the components, in order to determine scaling
+  sch_positions = []
+  for o in optical_components:
+    sch_positions.append ([ o.x, o.y ])
+  for o in optical_waveguides:
+    x,y = xy_mean_mult(o.points, dbu)
+    sch_positions.append ([ x,y ])
+  sch_distances = []
+  for j in range(len(sch_positions)):
+    for k in range(j+1,len(sch_positions)):
+      dist = distance_xy ( sch_positions[j], sch_positions[k] )
+      sch_distances.append ( dist )
+
+  # find minimum distance between objects, but skip the closest x %, to make the layout more compact
+  # e.g., terminators connected to ring resonators are very close.
+  # not implemented...
+
+  sch_distances.sort()
+  print("Distances between components: %s" % sch_distances)
+  
+  # remove any 0 distances:
+  while 0.0 in sch_distances: sch_distances.remove(0.0)
+  
+  # scaling based on nearest neighbour:
+  Lumerical_schematic_scaling = 0.0006 / min(sch_distances)
+
+  # but if the layout is too big, limit the size
+  MAX_size = 0.05
+  if max(sch_distances)*Lumerical_schematic_scaling &gt; MAX_size:
+    Lumerical_schematic_scaling = MAX_size / max(sch_distances) 
+  print ("Scaling for Lumerical INTERCONNECT schematic: %s" % Lumerical_schematic_scaling)
+
+#  Lumerical_schematic_scaling = 5e-2
 #  Lumerical_schematic_scaling = 20e-2
+#  Lumerical_schematic_scaling = 5e-3
 
   # convert KLayout GDS rotation/flip to Lumerical INTERCONNECT
   # KLayout defines mirror as an x-axis flip, whereas INTERCONNECT does y-axis flip
@@ -1137,13 +1171,28 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   for o in optical_components:
     for p in o.epins:  # electrical pins
       NetName = " N$" + o.component +'_' + str(o.idx) + '_' + p
+#      NetName = " C" + str(o.idx) + '_' + p
       electricalIO_pins += NetName
-      DCsources += "N" + str(Vn) + NetName + " 0 dcsource amplitude=0 \n"
-      if SINGLE_DC_SOURCE == 0:
-        Vn += 1
+      DCsources += "N" + str(Vn) + NetName + " 0 dcsource amplitude=0 sch_x=%s sch_y=%s\n" % (-2-Vn/10., -2+Vn/8.)
+      Vn += 1
+  electricalIO_pins_subckt = electricalIO_pins
+
+  if SINGLE_DC_SOURCE == 1:
+    electricalIO_pins_subckt = ""
+    for o in optical_components:
+      for p in o.epins:  # electrical pins
+        NetName = " N$"
+        electricalIO_pins_subckt += NetName
+        DCsources = "N1" + NetName + " 0 dcsource amplitude=0 sch_x=-2 sch_y=0\n"
       
   # create the top subckt:
   text_subckt += '.subckt %s%s%s\n' % (topcell.name, electricalIO_pins, opticalIO_pins)
+  text_subckt += '.param MC_uniformity_width=0 \n' # assign MC settings before importing netlist components
+  text_subckt += '.param MC_uniformity_thickness=0 \n' 
+  text_subckt += '.param MC_resolution_x=100 \n' 
+  text_subckt += '.param MC_resolution_y=100 \n' 
+  text_subckt += '.param MC_grid=10e-6 \n' 
+  text_subckt += '.param MC_non_uniform=99 \n' 
 
   # Get information about the laser and detectors:
   laser_net, detector_nets, wavelength_start, wavelength_stop, wavelength_points, orthogonal_identifier, ignoreOpticalIOs = \
@@ -1198,14 +1247,17 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   for o in optical_waveguides:
     nets_str = "N$%s N$%s" %(o.net1, o.net2)
     x,y = xy_mean_mult(o.points, dbu)
+    wg_angle =  ( 360- int(round(angle_segment ( [o.points[0], o.points[len(o.points)-1]] ) / 90) * 90) ) % 360
+    
 #    t = '%s %s %s library="%s" wg_length=%s wg_width=%s lay_x=%s lay_y=%s sch_x=%5.3f sch_y=%5.3f'  % \
 #           ( "Xwg" + str(o.idx), nets_str, o.component, o.library, eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
 #             eng_str(x * 1e-6), eng_str(y * 1e-6), x, y)
-    t = '  %s %s %s library="%s" wg_length=%s wg_width=%s sch_x=%s sch_y=%s points="%s"'  % \
+    t = '  %s %s %s library="%s" wg_length=%s wg_width=%s sch_x=%s sch_y=%s sch_r=%s points="%s"'  % \
            ( "wg" + str(o.idx), nets_str, o.component, o.library, \
              eng_str(o.length*1e-6), eng_str(o.wg_width*1e-6), \
              eng_str(x * Lumerical_schematic_scaling), eng_str(y * Lumerical_schematic_scaling), \
              #str(o.points).replace('[','(').replace(']',')')  )   # format of waveguide section points
+             str(wg_angle), \
              str(o.points).replace(', ',',')  )   # change format, delete space    
     text_subckt += '%s\n' %t
 
@@ -1223,8 +1275,12 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
     text_main += '  + output=%s,N$%s\n' % (topcell.name, laser_net)
 
   # main circuit
-  text_main += '%s %s %s %s sch_x=-1 sch_y=-1\n\n' % (topcell.name, electricalIO_pins, opticalIO_pins, topcell.name)
-  
+  text_main += '%s %s %s %s sch_x=-1 sch_y=-1 ' % (topcell.name, electricalIO_pins_subckt, opticalIO_pins, topcell.name)
+  if len(DCsources) &gt; 0:
+    text_main += 'sch_r=270\n\n'
+  else:
+    text_main += '\n\n'
+
   text_main += DCsources
   
   print(text_main)
@@ -1341,7 +1397,9 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
     Proceed = 1
       
     #extract grating couplers as they are the only ones connected to an input or output:
-    gc_list = [[each,each.pins] for each in optical_components if('_gc_' in each.component)]
+#    gc_list = [[each,each.pins] for each in optical_components if('_gc_' in each.component)]
+#   revised version which includes all couplers (pin_type = 2) including edge couplers.
+    gc_list = [[optical_components[each.component_idx], optical_components[each.component_idx].pins] for each in optical_pins if ( each.pin_type == 2) ]
 #    print(gc_list[0][0].component])
     
     #make detector or laser string as a parent_node of the extracted gcs which will be used as a reference
