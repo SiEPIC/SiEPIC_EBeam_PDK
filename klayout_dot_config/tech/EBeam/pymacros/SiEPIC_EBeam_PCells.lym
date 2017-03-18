@@ -1006,14 +1006,14 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
-    self.param("mode", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
+    self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "ebeam_dc_halfring_straight(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ",Lc=" + ('%g' % (1000*self.Lc)) + ",mode=" + ('%s' % self.mode) + ")"
+    return "ebeam_dc_halfring_straight(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ",Lc=" + ('%g' % (1000*self.Lc)) + ",orthogonal_identifier=" + ('%s' % self.orthogonal_identifier) + ")"
 
   def can_create_from_shape_impl(self):
     return False
@@ -1103,7 +1103,7 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     shape.text_size = self.r*0.017/dbu
     t = Trans(r/4, r/2)
 
-    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu mode=%s'% (self.w,self.g,self.r,self.Lc, self.mode), t)
+    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu orthogonal_identifier=%s'% (self.w,self.g,self.r,self.Lc, self.orthogonal_identifier), t)
 
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
