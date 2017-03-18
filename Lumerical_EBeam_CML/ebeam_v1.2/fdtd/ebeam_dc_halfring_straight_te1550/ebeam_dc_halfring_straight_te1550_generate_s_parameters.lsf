@@ -16,6 +16,7 @@ run;
 runanalysis;
 filename1 = "ebeam_dc_halfring_straight_te1550_input_port=" + num2str(input_port) + "_gap=" + num2str(gap*1e9) + "nm_radius=" + num2str(radius*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm_CoupleLength=" + num2str(Lc*1e6) + "um.ldf";
 loaddata(filename1);
+rm(filename1);
 S33=S11;
 S43=-S21;
 S13=S31;
@@ -29,6 +30,7 @@ run;
 runanalysis;
 filename2 = "ebeam_dc_halfring_straight_te1550_input_port=" + num2str(input_port) + "_gap=" + num2str(gap*1e9) + "nm_radius=" + num2str(radius*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm_CoupleLength=" + num2str(Lc*1e6) + "um.ldf";
 loaddata(filename2);
+rm(filename2);
 S34=-S12;
 S22=0.1*S22;    # reduce the back reflection, as the mode mismatch loss is much lower in a realistic ring.
 S44=S22;
