@@ -22,13 +22,13 @@
 # define simulation parameters:
 #  - 1 to check if the simulation is working 
 #  - 3 or 4 for accurate simulation
-mesh_accuracy=1;
+#mesh_accuracy=1;
 
 # define which modes we should simulate:
 #  - 1 = TE, will result in a 3x3 matrix
 #  - 2 = TM, will result in a 3x3 matrix
 #  - 1:2 = {TE, TM}, will result in a 6x6 matrix
-mode_selection=1;
+#mode_selection=1;
 
 # S-Parameter output file:
 #s_filename = "ebeam_dc_halfring_straight.dat";
@@ -188,9 +188,9 @@ set("pml layers",[16, 16, 8, 16, 8, 8]);
 if (mode_selection == 1) {
  set("z min bc", "symmetric");
 }
-if (mode_selection == 2) {
- set("z min bc", "anti-symmetric");
-}
+#if (mode_selection == 2) {
+# set("z min bc", "anti-symmetric");
+#}
 
 setglobalsource ("wavelength start", wavelength_start);
 setglobalsource ("wavelength stop", wavelength_stop);
@@ -291,7 +291,7 @@ for (port=1:Nports) { # inject light into each port
   addsweepparameter("s-parameter sweep",index1);
  }
 }
- 
+
 # run s-parameter sweep
 runsweep("s-parameter sweep");
  
@@ -301,9 +301,9 @@ S_parameters = getsweepresult("s-parameter sweep","S parameters");
 S_diagnostic = getsweepresult("s-parameter sweep","S diagnostic");
  
 # visualize results
-visualize(S_matrix);
-visualize(S_parameters);
-visualize(S_diagnostic);
+#visualize(S_matrix);
+#visualize(S_parameters);
+#visualize(S_diagnostic);
  
 # export S-parameter data to file named s_params.dat to be loaded in INTERCONNECT
 exportsweep("s-parameter sweep",s_filename);

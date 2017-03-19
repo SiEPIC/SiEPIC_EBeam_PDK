@@ -116,7 +116,9 @@ Lukas Chrostowski           2017/02/14
 
 Lukas Chrostowski           2017/03/08
  - S-Bend - Waveguide_SBend
- 
+
+Lukas Chrostowski           2017/03/18
+ - ebeam_dc_halfring_straight, with TE/TM support.  Zeqin Lu adding CML for this component. 
 """
 
 import pya
@@ -987,6 +989,128 @@ def layout_pgtext(cell, layer, x, y, text, mag):
 
 
 
+class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the ebeam_dc_halfring_straight.
+  Consists of a half-ring with 1 waveguides.
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(ebeam_dc_halfring_straight, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
+    self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "ebeam_dc_halfring_straight(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ",Lc=" + ('%g' % (1000*self.Lc)) + ",orthogonal_identifier=" + ('%s' % self.orthogonal_identifier) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    from math import pi, cos, sin
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+    
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    TextLayerN = ly.layer(self.textl)
+
+    
+    w = int(round(self.w/dbu))
+    r = int(round(self.r/dbu))
+    g = int(round(self.g/dbu))
+    Lc = int(round(self.Lc/dbu))
+
+    # draw the half-circle
+    x = 0
+    y = r+w+g
+    layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 270)
+    layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 360)
+    
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    # Pins on the top side:
+    pin = pya.Path([Point(-r-Lc/2, y+pin_length/2), Point(-r-Lc/2, y-pin_length/2)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(-r-Lc/2, y)
+    text = Text ("pin2", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    pin = pya.Path([Point(r+Lc/2, y+pin_length/2), Point(r+Lc/2, y-pin_length/2)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(r+Lc/2, y)
+    text = Text ("pin4", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    if Lc &gt; 0:
+      wg1 = Box(-Lc/2, -w/2+w+g, Lc/2, w/2+w+g)
+      shapes(LayerSiN).insert(wg1)
+
+
+    # Create the waveguide
+    wg1 = Box(-r-w/2-w-Lc/2, -w/2, r+w/2+w+Lc/2, w/2)
+    shapes(LayerSiN).insert(wg1)
+
+    # Pins on the bus waveguide side:
+    pin = pya.Path([Point(-r-w/2-w-pin_length/2-Lc/2, 0), Point(-r-w/2-w+pin_length/2-Lc/2, 0)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(-r-w/2-w-Lc/2, 0)
+    text = Text ("pin1", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(r+w/2+w+Lc/2, 0)
+    text = Text ("pin3", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    dev = Box(-r-w/2-w-Lc/2, -w/2-w, r+w/2+w+Lc/2, y )
+    shapes(LayerDevRecN).insert(dev)
+
+    # Compact model information
+    t = Trans(r/4, 0)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.017/dbu
+    t = Trans(r/4, r/4)
+    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.017/dbu
+    t = Trans(r/4, r/2)
+
+    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu orthogonal_identifier=%s'% (self.w,self.g,self.r,self.Lc, self.orthogonal_identifier), t)
+
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.017/dbu
+
+    print("Done drawing the layout for - ebeam_dc_halfring_straight: %.3f-%g" % ( self.r, self.g) )
+
+
 class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the DirectionalCoupler_HalfRing_Straight.
@@ -1095,7 +1219,7 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(r/4, r/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight', t)
+    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(r/4, r/2)
@@ -2844,6 +2968,8 @@ class SiEPIC(pya.Library):
     self.description = "EBeam PCells"
     
     # Create the PCell declarations
+
+    self.layout().register_pcell("ebeam_dc_halfring_straight", ebeam_dc_halfring_straight())
     self.layout().register_pcell("DirectionalCoupler_HalfRing_Straight", DirectionalCoupler_HalfRing_Straight())
     self.layout().register_pcell("DirectionalCoupler_HalfRing_Arc", DirectionalCoupler_HalfRing_Arc())
     self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())

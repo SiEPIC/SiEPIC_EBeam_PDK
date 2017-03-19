@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name="point_coupler">
+    <association>
+        <design>
+            <value name="CoupleLength" type="double">0</value>
+            <value name="gap" type="double">3e-07</value>
+            <value name="radius" type="double">5e-06</value>
+            <value name="thickness" type="double">2.2e-07</value>
+            <value name="width" type="double">5e-07</value>
+        </design>
+        <extracted>
+            <value name="s-param" type="string">tm_ebeam_dc_halfring_straight_gap=300nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+        </extracted>
+    </association>
+    <association>
+        <design>
+            <value name="CoupleLength" type="double">1e-06</value>
+            <value name="gap" type="double">1e-07</value>
+            <value name="radius" type="double">5e-06</value>
+            <value name="thickness" type="double">2.2e-07</value>
+            <value name="width" type="double">5e-07</value>
+        </design>
+        <extracted>
+            <value name="s-param" type="string">ebeam_dc_halfring_straight_gap=100nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=1um.dat</value>
+        </extracted>
+    </association>
+    <association>
+        <design>
+            <value name="CoupleLength" type="double">0</value>
+            <value name="gap" type="double">3e-07</value>
+            <value name="radius" type="double">5e-06</value>
+            <value name="thickness" type="double">2.2e-07</value>
+            <value name="width" type="double">5e-07</value>
+        </design>
+        <extracted>
+            <value name="s-param" type="string">tm_ebeam_dc_halfring_straight_gap=300nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+        </extracted>
+    </association>
+</lumerical_lookup_table>
