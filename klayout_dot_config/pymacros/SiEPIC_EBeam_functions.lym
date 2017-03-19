@@ -1167,7 +1167,10 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
   electricalIO_pins = ""
   DCsources = "" # string to create DC sources for each pin
   Vn = 1
-  SINGLE_DC_SOURCE = 1  # attach all electrical pins to the same DC source (1), or to individual DC sources (0).
+  SINGLE_DC_SOURCE = 2
+  # (1) attach all electrical pins to the same DC source
+  # (2) or to individual DC sources
+  # (3) or choose based on number of DC sources, if &gt; 5, use single DC source
   for o in optical_components:
     for p in o.epins:  # electrical pins
       NetName = " N$" + o.component +'_' + str(o.idx) + '_' + p
@@ -1177,7 +1180,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
       Vn += 1
   electricalIO_pins_subckt = electricalIO_pins
 
-  if SINGLE_DC_SOURCE == 1:
+  if (SINGLE_DC_SOURCE == 1) or ( (SINGLE_DC_SOURCE == 2) &amp; (Vn &gt; 5)):
     electricalIO_pins_subckt = ""
     for o in optical_components:
       for p in o.epins:  # electrical pins

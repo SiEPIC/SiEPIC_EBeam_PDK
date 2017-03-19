@@ -1,0 +1,54 @@
+# GSiP_1_RingMod.lsf and .gds
+# lsf script for Lumerical INTERCONNECT
+# user runs simulation from KLayout to INTERCONNECT
+# this script sweeps the DC voltage on the PN junction and/or heater
+# and plots the spectra
+
+SIM_PN = 1;  # simulate PN junction effect
+SIM_H = 0;   # simulate heater effect
+
+switchtolayout;
+select("ONA_1");
+set("input parameter","center and range");
+set("frequency range",1e12);
+set("number of points",5000);
+
+if (SIM_PN) {
+# PN junction from -0.5 to 4 V
+amplitude_values = [0,1,2,3,4];
+select("N1");
+
+dat = matrixdataset("dat"); # initialize visualizer data
+for (i=1:length(amplitude_values)) {
+    switchtolayout;
+    set("amplitude",amplitude_values(i));
+    run;
+    if (i==1) { 
+        T=getresult("ONA_1","input 1/mode 1/transmission");
+        wavelength = T.wavelength;
+        dat.addparameter("wavelength",wavelength);
+    }
+    dat.addattribute(num2str(amplitude_values(i)), getattribute( getresult("ONA_1", "input 1/mode 1/gain"), getattribute(getresult("ONA_1", "input 1/mode 1/gain")) ) );    
+}
+visualize(dat);
+}
+
+if (SIM_H) {
+# Heater max amplitude = 1.22
+amplitude_values = [0,0.2,0.4,0.6,0.8,1.0,1.2];
+select("N3");
+
+dat = matrixdataset("dat"); # initialize visualizer data
+for (i=1:length(amplitude_values)) {
+    switchtolayout;
+    set("amplitude",amplitude_values(i));
+    run;
+    if (i==1) { 
+        T=getresult("ONA_1","input 1/mode 1/transmission");
+        wavelength = T.wavelength;
+        dat.addparameter("wavelength",wavelength);
+    }
+    dat.addattribute(num2str(amplitude_values(i)), getattribute( getresult("ONA_1", "input 1/mode 1/gain"), getattribute(getresult("ONA_1", "input 1/mode 1/gain")) ) );    
+}
+visualize(dat);
+}
