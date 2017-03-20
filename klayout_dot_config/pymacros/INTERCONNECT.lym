@@ -151,7 +151,7 @@ else:
   filename2 = '/tmp/%s.lsf' % topcell.name
   filename_icp = '/tmp/%s.icp' % topcell.name
 
-text_Spice_main += '.INCLUDE %s\n\n' % (filename_subckt)
+text_Spice_main += '.INCLUDE "%s"\n\n' % (filename_subckt)
 
 # Write the Spice netlist to file
 file = open(filename, 'w')
