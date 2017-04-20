@@ -317,7 +317,7 @@ def find_automated_measurement_labels(topcell, LayerTextN):
   # LayerText = pya.LayerInfo(10, 0)
   # LayerTextN = topcell.layout().layer(LayerText)
   # find_automated_measurement_labels(topcell, LayerTextN)
-  t = ''
+  t = '% X-coord, Y-coord, Polarization, wavelength, type, deviceID, comment &lt;br&gt;'
   dbu = topcell.layout().dbu
   iter = topcell.begin_shapes_rec(LayerTextN)
   i=0
@@ -327,7 +327,11 @@ def find_automated_measurement_labels(topcell, LayerTextN):
       if text.string.find("opt_in") &gt; -1:
         i+=1
         text2 = iter.shape().text.transformed(iter.itrans())
-        t += "label: %s, location: (%s, %s) &lt;br&gt;" %(text.string, text2.x*dbu, text2.y*dbu )
+#        t += "label: %s, location: (%s, %s) &lt;br&gt;" %(text.string, text2.x*dbu, text2.y*dbu )
+        fields = text.string.split("_")
+        fields.append('comment')
+        fields = fields[:7]
+        t += "%s,%s,%s,%s,%s,%s,%s&lt;br&gt;" %(int(text2.x*dbu), int(text2.y*dbu), fields[2], fields[3],fields[4],fields[5],fields[6] )
     iter.next()
   t += "&lt;br&gt;*** Number of automated measurement labels: %s.&lt;br&gt;" % i
   return t
