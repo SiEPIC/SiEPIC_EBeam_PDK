@@ -76,6 +76,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
   The PCell declaration for ring modulator.
   Consists of a ring with 2 straight waveguides
   With pn junction and heater
+  Written by Anthony Park and Wei Shi, 2017
   """
   def __init__(self):
 
