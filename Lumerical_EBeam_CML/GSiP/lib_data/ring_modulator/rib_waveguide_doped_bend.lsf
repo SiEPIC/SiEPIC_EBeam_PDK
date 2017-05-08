@@ -1,0 +1,111 @@
+? "Doped waveguide simulation.";
+
+doped_wg_filename = %local path% + '/lib_data/ring_modulator/' + "rib_waveguide_doped_bend_" + process + "_w" + num2str(wg_width*1e9) + "nm_r" + num2str(radius*1e9) + "nm_c" + num2str(junction_clearance*1e9) + "nm_o" + num2str(junction_offset*1e9) + "nm.ldf";
+dneff_filename = %local path% + '/lib_data/ring_modulator/' + "ring_modulator_" + process + "_w" + num2str(wg_width*1e9) + "nm_r" + num2str(radius*1e9) + "nm_c" + num2str(junction_clearance*1e9) + "nm_o" + num2str(junction_offset*1e9) + "nm.dat";
+
+?"Checking for file: " + doped_wg_filename;
+?"Checking for file: " + dneff_filename;
+
+if ((fileexists(doped_wg_filename))&(fileexists(dneff_filename))) {
+    ? "Loading existing simulation data.";
+    loaddata(doped_wg_filename);
+}
+else {
+    ? "Running MODE.";
+    m3 = opensession("mode");
+    lms_filename = %local path% + '/lib_data/ring_modulator/rib_waveguide.lms';
+    local_path = %local path%;
+    api_script = "";
+    api_script = api_script + 'load("' + lms_filename + '");' + endl;
+    putremotedata(m3,'doped_wg_filename',doped_wg_filename);
+    putremotedata(m3,'dneff_filename',dneff_filename);
+    putremotedata(m3,'local_path',local_path);
+    putremotedata(m3,'process',process);
+    putremotedata(m3,'radius',radius);
+    putremotedata(m3,'wg_width',wg_width);
+    putremotedata(m3,'Si_Full_Height',Si_Full_Height);
+    putremotedata(m3,'Si_Slab_Height',Si_Slab_Height);
+    putremotedata(m3,'N_doping',N_doping);
+    putremotedata(m3,'P_doping',P_doping);
+    putremotedata(m3,'junction_clearance',junction_clearance);
+    putremotedata(m3,'junction_offset',junction_offset);
+    api_script = api_script + '
+        switchtolayout;
+        ? "Rib Waveguide (Active & Bend): ";
+        setnamed("::model","wg_width",wg_width);
+        setnamed("::model","Si_Full_Height",Si_Full_Height);
+        setnamed("::model","Si_Slab_Height",Si_Slab_Height);
+        setnamed("::model","active",1);
+        BiasV = linspace(-4,0.5,10);
+        neff = dneff = matrix(length(BiasV));
+        loss = matrix(length(BiasV));
+        temp_index = find(BiasV,0);
+        np_filename = "ring_modulator_" + process + "_w" + num2str(wg_width*1e9) + "nm_c" + num2str(junction_clearance*1e9) + "nm_o" + num2str(junction_offset*1e9) + "nm.mat";
+        ? "Step 1: import np denity";
+        if (fileexists(np_filename)) {? "        np denity file already exists";}
+        else {
+            ? "        np density file not found: now open DEVICE to run the electrical simulation...";
+            ring_modulator;
+        }    
+        select("np");
+        cleardataset;
+        ? "        np denity file has been successfully loaded";
+        importdataset(np_filename);
+        ? "Step 2: run optical simulation without bias (i.e., V = 0)";
+        setnamed("np","V_anode_index",temp_index);
+        ?string = "        Bias Voltage = " + num2str(getnamed("np","V_anode")) + "V";
+        ? "        find the fundamental mode";
+        setanalysis("wavelength",1.5e-6);
+        setanalysis("number of trial modes",10);
+        setanalysis("bent waveguide",1);
+        setanalysis("bend radius",radius);
+        findmodes;
+        selectmode(1);
+        setanalysis("stop wavelength",1.6e-6);         
+        setanalysis("number of points",5);
+        setanalysis("track selected mode",1);
+        setanalysis("bent waveguide",1);
+        setanalysis("bend radius",radius);
+        setanalysis("detailed dispersion calculation",1);
+        setanalysis("store mode profiles while tracking",0);
+        ? "        frequency sweep from 1.5 um to 1.6 um";
+        frequencysweep;
+        f=getresult("FDE::data::frequencysweep","f");
+        neff0=real(getresult("FDE::data::frequencysweep","neff"));
+        loss0=getresult("FDE::data::frequencysweep","loss");
+        ng0=c/getresult("FDE::data::frequencysweep","vg");
+        disp0=getdata("frequencysweep","D");
+        savedata(doped_wg_filename, f, neff0, loss0, ng0, disp0);
+        ? "        save the data in .ldf file";
+        switchtolayout;
+        save;
+        
+        if (fileexists(dneff_filename)) {rm(dneff_filename);}
+        ? "Step 3: run optical simulation with different bias";
+        setanalysis("frequency",f(3));
+        for (ii=1:length(BiasV)) {
+            switchtolayout;
+            setnamed("np","V_anode_index",ii);
+            ?string = "        Bias Voltage = " + num2str(getnamed("np","V_anode")) + "V";
+            findmodes;
+            neff(ii) = getresult("FDE::data::mode1","neff");
+            loss(ii)=getresult("FDE::data::mode1","loss");
+        }
+        # plot(BiasV,neff,"Voltage (V)","neff");
+        # plot(BiasV,loss/100,"Voltage (V)","Loss (dB/cm)");
+        dneff = real(neff) - real(neff(temp_index));         # relative change in index
+        data = [BiasV,dneff,imag(neff)];
+        write(dneff_filename,num2str(data));
+        ? "        save the data in .dat file";         
+    ';
+    
+    evalremote(m3,api_script);
+    closesession(m3);
+    loaddata(data_filename);
+}
+
+f = f(3);
+neff = neff0(3);
+loss = loss0(3);
+ng = ng0(3);
+disp = disp0(3);

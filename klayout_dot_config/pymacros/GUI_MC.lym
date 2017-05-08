@@ -449,7 +449,10 @@ def button(self):
       
   else:
     global topcell, layout, dbu
-    topcell= None
+
+    if pya.Application.instance().main_window().current_view() == None:
+      raise Exception("Please create a layout before running a simulation.")
+
     topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
     if topcell == None:
       raise Exception("No cell")
