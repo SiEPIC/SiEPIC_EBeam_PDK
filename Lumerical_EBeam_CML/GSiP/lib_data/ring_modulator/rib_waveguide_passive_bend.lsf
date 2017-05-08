@@ -1,0 +1,54 @@
+data_filename = %local path% + '/lib_data/ring_modulator/' + "rib_waveguide_passive_bend_" + process + "_w" + num2str(wg_width*1e9) + "nm_r" + num2str(radius*1e9) + "nm.ldf";
+if (fileexists(data_filename)) {loaddata(data_filename);}
+else {
+    m2 = opensession("mode");
+    lms_filename = %local path% + '/lib_data/ring_modulator/rib_waveguide.lms';
+    api_script = "";
+    api_script = api_script + 'load("' + lms_filename + '");' + endl;
+    putremotedata(m2,'data_filename',data_filename);
+    putremotedata(m2,'radius',radius);
+    putremotedata(m2,'wg_width',wg_width);
+    putremotedata(m2,'Si_Full_Height',Si_Full_Height);
+    putremotedata(m2,'Si_Slab_Height',Si_Slab_Height);
+    api_script = api_script + '
+        switchtolayout;
+        setnamed("::model","active",0);
+        setnamed("::model","wg_width",wg_width);
+        setnamed("::model","Si_Full_Height",Si_Full_Height);
+        setnamed("::model","Si_Slab_Height",Si_Slab_Height);
+        setanalysis("wavelength",1.5e-6);
+        setanalysis("number of trial modes",10);
+        setanalysis("bent waveguide",1);
+        setanalysis("bend radius",radius);        
+        ? "Rib Waveguide (Passive & Bend): ";
+        ? "Step 1: find the fundamental mode";
+        findmodes;
+        selectmode(1);
+        setanalysis("stop wavelength",1.6e-6);
+        setanalysis("number of points",5);
+        setanalysis("track selected mode",1);
+        setanalysis("bent waveguide",1);
+        setanalysis("bend radius",radius);
+        setanalysis("detailed dispersion calculation",1);
+        setanalysis("store mode profiles while tracking",0);
+        ? "Step 2: frequency sweep from 1.5 um to 1.6 um";
+        frequencysweep;
+        f=getresult("FDE::data::frequencysweep","f");
+        neff0=real(getresult("FDE::data::frequencysweep","neff"));
+        loss0=getresult("FDE::data::frequencysweep","loss");
+        ng0=c/getresult("FDE::data::frequencysweep","vg");
+        disp0=getdata("frequencysweep","D");
+        savedata(data_filename, f, neff0, loss0, ng0, disp0);
+        ? "Step 3: save the data in .ldf file";
+        switchtolayout;
+        save;
+    ';
+    evalremote(m2,api_script);
+    loaddata(data_filename);
+    closesession(m2);
+}
+f = f(3);
+neff = neff0(3);
+loss = loss0(3);
+ng = ng0(3);
+disp = disp0(3);

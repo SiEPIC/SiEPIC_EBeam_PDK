@@ -60,12 +60,24 @@ else:
 
 SIMULATION = 1    # Regular INTERCONNECT simulation
 
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+
 # find the currently selected cell:
 topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
 if topcell == None:
   raise Exception("No cell")
 layout = topcell.layout()
 dbu = layout.dbu
+
+# Save the layout prior to running simulations, if there are changes.
+mw = pya.Application.instance().main_window()
+if mw.manager().has_undo():
+  mw.cm_save()
+layout_filename = mw.current_view().active_cellview().filename()
+if len(layout_filename) == 0:
+  raise Exception("Please save your layout before running the simulation")
 
 # initialize the arrays to keep track of layout objects
 optical_components = []
@@ -95,9 +107,30 @@ optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
 optical_waveguides, optical_components = \
   terminate_all_disconnected_pins(optical_pins, optical_waveguides, optical_components)
   
+# Ask user whether to trim the netlist
+# Trim Netlist setting is saved in a "User Properties" defined via the Cells window.
+# if missing, a dialog is presented.
+Trim_Netlist_options = ['Export full circuit', 'Trim netlist by finding components connected to the Laser']
+Trim_Netlist = topcell.property("Trim_Netlist")
+if Trim_Netlist and Trim_Netlist in Trim_Netlist_options:
+  print("Trim_Netlist {%s}, taken from cell {%s}" % (Trim_Netlist, topcell.name) )
+else:
+  Trim_Netlist = pya.InputDialog.ask_item("Trim_Netlist", "Do you want to export the complete circuit, or trim the netlist?  \nYour preference will be saved as a user property in cell {%s}." % topcell.name, Trim_Netlist_options, 0)
+  if Trim_Netlist == None:
+    Trim_Netlist = Trim_Netlist_options[0]
+  else:
+    # Record a transaction, to enable "undo"
+    lv.transaction("Trim_Netlist selection")
+    print("Trim_Netlist taken from the InputDialog = %s; for next time, saved in cell {%s}." % (Trim_Netlist, topcell.name) )
+    topcell.set_property("Trim_Netlist", Trim_Netlist)
+    lv.commit()
+
 # Output the Spice netlist:
-#text_Spice, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components)
-text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
+if Trim_Netlist == Trim_Netlist_options[0]:
+  text_Spice, text_Spice_main, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins)
+else:
+  text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
+
 print(text_Spice)
 
 if sys.platform.startswith("win"):
@@ -155,7 +188,7 @@ elif sys.platform.startswith('darwin'):
     import commands
     print("Running INTERCONNECT")
     #commands.getstatusoutput('open /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args %s' % filename)
-    commands.getstatusoutput('open -n /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
+    commands.getstatusoutput('source ~/.bash_profile; open -n /Applications/Lumerical/INTERCONNECT/INTERCONNECT.app --args -run %s' % filename2)
 
 elif sys.platform.startswith('win'):
   # Windows specific code here
