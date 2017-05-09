@@ -1296,6 +1296,7 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
 
 
 def generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins):
+  
   # create a list of all the waveguides and components
   temp_list = optical_waveguides + optical_components
 
@@ -1411,7 +1412,6 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
     
     #make detector or laser string as a parent_node of the extracted gcs which will be used as a reference
     #to identify connected GCs
-    
     for items in lumerical_list:
       x_ = []
       y_ = []
@@ -1482,14 +1482,24 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
     #make a list of groups
     temp_group_list = [list(each) for each in grouped_items]
     
+    
+    print(len(temp_group_list))
     final_group_list=[]
     #remove the groups with no detectors/lasers and store them in final_group_list
+    #selects the ones with only detector and no laser connection which is bad
+    """
     for each in temp_group_list:
         if(any(x.parent_node == "DETECTOR" or x.parent_node == "LASER" for x in each) == True):
           temp = [i.current_node for i in each]
           final_group_list = final_group_list + temp
-    
-    
+   """
+   
+    for each in temp_group_list:
+        if(any(x.parent_node == "LASER" for x in each) == True):
+          if(any(y.parent_node == "DETECTOR" for y in each) == True):
+            temp = [i.current_node for i in each]
+            final_group_list = final_group_list + temp   
+
     #get separate lists of fetched optical_waveguides and optical_components
     optical_waveguideF = []
     optical_componentF = []
@@ -1517,7 +1527,7 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
          
     optical_pins = []
     optical_pins = optical_pinsF
-    
+
     
     # Output the Spice netlist:
     return generate_Spice_file(topcell, optical_waveguideF, optical_componentF, optical_pins)
