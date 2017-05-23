@@ -1,0 +1,196 @@
+switchtodesign;
+#remove ONA
+
+select("ONA_1");
+delete;
+dlambda = 0.2e-9; 
+lambda1 = 1547.41e-9+dlambda;
+lambda2 = 1549.88e-9+dlambda;
+lambda3 = 1552.35e-9+dlambda;
+lambda4 = 1554.82e-9+dlambda;
+
+Vh = 0.5; # heater voltage for modulator; 
+
+ 
+ BITRATE = 1.5e10;
+ sequence_length = 64;
+ SPB = 512; 
+ f0 = c/1550e-9; 
+ 
+ 
+selectpartial("CWL");
+delete; 
+selectpartial("SPLT");
+delete;
+selectpartial("N1");
+delete;
+#remove DC source
+selectpartial("DC");
+delete;
+selectpartial("NODE");
+delete;
+selectpartial("Node");
+delete;
+selectpartial("PRBS");
+delete;
+selectpartial("NRZ");
+delete;
+selectpartial("LPF");
+delete;
+selectpartial("OSC");
+delete;
+selectpartial("EYE");
+delete;
+selectpartial("OSA");
+delete;
+selectpartial("OOSC");
+delete;
+ 
+ #set up simulation 
+setnamed("::Root Element", "simulation input" , "sequence length");
+setnamed("::Root Element", "bitrate", BITRATE); 
+setnamed("::Root Element", "samples per bit", SPB);
+setnamed("::Root Element", "sequence length", sequence_length);  
+setnamed("::Root Element", "sample mode frequency band", "single");
+setnamed("::Root Element", "sample mode center frequency", f0);
+
+
+#add laser sources
+
+addelement("::sources::optical::cw laser");
+set("frequency", c/lambda1); set("x position", -300); set("y position", -800); 
+addelement("::sources::optical::cw laser");
+set("frequency", c/lambda2); set("x position", -300); set("y position", -600); 
+addelement("::sources::optical::cw laser");
+set("frequency", c/lambda3); set("x position", -300); set("y position", -400); 
+addelement("::sources::optical::cw laser");
+set("frequency", c/lambda4); set("x position", -300); set("y position", -200); 
+
+
+addelement("::passives::optical::optical splitter/coupler"); set("x position", -100); set("y position", -500); set("vertical flipped", true);set("rotated", 2);
+set("number of ports", 4); set("split ratio", "none");
+connect("CWL_1", "output", "SPLT_1", "port 2");
+connect("CWL_2", "output", "SPLT_1", "port 3");
+connect("CWL_3", "output", "SPLT_1", "port 4");
+connect("CWL_4", "output", "SPLT_1", "port 5");
+connect("SPLT_1", "port 1", "GSiP_RingMod_Transceiver", "N$0"); 
+
+#add ground
+
+
+
+addelement("DC source"); set("x position", -360); set("y position", 70);
+addelement("DC source"); set("x position", -360); set("y position", 170);
+set("amplitude", Vh);
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_19_elec2h2");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_19_elec2h1");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_18_elec2h2");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_18_elec2h1");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_15_elec2h2");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_15_elec2h1");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_14_elec2h2");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Filter_DB_14_elec2h1");
+ 
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_7_elecP");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_7_elecN");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_6_elecP");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_6_elecN");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_5_elecP");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_5_elecN");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_4_elecP");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_4_elecN");
+
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_0_elec1a");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_0_elec2h1");
+connect("DC_2", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_0_elec2h2");
+
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_1_elec1a");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_1_elec2h1");
+connect("DC_2", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_1_elec2h2");
+
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_2_elec1a");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_2_elec2h1");
+connect("DC_2", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_2_elec2h2");
+
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_3_elec1a");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_3_elec2h1");
+connect("DC_2", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_3_elec2h2");
+
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_23_elecP");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_22_elecP");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_21_elecP");
+connect("DC_1", "output", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_20_elecP");
+
+#add bit sequency generator
+addelement("::sequence generators::prbs generator"); set("x position", -400); set("y position", 400); set("vertical flipped", false);set("rotated", 0);
+addelement("::sequence generators::prbs generator"); set("x position", -400); set("y position", 500); set("vertical flipped", false);set("rotated", 0);
+addelement("::sequence generators::prbs generator"); set("x position", -400); set("y position", 600); set("vertical flipped", false);set("rotated", 0);
+addelement("::sequence generators::prbs generator"); set("x position", -400); set("y position", 700); set("vertical flipped", false);set("rotated", 0);
+
+addelement("::pulse generators::electrical::nrz pulse generator"); set("x position", -200); set("y position", 400); set("vertical flipped", false);set("rotated", 0);
+set("bias", -2); set("amplitude", 2);
+addelement("::pulse generators::electrical::nrz pulse generator"); set("x position", -200); set("y position", 500); set("vertical flipped", false);set("rotated", 0);
+set("bias", -2); set("amplitude", 2);
+addelement("::pulse generators::electrical::nrz pulse generator"); set("x position", -200); set("y position", 600); set("vertical flipped", false);set("rotated", 0);
+set("bias", -2); set("amplitude", 2);
+addelement("::pulse generators::electrical::nrz pulse generator"); set("x position", -200); set("y position", 700); set("vertical flipped", false);set("rotated", 0);
+set("bias", -2); set("amplitude", 2);
+
+connect("PRBS_1", "output", "NRZ_1", "modulation");
+connect("PRBS_2", "output", "NRZ_2", "modulation");
+connect("PRBS_3", "output", "NRZ_3", "modulation");
+connect("PRBS_4", "output", "NRZ_4", "modulation");
+
+connect("NRZ_4", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_0_elec1c");
+connect("NRZ_3", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_1_elec1c");
+connect("NRZ_2", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_2_elec1c");
+connect("NRZ_1", "output", "GSiP_RingMod_Transceiver", "N$Ring_Modulator_DB_3_elec1c");
+
+#add output filters
+addelement("::filters::electrical::lp bessel filter"); set("x position", 600); set("y position", -400);
+addelement("::filters::electrical::lp bessel filter"); set("x position", 600); set("y position", -300);
+addelement("::filters::electrical::lp bessel filter"); set("x position", 600); set("y position", -200);
+addelement("::filters::electrical::lp bessel filter"); set("x position", 600); set("y position", -100);
+
+connect("LPF_1", "input", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_23_elecN");
+connect("LPF_2", "input", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_22_elecN");
+connect("LPF_3", "input", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_21_elecN");
+connect("LPF_4", "input", "GSiP_RingMod_Transceiver", "N$Detector_Ge_floating_20_elecN");
+
+#add oscilloscope and eye diagram
+addelement("::analyzers::electrical::oscilloscope"); set("x position", 750); set("y position", 200);
+addelement("::analyzers::electrical::eye diagram"); set("x position", 750); set("y position", 100);
+set("signal reference input", false); 
+
+addelement("::analyzers::electrical::oscilloscope"); set("x position", 850); set("y position", 0);
+addelement("::analyzers::electrical::eye diagram"); set("x position", 850); set("y position", -100);
+set("signal reference input", false); 
+
+addelement("::analyzers::electrical::oscilloscope"); set("x position", 950); set("y position", -200);
+addelement("::analyzers::electrical::eye diagram"); set("x position", 950); set("y position", -300);
+set("signal reference input", false); 
+
+addelement("::analyzers::electrical::oscilloscope"); set("x position", 1050); set("y position", -400);
+addelement("::analyzers::electrical::eye diagram"); set("x position", 1050); set("y position", -500);
+set("signal reference input", false); 
+
+connect("OSC_1", "input", "LPF_4", "output");
+connect("EYE_1", "input", "LPF_4", "output");
+connect("OSC_2", "input", "LPF_3", "output");
+connect("EYE_2", "input", "LPF_3", "output");
+connect("OSC_3", "input", "LPF_2", "output");
+connect("EYE_3", "input", "LPF_2", "output");
+connect("OSC_4", "input", "LPF_1", "output");
+connect("EYE_4", "input", "LPF_1", "output");
+
+
+addelement("::analyzers::optical::optical oscilloscope"); set("x position", 500); set("y position", -800);
+addelement("::analyzers::optical::optical spectrum analyzer"); set("x position",500); set("y position", -900);
+connect("OSA_1", "input", "GSiP_RingMod_Transceiver", "N$1");
+connect("OOSC_1", "input", "GSiP_RingMod_Transceiver", "N$1");
+addelement("::analyzers::optical::optical oscilloscope"); set("x position", 600); set("y position", -600);
+addelement("::analyzers::optical::optical spectrum analyzer"); set("x position",600); set("y position", -700);
+connect("OSA_2", "input", "GSiP_RingMod_Transceiver", "N$2");
+connect("OOSC_2", "input", "GSiP_RingMod_Transceiver", "N$2");
+
+
