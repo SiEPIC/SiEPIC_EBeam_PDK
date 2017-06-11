@@ -235,6 +235,7 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
     self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("wg_width", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("bend_angle", self.TypeDouble, "Bend angle", default = 45)
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
     # hidden parameters, can be used to query this component:
@@ -244,7 +245,7 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "Waveguide_Bend(R=" + ('%.3f' % self.radius) + ")"
+    return "Bent_Coupler(R=" + ('%.3f' % self.radius) + ")"
 
   def can_create_from_shape_impl(self):
     return False
@@ -280,56 +281,51 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
     
     w = int(round(self.wg_width/dbu))
     r = int(round(self.radius/dbu))
+    bend_angle = int(round(self.bend_angle))
 
-    # draw the quarter-circle
-    x = -r
-    y = r
-    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 360)
+    # draw the first arc
+    x = 0
+    y = 0
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270+0, 270+bend_angle)
     
+    # draw the second arc
+    x = 2*r*math.sin(bend_angle * math.pi/180)
+    y = -2*r*math.cos(bend_angle * math.pi/180)
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 90-bend_angle, 90+bend_angle)
+    
+    
+    # draw the third arc
+    x = 4*r*math.sin(bend_angle * math.pi/180)
+    y = 0
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270-bend_angle, 270-0)
+
+
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
     # Pin on the top side:
-    p2 = [pya.Point(0, y+pin_length/2), pya.Point(0, y-pin_length/2)]
-    p2c = pya.Point(0, y)
+    p2 = [pya.Point(-pin_length/2, -r), pya.Point(pin_length/2, -r)]
+    p2c = pya.Point(0, -r)
     self.set_p2 = p2c
     self.p2 = p2c
     pin = pya.Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(0, y)
+    t = pya.Trans(0, -r)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     # Pin on the left side:
-    p1 = [pya.Point(pin_length/2+x,0), pya.Point(-pin_length/2+x,0)]
-    p1c = pya.Point(x,0)
+    p1 = [pya.Point(pin_length/2+x,-r), pya.Point(-pin_length/2+x,-r)]
+    p1c = pya.Point(x,-r)
     self.set_p1 = p1c
     self.p1 = p1c
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x, 0)
+    t = pya.Trans(x, -r)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
-
-    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 360)
-
-    # Compact model information
-    t = pya.Trans(x+r/10, 0)
-    text = pya.Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
-    shape = self.cell.shapes(LayerDevRecN).insert(text)
-    shape.text_size = r/100
-    t = pya.Trans(x+r/10, r/4)
-    text = pya.Text ('Lumerical_INTERCONNECT_component=ebeam_bend_1550', t)
-    shape = self.cell.shapes(LayerDevRecN).insert(text)
-    shape.text_size = r/100
-    t = pya.Trans(x+r/10, r/2)
-    text = pya.Text ('Spice_param:radius=%.3fu wg_width=%.3fu'% (self.radius,self.wg_width), t)
-    shape = self.cell.shapes(LayerDevRecN).insert(text)
-    shape.text_size = r/100
-
 #    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
 
   
