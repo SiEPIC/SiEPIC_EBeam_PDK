@@ -137,8 +137,8 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("wg_width", self.TypeDouble, "Waveguide Width", default = 0.5)
-    self.param("start_angle", self.TypeDouble, "Start Angle (270 -&gt; 360)", default = 270)
-    self.param("stop_angle", self.TypeDouble, "Stop Angle (270 -&gt; 360)", default = 360)
+    self.param("start_angle", self.TypeDouble, "Start Angle (270 -&gt; 360)", default = 0)
+    self.param("stop_angle", self.TypeDouble, "Stop Angle (270 -&gt; 360)", default = 90)
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
     # hidden parameters, can be used to query this component:
@@ -189,39 +189,54 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     start_angle = self.start_angle
     stop_angle = self.stop_angle
     
+    deg_to_rad = math.pi / 180
+    
+    
     # draw the arc
-    x = -r
-    y = r
+    x = 0
+    y = 0
     layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, start_angle, stop_angle)
     
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
-    # Pin on the top side:
-    p2 = [pya.Point(-r+r*math.cos((360-stop_angle)*(math.pi/180))+(pin_length*math.tan((360-stop_angle)*(math.pi/180)))/2, y+pin_length/2 +r*math.sin(stop_angle*math.pi/180)), pya.Point(-r+r*math.cos((360-stop_angle)*(math.pi/180))-(pin_length*math.tan((360-stop_angle)*(math.pi/180)))/2, y-pin_length/2 +r*math.sin(stop_angle*math.pi/180))]
-    p2c = pya.Point(-r+r*math.cos((360-stop_angle)*(math.pi/180)), y+r*math.sin(stop_angle*math.pi/180))
+
+    # Pin on the right side:
+    x = r*math.cos( start_angle * deg_to_rad ) 
+    y = r*math.sin( start_angle * deg_to_rad )
+    
+    p2 = [pya.Point(x+math.tan( start_angle * deg_to_rad)*pin_length/2, y-pin_length/2), pya.Point(x-math.tan( start_angle * deg_to_rad)*pin_length/2, y+pin_length/2)]
+    p2c = pya.Point(x, y)
     self.set_p2 = p2c
     self.p2 = p2c
     pin = pya.Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(-r+r*math.cos((360-stop_angle)*(math.pi/180)), y+r*math.sin(stop_angle*math.pi/180))
+    t = pya.Trans(x, y)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
+
     # Pin on the left side:
-    p1 = [pya.Point(r*math.sin((270-start_angle)*math.pi/180)+r+pin_length/2+x,-((pin_length*math.tan((270-start_angle)*(math.pi/180)))/2) + y-r*math.cos((270-start_angle)*math.pi/180)), pya.Point(-pin_length/2+x+(r*math.sin((270-start_angle)*math.pi/180)+r),((pin_length*math.tan((270-start_angle)*(math.pi/180)))/2)+y-r*math.cos((270-start_angle)*math.pi/180))]
-    p1c = pya.Point(r*math.sin((270-start_angle)*math.pi/180), y-r*math.cos((270-start_angle)*math.pi/180))
+    x = r*math.cos( stop_angle * deg_to_rad ) 
+    y = r*math.sin( stop_angle * deg_to_rad )
+    
+
+    p1 = [pya.Point(x-pin_length/2, y+math.tan( (90-stop_angle) * deg_to_rad)*pin_length/2), pya.Point(x+pin_length/2, y-math.tan( (90-stop_angle) * deg_to_rad)*pin_length/2)]
+    p1c = pya.Point(x,y)
     self.set_p1 = p1c
     self.p1 = p1c
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(r*math.sin((270-start_angle)*math.pi/180), y-r*math.cos((270-start_angle)*math.pi/180))
+    t = pya.Trans(x, y)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
+    
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    x = 0
+    y = 0
     layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, start_angle, stop_angle)
 
 
@@ -447,25 +462,25 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     pin_length = 200 # database units, = 0.2 microns
     
     # Pin on the bottom left side:
-    p3 = [pya.Point(x-r, -r+pin_length/2 ), pya.Point(x-r, -r-pin_length/2 )]
-    p3c = pya.Point(x-r, -r)
+    p3 = [pya.Point(x-r, pin_length/2 +y), pya.Point(x-r, -pin_length/2 +y)]
+    p3c = pya.Point(x-r, y)
     self.set_p3 = p3c
     self.p3 = p3c
     pin = pya.Path(p3, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x-r, -r)
+    t = pya.Trans(x-r, y)
     text = pya.Text ("pin3", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     # Pin on the bottom right side:
-    p4 = [pya.Point(x+r,-r+pin_length/2), pya.Point(x+r,-r-pin_length/2)]
-    p4c = pya.Point(x+r,-r)
+    p4 = [pya.Point(x+r, y+pin_length/2), pya.Point(x+r,y-pin_length/2)]
+    p4c = pya.Point(x+r,y)
     self.set_p4 = p4c
     self.p4 = p4c
     pin = pya.Path(p4, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x+r, -r)
+    t = pya.Trans(x+r, y)
     text = pya.Text ("pin4", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -564,7 +579,7 @@ class MustafaLib(pya.Library):
     
     # Create the PCell declarations
     self.layout().register_pcell("Circle", Circle())
-    self.layout().register_pcell("Waveguide Arc (buggy)", Waveguide_Arc())
+    self.layout().register_pcell("Waveguide Arc", Waveguide_Arc())
     self.layout().register_pcell("Bent Coupler Bus", Bent_Coupler_Bus())
     self.layout().register_pcell("Bent Coupled Half Ring", Bent_Coupled_Half_Ring())
     
