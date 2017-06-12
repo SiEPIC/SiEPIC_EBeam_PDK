@@ -22,6 +22,22 @@ import math
   Email:  mustafa@ece.ubc.ca
   
   ece.ubc.ca/~mustafa
+  
+  
+  Change log:
+  
+  9 June 2017
+  - Added waveguide Arc PCell with device recognition and pins layer (buggy)
+  
+  10 June 2017
+  - Added Bent bus coupler PCell 
+  
+  11 June 2017
+  - Added Bent bus coupler device recognition layer
+  - Added framework for bent coupled half ring PCell
+  
+  12 June 2017
+  - Completed bent coupled half ring PCell with device recognition layer
 """
 
 class Circle(pya.PCellDeclarationHelper):
@@ -312,7 +328,7 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
-    # Pin on the top side:
+    # Pin on the left side:
     p2 = [pya.Point(-pin_length/2, -r), pya.Point(pin_length/2, -r)]
     p2c = pya.Point(0, -r)
     self.set_p2 = p2c
@@ -324,7 +340,7 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    # Pin on the left side:
+    # Pin on the right side:
     p1 = [pya.Point(pin_length/2+x,-r), pya.Point(-pin_length/2+x,-r)]
     p1c = pya.Point(x,-r)
     self.set_p1 = p1c
@@ -356,6 +372,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
     self.param("radius", self.TypeDouble, "Radius", default = 10)
+    self.param("gap", self.TypeDouble, "Gap", default = 0.2)
     self.param("bus_width", self.TypeDouble, "Bus Width", default = 0.5)
     self.param("ring_width", self.TypeDouble, "Ring Width", default = 0.5)
     self.param("bend_angle", self.TypeDouble, "Bend angle", default = 45)
@@ -406,9 +423,130 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     w_ring = int(round(self.ring_width/dbu))
     r = int(round(self.radius/dbu))
     bend_angle = int(round(self.bend_angle))
+    gap = int(round(self.gap/dbu))
     
     
-#    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
+
+
+    #**********************
+    # Draw the ring waveguide
+    #**********************
+
+
+    w = w_ring
+    
+    
+    x = 2*r*math.sin(bend_angle * math.pi/180)
+    y = -2*r*math.cos(bend_angle * math.pi/180)
+    
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 0, 180)
+
+
+
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    # Pin on the bottom left side:
+    p3 = [pya.Point(x-r, -r+pin_length/2 ), pya.Point(x-r, -r-pin_length/2 )]
+    p3c = pya.Point(x-r, -r)
+    self.set_p3 = p3c
+    self.p3 = p3c
+    pin = pya.Path(p3, w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(x-r, -r)
+    text = pya.Text ("pin3", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Pin on the bottom right side:
+    p4 = [pya.Point(x+r,-r+pin_length/2), pya.Point(x+r,-r-pin_length/2)]
+    p4c = pya.Point(x+r,-r)
+    self.set_p4 = p4c
+    self.p4 = p4c
+    pin = pya.Path(p4, w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(x+r, -r)
+    text = pya.Text ("pin4", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 0, 180)
+    
+    
+    #**********************
+    # Draw the bus waveguide (figure out how to call the existing class maybe??)
+    #**********************
+    
+    r_original = int(round(self.radius/dbu))
+    
+    w = w_bus
+    
+
+    # draw the first arc
+    x = 0
+    y = 0
+    
+    r = r - gap - w_ring/2 - w_bus/2
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 270+bend_angle)
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 270+bend_angle)
+    
+        
+    # draw the second arc
+    r = int(round(self.radius/dbu))
+    x = 2*r*math.sin(bend_angle * math.pi/180)
+    y = -2*r*math.cos(bend_angle * math.pi/180)
+    
+    r = r + gap + w_ring/2 + w_bus/2
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 90-bend_angle, 90+bend_angle)
+    
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 90-bend_angle, 90+bend_angle)
+    
+    
+    # draw the third arc
+    
+    r = int(round(self.radius/dbu))
+    
+    x = 4*r*math.sin(bend_angle * math.pi/180)
+    y = 0
+    
+    r = r - gap - w_ring/2 - w_bus/2
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270-bend_angle, 270)
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270-bend_angle, 270)
+    
+
+
+    
+    # Pin on the left side:
+    p2 = [pya.Point(-pin_length/2, -r), pya.Point(pin_length/2, -r)]
+    p2c = pya.Point(0, -r)
+    self.set_p2 = p2c
+    self.p2 = p2c
+    pin = pya.Path(p2, w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(0, -r)
+    text = pya.Text ("pin2", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Pin on the right side:
+    p1 = [pya.Point(pin_length/2+x,-r), pya.Point(-pin_length/2+x,-r)]
+    p1c = pya.Point(x,-r)
+    self.set_p1 = p1c
+    self.p1 = p1c
+    pin = pya.Path(p1, w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(x, -r)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    
+
 
   
 #  def produce_impl(self):
@@ -433,7 +571,7 @@ class MustafaLib(pya.Library):
     
     # That would be the place to put in more PCells ...
     
-    # Register us with the name "Testytest".
+    # Register the library with a name.
     # If a library with that name already existed, it will be replaced then.
     self.register("MustafaLibrary")
 
