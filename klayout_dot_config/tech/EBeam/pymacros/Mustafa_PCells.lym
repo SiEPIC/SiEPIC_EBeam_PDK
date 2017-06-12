@@ -286,19 +286,28 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
     # draw the first arc
     x = 0
     y = 0
-    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270+0, 270+bend_angle)
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 270+bend_angle)
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 270+bend_angle)
     
+        
     # draw the second arc
     x = 2*r*math.sin(bend_angle * math.pi/180)
     y = -2*r*math.cos(bend_angle * math.pi/180)
     layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 90-bend_angle, 90+bend_angle)
     
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 90-bend_angle, 90+bend_angle)
     
     # draw the third arc
     x = 4*r*math.sin(bend_angle * math.pi/180)
     y = 0
-    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270-bend_angle, 270-0)
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270-bend_angle, 270)
 
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270-bend_angle, 270)
+    
 
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
@@ -326,6 +335,79 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+
+    
+#    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
+
+  
+#  def produce_impl(self):
+
+
+class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the waveguide bend.
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Bent_Coupled_Half_Ring, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("radius", self.TypeDouble, "Radius", default = 10)
+    self.param("bus_width", self.TypeDouble, "Bus Width", default = 0.5)
+    self.param("ring_width", self.TypeDouble, "Ring Width", default = 0.5)
+    self.param("bend_angle", self.TypeDouble, "Bend angle", default = 45)
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+    # hidden parameters, can be used to query this component:
+    self.param("p1", self.TypeShape, "DPoint location of pin1", default = pya.Point(-10000, 0), hidden = True, readonly = True)
+    self.param("p2", self.TypeShape, "DPoint location of pin2", default = pya.Point(0, 10000), hidden = True, readonly = True)
+    
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Bent_Coupler(R=" + ('%.3f' % self.radius) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+
+
+  def produce(self, layout, layers, parameters, cell):
+    """
+    coerce parameters (make consistent)
+    """
+    self._layers = layers
+    self.cell = cell
+    self._param_values = parameters
+    self.layout = layout
+
+
+    # cell: layout cell to place the layout
+    # LayerSiN: which layer to use
+    # r: radius
+    # w: waveguide width
+    # length units in dbu
+
+    from math import pi, cos, sin
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    
+    LayerSi = self.silayer
+    LayerSiN = self.silayer_layer
+#    LayerSiN = ly.layer(LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    
+    w_bus = int(round(self.bus_width/dbu))
+    w_ring = int(round(self.ring_width/dbu))
+    r = int(round(self.radius/dbu))
+    bend_angle = int(round(self.bend_angle))
+    
+    
 #    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
 
   
@@ -346,11 +428,14 @@ class MustafaLib(pya.Library):
     self.layout().register_pcell("Circle", Circle())
     self.layout().register_pcell("Waveguide Arc (buggy)", Waveguide_Arc())
     self.layout().register_pcell("Bent Coupler Bus", Bent_Coupler_Bus())
+    self.layout().register_pcell("Bent Coupled Half Ring", Bent_Coupled_Half_Ring())
+    
+    
     # That would be the place to put in more PCells ...
     
     # Register us with the name "Testytest".
     # If a library with that name already existed, it will be replaced then.
-    self.register("Mustafa Library")
+    self.register("MustafaLibrary")
 
 
 # Instantiate and register the library
