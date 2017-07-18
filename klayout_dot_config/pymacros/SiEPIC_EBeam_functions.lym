@@ -331,6 +331,8 @@ def find_automated_measurement_labels(topcell, LayerTextN):
         fields = text.string.split("_")
         fields.append('comment')
         fields = fields[:7]
+        while len(fields) &lt; 7:
+          fields.append('')
         t += "%s,%s,%s,%s,%s,%s,%s&lt;br&gt;" %(int(text2.x*dbu), int(text2.y*dbu), fields[2], fields[3],fields[4],fields[5],fields[6] )
     iter.next()
   t += "&lt;br&gt;*** Number of automated measurement labels: %s.&lt;br&gt;" % i
