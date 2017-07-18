@@ -534,10 +534,14 @@ def angle_vectors(pt1, pt2):
   return (rads2-rads1)/math.pi*180
 
 def angle_segments(segA, segB):
-  ptA1, ptA2 = segA
-  ptB1, ptB2 = segB
-  return angle_vectors([ptA2[0]-ptA1[0], ptA2[1]-ptA1[1]], [ptB2[0]-ptB1[0], ptB2[1]-ptB1[1]])
-
+  if len(segA) == 2 &amp; len(segB) == 2:
+    ptA1, ptA2 = segA
+    ptB1, ptB2 = segB
+    return angle_vectors([ptA2[0]-ptA1[0], ptA2[1]-ptA1[1]], [ptB2[0]-ptB1[0], ptB2[1]-ptB1[1]])
+  else:
+    print("Error: need exactly 2 vertices per segment")
+    return -1
+    
 def av_angle_segments(segA, segB):
   ptA1, ptA2 = segA
   ptB1, ptB2 = segB
