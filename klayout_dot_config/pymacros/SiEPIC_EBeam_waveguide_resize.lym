@@ -64,7 +64,7 @@ lv = pya.Application.instance().main_window().current_view()
 if lv == None:
   raise Exception("No view selected")
 # Find the currently selected layout.
-ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+ly = pya.CellView.active().layout()
 if ly == None:
   raise Exception("No layout")
 # find the currently selected cell:
@@ -88,6 +88,10 @@ optical_waveguides = []
 optical_pins = []
 optical_nets = []
 layout_errors = []
+
+
+#delete instances
+to_delete = []
 
 # extract the circuit netlist from the physical layout:
 optical_waveguides, optical_components = netlist_extraction(topcell)[:2]
@@ -121,7 +125,8 @@ else:
       o_instpathlen = o.path_length()
       oinst = o.path_nth(o_instpathlen-1).inst()
       is_waveguide = True
-
+  
+  to_delete.append(oinst)
 # We now have a waveguide ROUND_PATH PCell, with variables: o (ObjectInstPath), oinst (Instance), c (Cell)
 if is_waveguide == True:
   path_obj = c.pcell_parameters_by_name()['path']
@@ -296,7 +301,9 @@ if is_waveguide == True:
       radius =  cell.pcell_parameters()[1]
      
       layout_waveguide_abs(topcell, LayerSi, points_mult(copy_pts,1), wg_width, radius)
-      cell.delete()
+      
+      for t in to_delete:
+        t.delete()
   
       # Clear the layout view selection, since we deleted some objects
       lv.clear_object_selection()
