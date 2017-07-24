@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>remote Calibre DRC</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.verification_submenu.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# Calibre DRC
+
+"""
+This file is part of the SiEPIC PDK
+by Lukas Chrostowski (c) 2017
+
+This Python file implements layout verification using 
+Mentor Graphics Calibre, and displays results in 
+Marker Database Browser
+
+Version history:
+
+Lukas Chrostowski 2017/05/10
+ - Initial version
+ - Assume ssh passwordless login enabled
+
+ 
+"""
+
+# ************************************************************************
+# ************************************************************************
+#  Main script:
+# ************************************************************************
+# ************************************************************************
+
+
+# Configure variables to draw structures in the presently selected cell:
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+layout = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if layout == None:
+  raise Exception("No layout")
+cv = pya.Application.instance().main_window().current_view().active_cellview()
+# find the currently selected cell:
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if topcell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = layout.dbu
+
+# Define layers based on PDK_functions:
+LayerSiN = layout.layer(LayerSi)
+LayerTextN = layout.layer(LayerText)
+LayerPinRecN = layout.layer(LayerPinRec)
+LayerDevRecN = layout.layer(LayerDevRec)
+LayerFbrTgtN = layout.layer(LayerFbrTgt)
+LayerErrorN = layout.layer(LayerError)
+LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
+
+
+# The Linux server which has Mentor Graphics Calibre installed
+ssh_server = "ssh.ece.ubc.ca"
+
+# Calibre run script
+
+# Ask for the user's server password:
+#passwd = pya.InputDialog.ask_string("Password", "Enter the password to the server, %s." % ssh_server, "")
+
+# Layout path and filename:
+layout_filename = mw.current_view().active_cellview().filename()
+
+# Python version
+import sys
+version = sys.version
+
+# ********* Verification ********* 
+# Check the layout for errors, using the above arrays:
+print("")
+
+print("uploading layout to server.")
+
+if sys.platform.startswith('darwin'):
+  # OSX specific
+  if string.find(version,"2.7.") &gt; -1:
+    import os
+    remote_path = "/tmp"
+    remote_pathfile = remote_path + "/" + os.path.basename(layout_filename)
+    import pipes
+    layout_filename_quotes = pipes.quote(layout_filename)
+    import commands
+    results_file = os.path.basename(layout_filename) + ".rve"
+    results_pathfile = os.path.dirname(layout_filename) + "/" + results_file
+
+    cal_script = "#!/bin/tcsh \n"
+    cal_script += "source /CMC/scripts/mentor.calibre.2013.2_18.13.csh \n"
+    cal_script += "setenv SIEPIC_IME_PDK /ubc/ece/home/nano/data/LC_GROUP/SiEPIC_PDK/CMC_IME_March10_2017/SiEPIC_IME/SiEPIC_IME_PDK \n"
+    cal_script += "$MGC_HOME/bin/calibre -drc -hier -turbo  -nowait drc.cal \n"
+    file = open("/tmp/run_calibre", 'w')
+    file.write (cal_script)
+    file.close()
+    cal_deck  = 'LAYOUT PATH  "%s"\n' % os.path.basename(layout_filename)
+    cal_deck += 'LAYOUT PRIMARY "%s"\n' % topcell.name
+    cal_deck += 'LAYOUT SYSTEM GDSII\n'
+    cal_deck += 'DRC RESULTS DATABASE "drc.rve" ASCII\n'
+    cal_deck += 'DRC MAXIMUM RESULTS ALL\n'
+    cal_deck += 'DRC MAXIMUM VERTEX 4096\n'
+    cal_deck += 'DRC CELL NAME YES CELL SPACE XFORM\n'
+    cal_deck += 'VIRTUAL CONNECT COLON NO\n'
+    cal_deck += 'VIRTUAL CONNECT REPORT NO\n'
+    cal_deck += 'DRC ICSTATION YES\n'
+    cal_deck += 'INCLUDE "/ubc/ece/home/nano/data/LC_GROUP/SiEPIC_PDK/CMC_IME_March10_2017/SiEPIC_IME/SiEPIC_IME_PDK/calibre_rule_decks/CMC_SiEPIC_IMESP.drc.cal"\n'
+    file = open("/tmp/drc.cal", 'w')
+    file.write (cal_deck)
+    file.close()
+
+    print("Uploading layout and Calibre scripts: ")
+    cmd = 'cd %s; ' % pipes.quote(os.path.dirname(layout_filename))
+    cmd += '/usr/bin/scp %s %s %s %s:%s' % (os.path.basename(layout_filename), "/tmp/run_calibre", "/tmp/drc.cal", ssh_server, remote_path) 
+    print(cmd)
+    out = commands.getstatusoutput( cmd )
+    print (out)
+         
+    print("Checking layout for errors: ")
+    cmd = '/usr/bin/ssh %s "%s"' % (ssh_server, "cd " + remote_path +"; source run_calibre;" ) 
+    print(cmd)
+    out = commands.getstatusoutput( cmd )
+    print (out)
+    
+    print("Downloading results file: ")
+#    cmd = 'cd %s; ' % pipes.quote(os.path.dirname(layout_filename))
+    cmd = '/usr/bin/scp %s:%s %s' % ( ssh_server, remote_path + "/drc.rve", pipes.quote(results_pathfile) ) 
+    print(cmd)
+    out = commands.getstatusoutput( cmd )
+    print (out)
+
+    if os.path.exists ( results_pathfile ):
+      success = 1
+    else:
+      success = 0
+
+if success:
+  rdb_i = lv.create_rdb("Calibre Verification")
+  rdb = lv.rdb(rdb_i)
+  rdb.load (results_pathfile )
+  rdb.top_cell_name = topcell.name
+  rdb_cell = rdb.create_cell(topcell.name)
+  lv.show_rdb(rdb_i, cv.cell_index)
+  v = pya.MessageBox.warning("Errors", "Calibre complete. \nPlease review errors using the 'Marker Database Browser'.",  pya.MessageBox.Ok)
+else:
+  v = pya.MessageBox.warning("Errors", "Something failed during the server Calibre DRC check.",  pya.MessageBox.Ok)
+
+print("")
+print("Done. ")
+
+
+#displays results in Marker Database Browser, using Results Database (rdb)
+#if number_errors&gt;0:
+#  v = pya.MessageBox.warning("Errors", "%s layout errors detected.  \nPlease review errors using the 'Marker Database Browser'." % number_errors, pya.MessageBox.Ok)
+#  lv.show_rdb(rdb_i, cv.cell_index)
+#else:
+#  v = pya.MessageBox.warning("Errors", "No layout errors detected.", pya.MessageBox.Ok)
+
+</text>
+</klayout-macro>

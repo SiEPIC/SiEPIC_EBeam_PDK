@@ -135,7 +135,7 @@ for i in range(len(sweep_gap)):
 
   # Ring resonator PCell
   wg_width = 0.5
-  pcell = ly.create_cell("DirectionalCoupler_HalfRing_Straight", "SiEPIC", { "r": r, "w": wg_width, "g": g, "silayer": LayerSi, "bustype": 0 } )
+  pcell = ly.create_cell("DirectionalCoupler_HalfRing_Straight", "SiEPIC-EBeam PCells", { "r": r, "w": wg_width, "g": g, "silayer": LayerSi, "bustype": 0 } )
   print ("Cell: pcell: #%s" % pcell.cell_index())
   y_ring = 127*3/2
   if 2*r &lt; (gc_length+wg_bend_radius):

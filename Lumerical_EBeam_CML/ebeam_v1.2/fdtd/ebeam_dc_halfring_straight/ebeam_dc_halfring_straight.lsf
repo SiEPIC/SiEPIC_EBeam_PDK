@@ -266,6 +266,8 @@ set("z min", FDTD_zmin);
 set("z max", FDTD_zmax);
 updateportmodes(mode_selection); # select the number of modes of the port
 
+select("FDTD::ports");
+set("monitor frequency points", frequency_points_monitor);
 
 
 ##################################################################
