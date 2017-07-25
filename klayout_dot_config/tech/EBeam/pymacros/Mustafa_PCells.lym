@@ -16,6 +16,7 @@
  <dsl-interpreter-name/>
  <text>import pya
 import math
+#import numpy as np      #NumPy library from Christoph Gohlke (http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy)
 
 """
   Author: Mustafa Hammood
@@ -41,6 +42,21 @@ import math
 
   12 June 2017
   - Bug fixes
+  
+  21 June 2017
+  - Bug fixes
+  - Added framework for "tapered ring" PCell
+  - Removed "CIRCLE" PCell
+  
+  24 July 2017
+  - Added framework for "bezier bend" PCell
+  - Minor changes to PCell descriptions and documentation
+  
+  
+  25 July 2017
+  - Completed "bezier bend" PCell lacking deviceRec and pinRec layers
+  - later that day ... Added proper pinRec and deviceRec to "bezier bend" PCell
+  
 """
 
 
@@ -171,7 +187,7 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, start_angle, stop_angle)
 
 
-#    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
+#    print("Done drawing the layout")
 
   
 #  def produce_impl(self):
@@ -300,7 +316,7 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     
-#    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
+#    print("Done drawing the layout")
 
   
 #  def produce_impl(self):
@@ -595,11 +611,226 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
     
 
 
-#    print("Done drawing the layout for - Waveguide_Bend: %.3f" % ( self.radius) )
-
+#    print("Done drawing the layout")
   
 #  def produce_impl(self):
 
+
+
+
+
+class Bezier_Bend(pya.PCellDeclarationHelper):
+  """
+  Input: bezier number, effective radius, waveguide width, layers
+  draws a 90 degree bezier bend with a given bezier factor
+  Usage: instantiate, and use transformations (rotation)
+  
+  This implementation is Python translation of the 90 degree Bezier bend ample script for Mentor Graphics Pyxis
+    by Jonas Flueckiger and Lukas Chrostowski's
+    influenced by www.tinaja.com/glib/cubemath.pdf implementation
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Bezier_Bend, self).__init__()
+
+    # declare the parameters
+    self.param("bezier_num", self.TypeInt, "Bezier factor ~(-60 to 90)", default = 35)     
+    self.param("eff_r", self.TypeInt, "Effective bend radius (um)", default = 5)
+    self.param("wg_width", self.TypeInt, "Waveguide width (nm)", default = 500)     
+    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+#    self.param("textl", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Bezier_Number_%.3f-%.3f" % (self.bezier_num/1000, self.wg_width/1000)
+  
+  def coerce_parameters_impl(self):
+    pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return False
+    
+  def produce_impl(self):
+  
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+
+    LayerSi = self.layer
+    LayerSiN = ly.layer(LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+
+    w = self.wg_width
+
+
+#
+    NN = 101
+    diff = 0.01
+    
+    L = self.eff_r/dbu
+    R = L
+    bezier = self.bezier_num/100
+    
+    xp = [0, (1-bezier)*L, L, L];
+    yp = [0, 0, bezier*L, L];
+    A = xp[3] - 3*xp[2] + 3*xp[1] - xp[0] ;
+    B = 3*xp[2] - 6*xp[1] + 3*xp[0];
+    C = 3*xp[1] - 3*xp[0];
+    D = xp[0];
+    E = yp[3] - 3*yp[2] + 3*yp[1] - yp[0];
+    F = 3*yp[2] - 6*yp[1] + 3*yp[0];
+    G = 3*yp[1] - 3*yp[0];
+    H = yp[0];    
+  
+    t = [0]*NN
+    x = [0]*NN
+    y = [0]*NN
+    
+    # Creates a list containing NN lists, each of 2 items, all set to 0, this is easier done if NumPy is imported
+    jj, kk = 2, NN;
+    coord = [[0 for jjj in range(jj)] for kkk in range(kk)] 
+    
+    
+    ii = 1
+    
+    while (ii&lt;NN):
+      t[ii] = t[ii-1] + diff	
+      x[ii] = t[ii]*t[ii]*t[ii]*A+t[ii]*t[ii]*B+t[ii]*C+D
+      y[ii] = t[ii] * t[ii] * t[ii] * E + t[ii] * t[ii] * F + t[ii] * G + H
+      coord[ii][0] = x[ii]
+      coord[ii][1] = y[ii]
+
+      ii = ii + 1  
+
+    coord[0][0] = D
+    coord[0][0] = H
+
+    #curvature
+    dx = [0]*NN
+    ddx = [0]*NN
+    dy = [0]*NN
+    ddy = [0]*NN
+    dt = diff * 2
+    
+    ii = 1
+    while ii &lt; (NN - 1):
+      dx[ii] = (x[ii+1] - x[ii-1]) / dt
+      dy[ii] = (y[ii+1] - y[ii-1]) / dt
+            
+      ii = ii+1
+
+
+    dx[0] = dx[1]
+    dx[NN-1] = dx[NN-1-1]
+    dy[0] = dy[1]
+    dy[NN-1] = dy[NN-1-1]
+    
+    ii = 1
+    while ii &lt; (100 - 1):
+      ddx[ii] = (dx[ii+1] - dx[ii-1]) / dt
+      ddy[ii] = (dy[ii+1] - dy[ii-1]) / dt
+            
+      ii = ii+1
+      
+    ddx[0] = ddx[1] 
+    ddx[NN-1] = ddx[NN-1-1]
+    ddy[0] = ddy[1]
+    ddy[NN-1] = ddy[NN-1-1]
+    
+    
+    curvature = [0]*NN
+    radius_t = [0]*NN
+    Normal_x = [0]*NN
+    Normal_y = [0]*NN
+    
+    # Creates a list containing NN lists, each of 2 items, all set to 0, this is easier done if NumPy is imported
+    jj, kk = 2, NN    
+    wg_coord1 = [[0 for jjj in range(jj)] for kkk in range(kk)]
+    jj, kk = 2, NN 
+    wg_coord2 = [[0 for jjj in range(jj)] for kkk in range(kk)] 
+    
+    
+    ii = 0
+    while ii &lt; (NN):
+      curvature[ii] = (dx[ii] * ddy[ii] - dy[ii] * ddx[ii]) / (pow(dx[ii] * dx[ii] + dy[ii] * dy[ii], 3 / 2))
+      #radius_t[ii] = abs(1 / curvature[ii])
+      Normal_x[ii] = -dy[ii] / math.sqrt(dx[ii] * dx[ii] + dy[ii] * dy[ii]) * w / 2
+      Normal_y[ii] = dx[ii] / math.sqrt(dx[ii] * dx[ii] + dy[ii] * dy[ii]) * w / 2	
+      wg_coord1[ii][0] = x[ii] + Normal_x[ii]
+      wg_coord1[ii][1] = y[ii] + Normal_y[ii]
+      wg_coord2[NN-1-ii][0] = x[ii] - Normal_x[ii]
+      wg_coord2[NN-1-ii][1] = y[ii] - Normal_y[ii]
+	            
+      ii = ii+1
+      
+    
+    myPoints = [wg_coord1[NN-1], wg_coord2[0], [L+(w/2), L+0.01], [L-(w/2), w+0.01]]
+    myPoints2 = [wg_coord1[0], wg_coord2[NN-1], [-0.01, -(w/2)], [-0.01, (w/2)]]
+    
+    jj, kk = 2, NN 
+    myPointsX = [[0 for jjj in range(jj)] for kkk in range(kk)] 
+    ii = 0
+    while ii &lt; (NN/3):
+      myPointsX[ii][0] = coord[ii][0] 
+      myPointsX[ii][1] = coord[ii][1]
+      ii = ii+1
+    
+    iii = int(NN/3)
+    while iii &lt; (NN):
+    
+      myPointsX[iii][0] = myPointsX[ii-1][0]
+      myPointsX[iii][1] = myPointsX[ii-1][1]
+      
+      iii = iii+1
+    
+    path = points_to_path(coord,w)
+
+#
+
+    self.cell.shapes(LayerSiN).insert(path.simple_polygon())
+
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    w = int(round(self.wg_width/dbu))/1000
+    r = int(round(self.eff_r/dbu))
+    x = r
+    y = r
+    
+    # Pin on the top side:
+    p2 = [pya.Point(x, y+pin_length/2), pya.Point(x, y-pin_length/2)]
+    p2c = pya.Point(x, y)
+    self.set_p2 = p2c
+    self.p2 = p2c
+    pin = pya.Path(p2, w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(x, y)
+    text = pya.Text ("pin2", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    x = 0
+    y = 0
+    # Pin on the left side:
+    p1 = [pya.Point(pin_length/2+x,0), pya.Point(-pin_length/2+x,0)]
+    p1c = pya.Point(x,0)
+    self.set_p1 = p1c
+    self.p1 = p1c
+    pin = pya.Path(p1, w)
+    self.cell.shapes(LayerPinRecN).insert(pin)
+    t = pya.Trans(x, 0)
+    text = pya.Text ("pin1", t)
+    shape = self.cell.shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    path = points_to_path(coord,3*w)
+    self.cell.shapes(LayerDevRecN).insert(path.simple_polygon())
 
 
 
@@ -620,6 +851,7 @@ class MustafaLib(pya.Library):
     self.layout().register_pcell("Bent Coupler Bus", Bent_Coupler_Bus())
     self.layout().register_pcell("Bent Coupled Half Ring", Bent_Coupled_Half_Ring())
     self.layout().register_pcell("Tapered Ring", Tapered_Ring())
+    self.layout().register_pcell("Bezier Bend", Bezier_Bend())
     
     
     # That would be the place to put in more PCells ...
