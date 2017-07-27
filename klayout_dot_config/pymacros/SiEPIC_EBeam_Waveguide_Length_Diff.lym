@@ -55,7 +55,7 @@ proceed = True
 
 # we need two objects.  One is selected, and the other is a transient selection
 if lv.has_transient_object_selection() == False:
-  v = pya.MessageBox.warning("No transient selection", "Hover the mouse (transient selection) over the object to which you wish to snap to.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
+  v = pya.MessageBox.warning("No transient selection", "No transient selection.  We need two different objects: one selected, and one transient (hover mouse over).  Hover the mouse (transient selection) over one waveguide.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
 else:
   # find the transient selection:
   o_transient_iter = lv.each_object_selected_transient()
@@ -64,7 +64,7 @@ else:
   # Find the selected objects
   o_selection = lv.object_selection   # returns ObjectInstPath[].
   if len(o_selection) &lt; 1:
-    v = pya.MessageBox.warning("No selection", "Select the object you wish to be moved.", pya.MessageBox.Ok)
+    v = pya.MessageBox.warning("No selection", "Select the waveguide to be measured.", pya.MessageBox.Ok)
   else:
     o_selection = o_selection[0]
 
