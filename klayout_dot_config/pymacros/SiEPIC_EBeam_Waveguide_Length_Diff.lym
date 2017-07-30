@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Measure Waveguide Length Diff</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut>Shift+D</shortcut>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.waveguides_submenu.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>"""
+This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski (c) 2016
+
+This Python file implements finding length difference of two selected waveguide.
+
+Version history:
+
+Lukas Chrostowski 2016/04/17
+ - initial version - Waveguide length
+
+ Rounak Singh 2017/04/02
+ - Modified to find waveguide difference
+ 
+ """
+
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+# find the currently selected cell:
+topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if topcell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = ly.dbu
+
+# Define layers based on PDK_functions:
+LayerSiN = ly.layer(LayerSi)
+LayerPinRecN = ly.layer(LayerPinRec)
+LayerDevRecN = ly.layer(LayerDevRec)
+LayerFbrTgtN = ly.layer(LayerFbrTgt)
+LayerErrorN = ly.layer(LayerError)
+
+proceed = True
+
+# we need two objects.  One is selected, and the other is a transient selection
+if lv.has_transient_object_selection() == False:
+  v = pya.MessageBox.warning("No transient selection", "No transient selection.  We need two different objects: one selected, and one transient (hover mouse over).  Hover the mouse (transient selection) over one waveguide.\nEnsure transient selection is enabled in Settings - Applications - Selection.", pya.MessageBox.Ok)
+else:
+  # find the transient selection:
+  o_transient_iter = lv.each_object_selected_transient()
+  o_transient = next(o_transient_iter)  # returns ObjectInstPath[].
+
+  # Find the selected objects
+  o_selection = lv.object_selection   # returns ObjectInstPath[].
+  if len(o_selection) &lt; 1:
+    v = pya.MessageBox.warning("No selection", "Select the waveguide to be measured.", pya.MessageBox.Ok)
+  else:
+    o_selection = o_selection[0]
+
+    #if o_selection.inst().is_regular_array() | o_transient.inst().is_regular_array():
+      #v = pya.MessageBox.warning("Array", "Selection was an array. \nThe array was 'exploded' (Edit | Selection | Resolve Array). \nPlease select the objects and try again.", pya.MessageBox.Ok)
+      #o_transient.inst().explode()
+      #o_selection.inst().explode()
+      #proceed = False
+
+    if proceed:
+      if o_transient == o_selection:
+        v = pya.MessageBox.warning("Same selection", "We need two different objects: one selected, and one transient (hover mouse over).", pya.MessageBox.Ok)
+      else:
+      # we have two instances:
+#      print o_transient.inst()
+#      print o_selection.inst()
+        
+        #Combine the selections
+        o_selection = [o_selection, o_transient];
+
+        if len(o_selection) == 2:
+          # Always len(o_selection) is 2
+          path_lengths=[None, None];
+          is_waveguide=False;
+          index=0;
+
+          #is_waveguide=[False, False];
+          for o in o_selection:
+            if o.is_cell_inst():
+              print("Selected object is a cell.")
+              oinst = o.inst()
+              if oinst.is_pcell():
+                c = oinst.cell
+                if c.basic_name() in Waveguide_Types and c.pcell_parameters_by_name()['layer'] == LayerSi:
+                  print("%s on LayerSi." % c.basic_name() )
+                  is_waveguide=True;
+                  trans = oinst.trans
+
+            elif o.shape:
+              print("Selected object is a shape.")
+              c = o.shape.cell
+              if c.basic_name() in Waveguide_Types and c.is_pcell_variant() and c.pcell_parameters_by_name()['layer'] == LayerSi:
+                # we have a waveguide GUIDING_LAYER selected
+                print("Selected object is a GUIDING_LAYER in %s on LayerSi." % c.basic_name() )
+                trans = o.source_trans().s_trans()
+                o_instpathlen = o.path_length()
+                oinst = o.path_nth(o_instpathlen-1).inst()
+                is_waveguide=True;
+
+            # We now have a waveguide ROUND_PATH PCell, with variables: o (ObjectInstPath), oinst (Instance), c (Cell)
+            if is_waveguide == True:
+              path_obj = c.pcell_parameters_by_name()['path']
+
+              #  path_length
+              wg_width = c.pcell_parameters_by_name()['path'].width  # in microns
+              # calculate the length of the waveguide using the area / width
+              iter2 = c.begin_shapes_rec(LayerSiN)
+              if iter2.shape().is_polygon():
+                area = iter2.shape().polygon.area()
+                path_lengths[index] = area / wg_width * dbu * dbu
+              else:
+                print("## ROUND_PATH waveguide, not polygon; bug in code? ##")
+                #path_lengths[index] =  None  # or path_obj.length()
+            
+            is_waveguide=False;
+            index+=1;
+
+          if not(None in path_lengths):
+            msg="Waveguide 1 length: %s\nWaveguide 2 length: %s\nDifference: %s" % (path_lengths[0], path_lengths[1], abs(path_lengths[0]-path_lengths[1]));
+            v = pya.MessageBox.warning("Waveguide Length Difference", msg, pya.MessageBox.Ok)
+          else:
+            v = pya.MessageBox.warning("Path Length error", "Error in path lengths.", pya.MessageBox.Ok)  
+        else:
+          v = pya.MessageBox.warning("selection error", "Test:Select the two waveguides you wish to measure difference.", pya.MessageBox.Ok)
+
+</text>
+</klayout-macro>

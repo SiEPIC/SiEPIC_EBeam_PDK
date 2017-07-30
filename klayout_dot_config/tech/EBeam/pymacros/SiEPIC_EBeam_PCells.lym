@@ -119,6 +119,10 @@ Lukas Chrostowski           2017/03/08
 
 Lukas Chrostowski           2017/03/18
  - ebeam_dc_halfring_straight, with TE/TM support.  Zeqin Lu adding CML for this component. 
+ 
+Timothy Richards, Adam DeAbreu, Lukas Chrostowski  2017/07/11
+ -  Focusing Sub-wavelength grating coupler PCell.
+
 """
 
 import pya
@@ -136,6 +140,331 @@ Polygon = pya.Polygon
 Text = pya.Text
 Trans = pya.Trans
 LayerInfo = pya.LayerInfo
+
+
+
+class strip_to_slot(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the strip_to_slot.
+  draft by Lukas Chrostowski july 24, 2017
+  based on https://www.osapublishing.org/oe/fulltext.cfm?uri=oe-21-16-19029&amp;id=259920
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(strip_to_slot, self).__init__()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("r", self.TypeDouble, "Radius", default = 10)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
+    self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "strip_to_slot(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ",Lc=" + ('%g' % (1000*self.Lc)) + ",orthogonal_identifier=" + ('%s' % self.orthogonal_identifier) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    from math import pi, cos, sin
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+    
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    TextLayerN = ly.layer(self.textl)
+
+    
+    w = int(round(self.w/dbu))
+    w = 0.5/dbu
+    r = int(round(self.r/dbu))
+    r = 10/dbu
+    g = int(round(self.g/dbu))
+    g = 0.1/dbu
+    Lc = int(round(self.Lc/dbu))
+
+    # draw the half-circle
+    x = 0
+    y = r+0.35/dbu+g
+#    layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 270)
+    layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, 0.2/dbu, 270, 360)
+
+    # Draw 500 to 200 nm polygon
+    pts = []
+    pts.append(Point.from_dpoint(pya.DPoint(0/dbu, (-0.35+0.6)/dbu)))
+    pts.append(Point.from_dpoint(pya.DPoint(0/dbu, (-0.85+0.6)/dbu)))
+    pts.append(Point.from_dpoint(pya.DPoint(-10/dbu, (-0.55+0.6)/dbu)))
+    pts.append(Point.from_dpoint(pya.DPoint(-10/dbu, (-0.35+0.6)/dbu)))
+    polygon = Polygon(pts)
+    shapes(LayerSiN).insert(polygon)
+
+    # Create the top left 1/2 waveguide
+    wg1 = Box(-10/dbu, (-0.35+0.6+0.3)/dbu, 0, (-0.55+0.6+0.3)/dbu)
+    shapes(LayerSiN).insert(wg1)
+
+    
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+ 
+    # Create the waveguide
+    wg1 = Box(0, -w/2, r+w/2+w+Lc/2, w/2)
+    shapes(LayerSiN).insert(wg1)
+
+    # Pins on the bus waveguide side:
+    pin = pya.Path([Point(-10.1/dbu, (-0.35+0.6+0.05)/dbu), Point(-9.9/dbu, (-0.35+0.6+0.05)/dbu)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(-10/dbu, (-0.35+0.6+0.05)/dbu)
+    text = Text ("pin1", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(r+w/2+w+Lc/2, 0)
+    text = Text ("pin2", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    dev = Box(-10/dbu, -w/2-w, r+w/2+w+Lc/2, y )
+    shapes(LayerDevRecN).insert(dev)
+
+    print("Done drawing the layout for - strip_to_slot: %.3f-%g" % ( self.r, self.g) )
+
+
+
+class fswgc(pya.PCellDeclarationHelper):
+  """
+  Focusing Sub-wavelength grating coupler PCell implementation.
+  Analytical design based on "Grating Coupler Design Based on Silicon-On-Insulator", Yun Wang (2013). Master's Thesis, University of British Columbia, Canada
+  Some PCell implementation adapted from the SiEPIC_EBeam library by Dr. Lukas Chrostowski, University of British Columbia, Canada
+ 
+  Separate modelling (e.g. Lumerical MODE) is required to determine the "grating effective index" parameter for a given device layer thickness,
+  cladding type, and period/duty cycle/fill factor.
+
+  Script written by Timothy Richards (Simon Fraser University, BC, Canada) and Adam DeAbreu (Simon Fraser University, BC, Canada)
+
+  Changelog
+
+  2017-07-07 - initial publish
+  2017-07-07 - change library &amp; component names; commit to github
+
+  TO-DO:
+  - implement mode solver here, or call Lumerical MODE to calculate
+  - needs to be verified experimentally
+  - default parameters are not correct; compare with "ebeam_gc_te1550"
+
+  Input: 
+  
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(fswgc, self).__init__()
+
+    # declare the parameters  
+    self.param("wavelength", self.TypeDouble, "Design Wavelength (micron)", default = 1.55)  
+    self.param("n_t", self.TypeDouble, "Cladding Index", default = 1.0)
+    self.param("n_e", self.TypeDouble, "Grating Effective Index", default = 2.75618)
+    self.param("angle_e", self.TypeDouble, "Taper Angle (deg)", default = 35.0)
+    self.param("grating_length", self.TypeDouble, "Grating Length (micron)", default = 15.0)
+    self.param("taper_length", self.TypeDouble, "Taper Length (micron)", default = 19.0)
+    self.param("dc", self.TypeDouble, "Duty Cycle", default = 0.488193)
+    self.param("period", self.TypeDouble, "Grating Period", default = 1.18939)
+    self.param("ff", self.TypeDouble, "Fill Factor", default = 0.244319)
+    self.param("t", self.TypeDouble, "Waveguide Width (micron)", default = 0.5)
+    self.param("theta_c", self.TypeDouble, "Insertion Angle (deg)", default = -31.0)
+    
+    # Layer parameters
+    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "fswgc_%.1f-%.2f-%.2f-%.2f-%.2f-%.2f-%.2f-%.2f" % \
+    (self.wavelength, self.theta_c, self.period, self.dc, self.ff, self.angle_e, self.taper_length, self.t)
+    
+#    return "temporary placeholder"
+    
+  def coerce_parameters_impl(self):
+    pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return False
+    
+  def produce_impl(self):
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+
+    LayerSi = self.layer
+    LayerSiN = ly.layer(LayerSi)
+    LayerSiSPN = ly.layer(LayerSiSP)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    LayerTextN = ly.layer(LayerText)
+
+    from math import pi, cos, sin, log, sqrt, tan
+    
+    lambda_0 = self.wavelength                   ##um wavelength of light
+#    pin_length =0.0                 ##um extra nub for the waveguide attachment
+    
+    # Geometry
+    wh = self.period*self.dc                   ##thick grating
+    wl = self.ff*(self.period - wh)            ## thin grating
+    spacing = (self.period - wh - wl)/2   ##space between thick and thin
+    
+    gc_number = int(round(self.grating_length/self.period)) ##number of periods
+    e = self.n_t*sin((pi/180)*self.theta_c)/self.n_e
+    N = round(self.taper_length*(1+e)*self.n_e/lambda_0) ##allows room for the taper
+
+    start = (pi - (pi/180)*self.angle_e/2)
+    stop = (pi + (pi/180)*self.angle_e/2)
+              
+    # Draw coupler grating.
+    for j in range(gc_number):
+
+        # number of points in the arcs:
+        # calculate such that the vertex &amp; edge placement error is &lt; 0.5 nm.
+        #   see "SiEPIC_EBeam_functions - points_per_circle" for more details
+        radius = N*lambda_0 / ( self.n_e*( 1 - e )) + j*self.period + spacing
+        seg_points = int(points_per_circle(radius)/360.*self.angle_e) # number of points grating arc
+        theta_up = []
+        for m in range(seg_points+1):    
+          theta_up = theta_up + [start + m*(stop-start)/seg_points]
+        theta_down = theta_up[::-1]
+
+        ##small one
+        r_up = []
+        r_down = []
+        for k in range(len(theta_up)):
+          r_up = r_up + [N*lambda_0 / ( self.n_e*( 1 - e*cos(float(theta_up[k])) )) + j*self.period + spacing]
+        r_down = r_up[::-1]
+    
+        xr = []
+        yr = []
+        for k in range(len(theta_up)):
+          xr = xr + [r_up[k]*cos(theta_up[k])]
+          yr = yr + [r_up[k]*sin(theta_up[k])]
+    
+        xl = []
+        yl = []
+        for k in range(len(theta_down)):
+          xl = xl + [(r_down[k] + wl)*cos(theta_down[k])]
+          yl = yl + [(r_down[k] + wl)*sin(theta_down[k])]
+    
+        x = xr + xl
+        y = yr + yl
+    
+        pts = []
+        for i in range(len(x)):
+            pts.append(Point.from_dpoint(pya.DPoint(x[i]/dbu, y[i]/dbu)))
+        #small_one = core.Boundary(points)
+        
+        polygon = Polygon(pts)
+        shapes(LayerSiN).insert(polygon)
+        
+        ##big one
+        r_up = []
+        r_down = []
+        for k in range(len(theta_up)):
+          r_up = r_up + [N*lambda_0 / ( self.n_e*( 1 - e*cos(float(theta_up[k])) )) + j*self.period + 2*spacing+ wl]
+        r_down = r_up[::-1]
+    
+        xr = []
+        yr = []
+        for k in range(len(theta_up)):
+          xr = xr + [r_up[k]*cos(theta_up[k])]
+          yr = yr + [r_up[k]*sin(theta_up[k])]
+    
+        xl = []
+        yl = []
+        for k in range(len(theta_down)):
+          xl = xl + [(r_down[k] + wh)*cos(theta_down[k])]
+          yl = yl + [(r_down[k] + wh)*sin(theta_down[k])]
+    
+        x = xr + xl
+        y = yr + yl
+        
+        pts = []
+        for i in range(len(x)):
+            pts.append(Point.from_dpoint(pya.DPoint(x[i]/dbu, y[i]/dbu)))
+        
+        polygon = Polygon(pts)
+        shapes(LayerSiN).insert(polygon)
+      
+    # Taper section
+    r_up = []
+    r_down = []
+    for k in range(len(theta_up)):  
+      r_up = r_up + [N*lambda_0 / ( self.n_e*( 1 - e*cos(float(theta_up[k])) ))]
+    r_down = r_up[::-1]
+     
+    xl = []
+    yl = []  
+    for k in range(len(theta_down)):
+      xl = xl + [(r_down[k])*cos(theta_down[k])]
+      yl = yl + [(r_down[k])*sin(theta_down[k])]
+      
+    yr = [self.t/2., self.t/2., -self.t/2., -self.t/2.]
+    
+    yl_abs = []
+    for k in range(len(yl)):
+      yl_abs = yl_abs + [abs(yl[k])]
+    
+    y_max = max(yl_abs)
+    iy_max = yl_abs.index(y_max)
+      
+    L_o = (y_max - self.t/2)/tan((pi/180)*self.angle_e/2)
+      
+    xr = [L_o+xl[iy_max], 0, 0, L_o+xl[iy_max]]
+     
+    x = xr + xl
+    y = yr + yl  
+
+    pts = []
+    for i in range(len(x)):
+      pts.append(Point.from_dpoint(pya.DPoint(x[i]/dbu, y[i]/dbu)))
+    
+    polygon = Polygon(pts)
+    shapes(LayerSiN).insert(polygon)
+
+
+    # Pin on the waveguide:
+    pin_length = 200
+    x = 0
+    t = Trans(x,0)
+    pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], self.t/dbu)
+    pin_t = pin.transformed(t)
+    shapes(LayerPinRecN).insert(pin_t)
+    text = Text ("pin1", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+
+    # Device recognition layer 
+    yr = sin(start) * (N*lambda_0 / ( self.n_e*( 1 - e*cos(float(start)) )) + gc_number*self.period + spacing)
+    box1 = Box(-(self.grating_length+self.taper_length)/dbu-pin_length*2, yr/dbu, 0, -yr/dbu)
+    shapes(LayerDevRecN).insert(box1)
+
 
 
 class Waveguide_SBend(pya.PCellDeclarationHelper):
@@ -2989,6 +3318,8 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("DirectionalCoupler_SeriesRings", DirectionalCoupler_SeriesRings())
     self.layout().register_pcell("Waveguide_bump", Waveguide_bump())
     self.layout().register_pcell("Waveguide_SBend", Waveguide_SBend())
+    self.layout().register_pcell("Focusing Sub-wavelength grating coupler (fswgc)", fswgc() )
+    self.layout().register_pcell("strip_to_slot", strip_to_slot() )
     
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
