@@ -21,7 +21,6 @@ import math
 """
   Author: Mustafa Hammood
   Email:  mustafa@ece.ubc.ca
-  
   ece.ubc.ca/~mustafa
   
   
@@ -57,13 +56,16 @@ import math
   - Completed "bezier bend" PCell lacking deviceRec and pinRec layers
   - later that day ... Added proper pinRec and deviceRec to "bezier bend" PCell
   
+  26 July 2017
+  - Fixed bend-straight interface discontinuity bug with "bezier bend" PCell
+  
 """
 
 
 
 class Waveguide_Arc(pya.PCellDeclarationHelper):
   """
-  The PCell declaration for the waveguide bend.
+  The PCell declaration for the waveguide arc.
   """
 
   def __init__(self):
@@ -202,7 +204,7 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
 
 class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
   """
-  The PCell declaration for the waveguide bend.
+  The PCell declaration for the bent coupler bus pcell.
   """
 
   def __init__(self):
@@ -328,7 +330,7 @@ class Bent_Coupler_Bus(pya.PCellDeclarationHelper):
 
 class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
   """
-  The PCell declaration for the waveguide bend.
+  The PCell declaration for the bent-coupled half ring resonator pcell
   """
 
   def __init__(self):
@@ -526,7 +528,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
 
 class Tapered_Ring(pya.PCellDeclarationHelper):
   """
-  The PCell declaration for the waveguide bend.
+  The PCell declaration for the tapered ring pcell.
   """
 
   def __init__(self):
@@ -636,7 +638,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     super(Bezier_Bend, self).__init__()
 
     # declare the parameters
-    self.param("bezier_num", self.TypeInt, "Bezier factor ~(-60 to 90)", default = 35)     
+    self.param("bezier_num", self.TypeInt, "Bezier factor ~(&lt; 67)", default = 35)     
     self.param("eff_r", self.TypeInt, "Effective bend radius (um)", default = 5)
     self.param("wg_width", self.TypeInt, "Waveguide width (nm)", default = 500)     
     self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
@@ -669,10 +671,11 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
 
 
 #
-    NN = 101
-    diff = 0.01
+    NN = 1001
+    diff = 0.001000001
     
-    L = self.eff_r/dbu
+    
+    L = (self.eff_r+0.001/2)/dbu
     R = L
     bezier = self.bezier_num/100
     
@@ -794,6 +797,14 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
 
     self.cell.shapes(LayerSiN).insert(path.simple_polygon())
 
+
+
+
+
+#
+
+    self.cell.shapes(LayerSiN).insert(path.simple_polygon())
+    
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
@@ -831,6 +842,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     path = points_to_path(coord,3*w)
     self.cell.shapes(LayerDevRecN).insert(path.simple_polygon())
+
 
 
 
