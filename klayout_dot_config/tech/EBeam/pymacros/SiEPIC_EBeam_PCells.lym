@@ -3855,9 +3855,9 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     super(Bezier_Bend, self).__init__()
 
     # declare the parameters
-    self.param("bezier_num", self.TypeInt, "Bezier factor ~(&amp;lt; 67)", default = 20)     
-    self.param("eff_r", self.TypeInt, "Effective bend radius (um)", default = 5)
-    self.param("wg_width", self.TypeInt, "Waveguide width (nm)", default = 500)     
+    self.param("bezier_num", self.TypeDouble, "Bezier factor ~(&amp;lt; 67)", default = 20)     
+    self.param("eff_r", self.TypeDouble, "Effective bend radius (microns)", default = 5)
+    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.500)     
     self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
@@ -3884,7 +3884,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
-    w = self.wg_width
+    w = self.wg_width/dbu
 
 
 #
@@ -3894,7 +3894,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     
     L = (self.eff_r+0.001/2)/dbu
     R = L
-    bezier = self.bezier_num/100
+    bezier = self.bezier_num/100.
     
     xp = [0, (1-bezier)*L, L, L];
     yp = [0, 0, bezier*L, L];
@@ -4016,7 +4016,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
-    w = int(round(self.wg_width/dbu))/1000
+    w = int(round(self.wg_width/dbu))
     r = int(round(self.eff_r/dbu))
     x = r
     y = r
