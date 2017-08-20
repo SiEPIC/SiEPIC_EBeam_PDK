@@ -142,6 +142,115 @@ Trans = pya.Trans
 LayerInfo = pya.LayerInfo
 
 
+class cavity_hole(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the cavity hole.
+  This is an example of how to perform inversion operations
+  by Jaspreet, Jingda, and Lukas
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(cavity_hole, self).__init__()
+
+    # declare the parameters
+    self.param("x", self.TypeDouble, "x coordinate", default = 0)
+    self.param("y", self.TypeDouble, "y coordinate", default = 0)
+    self.param("radius", self.TypeDouble, "hole radius", default = 10)
+    self.param("gap", self.TypeDouble, "half of the gap between surrounding holes (microns)", default = 2)
+    self.param("LayerSi", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "cavity_hole(R=" + ('%.3f-%.3f' % (self.radius,self.gap) ) + ")"
+
+  def can_create_from_shape_impl(self, layout, shape, layer):
+    return False
+
+
+  def produce_impl(self):   
+    import pya
+    from operator import xor
+    from math import pi, cos, sin
+    
+    #fetch parameters
+
+    Box = pya.Box
+    Point = pya.Point
+    Polygon = pya.Polygon
+    Text = pya.Text
+    Trans = pya.Trans
+    LayerInfo = pya.LayerInfo
+
+
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+
+    #Layers definitions
+    LayerSi = self.layer
+    LayerSiN = ly.layer(self.LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    LayerTextN = ly.layer(LayerText)
+    
+    # cell: layout cell to place the layout
+    # LayerSiN: which layer to use
+    # x, y: location of the origin
+    # r: radius
+    # w: waveguide width
+    # length units in dbu
+    
+    x = self.x/dbu
+    y = self.y/dbu
+    r = self.radius/dbu
+    r= r/2
+    w = 2*r;
+    
+    gap = self.gap/dbu #gap between one hole to another
+
+  
+    # function to generate points to create a circle
+    def circle(x,y,r):
+      npts = 32
+      theta = 2 * math.pi / npts # increment, in radians
+      pts = []
+      for i in range(0, npts):
+        pts.append(Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1, (y+r*math.sin(i*theta))/1)))
+      return pts
+  
+    
+    #rectangular shapes
+    side_gap = gap # half of gap between surrounding holes
+    dx = side_gap + (2*r)
+    dy = side_gap + (2*r)
+
+    Si_slab = pya.Region()
+    Si_slab.insert(pya.Box(-dx/2, -dy/2, dx/2, dy/2))
+     
+    # Circle 
+    hole = pya.Region()
+    hole_cell = circle(0,0,r)
+    hole_poly = pya.Polygon(hole_cell)  
+    hole_t = hole_poly.transformed(pya.Trans(x,y))
+    hole.insert(hole_t)           
+
+    # perform inversion:
+    phc = Si_slab - hole
+    self.cell.shapes(LayerSiN).insert(phc)
+    # inversion can also be done by performing the XOR function
+    # upper_poly = xor(pya.Region(pya.Polygon(circleu_pts)),pya.Region(pya.Polygon(rectu_pts)))
+
+    
+    return "cavity_hole(R=" + ('%.3f-%.3f' % (r,gap) ) + ")"
+
+
+
+
 
 class strip_to_slot(pya.PCellDeclarationHelper):
   """
@@ -3431,7 +3540,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     # hidden parameters, can be used to query this component:
     self.param("p1", self.TypeShape, "DPoint location of pin1", default = pya.Point(-10000, 0), hidden = True, readonly = True)
     self.param("p2", self.TypeShape, "DPoint location of pin2", default = pya.Point(0, 10000), hidden = True, readonly = True)
-
+    
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -3764,7 +3873,7 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = pya.Trans(x-r, y)
-    text = pya.Text ("pin2", t)
+    text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
@@ -3797,10 +3906,7 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r+gap, w*5, 0, 180)
     
     
-
     
-    
-
 class Bezier_Bend(pya.PCellDeclarationHelper):
   """
   Input: bezier number, effective radius, waveguide width, layers
@@ -3818,9 +3924,9 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     super(Bezier_Bend, self).__init__()
 
     # declare the parameters
-    self.param("bezier_num", self.TypeInt, "Bezier factor ~(&amp;lt; 67)", default = 20)     
-    self.param("eff_r", self.TypeInt, "Effective bend radius (um)", default = 5)
-    self.param("wg_width", self.TypeInt, "Waveguide width (nm)", default = 500)     
+    self.param("bezier_num", self.TypeDouble, "Bezier factor ~(&amp;lt; 67)", default = 20)     
+    self.param("eff_r", self.TypeDouble, "Effective bend radius (microns)", default = 5)
+    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.500)     
     self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
@@ -3847,7 +3953,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
-    w = self.wg_width
+    w = self.wg_width/dbu
 
 
 #
@@ -3857,7 +3963,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     
     L = (self.eff_r+0.001/2)/dbu
     R = L
-    bezier = self.bezier_num/100
+    bezier = self.bezier_num/100.
     
     xp = [0, (1-bezier)*L, L, L];
     yp = [0, 0, bezier*L, L];
@@ -3979,7 +4085,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
-    w = int(round(self.wg_width/dbu))/1000
+    w = int(round(self.wg_width/dbu))
     r = int(round(self.eff_r/dbu))
     x = r
     y = r
@@ -4057,7 +4163,8 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("Bent_Coupled_Half_Ring", Bent_Coupled_Half_Ring())
     self.layout().register_pcell("Bent_CDC_Half_Ring", Bent_CDC_Half_Ring())
     self.layout().register_pcell("Bezier_Bend", Bezier_Bend())
-    
+    self.layout().register_pcell("Cavity Hole", cavity_hole())
+
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
     self.register("SiEPIC-EBeam PCells")
