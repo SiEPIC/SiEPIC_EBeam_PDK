@@ -3395,6 +3395,8 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
 class Waveguide_Arc(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the waveguide arc.
+  
+  Author: Mustafa Hammood     mustafa@ece.ubc.ca
   """
 
   def __init__(self):
@@ -3521,6 +3523,8 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
 class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the bent-coupled half ring resonator pcell
+  
+  Author: Mustafa Hammood     mustafa@ece.ubc.ca
   """
 
   def __init__(self):
@@ -3708,7 +3712,9 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
 
 class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
   """
-  The PCell declaration for the bent-coupled half ring resonator pcell
+  The PCell declaration for the bent-CDC half ring resonator pcell
+  
+  Author: Mustafa Hammood     mustafa@ece.ubc.ca
   """
 
   def __init__(self):
@@ -3916,6 +3922,8 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
   This implementation is Python translation of the 90 degree Bezier bend ample script for Mentor Graphics Pyxis
     by Jonas Flueckiger and Lukas Chrostowski's
     influenced by www.tinaja.com/glib/cubemath.pdf implementation
+    
+  Author: Mustafa Hammood     mustafa@ece.ubc.ca
   """
 
   def __init__(self):
@@ -4122,6 +4130,122 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
 
 
 
+class Tapered_Ring(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the tapered ring.
+  Author: Mustafa Hammood     mustafa@ece.ubc.ca
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(Tapered_Ring, self).__init__()
+
+    # declare the parameters
+    self.param("w_top", self.TypeDouble, "Top width", default = 0)
+    self.param("w_bot", self.TypeDouble, "Bottom width", default = 2)
+    self.param("radius", self.TypeDouble, "Radius", default = 10)
+    self.param("LayerSi", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "Tapered_Ring(R=" + ('%.3f-%.3f' % (self.radius,self.w_bot) ) + ")"
+
+  def can_create_from_shape_impl(self, layout, shape, layer):
+    return False
+
+
+  def produce_impl(self):   
+    import pya
+    from operator import xor
+    from math import pi, cos, sin
+    
+    #fetch parameters
+  
+    Box = pya.Box
+    Point = pya.Point
+    Polygon = pya.Polygon
+    Text = pya.Text
+    Trans = pya.Trans
+    LayerInfo = pya.LayerInfo
+
+    
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+
+    #Layers definitions
+    LayerSi = self.layer
+    LayerSiN = ly.layer(self.LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    LayerTextN = ly.layer(LayerText)
+    
+    # cell: layout cell to place the layout
+    # LayerSiN: which layer to use
+    # x, y: location of the origin
+    # r: radius
+    # w: waveguide width
+    # length units in dbu
+
+    x = 0
+    w_top = self.w_top/dbu
+    r = self.radius/dbu    
+    w = 2*r;
+    w_bot = self.w_bot/dbu - w_top #gap between one hole to another
+    
+    r= r + w_top/4 + w_bot/4
+    nptsFactor = 100
+    
+    
+    # function to generate points to create circle
+    def circle(x,w_top,r):
+      npts = 32*nptsFactor
+      theta =  2*math.pi / npts # increment, in radians
+      pts = []
+      for i in range(0, npts):
+        pts.append(Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1, (w_top+r*math.sin(i*theta))/1)))
+      return pts
+  
+    # function to generate points to create innercircle
+    def inner_circle(x,w_top,r):
+      npts = 32*nptsFactor
+      theta =  2*math.pi / npts # increment, in radians
+      pts = []
+      for i in range(0, npts):
+        pts.append(Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1, (w_top+r*math.sin(i*theta))/1)))
+      return pts
+     
+    
+    inner_r = r - w
+    # Inner Circle 
+    hole = pya.Region()
+    hole_cell = inner_circle(0,w_bot/2,r-w_top/2-w_bot/2)
+    hole_poly = pya.Polygon(hole_cell)  
+    hole_t = hole_poly.transformed(pya.Trans(x,w_top/2))
+    hole.insert(hole_t)           
+    
+    # Outer Circle
+    ring = pya.Region()
+    ring_cell = circle(0,0,r+w_top/2)
+    ring_poly = pya.Polygon(ring_cell)  
+    ring_t = ring_poly.transformed(pya.Trans(x,w_top/2))
+    ring.insert(ring_t)  
+
+    # perform inversion:
+    phc = ring - hole
+    self.cell.shapes(LayerSiN).insert(phc)
+    # inversion can also be done by performing the XOR function
+    # upper_poly = xor(pya.Region(pya.Polygon(circleu_pts)),pya.Region(pya.Polygon(rectu_pts)))
+
+    
+    return "Tapered_Ring(R=" + ('%.3f-%.3f' % (r,w_bot) ) + ")"
+
+
+
 class SiEPIC(pya.Library):
   """
   The library where we will put the PCell into 
@@ -4164,6 +4288,7 @@ class SiEPIC(pya.Library):
     self.layout().register_pcell("Bent_CDC_Half_Ring", Bent_CDC_Half_Ring())
     self.layout().register_pcell("Bezier_Bend", Bezier_Bend())
     self.layout().register_pcell("Cavity Hole", cavity_hole())
+    self.layout().register_pcell("Tapered Ring", Tapered_Ring())
 
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
