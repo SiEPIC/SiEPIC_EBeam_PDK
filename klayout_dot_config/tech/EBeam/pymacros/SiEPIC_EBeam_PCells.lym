@@ -3535,6 +3535,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
     self.param("radius", self.TypeDouble, "Radius", default = 10)
+    self.param("bus_radius", self.TypeDouble, "Bus Radius", default = 5)
     self.param("gap", self.TypeDouble, "Gap", default = 0.2)
     self.param("bus_width", self.TypeDouble, "Bus Width", default = 0.5)
     self.param("ring_width", self.TypeDouble, "Ring Width", default = 0.5)
@@ -3585,6 +3586,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     w_bus = int(round(self.bus_width/dbu))
     w_ring = int(round(self.ring_width/dbu))
     r = int(round(self.radius/dbu))
+    r_bus = int(round(self.bus_radius/dbu))
     bend_angle = int(round(self.bend_angle))
     gap = int(round(self.gap/dbu))
     
@@ -3599,8 +3601,8 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     w = w_ring
     
     
-    x = 2*r*math.sin(bend_angle * math.pi/180)
-    y = -2*r*math.cos(bend_angle * math.pi/180)
+    x = 0
+    y = 0
     
     layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 0, 180)
 
@@ -3645,22 +3647,22 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     
     w = w_bus
     
-
+    r = r + gap + w_ring/2 + w_bus/2
     # draw the first arc
-    x = 0
-    y = 0
+    x = -r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180) 
+    y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) 
     
-    r = r - gap - w_ring/2 - w_bus/2
-    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 270+bend_angle)
+    
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r_bus, w, 270, 270+bend_angle)
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 270+bend_angle)
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r_bus, w*3, 270, 270+bend_angle)
     
         
     # draw the second arc
     r = int(round(self.radius/dbu))
-    x = 2*r*math.sin(bend_angle * math.pi/180)
-    y = -2*r*math.cos(bend_angle * math.pi/180)
+    x = 0
+    y = 0
     
     r = r + gap + w_ring/2 + w_bus/2
     layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 90-bend_angle, 90+bend_angle)
@@ -3671,45 +3673,47 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     
     # draw the third arc
     
-    r = int(round(self.radius/dbu))
+    x = r*math.sin(bend_angle * math.pi/180) + r_bus*math.sin(bend_angle * math.pi/180) 
+    y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180)
     
-    x = 4*r*math.sin(bend_angle * math.pi/180)
-    y = 0
-    
-    r = r - gap - w_ring/2 - w_bus/2
-    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270-bend_angle, 270)
+    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r_bus, w, 270-bend_angle, 270)
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270-bend_angle, 270)
+    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r_bus, w*3, 270-bend_angle, 270)
     
 
-
-    
+    r = int(round(self.radius/dbu))
+    r = r + gap + w_ring/2 + w_bus/2
     # Pin on the left side:
-    p2 = [pya.Point(-pin_length/2, -r), pya.Point(pin_length/2, -r)]
-    p2c = pya.Point(0, -r)
+    x = -r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180) 
+    y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) -r_bus
+    
+    p2 = [pya.Point(x-pin_length/2, y), pya.Point(x+pin_length/2, y)]
+    p2c = pya.Point(x, y)
     self.set_p2 = p2c
     self.p2 = p2c
     pin = pya.Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(0, -r)
+    t = pya.Trans(x, y)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     # Pin on the right side:
-    p1 = [pya.Point(pin_length/2+x,-r), pya.Point(-pin_length/2+x,-r)]
+    p1 = [pya.Point(-x+pin_length/2,y), pya.Point(-x-pin_length/2,y)]
     p1c = pya.Point(x,-r)
     self.set_p1 = p1c
     self.p1 = p1c
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x, -r)
+    t = pya.Trans(-x, y)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
 
+    
+    
 class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the bent-CDC half ring resonator pcell
@@ -3934,7 +3938,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     # declare the parameters
     self.param("bezier_num", self.TypeDouble, "Bezier factor ~(&amp;lt; 67)", default = 20)     
     self.param("eff_r", self.TypeDouble, "Effective bend radius (microns)", default = 5)
-    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.500)     
+    self.param("wg_width",self.TypeDouble, "Waveguide width (microns)", default = 0.500)     
     self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
@@ -3965,8 +3969,8 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
 
 
 #
-    NN = 1001
-    diff = 0.001000001
+    NN = 101
+    diff = 0.01
     
     
     L = (self.eff_r+0.001/2)/dbu
@@ -4142,13 +4146,13 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
     super(Tapered_Ring, self).__init__()
 
     # declare the parameters
-    self.param("w_top", self.TypeDouble, "Top width", default = 0)
-    self.param("w_bot", self.TypeDouble, "Bottom width", default = 2)
+    self.param("w_top", self.TypeDouble, "Top width", default = .5)
+    self.param("w_bot", self.TypeDouble, "Bottom width (&gt;Top Width)", default = 2)
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("LayerSi", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
-    
+
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -4194,11 +4198,13 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
     x = 0
     w_top = self.w_top/dbu
     r = self.radius/dbu    
-    w = 2*r;
-    w_bot = self.w_bot/dbu - w_top #gap between one hole to another
+   
+    w_bot = self.w_bot/dbu
     
-    r= r + w_top/4 + w_bot/4
-    nptsFactor = 100
+    
+    deltaW = w_bot - w_top
+    
+    nptsFactor = 12
     
     
     # function to generate points to create circle
@@ -4219,22 +4225,29 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
         pts.append(Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1, (w_top+r*math.sin(i*theta))/1)))
       return pts
      
+  
+    # Outer circle
+    x = 0
+    y = 0
+    r_out = r+w_top/2
+    ring = pya.Region()
+    ring_cell = circle(0,0,r_out)
+    ring_poly = pya.Polygon(ring_cell)  
+    #ring_t = ring_poly.transformed(pya.Trans(x,y))
+    ring.insert(ring_poly)
     
-    inner_r = r - w
+    
+    # Inner erasing circle  
+    r_in = r - (w_top)/2 - deltaW/2
+    x = 0
+    y = -deltaW/2
     # Inner Circle 
     hole = pya.Region()
-    hole_cell = inner_circle(0,w_bot/2,r-w_top/2-w_bot/2)
+    hole_cell = inner_circle(x,y,r_in)
     hole_poly = pya.Polygon(hole_cell)  
-    hole_t = hole_poly.transformed(pya.Trans(x,w_top/2))
-    hole.insert(hole_t)           
+    #hole_t = hole_poly.transformed(pya.Trans(x,y))
+    hole.insert(hole_poly)           
     
-    # Outer Circle
-    ring = pya.Region()
-    ring_cell = circle(0,0,r+w_top/2)
-    ring_poly = pya.Polygon(ring_cell)  
-    ring_t = ring_poly.transformed(pya.Trans(x,w_top/2))
-    ring.insert(ring_t)  
-
     # perform inversion:
     phc = ring - hole
     self.cell.shapes(LayerSiN).insert(phc)
