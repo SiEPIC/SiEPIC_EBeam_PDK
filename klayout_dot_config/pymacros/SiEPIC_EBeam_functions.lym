@@ -1993,5 +1993,5 @@ def check_pdk_directory():
       #show warning message
       pya.MessageBox.warning("Incorrect File Directory", "PDK installed in the Global folder.\nIt should be installed in the KLayout Configuration folder: \n"+ r"C:\Users\%s\KLayout\pymacros"%(username), pya.MessageBox.Ok)
 
-  </text>
+</text>
 </klayout-macro>
