@@ -121,6 +121,21 @@
   <source>12/0@1</source>
  </properties>
  <properties>
+  <frame-color>#008000</frame-color>
+  <fill-color>#008000</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I7</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>13_MLopen</name>
+  <source>'13_MLopen' 13/0@1</source>
+ </properties>
+ <properties>
   <frame-color>#8000ff</frame-color>
   <fill-color>#8000ff</fill-color>
   <frame-brightness>0</frame-brightness>

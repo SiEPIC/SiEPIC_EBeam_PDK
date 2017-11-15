@@ -111,6 +111,7 @@ except ImportError:
 LayerSi = pya.LayerInfo(1, 0)
 LayerSiSP = pya.LayerInfo(31, 0)
 LayerText = pya.LayerInfo(10, 0)
+LayerSEM = pya.LayerInfo(26,0)
 LayerPinRec = pya.LayerInfo(69, 0)
 LayerDevRec = pya.LayerInfo(68, 0)
 LayerFbrTgt = pya.LayerInfo(81, 0)
@@ -1992,5 +1993,5 @@ def check_pdk_directory():
       #show warning message
       pya.MessageBox.warning("Incorrect File Directory", "PDK installed in the Global folder.\nIt should be installed in the KLayout Configuration folder: \n"+ r"C:\Users\%s\KLayout\pymacros"%(username), pya.MessageBox.Ok)
 
-  </text>
+</text>
 </klayout-macro>
