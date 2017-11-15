@@ -1234,8 +1234,12 @@ def generate_Spice_file(topcell, optical_waveguides, optical_components, optical
     # Check to see if this component is an Optical IO type.
     pinIOtype = 0
     for p in o.pins:
-      if optical_pins[p].pin_type == 2:
-        pinIOtype = 1        
+      for each_pin in optical_pins:
+        if(each_pin.idx == p):
+          if each_pin.pin_type == 2:
+            pinIOtype = 1
+          break  
+        
     if ignoreOpticalIOs and pinIOtype:
       # Replace the Grating Coupler or Edge Coupler with a 0-length waveguide.
       component1 = "ebeam_wg_strip_1550"
@@ -1532,12 +1536,12 @@ def generate_short_spice_files(topcell, optical_waveguides, optical_components, 
       if(each.idx in pins_indexes):
         optical_pinsF.append(each)
          
-    optical_pins = []
-    optical_pins = optical_pinsF
+    #optical_pins = []
+    #optical_pins = optical_pinsF
 
     
     # Output the Spice netlist:
-    return generate_Spice_file(topcell, optical_waveguideF, optical_componentF, optical_pins)
+    return generate_Spice_file(topcell, optical_waveguideF, optical_componentF, optical_pinsF)
 
   if(laser_count==0):
 
