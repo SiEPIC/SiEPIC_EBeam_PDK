@@ -125,7 +125,7 @@ def mc_interconnect(topcell, layout, dbu, datadict):
   else:
     Trim_Netlist = pya.InputDialog.ask_item("Trim_Netlist", "Do you want to export the complete circuit, or trim the netlist?  \nYour preference will be saved as a user property in cell {%s}." % topcell.name, Trim_Netlist_options, 0)
     if Trim_Netlist == None:
-      Trim_Netlist = Trim_Netlist_options[0]
+      Trim_Netlist = Trim_Netlist_options[1]
     else:
       # Record a transaction, to enable "undo"
       lv.transaction("Trim_Netlist selection")
@@ -134,7 +134,7 @@ def mc_interconnect(topcell, layout, dbu, datadict):
       lv.commit()
     
   # Output the Spice netlist:
-  if Trim_Netlist == Trim_Netlist_options[0]:
+  if Trim_Netlist == Trim_Netlist_options[1]:
     text_Spice, text_Spice_main, num_detectors = generate_Spice_file(topcell, optical_waveguides, optical_components, optical_pins)
   else:
     text_Spice, text_Spice_main, num_detectors = generate_short_spice_files(topcell, optical_waveguides, optical_components, optical_pins)
