@@ -1,0 +1,149 @@
+ # Created by Yun Wang, 2016-09-05
+# This file is used to draw the taper section of adiabatic coupler
+
+
+# draw BOX
+addrect;
+set('name','BOX');
+set('material','SiO2 (Glass) - Palik');
+set('x min',-10e-6);
+set('x max',taperL+2*S_L_in+couplingL+10e-6);
+set('y',0);
+set('y span',wg_spacing+10e-6);
+set('z max',3e-6);
+set('z min',-3e-6);
+set('override mesh order from material database',1);
+set('mesh order',3);
+
+# draw input WGs  
+addrect;
+set('name','WG1');
+set('material',wg_material);
+set('x min',-5e-6);
+set('x max',1e-6);
+set('y',0.5*wg_spacing);
+set('y span',wg_width);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+
+addrect;
+set('name','WG2');
+set('material',wg_material);
+set('x min',-5e-6);
+set('x max',1e-6);
+set('y',-0.5*wg_spacing);
+set('y span',wg_width);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+
+# add taper section
+addpoly;
+set('name','taper1');
+set('material',wg_material);
+set('x',1e-6);
+set('y',0.5*wg_spacing);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+vertices=[0,0.5*wg_width;0,-0.5*wg_width;taperL,-0.5*wg1;taperL,0.5*wg1];
+set('vertices',vertices);
+
+addpoly;
+set('name','taper2');
+set('material',wg_material);
+set('x',1e-6);
+set('y',-0.5*wg_spacing);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+vertices=[0,0.5*wg_width;0,-0.5*wg_width;taperL,-0.5*wg2;taperL,0.5*wg2];
+set('vertices',vertices);
+
+
+# Draw S bends
+width=wg1;
+S_h=(wg_spacing-gap)/2-wg1/2;
+S_length=S_L_in;
+Draw_Sbend;
+set('name','S1');
+set('first axis','none');
+set('x',1e-6+taperL);
+set('y',0.5*wg_spacing);
+
+
+width=wg2;
+S_h=(wg_spacing-gap)/2-wg2/2;
+Draw_Sbend;
+set('name','S2');
+set('x',1e-6+taperL);
+set('y',-0.5*wg_spacing);
+
+# draw coupling section
+addpoly;
+set('name','coupling_WG1');
+set('material',wg_material);
+set('x',1e-6+taperL+S_L_in);
+set('y',0);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+vertices=[0,0.5*gap;
+0,0.5*gap+wg1;
+couplingL,0.5*gap+wg3;
+couplingL,0.5*gap];
+set('vertices',vertices);
+
+addpoly;
+set('name','coupling_WG2');
+set('material',wg_material);
+set('x',1e-6+taperL+S_L_in);
+set('y',0);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+vertices=[0,-0.5*gap;
+0,-0.5*gap-wg2;
+couplingL,-0.5*gap-wg4;
+couplingL,-0.5*gap];
+set('vertices',vertices);
+
+# Draw S bends (output)
+S_h=(wg_spacing-gap)/2-wg3/2;
+S_length=S_L_out;
+width=wg3;
+Draw_Sbend;
+set('name','S3');
+set('first axis','y');
+set('rotation 1',180);
+set('x',1e-6+taperL+couplingL+S_L_in+S_L_out);
+set('y',0.5*wg_spacing);
+
+width=wg4;
+S_h=(wg_spacing-gap)/2-wg4/2;
+Draw_Sbend;
+set('name','S4');
+set('first axis','z');
+set('rotation 1',180);
+set('x',1e-6+taperL+couplingL+S_L_in+S_L_out);
+set('y',-0.5*wg_spacing);
+
+##--------- draw output WG---------
+addrect;
+set('name','Output_WG_Throu');
+set('material',wg_material);
+set('x min',1e-6+taperL+S_L_in+S_L_out+couplingL);
+set('x max',1e-6+taperL+S_L_in+S_L_out+couplingL+5e-6);
+set('y',0.5*wg_spacing);
+set('y span',wg3);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+
+addrect;
+set('name','Output_WG_Cross');
+set('material',wg_material);
+set('x min',1e-6+taperL+S_L_in+S_L_out+couplingL);
+set('x max',1e-6+taperL+S_L_in+S_L_out+couplingL+5e-6);
+set('y',-0.5*wg_spacing);
+set('y span',wg4);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+
+
+selectall;
+addtogroup('Adiabactic_Coupler');

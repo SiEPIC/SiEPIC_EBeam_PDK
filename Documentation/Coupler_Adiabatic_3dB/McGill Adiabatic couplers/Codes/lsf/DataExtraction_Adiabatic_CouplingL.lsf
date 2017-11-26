@@ -1,0 +1,22 @@
+# Created by Yun Wang, yun.wang5@mcgill.ca
+# This file is used to extract the data for CouplingL optimizations
+
+
+
+for(ii=1:6) 
+ {         
+	load('Cband_Adiabatic_WG600_300_Gap100_CouplingL'+num2str(10+(ii-1)*10)+'_input1.fsp'); 
+	f=getdata('P1','f');
+	wl=c/f;
+	
+	T=getresult('Expan_T_coup','expansion for T_coup');
+        T_fund=T.T_forward;   
+	
+	P1=getresult('Expan_P1','expansion for P1');
+        P1_fund=P1.T_forward;   
+        
+        P2=getresult('Expan_P2','expansion for P2');
+        P2_fund=P2.T_forward;             
+               
+        matlabsave ('Cband_Adiabatic_WG600_300_Gap100_CouplingL'+num2str(10+(ii-1)*10)+'_input1.mat',wl,T_fund,P1_fund,P2_fund);     
+  }
