@@ -1,0 +1,208 @@
+
+###-------------add source------------
+addmode;
+set('name','mode');
+set('injection axis','x-axis');
+set('x',0);
+set('y',0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+set('center wavelength',lambda);
+set('wavelength span',lambda_span);
+set('mode selection',mode);
+
+###------------add monitors------------
+
+addpower;
+set('name','Throu1');   
+set('x',0.9e-6);
+set('monitor type','2D X-normal');
+set('y',0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_Throu1');
+set('x',1e-6);
+set('monitor type','2D X-normal');
+set('y',0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('Throu1','Throu1');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+
+addpower;
+set('name','Throu');   
+set('x',0.9e-6+taperL);
+set('monitor type','2D X-normal');
+set('y',0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_Throu');
+set('x',1e-6+taperL);
+set('monitor type','2D X-normal');
+set('y',0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('Throu','Throu');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+
+addpower;
+set('name','Cross1');   
+set('x',0.9e-6);
+set('monitor type','2D X-normal');
+set('y',-0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_Cross1');
+set('x',1e-6);
+set('monitor type','2D X-normal');
+set('y',-0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('Cross1','Cross1');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+addpower;
+set('name','Cross');   
+set('x',0.9e-6+taperL);
+set('monitor type','2D X-normal');
+set('y',-0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_Cross');
+set('x',1e-6+taperL);
+set('monitor type','2D X-normal');
+set('y',-0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('Cross','Cross');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+
+addpower;
+set('name','T');   
+set('x',1e-6+taperL+S_L_in);
+set('monitor type','2D X-normal');
+set('y',0);
+set('y span',3e-6);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_T');
+set('x',1.1e-6+taperL+S_L_in);
+set('monitor type','2D X-normal');
+set('y',0);
+set('y span',3e-6);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('T','T');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+
+addpower;
+set('name','T_coup');   
+set('x',0.9e-6+taperL+S_L_in+couplingL);
+set('monitor type','2D X-normal');
+set('y',0);
+set('y span',3e-6);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_T_coup');
+set('x',1e-6+taperL+S_L_in+couplingL);
+set('monitor type','2D X-normal');
+set('y',0);
+set('y span',3e-6);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('T_coup','T_coup');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+
+addpower;
+set('name','P1');   
+set('x',taperL+S_L_in+S_L_out+couplingL+2e-6);
+set('monitor type','2D X-normal');
+set('y',0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_P1');
+set('x',taperL+S_L_in+S_L_out+couplingL+2.1e-6);
+set('monitor type','2D X-normal');
+set('y',0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('P1','P1');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+
+addpower;
+set('name','P2');   
+set('x',taperL+S_L_in+S_L_out+couplingL+2e-6);
+set('monitor type','2D X-normal');
+set('y',-0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+
+addmodeexpansion;
+set('name','Expan_P2');
+set('x',taperL+S_L_in+S_L_out+couplingL+2.1e-6);
+set('monitor type','2D X-normal');
+set('y',-0.5*wg_spacing);
+set('y span',monitor_yspan);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan);
+setexpansion('P2','P2');
+set('mode selection',mode);
+set('override global monitor settings',0);
+
+
+###--------set up simulatio regition---------
+
+Simu_L=taperL+S_L_in+S_L_out+couplingL;
+
+addfdtd;
+set('x min',-1e-6);
+set('x max',Simu_L+3e-6);
+set('y',0);
+set('y span',wg_spacing+monitor_yspan+1e-6);
+set('z',0.5*Si_thick);
+set('z span',monitor_zspan+1e-6);
+set('simulation time',simu_time);
+set('mesh accuracy',mesh);
+
+#----------global setting----------
+setglobalmonitor('frequency points',simu_points);
+

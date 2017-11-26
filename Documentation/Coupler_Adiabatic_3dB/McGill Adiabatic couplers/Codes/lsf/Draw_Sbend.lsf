@@ -1,0 +1,58 @@
+#width=500e-9;
+#S_h=3e-6;
+#S_length=5e-6;
+#Si_thick=0.22e-6;
+
+###---------------- add S_bend---------------------
+points=100;
+
+vertices=matrix(2*(points+1),2);
+vec1=matrix(points+1,2);
+vec2=matrix(points+1,2);
+myx=matrix(points+1,1);
+myy=matrix(points+1,1);
+
+
+for (ii=0:points) {
+arc1=S_h/2*cos(pi*ii/points)-S_h/2;
+slope=-(S_h-width)/2*pi/S_length*sin(pi*ii/points);
+
+vec1(ii+1,1)=S_length*ii/points;
+vec1(ii+1,2)=arc1-width/2;
+
+
+  if (ii==0){   
+  myx(ii+1,1)=0;
+  myy(ii+1,1)=width;    
+  } else {
+  myx(ii+1,1)=(width^2/(1+1/(abs(slope)^2)))^0.5;
+  myy(ii+1,1)=(width^2-myx(1)^2)^0.5;  
+}
+
+if (ii==points){   
+  myx(ii+1,1)=0;
+  myy(ii+1,1)=width;    
+  }
+  
+}  
+ 
+for (ii=0:points){ 
+vec2(ii+1,1)=vec1(points+1-ii,1)+myx(points+1-ii);
+vec2(ii+1,2)=vec1(points+1-ii,2)+myy(points+1-ii);
+
+}
+
+vertices(1:points+1,1:2)=vec1(1:points+1,1:2);
+vertices(points+2:2*(points+1),1:2)=vec2(1:points+1,1:2);
+
+addpoly;
+set('vertices',vertices);
+set('name','S_bend');
+set('material',wg_material);
+
+set('x',0);
+set('y',0);
+set('z',0.5*Si_thick);
+set('z span',Si_thick);
+set('first axis','x');
+set('rotation 1',180);
