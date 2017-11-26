@@ -21,12 +21,61 @@
 import pya
 
 
+
+def gen_ui():
+  global wdg
+  
+  # If the window is already here, destroy it and start over again.
+  if 'wdg' in globals():
+    if wdg is not None and not wdg.destroyed():
+      wdg.destroy()
+  global wtext
+
+  def button_clicked(checked):
+    """ Event handler: "OK" button clicked """
+    wdg.destroy()
+
+  wdg = pya.QDialog(pya.Application.instance().main_window())
+
+  wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
+  wdg.setWindowTitle("SiEPIC-Tools SEM image list")
+
+  wdg.resize(1200, 2500)
+  wdg.move(1, 1)
+
+  grid = pya.QGridLayout(wdg)
+
+  windowlabel1 = pya.QLabel(wdg)
+  windowlabel1.setText("SiEPIC-Tools SEM image list:")
+  wtext = pya.QTextEdit(wdg)
+  wtext.enabled = True
+  wtext.setText('')
+  wtext.LineWrapMode = pya.QTextEdit.NoWrap
+
+  ok = pya.QPushButton("OK", wdg)
+  ok.clicked(button_clicked)   # attach the event handler
+#  netlist = pya.QPushButton("Netlist Export", wdg) # not implemented
+
+  grid.addWidget(windowlabel1, 0, 0, 1, 3)
+  grid.addWidget(wtext, 1, 1, 3, 3)
+#  grid.addWidget(netlist, 4, 2)
+  grid.addWidget(ok, 4, 3)
+
+  grid.setRowStretch(3, 1)
+  grid.setColumnStretch(1, 1)
+
+  wdg.show()
+
+
+
+
+
 def find_all_SEMs(cell, LayerSEMN):
   # function to traverse the entire layout hierarchy and find all the SEM geometries
   # returns list of ....
   
   # Find all the SEM shapes; identify the component it belongs; 
-  print("Find all SEM image boxes and polygons")
+  t= 'Find all SEM image boxes and polygons:&lt;br&gt;&lt;br&gt;'
 
   # Find all the SEM shapes
   iter1 = cell.begin_shapes_rec(LayerSEMN)
@@ -45,7 +94,7 @@ def find_all_SEMs(cell, LayerSEMN):
       found_component = True
     if iter1.shape().is_polygon():
       polygon = iter1.shape().polygon.transformed(iter1.itrans())
-      box = polygon.bbox
+      box = polygon.bbox()
       x, y = xy_mean_mult([[box.p1.x, box.p1.y], [box.p2.x, box.p2.y]],1)
       found_component = True
 
@@ -58,14 +107,11 @@ def find_all_SEMs(cell, LayerSEMN):
       while not(iter2.at_end()):
         if iter2.shape().is_text():
           SEMlabel = iter2.shape().text.string
- #         print("%s: SEM label: %s" % (i, SEMlabel))
         iter2.next()
 
-#      x = iter1.itrans().disp.x*dbu
-#      y = iter1.itrans().disp.y*dbu
       flip = iter1.trans().is_mirror()
       rotate = (int(iter1.trans().rot())*90) % 360
-      print("SEM image #%s: %s, %s, %s, %s, SEM label: %s, %s" % (i, x*dbu,y*dbu,component,instance,SEMlabel, subcell.display_title()) )
+      t += "SEM image #%s: %s, %s, %s, %s, SEM label: %s, %s &lt;br&gt;" % (i, x*dbu,y*dbu,component,instance,SEMlabel, subcell.display_title())
 
       
     # end if found_component   
@@ -73,9 +119,28 @@ def find_all_SEMs(cell, LayerSEMN):
     iter1.next()
  
   # end while iter1 
+
+  t += "&lt;br&gt;*** Number of SEM images: %s.&lt;br&gt;" % i
+  return t
 # end def find_all_SEMs
 
 
+# ************************************************************************
+# ************************************************************************
+#  Main script:
+# ************************************************************************
+# ************************************************************************
+
+#from time import strftime, clock
+import time
+
+# Create a GUI for the output:
+gen_ui()
+
+if 'wtext' in globals():
+  wtext.insertHtml('Running SiEPIC-Tools SEM image list.&lt;br&gt;')
+  wtext.insertHtml('* KLayout SiEPIC_Tools v%s, %s.&lt;br&gt;' % (SiEPIC_Version, time.strftime("%Y-%m-%d %H:%M:%S") ) )
+clock_start = time.clock()
 
 
 # Find the currently selected layout.
@@ -91,7 +156,11 @@ dbu = ly.dbu
 # Define layers based on PDK_functions:
 LayerSEMN = ly.layer(LayerSEM)
 
-find_all_SEMs(cell,LayerSEMN)
+t = find_all_SEMs(cell,LayerSEMN)
+wtext.insertHtml (t)
+
+
+
 
 
 
