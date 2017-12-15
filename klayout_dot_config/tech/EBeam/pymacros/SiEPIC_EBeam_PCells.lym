@@ -236,7 +236,7 @@ class cavity_hole(pya.PCellDeclarationHelper):
     hole = pya.Region()
     hole_cell = circle(0,0,r)
     hole_poly = pya.Polygon(hole_cell)  
-    hole_t = hole_poly.transformed(pya.Trans(x,y))
+    hole_t = hole_poly.transformed(pya.Trans(pya.Trans.R0, x,y))
     hole.insert(hole_t)           
 
     # perform inversion:
@@ -337,14 +337,14 @@ class strip_to_slot(pya.PCellDeclarationHelper):
     # Pins on the bus waveguide side:
     pin = pya.Path([Point(-10.1/dbu, (-0.35+0.6+0.05)/dbu), Point(-9.9/dbu, (-0.35+0.6+0.05)/dbu)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-10/dbu, (-0.35+0.6+0.05)/dbu)
+    t = Trans(pya.Trans.R0, -10/dbu, (-0.35+0.6+0.05)/dbu)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r+w/2+w+Lc/2, 0)
+    t = Trans(pya.Trans.R0, r+w/2+w+Lc/2, 0)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -560,7 +560,7 @@ class fswgc(pya.PCellDeclarationHelper):
     # Pin on the waveguide:
     pin_length = 200
     x = 0
-    t = Trans(x,0)
+    t = Trans(pya.Trans.R0, x,0)
     pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], self.t/dbu)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -697,7 +697,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     # Pins on the waveguide:
     pin_length = 200
     x = self.length / dbu
-    t = Trans(x,h)
+    t = Trans(pya.Trans.R0, x,h)
     pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -706,7 +706,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     x = 0
-    t = Trans(x,0)
+    t = Trans(pya.Trans.R0, x,0)
     pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -716,15 +716,15 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
 
 
     # Compact model information
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(0, w*2)
+    t = Trans(pya.Trans.R0, 0, w*2)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(0, -w*2)
+    t = Trans(pya.Trans.R0, 0, -w*2)
     text = Text \
       ('Spice_param:wg_length=%.3fu wg_width=%.3fu' %\
       (waveguide_length, self.wg_width), t )
@@ -810,7 +810,7 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     pin_length = 200
     x = self.length / dbu
     w = self.wg_width / dbu
-    t = Trans(x,0)
+    t = Trans(pya.Trans.R0, x,0)
     pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -820,7 +820,7 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
 
 
     x = 0
-    t = Trans(x,0)
+    t = Trans(pya.Trans.R0, x,0)
     pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -830,22 +830,22 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
 
 
     # Compact model information
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(0, w*2)
+    t = Trans(pya.Trans.R0, 0, w*2)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(0, -w*2)
+    t = Trans(pya.Trans.R0, 0, -w*2)
     text = Text \
       ('Spice_param:wg_length=%.3fu wg_width=%.3fu' %\
       (waveguide_length, self.wg_width), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
-    t = Trans(self.length / dbu /6, -w*2)
+    t = Trans(pya.Trans.R0, self.length / dbu /6, -w*2)
     text = Text ('dL = %.4f um' % ((waveguide_length-length)), t)
     shape = shapes(LayerTextN).insert(text)
     shape.text_size = 0.6/dbu
@@ -1018,7 +1018,7 @@ class spiral(pya.PCellDeclarationHelper):
     pin_length = 200
     x = -(2*b + a * (turn+1) * 2 * pi)/dbu
     w = self.wg_width / dbu
-    t = Trans(x,0)
+    t = Trans(pya.Trans.R0, x,0)
     pin = pya.Path([Point(0,-pin_length/2), Point(0,pin_length/2)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -1030,7 +1030,7 @@ class spiral(pya.PCellDeclarationHelper):
       x = -(2*b + a * (turn+1.5) * 2 * pi)/dbu
     else:
       x = (2*b + a * (turn+1) * 2 * pi)/dbu
-    t = Trans(x,0)
+    t = Trans(pya.Trans.R0, x,0)
     pin = pya.Path([Point(0,-pin_length/2), Point(0,pin_length/2)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -1039,19 +1039,19 @@ class spiral(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(-abs(x), 0)
+    t = Trans(pya.Trans.R0, -abs(x), 0)
     text = Text ('Length=%.3fu' % spiral_length, t)
     shape = shapes(LayerTextN).insert(text)
     shape.text_size = abs(x)/8
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(0, w*2)
+    t = Trans(pya.Trans.R0, 0, w*2)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_strip_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(0, -w*2)
+    t = Trans(pya.Trans.R0, 0, -w*2)
     text = Text \
       ('Spice_param:wg_length=%.3fu wg_width=%.3fu min_radius=%.3fu wg_spacing=%.3fu' %\
       (spiral_length, self.wg_width, (self.min_radius), self.wg_spacing), t )
@@ -1160,7 +1160,7 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     pin_length = 200
 #    pin_length = self.period_swg * self.duty_swg / dbu
     w = self.wg_width_swg / dbu
-    t = Trans(0,0)
+    t = Trans(pya.Trans.R0, 0,0)
     pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -1172,7 +1172,7 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     pin_length = 200
 #    pin_length = self.period_strip * self.duty_strip / dbu
     w = max ( self.wg_width_strip, self.wg_width_taper) / dbu
-    t = Trans(length,0)
+    t = Trans(pya.Trans.R0, length,0)
     pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -1181,15 +1181,15 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/10, 0)
+    t = Trans(pya.Trans.R0, length/10, 0)
     text = Text ('Lumerical_INTERCONNECT_component=NO_MODEL_AVAILABLE', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/9, -w*2)
+    t = Trans(pya.Trans.R0, length/9, -w*2)
     text = Text \
       ('Spice_param:length=%.3fu period_swg=%.3fu period_strip=%.3fu wg_width_swg=%.3fu wg_width_strip=%.3fu duty_swg=%.3f duty_strip=%.3f ' %\
       (self.length, self.period_swg, (self.period_strip), self.wg_width_swg, self.wg_width_strip, self.duty_swg, self.duty_strip), t )
@@ -1274,7 +1274,7 @@ class SWG_waveguide(pya.PCellDeclarationHelper):
     # Pins on the waveguide:
     pin_length = 200
 #    pin_length = box_width
-    t = Trans(0,0)
+    t = Trans(pya.Trans.R0, 0,0)
     pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -1282,7 +1282,7 @@ class SWG_waveguide(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    t = Trans(length,0)
+    t = Trans(pya.Trans.R0, length,0)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)
@@ -1290,15 +1290,15 @@ class SWG_waveguide(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/10, 0)
+    t = Trans(pya.Trans.R0, length/10, 0)
     text = Text ('Lumerical_INTERCONNECT_component=NO_MODEL_AVAILABLE', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/9, -box_width*2)
+    t = Trans(pya.Trans.R0, length/9, -box_width*2)
     text = Text \
       ('Spice_param:length=%.3fu target_period=%.3fu grating_period=%.3fu wg_width=%.3fu duty=%.3f ' %\
       (self.length, self.target_period, round(grating_period)*dbu, self.wg_width, self.duty), t )
@@ -1490,14 +1490,14 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     # Pins on the top side:
     pin = pya.Path([Point(-r-Lc/2, y+pin_length/2), Point(-r-Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r-Lc/2, y)
+    t = Trans(pya.Trans.R0, -r-Lc/2, y)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r+Lc/2, y+pin_length/2), Point(r+Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r+Lc/2, y)
+    t = Trans(pya.Trans.R0, r+Lc/2, y)
     text = Text ("pin4", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1514,14 +1514,14 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     # Pins on the bus waveguide side:
     pin = pya.Path([Point(-r-w/2-w-pin_length/2-Lc/2, 0), Point(-r-w/2-w+pin_length/2-Lc/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r-w/2-w-Lc/2, 0)
+    t = Trans(pya.Trans.R0, -r-w/2-w-Lc/2, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r+w/2+w+Lc/2, 0)
+    t = Trans(pya.Trans.R0, r+w/2+w+Lc/2, 0)
     text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1531,15 +1531,15 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(dev)
 
     # Compact model information
-    t = Trans(r/4, 0)
+    t = Trans(pya.Trans.R0, r/4, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(r/4, r/4)
+    t = Trans(pya.Trans.R0, r/4, r/4)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(r/4, r/2)
+    t = Trans(pya.Trans.R0, r/4, r/2)
 
     text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu orthogonal_identifier=%s'% (self.w,self.g,self.r,self.Lc, self.orthogonal_identifier), t)
 
@@ -1611,14 +1611,14 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     # Pins on the top side:
     pin = pya.Path([Point(-r-Lc/2, y+pin_length/2), Point(-r-Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r-Lc/2, y)
+    t = Trans(pya.Trans.R0, -r-Lc/2, y)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r+Lc/2, y+pin_length/2), Point(r+Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r+Lc/2, y)
+    t = Trans(pya.Trans.R0, r+Lc/2, y)
     text = Text ("pin4", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1635,14 +1635,14 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     # Pins on the bus waveguide side:
     pin = pya.Path([Point(-r-w/2-w-pin_length/2-Lc/2, 0), Point(-r-w/2-w+pin_length/2-Lc/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r-w/2-w-Lc/2, 0)
+    t = Trans(pya.Trans.R0, -r-w/2-w-Lc/2, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r+w/2+w+Lc/2, 0)
+    t = Trans(pya.Trans.R0, r+w/2+w+Lc/2, 0)
     text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1652,15 +1652,15 @@ class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(dev)
 
     # Compact model information
-    t = Trans(r/4, 0)
+    t = Trans(pya.Trans.R0, r/4, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(r/4, r/4)
+    t = Trans(pya.Trans.R0, r/4, r/4)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(r/4, r/2)
+    t = Trans(pya.Trans.R0, r/4, r/2)
   #  text = Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% (self.w,self.g,int(self.r)), t)
 
     text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'% (self.w,self.g,self.r,self.Lc), t)
@@ -1737,14 +1737,14 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     # Pins on the top side:
     pin = pya.Path([Point(-r-Lc/2, y+pin_length/2), Point(-r-Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r-Lc/2, y)
+    t = Trans(pya.Trans.R0, -r-Lc/2, y)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r+Lc/2, y+pin_length/2), Point(r+Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r+Lc/2, y)
+    t = Trans(pya.Trans.R0, r+Lc/2, y)
     text = Text ("pin4", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1775,14 +1775,14 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     # Pins on the bus waveguide side:
     pin = pya.Path([Point(-r-w/2-w-pin_length/2-Lc/2, y_bottom), Point(-r-w/2-w+pin_length/2-Lc/2, y_bottom)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r-w/2-w-Lc/2, y_bottom)
+    t = Trans(pya.Trans.R0, -r-w/2-w-Lc/2, y_bottom)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, y_bottom), Point(r+w/2+w+pin_length/2+Lc/2, y_bottom)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r+w/2+w+Lc/2, y_bottom)
+    t = Trans(pya.Trans.R0, r+w/2+w+Lc/2, y_bottom)
     text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1793,15 +1793,15 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
 
 
     # Compact model information
-    t = Trans(r/4, 0)
+    t = Trans(pya.Trans.R0, r/4, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(r/4, r/4)
+    t = Trans(pya.Trans.R0, r/4, r/4)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_arc_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(r/4, r/2)
+    t = Trans(pya.Trans.R0, r/4, r/2)
     text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'(self.w,self.g,self.r,self.Lc), t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
@@ -1946,28 +1946,28 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     
     pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(w+2*r-pin_length/2, 0), Point(w+2*r+pin_length/2, 0)],w )
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(w+2*r, 0)
+    t = Trans(pya.Trans.R0, w+2*r, 0)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(-pin_length/2, y_offset), Point(pin_length/2, y_offset)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(0, y_offset)
+    t = Trans(pya.Trans.R0, 0, y_offset)
     text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(w+2*r-pin_length/2, y_offset), Point(w+2*r+pin_length/2, y_offset)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(w+2*r, y_offset)
+    t = Trans(pya.Trans.R0, w+2*r, y_offset)
     text = Text ("pin4", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -2090,7 +2090,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-    t = Trans(0, 127*2/dbu)
+    t = Trans(pya.Trans.R0, 0, 127*2/dbu)
     text = Text ("opt_in_TE_1550_device_DoubleBusRing", t)
     shape = cell.shapes(TextLayerN).insert(text)
     shape.text_size = 3/dbu
@@ -2197,7 +2197,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-    t = Trans(0, 127*2/dbu)
+    t = Trans(pya.Trans.R0, 0, 127*2/dbu)
     text = Text ("opt_in_TE_1550_device_DoubleBusRing", t)
     shape = cell.shapes(TextLayerN).insert(text)
     shape.text_size = 3/dbu
@@ -2283,22 +2283,22 @@ class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
 #    box1 = Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
 #    shapes(LayerINTERCONNECTN).insert(box1)
         
-    t = Trans(-width/2+3/dbu, height/2-4/dbu)
+    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-4/dbu)
     text = Text ("Tunable Laser", t)
     shape = shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
-    t = Trans(-width/2+3/dbu, height/2-8/dbu)
+    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-8/dbu)
     text = Text ("Wavelength range: %4.3f - %4.3f nm" % ( self.wavelength_start, self.wavelength_stop), t)
     shape = shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
-    t = Trans(-width/2+3/dbu, height/2-12/dbu)
+    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-12/dbu)
     text = Text ("Number of points: %s" % ( self.npoints), t)
     shape = shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
-    t = Trans(-width/2+3/dbu, height/2-16/dbu)
+    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-16/dbu)
     text = Text ("Ignore optical IOs in simulations: %s" % ( self.ignoreOpticalIOs), t)
     shape = shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
@@ -2410,18 +2410,18 @@ class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
 #    box1 = Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
 #    shapes(LayerINTERCONNECTN).insert(box1)
         
-    t = Trans(-width/2+3/dbu, height/2-4/dbu)
+    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-4/dbu)
     text = Text ("Detector", t)
     shape = shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
 
-    t = Trans(-width/2+3/dbu, height/2-8/dbu)
+    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-8/dbu)
     text = Text ("Detector Number: %s" % ( self.number), t)
     shape = shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 1.5/dbu
     
     # Label to be used for Spice netlist, and for unique detector generation (coerce, above)
-    t = Trans(0,0)
+    t = Trans(pya.Trans.R0, 0,0)
     text = Text ("LumericalINTERCONNECT_Detector %s" % ( self.number), t)
     shape = shapes(LayerINTERCONNECTN).insert(text)
     shape.text_size = 0.1/dbu
@@ -2462,7 +2462,7 @@ class Waveguide_Route_simple(pya.PCellDeclarationHelper):
     return shape.is_path()
 
   def transformation_from_shape(self, layout, shape, layer):
-    return Trans(0,0)
+    return Trans(pya.Trans.R0, 0,0)
 
   def parameters_from_shape(self, layout, shape, layer):
     self._param_values = []
@@ -2543,7 +2543,7 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
 
   def transformation_from_shape(self, layout, shape, layer):
 #    return Trans(shape.bbox().center())
-    return Trans(0,0)
+    return Trans(pya.Trans.R0, 0,0)
 
   def parameters_from_shape(self, layout, shape, layer):
     shapes = self.cell.shapes
@@ -2787,7 +2787,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
     self.p2 = p2c
     pin = pya.Path(p2, w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(0, y)
+    t = Trans(pya.Trans.R0, 0, y)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -2799,7 +2799,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
     self.p1 = p1c
     pin = pya.Path(p1, w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(x, 0)
+    t = Trans(pya.Trans.R0, x, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -2808,15 +2808,15 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
     layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 360)
 
     # Compact model information
-    t = Trans(x+r/10, 0)
+    t = Trans(pya.Trans.R0, x+r/10, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
-    t = Trans(x+r/10, r/4)
+    t = Trans(pya.Trans.R0, x+r/10, r/4)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_bend_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
-    t = Trans(x+r/10, r/2)
+    t = Trans(pya.Trans.R0, x+r/10, r/2)
     text = Text ('Spice_param:radius=%.3fu wg_width=%.3fu'% (self.radius,self.wg_width), t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
@@ -2886,7 +2886,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     if pin_length == 0:
       pin_length = 2
 
-    t = Trans(-length/2,0)
+    t = Trans(pya.Trans.R0, -length/2,0)
     pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -2894,7 +2894,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    t = Trans(length/2,0)
+    t = Trans(pya.Trans.R0, length/2,0)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)
@@ -2902,15 +2902,15 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/10, 0)
+    t = Trans(pya.Trans.R0, length/10, 0)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/9, 0)
+    t = Trans(pya.Trans.R0, length/9, 0)
     text = Text ('Spice_param:wg_width=%.3fu wg_length=%.3fu'%(self.wg_width*dbu, self.wg_length*dbu), t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
@@ -2977,7 +2977,7 @@ class Waveguide_Straight2(pya.PCellDeclarationHelper):
     # Pins on the bus waveguide side:
     pin_length = 200
     t = Trans(int(round(angle)), 0, Point(round(points[0][0]), round(points[0][1])))
-#    t = Trans(Point(round(points[0][0]), round(points[0][1])))
+#    t = Trans(pya.Trans.R0, Point(round(points[0][0]), round(points[0][1])))
 
 #    Point(points[i][0], points[i][1])
     pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
@@ -3104,7 +3104,7 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
     # Pins on the waveguide:
     pin_length = 200
 
-    t = Trans(0,0)
+    t = Trans(pya.Trans.R0, 0,0)
     pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3112,7 +3112,7 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    t = Trans(length,0)
+    t = Trans(pya.Trans.R0, length,0)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)
@@ -3120,15 +3120,15 @@ class Bragg_waveguide(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/10, 0)
+    t = Trans(pya.Trans.R0, length/10, 0)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_bragg_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(length/9, 0)
+    t = Trans(pya.Trans.R0, length/9, 0)
     text = Text \
       ('Spice_param:number_of_periods=%s grating_period=%.3fu corrugation_width=%.3fu misalignment=%.3fu sinusoidal=%s' %\
       (self.number_of_periods, self.grating_period, self.corrugation_width, self.misalignment, int(self.sinusoidal)), t )
@@ -3218,7 +3218,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     self.p1 = p1c
     pin = pya.Path(p1, w1)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(0, 0)
+    t = Trans(pya.Trans.R0, 0, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3230,7 +3230,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     self.p2 = p2c
     pin = pya.Path(p2, w2)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(length, 0)
+    t = Trans(pya.Trans.R0, length, 0)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3242,15 +3242,15 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
 
 
     # Compact model information
-    t = Trans(w1/10, 0)
+    t = Trans(pya.Trans.R0, w1/10, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = length/100
-    t = Trans(length/10, w1/4)
+    t = Trans(pya.Trans.R0, length/10, w1/4)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_taper_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = length/100
-    t = Trans(length/10, w1/2)
+    t = Trans(pya.Trans.R0, length/10, w1/2)
     text = Text ('Spice_param:wg_width1=%.3fu wg_width2=%.3fu wg_length=%.3fu'% (self.wg_width1,self.wg_width2,self.wg_length), t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = length/100
@@ -3322,14 +3322,14 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
     # Pins on the top side:
     pin = pya.Path([Point(-r2-Lc/2, y+pin_length/2), Point(-r2-Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r2-Lc/2, y)
+    t = Trans(pya.Trans.R0, -r2-Lc/2, y)
     text = Text ("pin2", t)
     shape =  shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r2+Lc/2, y+pin_length/2), Point(r2+Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r2+Lc/2, y)
+    t = Trans(pya.Trans.R0, r2+Lc/2, y)
     text = Text ("pin4", t)
     shape =  shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3346,14 +3346,14 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
     # Pins on the lower side:
     pin = pya.Path([Point(-r1-Lc/2, y+pin_length/2), Point(-r1-Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(-r1-Lc/2, y)
+    t = Trans(pya.Trans.R0, -r1-Lc/2, y)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     pin = pya.Path([Point(r1+Lc/2, y+pin_length/2), Point(r1+Lc/2, y-pin_length/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(r1+Lc/2, y)
+    t = Trans(pya.Trans.R0, r1+Lc/2, y)
     text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3374,15 +3374,15 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
 
 
     # Compact model information
-    t = Trans(((r1+r2)/2)/4, 0)
+    t = Trans(pya.Trans.R0, ((r1+r2)/2)/4, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size =  r*0.017
-    t = Trans(((r1+r2)/2)/4, ((r1+r2)/2)/4)
+    t = Trans(pya.Trans.R0, ((r1+r2)/2)/4, ((r1+r2)/2)/4)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_seriesrings', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size =  r*0.017
-    t = Trans(((r1+r2)/2)/4, ((r1+r2)/2)/2)
+    t = Trans(pya.Trans.R0, ((r1+r2)/2)/4, ((r1+r2)/2)/2)
   #  text = Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% ( w, g,int( r)), t)
     text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius1=%.3fu radius2=%.3fu'% ( self.w, self.g,int( self.r1), int(self.r2)), t)
     shape = shapes(LayerDevRecN).insert(text)
@@ -3489,7 +3489,7 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     self.p2 = p2c
     pin = pya.Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x, y)
+    t = pya.Trans(pya.Trans.R0, x, y)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3508,7 +3508,7 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     self.p1 = p1c
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x, y)
+    t = pya.Trans(pya.Trans.R0, x, y)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3618,7 +3618,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     self.p3 = p3c
     pin = pya.Path(p3, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x-r, y)
+    t = pya.Trans(pya.Trans.R0, x-r, y)
     text = pya.Text ("pin3", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3630,7 +3630,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     self.p4 = p4c
     pin = pya.Path(p4, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x+r, y)
+    t = pya.Trans(pya.Trans.R0, x+r, y)
     text = pya.Text ("pin4", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3694,7 +3694,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     self.p2 = p2c
     pin = pya.Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x, y)
+    t = pya.Trans(pya.Trans.R0, x, y)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3706,7 +3706,7 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     self.p1 = p1c
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(-x, y)
+    t = pya.Trans(pya.Trans.R0, -x, y)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3869,7 +3869,7 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     self.p2 = p2c
     pin = pya.Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x-r, y)
+    t = pya.Trans(pya.Trans.R0, x-r, y)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3882,7 +3882,7 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     self.p1 = p1c
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x-r, y)
+    t = pya.Trans(pya.Trans.R0, x-r, y)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3895,7 +3895,7 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     self.p3 = p3c
     pin = pya.Path(p3, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x-r, y)
+    t = pya.Trans(pya.Trans.R0, x-r, y)
     text = pya.Text ("pin3", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -3907,7 +3907,7 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     self.p4 = p4c
     pin = pya.Path(p4, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x+r, y)
+    t = pya.Trans(pya.Trans.R0, x+r, y)
     text = pya.Text ("pin4", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -4109,7 +4109,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     self.p2 = p2c
     pin = pya.Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x, y)
+    t = pya.Trans(pya.Trans.R0, x, y)
     text = pya.Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -4123,7 +4123,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     self.p1 = p1c
     pin = pya.Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(x, 0)
+    t = pya.Trans(pya.Trans.R0, x, 0)
     text = pya.Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
