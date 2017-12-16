@@ -6,7 +6,7 @@
  <prolog/>
  <epilog/>
  <doc/>
- <autorun>false</autorun>
+ <autorun>true</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
  <show-in-menu>false</show-in-menu>
@@ -14,119 +14,49 @@
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text>import pya
-from SiEPIC.utils import get_technology
+ <text>"""
+This file is part of the SiEPIC-Tools and SiEPIC-GSiP PDK
+by Lukas Chrostowski (c) 2015-2017
 
-class Waveguide(pya.PCellDeclarationHelper):
+This Python file implements a library called "SiEPIC GSiP" 
 
-  def __init__(self):
-    # Important: initialize the super class
-    super(Waveguide, self).__init__()
-    # declare the parameters
-    TECHNOLOGY = get_technology()
-    self.param("path", self.TypeShape, "Path", default = pya.Path([pya.Point(0,0), pya.Point(10,0), pya.Point(10,10)], 0.5))
-    self.param("radius", self.TypeDouble, "Radius", default = 5)
-    self.param("width", self.TypeDouble, "Width", default = 0.5)
-    self.param("adiab", self.TypeBoolean, "Adiabatic", default = False)
-    self.param("bezier", self.TypeDouble, "Bezier Parameter", default = 0.35)
-    self.param("layers", self.TypeList, "Layers", default = [TECHNOLOGY['Si']])
-    self.param("widths", self.TypeList, "Widths", default =  [0.5])
-    self.param("offsets", self.TypeList, "Offsets", default = [0])
-    
-  def display_text_impl(self):
-    # Provide a descriptive text for the cell
-    return "Waveguide_%s" % self.path
-  
-  def coerce_parameters_impl(self):
-    pass
 
-  def can_create_from_shape(self, layout, shape, layer):
-    return shape.is_path()
+NOTE: after changing the code, the macro needs to be rerun to install the new
+implementation. The macro is also set to "auto run" to install the PCell 
+when KLayout is run.
 
-  def transformation_from_shape(self, layout, shape, layer):
-    return pya.Trans(pya.Trans.R0,0,0)
+Crash warning:
+ https://www.klayout.de/forum/comments.php?DiscussionID=734&amp;page=1#Item_13
+ This library has nested PCells. Running this macro with a layout open may
+ cause it to crash. Close the layout first before running.
 
-  def parameters_from_shape(self, layout, shape, layer):
-    self._param_values = []
-    for pd in self._param_decls:
-      self._param_values.append(pd.default)
-    return self._param_values
-        
-  def produce_impl(self):
+Version history:
 
-    from SiEPIC.utils import arc, arc_bezier, angle_vector, angle_b_vectors, inner_angle_b_vectors
-    from math import cos, sin, pi, sqrt
-    TECHNOLOGY = get_technology()
-    
-    dbu = self.layout.dbu
-    path = self.path*(1/dbu)
-    if not (len(self.layers)==len(self.widths) and len(self.layers)==len(self.offsets) and len(self.offsets)==len(self.widths)):
-      raise Exception("There must be an equal number of layers, widths and offsets")
-    path.remove_colinear_points()
-    for i in range(0, len(self.layers)):
-      
-      if isinstance(self.layers[i], str):
-        layer = self.layers[i].split('/')
-        layer = self.layout.layer(pya.LayerInfo(int(layer[0]), int(layer[1])))
-      else:
-        layer = self.layout.layer(self.layers[i])
+Lukas Chrostowski
+ - GDS cells (detector, etc) and PCells (ring modulator, filter)
 
-      width = float(self.widths[i])/dbu
-      offset = float(self.offsets[i])/dbu
-      #radius = self.radius/dbu + offset
-      
-      tpath = path.translate_from_center(offset)
-      
-      pts = tpath.get_points()
-      wg_pts = [pts[0]]
-      for i in range(1,len(pts)-1):
-        turn = ((angle_b_vectors(pts[i]-pts[i-1],pts[i+1]-pts[i])+90)%360-90)/90
-        radius = (self.radius/dbu + offset) if turn &gt; 0 else (self.radius/dbu - offset)
+Lukas Chrostowski 2017/12/16
+ - compatibility with KLayout 0.25 and SiEPIC-Tools
+ 
+todo:
+replace:     
+ layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
+with:
+ self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [pya.Point(0, 0)]).transformed(t))
 
-        pt_radius = radius
-        
-        dis = pts[i].distance(pts[i-1])
-        if (i==1 and dis &lt; pt_radius):
-          pt_radius = dis - TECHNOLOGY['dbu']
-        elif (dis &lt; 2*pt_radius):
-          pt_radius = dis/2
-        
-        dis = pts[i].distance(pts[i+1])
-        if (i==len(pts)-2 and dis &lt; pt_radius):
-          pt_radius = dis - TECHNOLOGY['dbu']
-        elif (dis &lt; 2*pt_radius):
-          pt_radius = dis/2
 
-        if(self.adiab):
-          arc_pts = [pya.Point(-pt_radius, pt_radius) + pt for pt in arc_bezier(pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]), self.bezier)]
-        else:
-          arc_pts = [pya.Point(-pt_radius, pt_radius) + pt for pt in arc(pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]))]
-        angle = angle_vector(pts[i]-pts[i-1])/90
-        
-        wg_pts += pya.Path(arc_pts, width).transformed(pya.Trans(angle, turn &lt; 0, pts[i])).get_points()
+"""
 
-      wg_pts.append(pts[-1])
-      self.cell.shapes(layer).insert(pya.Path(wg_pts, width).simple_polygon())
+import pya
+from SiEPIC.utils import get_technology_by_name
 
-    pts = path.get_points()
-    LayerPinRecN = self.layout.layer(TECHNOLOGY['PinRec'])
-    
-    t = pya.Trans(angle_vector(pts[0]-pts[1])/90, False, pts[0])
-    self.cell.shapes(LayerPinRecN).insert(pya.Path([pya.Point(-100, 0), pya.Point(100, 0)], self.width/dbu).transformed(t))
-    self.cell.shapes(LayerPinRecN).insert(pya.Text("pin1", t)).text_size = 0.4/dbu
-    
-    t = pya.Trans(angle_vector(pts[-1]-pts[-2])/90, False, pts[-1])
-    self.cell.shapes(LayerPinRecN).insert(pya.Path([pya.Point(-100, 0), pya.Point(100, 0)], self.width/dbu).transformed(t))
-    self.cell.shapes(LayerPinRecN).insert(pya.Text("pin2", t)).text_size = 0.4/dbu
 
-    self.cell.shapes(self.layout.guiding_shape_layer()).insert(pya.Path(path.get_points(), path.width))
-    
 class Ring(pya.PCellDeclarationHelper):
   def __init__(self):
     # Important: initialize the super class
     super(Ring, self).__init__()
     # declare the parameters
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('GSiP')
     self.param("width", self.TypeDouble, "Width", default = 0.5)
     self.param("radius", self.TypeDouble, "Radius", default = 5)
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
@@ -152,100 +82,6 @@ class Ring(pya.PCellDeclarationHelper):
     poly.insert_hole(hole.get_points())
     self.cell.shapes(layer).insert(poly)
 
-class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
-  """
-  The PCell declaration for the LumericalINTERCONNECT Optical Network Analyzer.
-  This configures the swept tunable laser
-  
-  Ultimately want to generate Spice output such as:
-  
-  .ona input_unit=wavelength input_parameter=center_and_range center=1550e-9
-  + range=100e-9 start=3 stop=4 number_of_points=1000 orthogonal_identifier=1
-  + label=TE peak_analysis=disable number_of_peaks=8 peak_at_maximum=9
-  + peak_threshold=0 peak_excursion=11 pit_excursion=12 fwhm_excursion=13
-  + minimum_loss=14 sensitivity=-200 analysis_type=scattering_data
-  + multithreading=automatic number_of_threads=1 input(1)=X_GC1,opt_fiber
-  + output=X_GC2,opt_fiber
-
-  
-  """
-  def __init__(self):
-    # Important: initialize the super class
-    super(LumericalINTERCONNECT_Laser, self).__init__()
-    # declare the parameters
-    self.param("wavelength_start", self.TypeDouble, "Start Wavelength (nm)", default = 1500)
-    self.param("wavelength_stop", self.TypeDouble, "Stop Wavelength (nm)", default = 1600)
-    self.param("npoints", self.TypeInt, "Number of points", default = 2000)     
-    self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
-    self.param("ignoreOpticalIOs", self.TypeInt, "Ignore optical IOs in simulations (1=Ignore, 0=Include)", default = 0)
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
-
-  def can_create_from_shape_impl(self):
-    return False
-    
-  def produce_impl(self):
-    TECHNOLOGY = get_technology()
-    ly = self.layout
-    shapes = self.cell.shapes
-    dbu = self.layout.dbu
-    
-    LayerINTERCONNECT = ly.layer(TECHNOLOGY['733_Lumerical'])
-
-    # Draw the laser
-    width = 60/dbu
-    height = 40/dbu
-    shapes(LayerINTERCONNECT).insert(pya.Box(-width/2, -height/2, width/2, height/2))
-    
-    shapes(LayerINTERCONNECT).insert(pya.Text("Tunable Laser", pya.Trans(pya.Trans.R0,-width/2+3/dbu, height/2-4/dbu))).text_size = 1.5/dbu
-    shapes(LayerINTERCONNECT).insert(pya.Text("Wavelength range: %4.3f - %4.3f nm" % (self.wavelength_start, self.wavelength_stop), pya.Trans(pya.Trans.R0,-width/2+3/dbu, height/2-8/dbu))).text_size = 1.5/dbu
-    shapes(LayerINTERCONNECT).insert(pya.Text ("Number of points: %s" % (self.npoints), pya.Trans(pya.Trans.R0,-width/2+3/dbu, height/2-12/dbu))).text_size = 1.5/dbu
-    shapes(LayerINTERCONNECT).insert(pya.Text("Ignore optical IOs in simulations: %s" % (self.ignoreOpticalIOs), pya.Trans(pya.Trans.R0,-width/2+3/dbu, height/2-16/dbu))).text_size = 1.5/dbu
-    # Add a polygon text description
-    from SiEPIC.utils import layout_pgtext
-    layout_pgtext(self.cell, _globals.TECHNOLOGY['Text'], -width/2*dbu+3, -height/2*dbu+2, "Number of points: %s" % (self.npoints), 2.2)
-    layout_pgtext(self.cell, _globals.TECHNOLOGY['Text'], -width/2*dbu+3, -height/2*dbu+5, "Wavelength range: %4.3f - %4.3f nm" % (self.wavelength_start, self.wavelength_stop), 2.2)
-
-class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
-  """
-  The PCell declaration for the LumericalINTERCONNECT Optical Network Analyzer.
-  This configures the detector  
-  """
-  def __init__(self):
-    # Important: initialize the super class
-    super(LumericalINTERCONNECT_Detector, self).__init__()
-    detector_number = 1
-      
-    # declare the parameters
-    self.param("number", self.TypeInt, "Detector number", default = detector_number)     
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
-
-  def can_create_from_shape_impl(self):
-    return False
-
-  def coerce_parameters_impl(self):
-    pass
-           
-  def produce_impl(self):
-    TECHNOLOGY = get_technology()
-    ly = self.layout
-    shapes = self.cell.shapes
-    dbu = self.layout.dbu
-    
-    LayerINTERCONNECT = ly.layer(TECHNOLOGY['733_Lumerical'])
-
-    # Draw the outline
-    width = 60/dbu
-    height = 40/dbu
-    shapes(LayerINTERCONNECT).insert(pya.Box(-width/2, -height/2, width/2, height/2))
-
-    shapes(LayerINTERCONNECT).insert(pya.Text("Detector", pya.Trans(-width/2+3/dbu, height/2-4/dbu))).text_size = 1.5/dbu
-    shapes(LayerINTERCONNECT).insert(pya.Text("Detector Number: %s" % (self.number), pya.Trans(-width/2+3/dbu, height/2-8/dbu))).text_size = 1.5/dbu
-    shapes(LayerINTERCONNECT).insert(pya.Text("LumericalINTERCONNECT_Detector %s" % (self.number), pya.Trans(0,0))).text_size = 0.1/dbu
-
-    # Add a polygon text description
-    from SiEPIC.utils import layout_pgtext
-    layout_pgtext(self.cell, _globals.TECHNOLOGY['Text'], -width/2*dbu+3, -height/2*dbu+2, "Number: %s" % (self.number), 2.2)
-
 class Ring_Modulator_DB(pya.PCellDeclarationHelper):
   """
   The PCell declaration for ring modulator.
@@ -256,7 +92,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
   def __init__(self):
     super(Ring_Modulator_DB, self).__init__()
     # declare the parameters
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('GSiP')
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
@@ -273,7 +109,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     self.param("vclayer", self.TypeLayer, "VC Layer", default = TECHNOLOGY['VC'])
     self.param("m1layer", self.TypeLayer, "M1 Layer", default = TECHNOLOGY['M1'])
     self.param("vllayer", self.TypeLayer, "VL Layer", default = TECHNOLOGY['VL'])
-    self.param("mllayer", self.TypeLayer, "ML Layer", default = TECHNOLOGY['Si'])
+    self.param("mllayer", self.TypeLayer, "ML Layer", default = TECHNOLOGY['ML'])
     self.param("mhlayer", self.TypeLayer, "MH Layer", default = TECHNOLOGY['M Heater'])
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -288,17 +124,18 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     return False
     
   def produce_impl(self):
+
     # This is the main part of the implementation: create the layout
     from math import pi, cos, sin
     
     # fetch the parameters
-    TECHNOLOGY = get_technology()
+#    TECHNOLOGY = get_technology_by_name('GSiP')
     dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
     
     LayerSi = self.silayer
-    LayerSi3 = ly.layer(self.si3layer)
+    LayerSi3N = ly.layer(self.si3layer)
     LayerSiN = ly.layer(LayerSi)
     LayernN = ly.layer(self.nlayer)
     LayerpN = ly.layer(self.player)
@@ -314,7 +151,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     TextLayerN = ly.layer(self.textl)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    
+
     # Define variables for the Modulator
     # Variables for the Si waveguide
     w = self.w/dbu
@@ -388,8 +225,9 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
    
     # Create the ring resonator
     t = pya.Trans(pya.Trans.R0,x0, y0)
-    pcell = ly.create_cell("Ring", "SiEPIC GSiP Library", { "layer": TECHNOLOGY['Si'], "radius": self.r, "width": self.w } )
+    pcell = ly.create_cell("Ring", "SiEPIC GSiP Library", { "layer": LayerSi, "radius": self.r, "width": self.w } )
     self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+
     
     # Create the two waveguides
     wg1 = pya.Box(x0 - (w_Si3 / 2 + taper_length), -w/2, x0 + (w_Si3 / 2 + taper_length), w/2)
@@ -401,7 +239,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     
     #Create the SiEtch2 (Slab) layer
     boxSi3 = pya.Box(x0-w_Si3/2.0, y0 - h_Si3/2.0, x0+w_Si3/2.0, y0 + h_Si3/2.0)
-    shapes(LayerSi3).insert(boxSi3)
+    shapes(LayerSi3N).insert(boxSi3)
     pin1pts = [pya.Point(x0-w_Si3/2.0, -taper_bigend/2.0),
                pya.Point(x0-w_Si3/2.0-taper_length,-taper_smallend/2.0),
                pya.Point(x0-w_Si3/2.0-taper_length,taper_smallend/2.0),
@@ -418,10 +256,10 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
                pya.Point(x0+w_Si3/2.0+taper_length,y_offset-taper_smallend/2.0),
                pya.Point(x0+w_Si3/2.0+taper_length,y_offset+taper_smallend/2.0),
                pya.Point(x0+w_Si3/2.0,y_offset+taper_bigend/2.0)]
-    shapes(LayerSi3).insert(pya.Polygon(pin1pts))
-    shapes(LayerSi3).insert(pya.Polygon(pin2pts))
-    shapes(LayerSi3).insert(pya.Polygon(pin3pts))
-    shapes(LayerSi3).insert(pya.Polygon(pin4pts))
+    shapes(LayerSi3N).insert(pya.Polygon(pin1pts))
+    shapes(LayerSi3N).insert(pya.Polygon(pin2pts))
+    shapes(LayerSi3N).insert(pya.Polygon(pin3pts))
+    shapes(LayerSi3N).insert(pya.Polygon(pin4pts))
     
     # arc angles
     # doping:
@@ -463,12 +301,12 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
 
     poly = pya.Path(arc(r_vc2, angle_min_VC, angle_max_VC), w_vc).transformed(t).simple_polygon()
     self.cell.shapes(LayervcN).insert(pya.Region(poly) - pya.Region(pya.Box(x0-r_vc2-w_vc/2, y_offset-w/2 - 1.5/dbu, x0+r_vc2+w_vc/2, y_offset+w/2 + 1.5/dbu)))
-    
+
+        
     #Create the M1 Layer
-    self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [pya.Point(-w_m1_in, w_m1_in)]).transformed(t))
+    self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [pya.Point(0, 0)]).transformed(t))
     self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in/2.0, 0, 360)).transformed(t))
     self.cell.shapes(Layerm1N).insert(pya.Path(arc(r_m1_out, angle_min_M1, angle_max_M1), w_m1_out).transformed(t).simple_polygon())
-
     boxM11 = pya.Box(x0-w_via, y0 + r_m1_out + w_m1_out-h_via, x0+w_via, y0 + r_m1_out + w_m1_out+h_via)
     shapes(Layerm1N).insert(boxM11)
     
@@ -555,7 +393,7 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
   def __init__(self):
     super(Ring_Filter_DB, self).__init__()
     # declare the parameters
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('GSiP')
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
@@ -583,7 +421,7 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
     from math import pi, cos, sin
     
     # fetch the parameters
-    TECHNOLOGY = get_technology()
+#    TECHNOLOGY = get_technology_by_name('GSiP')
     dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
@@ -647,7 +485,7 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
    
     # Create the ring resonator
     t = pya.Trans(pya.Trans.R0,(self.r+self.w/2)/dbu, (self.r+self.g+self.w)/dbu)
-    pcell = ly.create_cell("Ring", "SiEPIC GSiP Library", { "layer": TECHNOLOGY['Si'], "radius": self.r, "width": self.w } )
+    pcell = ly.create_cell("Ring", "SiEPIC GSiP Library", { "layer": LayerSi, "radius": self.r, "width": self.w } )
     self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
     
     # Create the two waveguides
@@ -751,18 +589,17 @@ class GSiP(pya.Library):
 
     self.description = ""
 
-    #import os
-    #self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-GSiP.gds"))
-    #[self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
+    import os
+    self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-GSiP.gds"))
+    [self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
     
-    self.layout().register_pcell("Lumerical INTERCONNECT Laser", LumericalINTERCONNECT_Laser())
-    self.layout().register_pcell("Lumerical INTERCONNECT Detector", LumericalINTERCONNECT_Detector())
-    self.layout().register_pcell("Waveguide", Waveguide())
+    
     self.layout().register_pcell("Ring", Ring())
     self.layout().register_pcell("Double-bus Ring Modulator", Ring_Modulator_DB())
     self.layout().register_pcell("Double-bus Ring Filter", Ring_Filter_DB())
     
-    self.register("SiEPIC GSiP Library")
+    self.register("SiEPIC GSiP")
+
     
 GSiP()
  </text>
