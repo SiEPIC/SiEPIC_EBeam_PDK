@@ -19,10 +19,23 @@
 
 """
 This file is part of the SiEPIC_EBeam_PDK
-by Lukas Chrostowski (c) 2015
+by Lukas Chrostowski (c) 2015-2017
 
-This Python file implements a library called "SiEPIC_EBeam_PCells" 
+This Python file implements a library called "SiEPIC_EBeam" 
 
+NOTE: after changing the code, the macro needs to be rerun to install the new
+implementation. The macro is also set to "auto run" to install the PCell 
+when KLayout is run.
+
+Crash warning:
+ https://www.klayout.de/forum/comments.php?DiscussionID=734&amp;page=1#Item_13
+ This library has nested PCells. Running this macro with a layout open may
+ cause it to crash. Close the layout first before running.
+
+*******
+GDS:
+*******
+imported from SiEPIC-EBeam.gds
 
 *******
 PCells:
@@ -52,11 +65,6 @@ def layout_pgtext(cell, layer, x, y, text, mag):
 def PCell_get_parameter_list ( cell_name, library_name ):
 def PCell_get_parameters ( pcell ):
 
-
-
-NOTE: after changing the code, the macro needs to be rerun to install the new
-implementation. The macro is also set to "auto run" to install the PCell 
-when KLayout is run.
 
 Version history:
 
@@ -122,6 +130,16 @@ Lukas Chrostowski           2017/03/18
  
 Timothy Richards, Adam DeAbreu, Lukas Chrostowski  2017/07/11
  -  Focusing Sub-wavelength grating coupler PCell.
+
+Lukas Chrostowski 2017/12/16
+ - compatibility with KLayout 0.25 and SiEPIC-Tools
+ 
+todo:
+replace:     
+ layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
+with:
+ self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [pya.Point(0, 0)]).transformed(t))
+
 
 """
 
@@ -756,9 +774,10 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
 # for now, let the user specify the unknown theta 
     self.param("theta", self.TypeDouble, "Waveguide angle (degrees)", default = 5)     
     self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5)     
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
+    self.param("waveguide", self.TypeLayer, "Waveguide Layer", default = LayerInfo(1, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("text", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
 
   def display_text_impl(self):
@@ -775,21 +794,22 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     
   def produce_impl(self):
   
+    from SiEPIC.utils import points_per_circle
+
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
 
 
-    LayerSi = self.layer
-    LayerSiN = ly.layer(LayerSi)
-    LayerSiSPN = ly.layer(LayerSiSP)
+    LayerSiN = ly.layer(self.waveguide)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    LayerTextN = ly.layer(LayerText)
+    LayerTextN = ly.layer(self.text)
 
 
     from math import pi, cos, sin, log, sqrt
+    from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle
     
     x = 0
     y = 0
@@ -799,11 +819,21 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     w = self.wg_width
     r = length/4/sin(theta/180.0*pi)
     waveguide_length = 2*pi*r*(4*theta/360.0)
-    layout_arc_wg_dbu(self.cell, LayerSiN, (x)/dbu, (y+r)/dbu, r/dbu, w/dbu, 270, 270+theta)
-    layout_arc_wg_dbu(self.cell, LayerSiN, (x+length/2)/dbu, (y-r+ 2*r*(1-cos(theta/180.0*pi)))/dbu, r/dbu, w/dbu, 90-theta, 90+theta)
-    layout_arc_wg_dbu(self.cell, LayerSiN, (x+length)/dbu, (y+r)/dbu, r/dbu, w/dbu, 270-theta, 270)
+    
+# layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
+#with:
+# self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [pya.Point(0, 0)]).transformed(t))
+    
+    #arc_to_waveguide(pts, width):
+    #arc(radius, start, stop)
+    t = pya.Trans(pya.Trans.R0,x/dbu, (y+r)/dbu)
+    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r/dbu, 270., 270.+theta), w/dbu).transformed(t))
 
+    t = pya.Trans(pya.Trans.R0,(x+length/2)/dbu, (y-r+ 2*r*(1-cos(theta/180.0*pi)))/dbu)
+    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r/dbu, 90.-theta, 90.+theta), w/dbu).transformed(t))
 
+    t = pya.Trans(pya.Trans.R0,(x+length)/dbu, (y+r)/dbu)
+    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r/dbu, 270.-theta, 270), w/dbu).transformed(t))
 
 
     # Pins on the waveguide:
@@ -818,7 +848,6 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-
     x = 0
     t = Trans(pya.Trans.R0, x,0)
     pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
@@ -827,7 +856,6 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
-
 
     # Compact model information
     t = Trans(pya.Trans.R0, 0, 0)
@@ -1826,6 +1854,7 @@ def layout_arc_wg_dbu(cell, LayerSiN, x, y, r, w, theta_start, theta_stop):
   # layout_Ring(cell, cell.layout().layer(LayerInfo(1, 0)), 0, 0, 10*1000, 0.5*1000, 0, 360)
 
   from math import pi, cos, sin
+  from SiEPIC.utils import points_per_circle
 
   dbu = cell.layout().dbu
   
@@ -2222,217 +2251,6 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     layout_waveguide_abs(cell, LayerSi, points, wg_width, 20)
 
     print( "Done drawing the layout for - TestStruct_DoubleBus_Ring2: %.3f-%g" % (r, g) )
-
-
-
-
- 
-
-
-class LumericalINTERCONNECT_Laser(pya.PCellDeclarationHelper):
-  """
-  The PCell declaration for the LumericalINTERCONNECT Optical Network Analyzer.
-  This configures the swept tunable laser
-  
-  Ultimately want to generate Spice output such as:
-  
-  .ona input_unit=wavelength input_parameter=center_and_range center=1550e-9
-  + range=100e-9 start=3 stop=4 number_of_points=1000 orthogonal_identifier=1
-  + label=TE peak_analysis=disable number_of_peaks=8 peak_at_maximum=9
-  + peak_threshold=0 peak_excursion=11 pit_excursion=12 fwhm_excursion=13
-  + minimum_loss=14 sensitivity=-200 analysis_type=scattering_data
-  + multithreading=automatic number_of_threads=1 input(1)=X_GC1,opt_fiber
-  + output=X_GC2,opt_fiber
-
-  
-  """
-
-  def __init__(self):
-
-    # Important: initialize the super class
-    super(LumericalINTERCONNECT_Laser, self).__init__()
-
-    # declare the parameters
-    self.param("wavelength_start", self.TypeDouble, "Start Wavelength (nm)", default = 1500)
-    self.param("wavelength_stop", self.TypeDouble, "Stop Wavelength (nm)", default = 1600)
-    self.param("npoints", self.TypeInt, "Number of points", default = 2000)     
-    self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
-    self.param("ignoreOpticalIOs", self.TypeInt, "Ignore optical IOs in simulations (1=Ignore, 0=Include)", default = 0)
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
-
-  def can_create_from_shape_impl(self):
-    return False
-    
-  def produce_impl(self):
-    # This is the main part of the implementation: create the layout
-
-    # fetch the parameters
-    dbu = self.layout.dbu
-    ly = self.layout
-    shapes = self.cell.shapes
-       
-    LayerINTERCONNECTN = ly.layer(LayerINTERCONNECT)
-    TextLayerN = ly.layer(LayerText)
-
-    # Draw the laser
-    width = 60/dbu
-    height = 40/dbu
-    box1 = Box(-width/2, -height/2, width/2, height/2)
-    shapes(LayerINTERCONNECTN).insert(box1)
-#    shrink = 1000
-#    box1 = Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
-#    shapes(LayerINTERCONNECTN).insert(box1)
-        
-    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-4/dbu)
-    text = Text ("Tunable Laser", t)
-    shape = shapes(LayerINTERCONNECTN).insert(text)
-    shape.text_size = 1.5/dbu
-
-    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-8/dbu)
-    text = Text ("Wavelength range: %4.3f - %4.3f nm" % ( self.wavelength_start, self.wavelength_stop), t)
-    shape = shapes(LayerINTERCONNECTN).insert(text)
-    shape.text_size = 1.5/dbu
-
-    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-12/dbu)
-    text = Text ("Number of points: %s" % ( self.npoints), t)
-    shape = shapes(LayerINTERCONNECTN).insert(text)
-    shape.text_size = 1.5/dbu
-
-    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-16/dbu)
-    text = Text ("Ignore optical IOs in simulations: %s" % ( self.ignoreOpticalIOs), t)
-    shape = shapes(LayerINTERCONNECTN).insert(text)
-    shape.text_size = 1.5/dbu
-
-    # Add a polygon text description
-    fontsize = 2.2
-    layout_pgtext(self.cell, LayerText, -width/2*dbu+3, -height/2*dbu+2, "Number of points: %s" % ( self.npoints), fontsize)
-    layout_pgtext(self.cell, LayerText, -width/2*dbu+3, -height/2*dbu+5, "Wavelength range: %4.3f - %4.3f nm" % ( self.wavelength_start, self.wavelength_stop), fontsize)
-
-    print("PCell produce_impl: laser")
-
-
-
-class LumericalINTERCONNECT_Detector(pya.PCellDeclarationHelper):
-  """
-  The PCell declaration for the LumericalINTERCONNECT Optical Network Analyzer.
-  This configures the detector  
-  """
-
-  def __init__(self):
-
-    # Important: initialize the super class
-    super(LumericalINTERCONNECT_Detector, self).__init__()
-
-    detector_number = 1
-      
-    # declare the parameters
-    self.param("number", self.TypeInt, "Detector number", default = detector_number)     
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
-
-  def can_create_from_shape_impl(self):
-    return False
-
-  def coerce_parameters_impl(self):
-    if 0:
-      detector_number = self.number
-      print("LumericalINTERCONNECT_Detector, original detector number: %s" % detector_number )
-      # scan layout for other detectors, record their numbers
-      detectors = []
-      iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
-      while not(iter1.at_end()):
-        if iter1.shape().is_text():
-          txt = iter1.shape().text.string
-          if string.find(txt,"LumericalINTERCONNECT_Detector") &gt; -1:
-            n = [int(s) for s in txt.split() if s.isdigit()]
-            if len(n)&gt;0:
-              detectors.append (n[0])
-        advance_iterator(iter1)
-      print("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
-      if detector_number in detectors:
-        detector_number = 1
-      while detector_number in detectors:
-        detector_number += 1
-      print("LumericalINTERCONNECT_Detector, new detector number: %s" % detector_number )
-      self.number = detector_number
-    else:
-      pass
-           
-  def produce_impl(self):
-    # This is the main part of the implementation: create the layout
-
-
-    if 0:
-      # choose a unique detector number
-      layout = pya.Application.instance().main_window().current_view().active_cellview().layout() 
-      if layout == None:
-        raise Exception("No layout")
-      lv = pya.Application.instance().main_window().current_view()
-      if lv == None:
-        raise Exception("No view selected")
-      # find the currently selected cell:
-      topcell = pya.Application.instance().main_window().current_view().active_cellview().cell
-      if topcell == None:
-        raise Exception("No cell")
-      # scan layout for other detectors, record their numbers
-      detectors = []
-      LayerINTERCONNECTN = layout.layer(LayerINTERCONNECT)
-      iter1 = topcell.begin_shapes_rec(LayerINTERCONNECTN)
-      while not(iter1.at_end()):
-        if iter1.shape().is_text():
-          txt = iter1.shape().text.string
-          if string.find(txt,"LumericalINTERCONNECT_Detector") &gt; -1:
-            n = [int(s) for s in txt.split() if s.isdigit()]
-            if len(n)&gt;0:
-              detectors.append (n[0])
-        advance_iterator(iter1)
-      print("LumericalINTERCONNECT_Detector, listing of detector numbers: %s" % detectors )
-      detector_number = 1
-      while detector_number in detectors:
-        detector_number += 1
-      print("LumericalINTERCONNECT_Detector, new detector number: %s" % detector_number )
-    else:
-      pass
-
-    # fetch the parameters
-    dbu = self.layout.dbu
-    ly = self.layout
-    shapes = self.cell.shapes
-       
-    LayerINTERCONNECTN = ly.layer(LayerINTERCONNECT)
-    TextLayerN = ly.layer(LayerText)
-
-    # Draw the outline
-    width = 60/dbu
-    height = 40/dbu
-    box1 = Box(-width/2, -height/2, width/2, height/2)
-    shapes(LayerINTERCONNECTN).insert(box1)
-#    shrink = 1000
-#    box1 = Box(-width/2+shrink, -height/2+shrink, width/2-shrink, height/2-shrink)
-#    shapes(LayerINTERCONNECTN).insert(box1)
-        
-    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-4/dbu)
-    text = Text ("Detector", t)
-    shape = shapes(LayerINTERCONNECTN).insert(text)
-    shape.text_size = 1.5/dbu
-
-    t = Trans(pya.Trans.R0, -width/2+3/dbu, height/2-8/dbu)
-    text = Text ("Detector Number: %s" % ( self.number), t)
-    shape = shapes(LayerINTERCONNECTN).insert(text)
-    shape.text_size = 1.5/dbu
-    
-    # Label to be used for Spice netlist, and for unique detector generation (coerce, above)
-    t = Trans(pya.Trans.R0, 0,0)
-    text = Text ("LumericalINTERCONNECT_Detector %s" % ( self.number), t)
-    shape = shapes(LayerINTERCONNECTN).insert(text)
-    shape.text_size = 0.1/dbu
-
-    # Add a polygon text description
-    fontsize = 2.2
-    layout_pgtext(self.cell, LayerText, -width/2*dbu+3, -height/2*dbu+2, "Number: %s" % ( self.number), fontsize)
-
-    print("PCell produce_impl: detector")
-
-
 
 
 
@@ -4259,43 +4077,74 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
 
 
 
-class SiEPIC(pya.Library):
+class SiEPIC_EBeam(pya.Library):
   """
-  The library where we will put the PCell into 
+  The library where we will put the PCells and GDS into 
   """
 
   def __init__(self):
 
-    print("Initializing SiEPIC EBeam PCells library.")
+    print("Initializing SiEPIC EBeam library.")
   
     # Set the description
-    self.description = "EBeam PCells"
+    self.description = ""
+
+    import os
+    self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-EBeam.gds"))
+    [self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
+    
     
     # Create the PCell declarations
 
     self.layout().register_pcell("ebeam_dc_halfring_straight", ebeam_dc_halfring_straight())
-    self.layout().register_pcell("DirectionalCoupler_HalfRing_Straight", DirectionalCoupler_HalfRing_Straight())
-    self.layout().register_pcell("DirectionalCoupler_HalfRing_Arc", DirectionalCoupler_HalfRing_Arc())
-    self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
-    self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
-    self.layout().register_pcell("TestStruct_DoubleBus_Ring2", TestStruct_DoubleBus_Ring2())
-#    self.layout().register_pcell("LumericalINTERCONNECT_Laser", LumericalINTERCONNECT_Laser())
-#    self.layout().register_pcell("LumericalINTERCONNECT_Detector", LumericalINTERCONNECT_Detector())
-    self.layout().register_pcell("Waveguide_Bend", Waveguide_Bend())
-    self.layout().register_pcell("Waveguide_Route", Waveguide_Route())
-    self.layout().register_pcell("Waveguide_Route_simple", Waveguide_Route_simple())
-    self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
     self.layout().register_pcell("Bragg_waveguide", Bragg_waveguide())
     self.layout().register_pcell("ebeam_taper_te1550", ebeam_taper_te1550())
     self.layout().register_pcell("SWG_waveguide", SWG_waveguide())
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
     self.layout().register_pcell("spiral", spiral())
-    self.layout().register_pcell("DirectionalCoupler_SeriesRings", DirectionalCoupler_SeriesRings())
     self.layout().register_pcell("Waveguide_bump", Waveguide_bump())
     self.layout().register_pcell("Waveguide_SBend", Waveguide_SBend())
     self.layout().register_pcell("Focusing Sub-wavelength grating coupler (fswgc)", fswgc() )
     self.layout().register_pcell("strip_to_slot", strip_to_slot() )
+
+    # Register us with the name "SiEPIC_EBeam_PCells".
+    # If a library with that name already existed, it will be replaced then.
+    self.register("SiEPIC-EBeam")
+ 
+# Instantiate and register the library
+SiEPIC_EBeam()
+
+
+
+class SiEPIC_EBeam_dev(pya.Library):
+  """
+  The library where we will put the PCells and GDS into 
+  """
+
+  def __init__(self):
+
+    print("Initializing SiEPIC EBeam Development library.")
+  
+    # Set the description
+    self.description = ""
+
+#    import os
+#    self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-EBeam.gds"))
+#    [self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
     
+    
+    # Create the PCell declarations
+
+    self.layout().register_pcell("DirectionalCoupler_HalfRing_Straight", DirectionalCoupler_HalfRing_Straight())
+    self.layout().register_pcell("DirectionalCoupler_HalfRing_Arc", DirectionalCoupler_HalfRing_Arc())
+    self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
+    self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
+    self.layout().register_pcell("TestStruct_DoubleBus_Ring2", TestStruct_DoubleBus_Ring2())
+    self.layout().register_pcell("Waveguide_Bend", Waveguide_Bend())
+    self.layout().register_pcell("Waveguide_Route", Waveguide_Route())
+    self.layout().register_pcell("Waveguide_Route_simple", Waveguide_Route_simple())
+    self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
+    self.layout().register_pcell("DirectionalCoupler_SeriesRings", DirectionalCoupler_SeriesRings())
     self.layout().register_pcell("Waveguide_Arc", Waveguide_Arc())
     self.layout().register_pcell("Bent_Coupled_Half_Ring", Bent_Coupled_Half_Ring())
     self.layout().register_pcell("Bent_CDC_Half_Ring", Bent_CDC_Half_Ring())
@@ -4305,10 +4154,10 @@ class SiEPIC(pya.Library):
 
     # Register us with the name "SiEPIC_EBeam_PCells".
     # If a library with that name already existed, it will be replaced then.
-    self.register("SiEPIC-EBeam PCells")
+    self.register("SiEPIC-EBeam-dev")
  
 # Instantiate and register the library
-SiEPIC()
+SiEPIC_EBeam_dev()
 
 
 
