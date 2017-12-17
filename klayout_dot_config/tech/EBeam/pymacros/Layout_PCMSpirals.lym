@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Python script
+# Layout_PCM Spiral
+
+"""
+Based on Lukas Chrowstowski's code
+Author: Stephen
+
+"""
+
+
+import pya
+
+pol = 'te'
+
+#Shared Sweep
+#sweep_length=[1, 2, 4, 6, 8, 10]
+#sweep_corrugation = [80, 100, 120]
+sweep_length=[1]
+sweep_corrugation = [80]
+
+#450
+#sweep_period450=[392, 380, 370]
+sweep_period450=[370]
+#400
+sweep_period400=[413, 396, 382]
+#350
+sweep_period350=[445, 419, 400]
+
+x_offset = 67
+y_ring = 127/2
+wg_bend_radius = 16
+
+# Configure variables to draw structures in the presently selected cell:
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+  raise Exception("No view selected")
+# Find the currently selected layout.
+ly = pya.Application.instance().main_window().current_view().active_cellview().layout() 
+if ly == None:
+  raise Exception("No layout")
+# find the currently selected cell:
+cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if cell == None:
+  raise Exception("No cell")
+# fetch the database parameters
+dbu = ly.dbu
+
+# clean all cells within "cell"
+ly.prune_subcells(cell.cell_index(), 10)
+#delete_extra_top_cells(cell)
+
+# Layer mapping:
+LayerSi = pya.LayerInfo(1, 0)
+LayerSiN = cell.layout().layer(LayerSi)
+fpLayer = pya.LayerInfo(99, 0)
+fpLayerN = cell.layout().layer(fpLayer)
+TextLayer = pya.LayerInfo(10, 0)
+TextLayerN = cell.layout().layer(TextLayer)
+
+# Draw floor plan
+cell.shapes(fpLayerN).insert(pya.Box(0,0, 1900/dbu, 7900/dbu))
+
+# Create a sub-cell for our Ring resonator layout
+top_cell = cell
+cell = cell.layout().create_cell("PCMSpiral_"+pol)
+if pol == 'te':
+  t = pya.Trans(pya.Trans.R0, 40 / dbu, 12 / dbu)
+else:
+  t = pya.Trans(pya.Trans.R180, 560 / dbu, 393 / dbu)
+
+# place "cell" in the top cell
+top_cell.insert(pya.CellInstArray(cell.cell_index(), t))
+
+
+# Import cells from the SiEPIC GDS Library, and instantiate them
+
+# Grating couplers, Ports 1, 2, 3, 4 (top-down):
+if pol == 'te':
+  GC_imported = ly.create_cell("ebeam_gc_%s1550" % pol, "SiEPIC-EBeam").cell_index()
+  print ("Cell: GC_imported: #%s" % GC_imported)
+gc_length = 41
+
+
+for i in range(len(sweep_length)):
+  for ii in range(len(sweep_corrugation)):
+      #450
+      for iii in range(len(sweep_period450)):
+        wg_width=450
+
+        # place layout at location:
+        x = iii * x_offset
+        devicelength= sweep_length[i]
+        cwidth=sweep_corrugation[ii]
+        period = sweep_period450[iii]
+        t = pya.Trans(pya.Trans.R0, x/dbu, 0)
+        cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 2, 1))
+      
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4 
+        t = pya.Trans(x/dbu, 127/2/dbu)
+        text = pya.Text ("opt_in_%s_1550_device_SpiralTEM_WG%sP%sdw%sL%s" % (pol,wg_width,period,cwidth,devicelength), t)
+        shape = cell.shapes(TextLayerN).insert(text)
+        shape.text_size = 3/dbu
+
+    
+
+        # Ring resonator PCell
+        pcell = ly.create_cell("PCMSpiral_BraggGrating", "PCMSpiral", {"silayer": LayerSi , "w": wg_width, "DeviceLength": devicelength, "Cwidth": cwidth, "pitch": period, "Chirp_Rate": 0, "n": 1800 , "textpolygon": 0, "textl": pya.LayerInfo(10, 0), "pinrec": pya.LayerInfo(69, 0), "textl": pya.LayerInfo(68, 0)} )
+        print ("Cell: pcell: #%s" % pcell.cell_index())
+        
+        if devicelength==1:
+          t1 = pya.Trans(pya.Trans.R90, 5*(x+wg_bend_radius) / dbu, y_ring / dbu)
+        else:
+          print ('hi') 
+        instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t1))
+
+        
+        '''
+        if 2*r &lt; (gc_length+wg_bend_radius):
+          t1 = pya.Trans(pya.Trans.R0, (x+wg_bend_radius) * dbu, y_ring * dbu) 
+          t2 = pya.Trans(pya.Trans.R90, (x+wg_bend_radius+2*r+2*g+2*wg_width) * dbu, y_ring * dbu) 
+        else:
+          t1 = pya.Trans(pya.Trans.R90, (x+wg_bend_radius) * dbu, y_ring * dbu) 
+          t2 = pya.Trans(pya.Trans.R270, (x+wg_bend_radius-2*r-2*g-2*wg_width) * dbu, y_ring * dbu) 
+
+        #instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t2))
+
+
+        # Create paths for waveguides
+        
+        # GC3 to bottom-left of ring
+        points = [ [0, 127], [wg_bend_radius,127], [wg_bend_radius, y_ring-1*r-1.5*wg_width] ] 
+        start_point = [ x, 0 ]
+        layout_waveguide_rel(cell, LayerSi, start_point, points, wg_width, wg_bend_radius)
+      
+        # GC2 to top-left of ring
+        points = [ [wg_bend_radius,y_ring+r+1.5*wg_width], [wg_bend_radius, 127*2], [0,127*2] ] 
+        layout_waveguide_rel(cell, LayerSi, start_point, points, wg_width, wg_bend_radius)
+        '''
+        '''
+        # GC1 to top-right of ring
+        # GC4 to bottom-right of ring
+        if l==1:
+          points_gc1 = [ [0, 127*2], [wg_bend_radius+2*r+2*g+2*wg_width,127*3], [wg_bend_radius+2*r+2*g+2*wg_width, y_ring+r+1.5*wg_width] ] 
+          points_gc4 = [ [0, 0], [wg_bend_radius+2*r+2*g+2*wg_width,0], [wg_bend_radius+2*r+2*g+2*wg_width, y_ring-1*r-1.5*wg_width]  ] ] 
+
+        layout_waveguide_rel(cell, LayerSi, start_point, points_gc1, wg_width, wg_bend_radius)
+        layout_waveguide_rel(cell, LayerSi, start_point, points_gc4, wg_width, wg_bend_radius)
+        '''
+        
+print ("done layout...")</text>
+</klayout-macro>
