@@ -26,8 +26,9 @@ FONTSIZE =  13; % font size for the figures;
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_07';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_08_ANT';
 %folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2016_10_ANT';
-folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_ANT';
-folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_UW';
+%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_ANT';
+%folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBeam_PCM/D2017_01_02_UW';
+folder_name = '/Users/lukasc/Dropbox (SiEPIC)/EBL/EBeam_PCM/D2017_11_ANT';
 
 folder_name_linux = regexprep (folder_name,'\s|)|(', '\\$0');
 %system(['ls ' folder_name_linux  ]);
@@ -37,10 +38,12 @@ folder_name_linux = regexprep (folder_name,'\s|)|(', '\\$0');
 polarizations = {'TE', 'TM'};
 
 % filename conventions for each PCM:
-filetype_wg_loss = 'LukasC_SpiralWG';
+%filetype_wg_loss = 'LukasC_SpiralWG';
 filetype_wg_loss = 'PCM_PCM_SpiralWG';
 filetype_wg_lossN = {'PCM_PCM_SpiralWG', 'PCM_PCM_StraightWGloss'};
+%filetype_wg_lossN = {'PCM_PCM_StraightWGloss'};
 filetype_wg_loss_descriptions = {'Spiral waveguide propagation loss', 'Straight waveguide propagation loss'};
+%filetype_wg_loss_descriptions = {'Straight waveguide propagation loss'};
 UncertaintyMax_wg_loss = 50;
 
 % At what wavelength do you want to find out the Loss of the DUT
@@ -197,6 +200,7 @@ global FONTSIZE MAKE_PLOTS lambda0
 % calculate error confidence intervals?
 % check if regress function is present. This is part of the statistics toolbox.
 Error_Intervals = exist('regress');
+Error_Intervals = 0;
 
 dB_threshold = -60; % minimum dB, average over the data, to use data.
 dB_threshold_diff =-20;  % consider only data that is dB_threshold_diff below the peaks
