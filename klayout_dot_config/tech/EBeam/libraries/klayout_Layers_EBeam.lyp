@@ -14,7 +14,7 @@
   <marked>false</marked>
   <xfill>false</xfill>
   <animation>0</animation>
-  <name>1_Si</name>
+  <name>Si</name>
   <source>1/0@1</source>
  </properties>
  <properties>
@@ -31,7 +31,7 @@
   <marked>false</marked>
   <xfill>false</xfill>
   <animation>0</animation>
-  <name>10_Text</name>
+  <name>Text</name>
   <source>10/0@1</source>
  </properties>
  <properties>
@@ -116,7 +116,7 @@
   <marked>false</marked>
   <xfill>false</xfill>
   <animation>0</animation>
-  <name>11_M1</name>
+  <name>M1</name>
   <source>11/0@1</source>
  </properties>
  <properties>
@@ -167,7 +167,7 @@
   <marked>false</marked>
   <xfill>false</xfill>
   <animation>0</animation>
-  <name>99_FloorPlan</name>
+  <name>FloorPlan</name>
   <source>99/0@1</source>
  </properties>
  <properties>
