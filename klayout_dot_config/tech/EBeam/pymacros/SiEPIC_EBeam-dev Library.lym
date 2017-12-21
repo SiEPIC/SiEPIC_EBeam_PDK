@@ -1112,7 +1112,7 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     # This is the main part of the implementation: create the layout
 
     from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg
+    from SiEPIC.utils import arc_wg, arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH
 
     # fetch the parameters
@@ -1169,12 +1169,16 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     dc_angle = 30.0
     t = pya.Trans(pya.Trans.R0,Lc/2, -r)
     self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90-dc_angle, 90).transformed(t))
+#    self.cell.shapes(LayerSiN).insert(arc_wg_xy(Lc/2,-r, r, w, 90-dc_angle, 90))
     t = pya.Trans(pya.Trans.R0,-Lc/2, -r)
     self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90, 90+dc_angle).transformed(t))
-    y_bottom = -2*(1-cos(dc_angle/180.0*pi))*r
-    x_bottom = 2*sin(dc_angle/180.0*pi)*r
+    y_bottom = round(-2*(1-cos(dc_angle/180.0*pi))*r)
+    x_bottom = round(2*sin(dc_angle/180.0*pi)*r)
     t = pya.Trans(pya.Trans.R0,-x_bottom-Lc/2, y_bottom+r)
+    print(t)
     self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90, -90+dc_angle).transformed(t))
+#    print("%s" % [-x_bottom-Lc/2, y_bottom+r, r, w, -90, -90+dc_angle])
+#    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-x_bottom-Lc/2, y_bottom+r, r, w, -90, -90+dc_angle))
     t = pya.Trans(pya.Trans.R0,x_bottom+Lc/2, y_bottom+r)
     self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90-dc_angle, -90).transformed(t))
     
