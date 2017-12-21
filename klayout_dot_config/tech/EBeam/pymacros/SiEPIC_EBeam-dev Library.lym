@@ -146,6 +146,7 @@ with:
 
 import pya
 import math
+from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle
 
 #import numpy as n
 MODULE_NUMPY = False
@@ -215,8 +216,8 @@ class cavity_hole(pya.PCellDeclarationHelper):
     LayerSiN = ly.layer(self.LayerSi)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    LayerTextN = ly.layer(LayerText)
-    
+    TECHNOLOGY = get_technology()
+    LayerTextN = TECHNOLOGY['Text']
     # cell: layout cell to place the layout
     # LayerSiN: which layer to use
     # x, y: location of the origin
@@ -330,7 +331,10 @@ class strip_to_slot(pya.PCellDeclarationHelper):
     x = 0
     y = r+0.35/dbu+g
 #    layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 270)
-    layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, 0.2/dbu, 270, 360)
+    #layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, 0.2/dbu, 270, 360)
+
+    t = pya.Trans(pya.Trans.R0,x+Lc/2, y)
+    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, 270, 360),0.2/dbu).transformed(t).simple_polygon())
 
     # Draw 500 to 200 nm polygon
     pts = []
@@ -1129,8 +1133,11 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     # draw the half-circle
     x = 0
     y = r+w+g
-    layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 270)
-    layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 360)
+    
+    t = pya.Trans(pya.Trans.R0,x+Lc/2, y)
+    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, 270, 360),w).transformed(t).simple_polygon())
+    t = pya.Trans(pya.Trans.R0,x-Lc/2, y)
+    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, 180, 270),w).transformed(t).simple_polygon())
     
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
@@ -1161,13 +1168,18 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
       shapes(LayerSiN).insert(wg1)
       
     dc_angle = 30.0
-    layout_arc_wg_dbu(self.cell, LayerSiN, Lc/2, -r, r, w, 90-dc_angle, 90)
-    layout_arc_wg_dbu(self.cell, LayerSiN, -Lc/2, -r, r, w, 90, 90+dc_angle)
+    t = pya.Trans(pya.Trans.R0,Lc/2, -r)
+    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, 90-dc_angle, 90),w).transformed(t).simple_polygon())
+    t = pya.Trans(pya.Trans.R0,-Lc/2, -r)
+    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, 90, 90+dc_angle),w).transformed(t).simple_polygon())
     y_bottom = -2*(1-cos(dc_angle/180.0*pi))*r
     x_bottom = 2*sin(dc_angle/180.0*pi)*r
-    layout_arc_wg_dbu(self.cell, LayerSiN, -x_bottom-Lc/2, y_bottom+r, r, w, -90, -90+dc_angle)
-    layout_arc_wg_dbu(self.cell, LayerSiN, x_bottom+Lc/2, y_bottom+r, r, w, -90-dc_angle, -90)
-
+    t = pya.Trans(pya.Trans.R0,-x_bottom-Lc/2, y_bottom+r)
+    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, -90, -90+dc_angle),w).transformed(t).simple_polygon())
+    
+    t = pya.Trans(pya.Trans.R0,x_bottom+Lc/2, y_bottom+r)
+    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, -90-dc_angle, -90),w).transformed(t).simple_polygon())
+    
     wg1 = Box(-r-w/2-w-Lc/2, y_bottom-w/2, -x_bottom-Lc/2, y_bottom+w/2)
     shapes(LayerSiN).insert(wg1)
     wg1 = Box(x_bottom+Lc/2, y_bottom-w/2, r+w/2+w+Lc/2, y_bottom+w/2)
@@ -1203,7 +1215,7 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(pya.Trans.R0, r/4, r/2)
-    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'(self.w,self.g,self.r,self.Lc), t)
+    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'%(self.w,self.g,self.r,self.Lc), t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
