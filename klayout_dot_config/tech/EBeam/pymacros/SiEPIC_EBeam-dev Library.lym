@@ -1202,6 +1202,16 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
+    # Merge all the waveguide shapes, to avoid any small gaps
+    layer_temp = self.layout.layer(pya.LayerInfo(913, 0))
+    shapes_temp = self.cell.shapes(layer_temp)
+    pya.ShapeProcessor().merge(self.layout,self.cell,LayerSiN,shapes_temp,True,0,True,True)
+    self.cell.shapes(LayerSiN).clear()
+    shapes_SiN = self.cell.shapes(LayerSiN)
+    pya.ShapeProcessor().merge(self.layout,self.cell,layer_temp, shapes_SiN,True,0,True,True)
+    self.cell.shapes(layer_temp).clear()
+
+
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     dev = Box(-r-w/2-w-Lc/2, y_bottom-w/2-w, r+w/2+w+Lc/2, y )
     shapes(LayerDevRecN).insert(dev)
