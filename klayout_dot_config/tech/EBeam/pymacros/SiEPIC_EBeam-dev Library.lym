@@ -1175,8 +1175,8 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     y_bottom = -2*(1-cos(dc_angle/180.0*pi))*r
     x_bottom = 2*sin(dc_angle/180.0*pi)*r
     t = pya.Trans(pya.Trans.R0,-x_bottom-Lc/2, y_bottom+r)
-    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, -90, -90+dc_angle),w).transformed(t).simple_polygon())
-    
+#    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, -90, -90+dc_angle),w).transformed(t).simple_polygon())
+    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r, -90, -90+dc_angle),w).transformed(t))
     t = pya.Trans(pya.Trans.R0,x_bottom+Lc/2, y_bottom+r)
     self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, -90-dc_angle, -90),w).transformed(t).simple_polygon())
     
