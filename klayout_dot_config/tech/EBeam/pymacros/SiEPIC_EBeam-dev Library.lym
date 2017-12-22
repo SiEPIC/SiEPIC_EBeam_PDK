@@ -85,24 +85,6 @@ Lukas Chrostowski           2015/11/15
 Lukas Chrostowski           2015/11/17
  - update "layout_waveguide_rel" to use the calculated points_per_circle(radius)
 
-Lukas Chrostowski           2015/11/19
- - Lumerical INTERCONNECT laser, detector
-
-Lukas Chrostowski           2015/11/xx
- - Waveguide based on bends, straight waveguide.
-
-Lukas Chrostowski           2015/12/3
- - Bragg grating
-
-Lukas Chrostowski           2016/01/17
- - Taper, matching EBeam CML component
- 
-Lukas Chrostowski           2016/01/20
- - (sinusoidal) Bragg grating
-
-Lukas Chrostowski           2016/04/19
- - Support for TM polarization in Netlist and laser
- 
 Lukas Chrostowski           2016/05/27
  - SWG_waveguide
  - SWG_to_strip_waveguide
@@ -112,22 +94,6 @@ Lukas Chrostowski           2016/06/11
 
 S. Preble                   2016/08/26
  - Double Bus Ring Pin's shifted - text now is in the middle of the pin path
-
-Lukas Chrostowski           2016/11/06
- - waveguide bump, to provide a tiny path length increase
-
-Lukas Chrostowski           2016/11/06
- - adding capability to Ignore optical IOs in simulations: added as an option in the Laser.
-
-Lukas Chrostowski           2017/02/14
- - renaming "SiEPIC" PCells library to "SiEPIC-EBeam PCells", update for Waveguide_Route
- - code simplifications: pya.Box -&gt; Box
-
-Lukas Chrostowski           2017/03/08
- - S-Bend - Waveguide_SBend
-
-Lukas Chrostowski           2017/03/18
- - ebeam_dc_halfring_straight, with TE/TM support.  Zeqin Lu adding CML for this component. 
  
 Timothy Richards, Adam DeAbreu, Lukas Chrostowski  2017/07/11
  -  Focusing Sub-wavelength grating coupler PCell.
@@ -139,30 +105,247 @@ todo:
 replace:     
  layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
 with:
- self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [pya.Point(0, 0)]).transformed(t))
+ self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [Point(0, 0)]).transformed(t))
 
 
 """
 
-import pya
 import math
-from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle
+from SiEPIC.utils import arc, arc_wg, arc_to_waveguide, points_per_circle
+from SiEPIC.utils import get_technology
 
 #import numpy as n
 MODULE_NUMPY = False
 
 dbu = 0.001
 
-# Create aliases for KLayout Python API methods:
-Box = pya.Box
-Point = pya.Point
-Polygon = pya.Polygon
-Text = pya.Text
-Trans = pya.Trans
-LayerInfo = pya.LayerInfo
+# Import KLayout Python API methods:
+# Box, Point, Polygon, Text, Trans, LayerInfo, etc
+from pya import *
 
 
-class cavity_hole(pya.PCellDeclarationHelper):
+
+class spiral(PCellDeclarationHelper):
+  """
+  Input: 
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(spiral, self).__init__()
+    TECHNOLOGY = get_technology()
+
+    # declare the parameters
+    self.param("length", self.TypeDouble, "Target Waveguide length", default = 10.0)     
+    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5)     
+    self.param("min_radius", self.TypeDouble, "Minimum radius (microns)", default = 5)     
+    self.param("wg_spacing", self.TypeDouble, "Waveguide spacing (microns)", default = 1)     
+    self.param("spiral_ports", self.TypeInt, "Ports on the same side? 0/1", default = 0)
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "spiral_%s-%.3f-%.3f-%.3f" % \
+    (self.length, self.wg_width, self.min_radius, self.wg_spacing)
+  
+  def coerce_parameters_impl(self):
+    pass
+
+  def can_create_from_shape(self, layout, shape, layer):
+    return False
+    
+  def produce_impl(self):
+  
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+
+    LayerSi = self.layer
+    LayerSiN = ly.layer(LayerSi)
+    LayerSiSPN = ly.layer(LayerSiSP)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    LayerTextN = ly.layer(LayerText)
+
+    # draw spiral
+    from math import pi, cos, sin, log, sqrt
+    
+    # Archimedes spiral
+    # r = b + a * theta
+    b = self.min_radius
+    spacing = self.wg_spacing+self.wg_width;
+    a = 2*spacing/(2*pi)
+
+
+    # area, length, turn tracking for spiral
+    area = 0
+    spiral_length = 0
+    turn = -1
+    
+    while spiral_length &lt; self.length:
+      turn +=1
+
+      # Spiral #1
+      pts = []
+      # local radius:
+      r = 2*b + a * turn * 2 * pi - self.wg_width/2
+      # number of points per circle:
+      npoints = int(points_per_circle(r))
+      # increment, in radians, for each point:
+      da = 2 * pi / npoints  
+      # draw the inside edge of spiral
+      for i in range(0, npoints+1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
+      # draw the outside edge of spiral
+      r = 2*b + a * turn * 2 * pi + self.wg_width/2
+      npoints = int(points_per_circle(r))
+      da = 2 * pi / npoints  
+      for i in range(npoints, -1, -1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
+      polygon = Polygon(pts)
+      area += polygon.area()
+      shapes(LayerSiN).insert(polygon)
+
+      # Spiral #2
+      pts = []
+      # local radius:
+      r = 2*b + a * turn * 2 * pi - self.wg_width/2 - spacing
+      # number of points per circle:
+      npoints = int(points_per_circle(r))
+      # increment, in radians, for each point:
+      da = 2 * pi / npoints  
+      # draw the inside edge of spiral
+      for i in range(0, npoints+1):
+        t = i*da + pi
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
+      # draw the outside edge of spiral
+      r = 2*b + a * turn * 2 * pi + self.wg_width/2  - spacing
+      npoints = int(points_per_circle(r))
+      da = 2 * pi / npoints  
+      for i in range(npoints, -1, -1):
+        t = i*da + pi
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
+      polygon = Polygon(pts)
+      area += polygon.area()
+      shapes(LayerSiN).insert(polygon)
+
+      # waveguide length:
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
+
+    if self.spiral_ports:
+      # Spiral #1 extra 1/2 arm
+      turn = turn + 1
+      pts = []
+      # local radius:
+      r = 2*b + a * turn * 2 * pi - self.wg_width/2
+      # number of points per circle:
+      npoints = int(points_per_circle(r))
+      # increment, in radians, for each point:
+      da = pi / npoints  
+      # draw the inside edge of spiral
+      for i in range(0, npoints+1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
+      # draw the outside edge of spiral
+      r = 2*b + a * turn * 2 * pi + self.wg_width/2
+      npoints = int(points_per_circle(r))
+      da = pi / npoints  
+      for i in range(npoints, -1, -1):
+        t = i*da
+        xa = (a*t + r) * cos(t);
+        ya = (a*t + r) * sin(t);
+        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
+      polygon = Polygon(pts)
+      area += polygon.area()
+      shapes(LayerSiN).insert(polygon)
+      turn = turn - 1
+      # waveguide length:
+      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
+
+    # Centre S-shape connecting waveguide        
+    layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
+    layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
+    
+    print("spiral length: %s microns" % spiral_length)
+
+    # Pins on the waveguide:
+    pin_length = 200
+    x = -(2*b + a * (turn+1) * 2 * pi)/dbu
+    w = self.wg_width / dbu
+    t = Trans(Trans.R0, x,0)
+    pin = Path([Point(0,-pin_length/2), Point(0,pin_length/2)], w)
+    pin_t = pin.transformed(t)
+    shapes(LayerPinRecN).insert(pin_t)
+    text = Text ("pin2", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    if self.spiral_ports:
+      x = -(2*b + a * (turn+1.5) * 2 * pi)/dbu
+    else:
+      x = (2*b + a * (turn+1) * 2 * pi)/dbu
+    t = Trans(Trans.R0, x,0)
+    pin = Path([Point(0,-pin_length/2), Point(0,pin_length/2)], w)
+    pin_t = pin.transformed(t)
+    shapes(LayerPinRecN).insert(pin_t)
+    text = Text ("pin1", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    # Compact model information
+    t = Trans(Trans.R0, -abs(x), 0)
+    text = Text ('Length=%.3fu' % spiral_length, t)
+    shape = shapes(LayerTextN).insert(text)
+    shape.text_size = abs(x)/8
+    t = Trans(Trans.R0, 0, 0)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = Trans(Trans.R0, 0, w*2)
+    text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_strip_1550', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = Trans(Trans.R0, 0, -w*2)
+    text = Text \
+      ('Spice_param:wg_length=%.3fu wg_width=%.3fu min_radius=%.3fu wg_spacing=%.3fu' %\
+      (spiral_length, self.wg_width, (self.min_radius), self.wg_spacing), t )
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    x = abs(x)
+    npoints = int(points_per_circle(x) /100 )
+    da = 2 * pi / npoints # increment, in radians
+    r=x + 2 * self.wg_width/dbu
+    pts = []
+    for i in range(0, npoints+1):
+      pts.append(Point.from_dpoint(DPoint(r*cos(i*da), r*sin(i*da))))
+    shapes(LayerDevRecN).insert(Polygon(pts))
+
+    print("spiral done.")
+
+
+
+
+
+
+class cavity_hole(PCellDeclarationHelper):
   """
   The PCell declaration for the cavity hole.
   This is an example of how to perform inversion operations
@@ -173,15 +356,16 @@ class cavity_hole(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(cavity_hole, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
     self.param("x", self.TypeDouble, "x coordinate", default = 0)
     self.param("y", self.TypeDouble, "y coordinate", default = 0)
     self.param("radius", self.TypeDouble, "hole radius", default = 10)
     self.param("gap", self.TypeDouble, "half of the gap between surrounding holes (microns)", default = 2)
-    self.param("LayerSi", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("LayerSi", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     
 
   def display_text_impl(self):
@@ -197,16 +381,6 @@ class cavity_hole(pya.PCellDeclarationHelper):
     from operator import xor
     from math import pi, cos, sin
     
-    #fetch parameters
-
-    Box = pya.Box
-    Point = pya.Point
-    Polygon = pya.Polygon
-    Text = pya.Text
-    Trans = pya.Trans
-    LayerInfo = pya.LayerInfo
-
-
     dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
@@ -240,7 +414,7 @@ class cavity_hole(pya.PCellDeclarationHelper):
       theta = 2 * math.pi / npts # increment, in radians
       pts = []
       for i in range(0, npts):
-        pts.append(Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1, (y+r*math.sin(i*theta))/1)))
+        pts.append(Point.from_dpoint(DPoint((x+r*math.cos(i*theta))/1, (y+r*math.sin(i*theta))/1)))
       return pts
   
     
@@ -249,21 +423,21 @@ class cavity_hole(pya.PCellDeclarationHelper):
     dx = side_gap + (2*r)
     dy = side_gap + (2*r)
 
-    Si_slab = pya.Region()
-    Si_slab.insert(pya.Box(-dx/2, -dy/2, dx/2, dy/2))
+    Si_slab = Region()
+    Si_slab.insert(Box(-dx/2, -dy/2, dx/2, dy/2))
      
     # Circle 
-    hole = pya.Region()
+    hole = Region()
     hole_cell = circle(0,0,r)
-    hole_poly = pya.Polygon(hole_cell)  
-    hole_t = hole_poly.transformed(pya.Trans(pya.Trans.R0, x,y))
+    hole_poly = Polygon(hole_cell)  
+    hole_t = hole_poly.transformed(Trans(Trans.R0, x,y))
     hole.insert(hole_t)           
 
     # perform inversion:
     phc = Si_slab - hole
     self.cell.shapes(LayerSiN).insert(phc)
     # inversion can also be done by performing the XOR function
-    # upper_poly = xor(pya.Region(pya.Polygon(circleu_pts)),pya.Region(pya.Polygon(rectu_pts)))
+    # upper_poly = xor(Region(Polygon(circleu_pts)),Region(Polygon(rectu_pts)))
 
     
     return "cavity_hole(R=" + ('%.3f-%.3f' % (r,gap) ) + ")"
@@ -272,7 +446,7 @@ class cavity_hole(pya.PCellDeclarationHelper):
 
 
 
-class strip_to_slot(pya.PCellDeclarationHelper):
+class strip_to_slot(PCellDeclarationHelper):
   """
   The PCell declaration for the strip_to_slot.
   draft by Lukas Chrostowski july 24, 2017
@@ -283,16 +457,17 @@ class strip_to_slot(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(strip_to_slot, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
     self.param("orthogonal_identifier", self.TypeInt, "Orthogonal identifier (1=TE, 2=TM)", default = 1)     
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
@@ -333,15 +508,15 @@ class strip_to_slot(pya.PCellDeclarationHelper):
 #    layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 270)
     #layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, 0.2/dbu, 270, 360)
 
-    t = pya.Trans(pya.Trans.R0,x+Lc/2, y)
-    self.cell.shapes(LayerSiN).insert(pya.Path(arc(r, 270, 360),0.2/dbu).transformed(t).simple_polygon())
+    t = Trans(Trans.R0,x+Lc/2, y)
+    self.cell.shapes(LayerSiN).insert(Path(arc(r, 270, 360),0.2/dbu).transformed(t).simple_polygon())
 
     # Draw 500 to 200 nm polygon
     pts = []
-    pts.append(Point.from_dpoint(pya.DPoint(0/dbu, (-0.35+0.6)/dbu)))
-    pts.append(Point.from_dpoint(pya.DPoint(0/dbu, (-0.85+0.6)/dbu)))
-    pts.append(Point.from_dpoint(pya.DPoint(-10/dbu, (-0.55+0.6)/dbu)))
-    pts.append(Point.from_dpoint(pya.DPoint(-10/dbu, (-0.35+0.6)/dbu)))
+    pts.append(Point.from_dpoint(DPoint(0/dbu, (-0.35+0.6)/dbu)))
+    pts.append(Point.from_dpoint(DPoint(0/dbu, (-0.85+0.6)/dbu)))
+    pts.append(Point.from_dpoint(DPoint(-10/dbu, (-0.55+0.6)/dbu)))
+    pts.append(Point.from_dpoint(DPoint(-10/dbu, (-0.35+0.6)/dbu)))
     polygon = Polygon(pts)
     shapes(LayerSiN).insert(polygon)
 
@@ -358,16 +533,16 @@ class strip_to_slot(pya.PCellDeclarationHelper):
     shapes(LayerSiN).insert(wg1)
 
     # Pins on the bus waveguide side:
-    pin = pya.Path([Point(-10.1/dbu, (-0.35+0.6+0.05)/dbu), Point(-9.9/dbu, (-0.35+0.6+0.05)/dbu)], w)
+    pin = Path([Point(-10.1/dbu, (-0.35+0.6+0.05)/dbu), Point(-9.9/dbu, (-0.35+0.6+0.05)/dbu)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, -10/dbu, (-0.35+0.6+0.05)/dbu)
+    t = Trans(Trans.R0, -10/dbu, (-0.35+0.6+0.05)/dbu)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
+    pin = Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, r+w/2+w+Lc/2, 0)
+    t = Trans(Trans.R0, r+w/2+w+Lc/2, 0)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -380,7 +555,7 @@ class strip_to_slot(pya.PCellDeclarationHelper):
 
 
 
-class fswgc(pya.PCellDeclarationHelper):
+class fswgc(PCellDeclarationHelper):
   """
   Focusing Sub-wavelength grating coupler PCell implementation.
   Analytical design based on "Grating Coupler Design Based on Silicon-On-Insulator", Yun Wang (2013). Master's Thesis, University of British Columbia, Canada
@@ -409,6 +584,7 @@ class fswgc(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(fswgc, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters  
     self.param("wavelength", self.TypeDouble, "Design Wavelength (micron)", default = 1.55)  
@@ -424,9 +600,9 @@ class fswgc(pya.PCellDeclarationHelper):
     self.param("theta_c", self.TypeDouble, "Insertion Angle (deg)", default = -31.0)
     
     # Layer parameters
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -508,7 +684,7 @@ class fswgc(pya.PCellDeclarationHelper):
     
         pts = []
         for i in range(len(x)):
-            pts.append(Point.from_dpoint(pya.DPoint(x[i]/dbu, y[i]/dbu)))
+            pts.append(Point.from_dpoint(DPoint(x[i]/dbu, y[i]/dbu)))
         #small_one = core.Boundary(points)
         
         polygon = Polygon(pts)
@@ -538,7 +714,7 @@ class fswgc(pya.PCellDeclarationHelper):
         
         pts = []
         for i in range(len(x)):
-            pts.append(Point.from_dpoint(pya.DPoint(x[i]/dbu, y[i]/dbu)))
+            pts.append(Point.from_dpoint(DPoint(x[i]/dbu, y[i]/dbu)))
         
         polygon = Polygon(pts)
         shapes(LayerSiN).insert(polygon)
@@ -574,7 +750,7 @@ class fswgc(pya.PCellDeclarationHelper):
 
     pts = []
     for i in range(len(x)):
-      pts.append(Point.from_dpoint(pya.DPoint(x[i]/dbu, y[i]/dbu)))
+      pts.append(Point.from_dpoint(DPoint(x[i]/dbu, y[i]/dbu)))
     
     polygon = Polygon(pts)
     shapes(LayerSiN).insert(polygon)
@@ -583,8 +759,8 @@ class fswgc(pya.PCellDeclarationHelper):
     # Pin on the waveguide:
     pin_length = 200
     x = 0
-    t = Trans(pya.Trans.R0, x,0)
-    pin = pya.Path([Point(-pin_length/2,0), Point(pin_length/2,0)], self.t/dbu)
+    t = Trans(Trans.R0, x,0)
+    pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], self.t/dbu)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
@@ -599,7 +775,7 @@ class fswgc(pya.PCellDeclarationHelper):
 
 
 
-class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
+class SWG_to_strip_waveguide(PCellDeclarationHelper):
   """
   Input: length, period_strip, period_swg, wg_width_strip, wg_width_swg, duty_strip, duty_swg
   continuously (linearly) variable period, width, duty along the length
@@ -609,6 +785,7 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(SWG_to_strip_waveguide, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
@@ -620,9 +797,9 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     self.param("wg_width_taper", self.TypeDouble, "Waveguide width at strip nanotaper end (microns)", default = 0.06)     
     self.param("duty_strip", self.TypeDouble, "SWG duty cycle at strip end (0 to 1)", default = 0.500)     
     self.param("duty_swg", self.TypeDouble, "SWG duty cycle at SWG end (0 to 1)", default = 0.700)     
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -686,8 +863,8 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     pin_length = 200
 #    pin_length = self.period_swg * self.duty_swg / dbu
     w = self.wg_width_swg / dbu
-    t = Trans(pya.Trans.R0, 0,0)
-    pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
+    t = Trans(Trans.R0, 0,0)
+    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
@@ -698,8 +875,8 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     pin_length = 200
 #    pin_length = self.period_strip * self.duty_strip / dbu
     w = max ( self.wg_width_strip, self.wg_width_taper) / dbu
-    t = Trans(pya.Trans.R0, length,0)
-    pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
+    t = Trans(Trans.R0, length,0)
+    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)
@@ -707,15 +884,15 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(pya.Trans.R0, 0, 0)
+    t = Trans(Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(pya.Trans.R0, length/10, 0)
+    t = Trans(Trans.R0, length/10, 0)
     text = Text ('Lumerical_INTERCONNECT_component=NO_MODEL_AVAILABLE', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(pya.Trans.R0, length/9, -w*2)
+    t = Trans(Trans.R0, length/9, -w*2)
     text = Text \
       ('Spice_param:length=%.3fu period_swg=%.3fu period_strip=%.3fu wg_width_swg=%.3fu wg_width_strip=%.3fu duty_swg=%.3f duty_strip=%.3f ' %\
       (self.length, self.period_swg, (self.period_strip), self.wg_width_swg, self.wg_width_strip, self.duty_swg, self.duty_strip), t )
@@ -733,7 +910,7 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
 
 
 
-class SWG_waveguide(pya.PCellDeclarationHelper):
+class SWG_waveguide(PCellDeclarationHelper):
   """
   Input: length, target_period, wg_width, width, duty
   """
@@ -742,15 +919,16 @@ class SWG_waveguide(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(SWG_waveguide, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
     self.param("target_period", self.TypeDouble, "Target period (microns)", default = 0.200)     
     self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.5)     
     self.param("duty", self.TypeDouble, "Duty Cycle (0 to 1)", default = 0.7)
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
@@ -800,15 +978,15 @@ class SWG_waveguide(pya.PCellDeclarationHelper):
     # Pins on the waveguide:
     pin_length = 200
 #    pin_length = box_width
-    t = Trans(pya.Trans.R0, 0,0)
-    pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
+    t = Trans(Trans.R0, 0,0)
+    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    t = Trans(pya.Trans.R0, length,0)
+    t = Trans(Trans.R0, length,0)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)
@@ -816,15 +994,15 @@ class SWG_waveguide(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(pya.Trans.R0, 0, 0)
+    t = Trans(Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(pya.Trans.R0, length/10, 0)
+    t = Trans(Trans.R0, length/10, 0)
     text = Text ('Lumerical_INTERCONNECT_component=NO_MODEL_AVAILABLE', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(pya.Trans.R0, length/9, -box_width*2)
+    t = Trans(Trans.R0, length/9, -box_width*2)
     text = Text \
       ('Spice_param:length=%.3fu target_period=%.3fu grating_period=%.3fu wg_width=%.3fu duty=%.3f ' %\
       (self.length, self.target_period, round(grating_period)*dbu, self.wg_width, self.duty), t )
@@ -849,7 +1027,7 @@ def layout_waveguide_abs(cell, layer, points, w, radius):
     # w: waveguide width
     
     # example usage:
-    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    # cell = Application.instance().main_window().current_view().active_cellview().cell
     # LayerSi = LayerInfo(1, 0)
     # points = [ [15, 2.75], [30, 2.75] ]  # units of microns.
     # layout_waveguide_abs(cell, LayerSi, points, 0.5, 10)
@@ -880,7 +1058,7 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
     # w: waveguide width
     
     # example usage:
-    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+    # cell = Application.instance().main_window().current_view().active_cellview().cell
     # LayerSi = LayerInfo(1, 0)
     # points = [ [15, 2.75], [30, 2.75] ]  # units of microns.
     # layout_waveguide_rel(cell, LayerSi, [0,0], points, 0.5, 10)
@@ -895,9 +1073,9 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
 
     a1 = []
     for p in points:
-      a1.append (pya.DPoint(float(p[0]), float(p[1])))
+      a1.append (DPoint(float(p[0]), float(p[1])))
   
-    wg_path = pya.DPath(a1, w)
+    wg_path = DPath(a1, w)
 
     npoints = points_per_circle(radius)
     param = { "npoints": npoints, "radius": float(radius), "path": wg_path, "layer": layer }
@@ -908,202 +1086,35 @@ def layout_waveguide_rel(cell, layer, start_point, points, w, radius):
     trans = Trans(Point(start_point[0], start_point[1]))
 
     # Place the PCell
-    cell.insert(pya.CellInstArray(pcell.cell_index(), trans))
+    cell.insert(CellInstArray(pcell.cell_index(), trans))
 
 
 
-
-def layout_pgtext(cell, layer, x, y, text, mag):
-    # example usage:
-    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-    # layout_pgtext(cell, LayerInfo(10, 0), 0, 0, "test", 1)
-
-    # for the Text polygon:
-    textlib = pya.Library.library_by_name("Basic")
-    if textlib == None:
-      raise Exception("Unknown lib 'Basic'")
-
-    textpcell_decl = textlib.layout().pcell_declaration("TEXT");
-    if textpcell_decl == None:
-      raise Exception("Unknown PCell 'TEXT'")
-    param = { 
-      "text": text, 
-      "layer": layer, 
-      "mag": mag 
-    }
-    pv = []
-    for p in textpcell_decl.get_parameters():
-      if p.name in param:
-        pv.append(param[p.name])
-      else:
-        pv.append(p.default)
-    # "fake PCell code" 
-    text_cell = cell.layout().create_cell("Temp_text_cell")
-    textlayer_index = cell.layout().layer(layer)
-    textpcell_decl.produce(cell.layout(), [ textlayer_index ], pv, text_cell)
-
-    # fetch the database parameters
-    dbu = cell.layout().dbu
-    t = Trans(Trans.R0, x/dbu, y/dbu)
-    cell.insert(pya.CellInstArray(text_cell.cell_index(), t))
-    # flatten and delete polygon text cell
-    cell.flatten(True)
-
-    print("Done layout_pgtext")
-
-
-
-
-class DirectionalCoupler_HalfRing_Straight(pya.PCellDeclarationHelper):
+class ebeam_dc_halfring_arc(PCellDeclarationHelper):
   """
-  The PCell declaration for the DirectionalCoupler_HalfRing_Straight.
-  Consists of a half-ring with 1 waveguides.
+  The PCell declaration for the Directional Coupler Half Ring with Arc for the bus waveguide.
+  Consists of a half-ring with 1 waveguide.
   """
 
   def __init__(self):
 
     # Important: initialize the super class
-    super(DirectionalCoupler_HalfRing_Straight, self).__init__()
+    super(ebeam_dc_halfring_arc, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "DirectionalCoupler_HalfRing_Straight(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
-
-  def can_create_from_shape_impl(self):
-    return False
-    
-  def produce_impl(self):
-    # This is the main part of the implementation: create the layout
-
-    from math import pi, cos, sin
-
-    # fetch the parameters
-    dbu = self.layout.dbu
-    ly = self.layout
-    shapes = self.cell.shapes
-    
-    LayerSi = self.silayer
-    LayerSiN = ly.layer(LayerSi)
-    LayerPinRecN = ly.layer(self.pinrec)
-    LayerDevRecN = ly.layer(self.devrec)
-    TextLayerN = ly.layer(self.textl)
-
-    
-    w = int(round(self.w/dbu))
-    r = int(round(self.r/dbu))
-    g = int(round(self.g/dbu))
-    Lc = int(round(self.Lc/dbu))
-
-    # draw the half-circle
-    x = 0
-    y = r+w+g
-    layout_arc_wg_dbu(self.cell, LayerSiN, x-Lc/2, y, r, w, 180, 270)
-    layout_arc_wg_dbu(self.cell, LayerSiN, x+Lc/2, y, r, w, 270, 360)
-    
-    # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
-    
-    # Pins on the top side:
-    pin = pya.Path([Point(-r-Lc/2, y+pin_length/2), Point(-r-Lc/2, y-pin_length/2)], w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, -r-Lc/2, y)
-    text = Text ("pin2", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    pin = pya.Path([Point(r+Lc/2, y+pin_length/2), Point(r+Lc/2, y-pin_length/2)], w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, r+Lc/2, y)
-    text = Text ("pin4", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    if Lc &gt; 0:
-      wg1 = Box(-Lc/2, -w/2+w+g, Lc/2, w/2+w+g)
-      shapes(LayerSiN).insert(wg1)
-
-
-    # Create the waveguide
-    wg1 = Box(-r-w/2-w-Lc/2, -w/2, r+w/2+w+Lc/2, w/2)
-    shapes(LayerSiN).insert(wg1)
-
-    # Pins on the bus waveguide side:
-    pin = pya.Path([Point(-r-w/2-w-pin_length/2-Lc/2, 0), Point(-r-w/2-w+pin_length/2-Lc/2, 0)], w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, -r-w/2-w-Lc/2, 0)
-    text = Text ("pin1", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    pin = pya.Path([Point(r+w/2+w-pin_length/2+Lc/2, 0), Point(r+w/2+w+pin_length/2+Lc/2, 0)], w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, r+w/2+w+Lc/2, 0)
-    text = Text ("pin3", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    dev = Box(-r-w/2-w-Lc/2, -w/2-w, r+w/2+w+Lc/2, y )
-    shapes(LayerDevRecN).insert(dev)
-
-    # Compact model information
-    t = Trans(pya.Trans.R0, r/4, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = self.r*0.017/dbu
-    t = Trans(pya.Trans.R0, r/4, r/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight_te1550', t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = self.r*0.017/dbu
-    t = Trans(pya.Trans.R0, r/4, r/2)
-  #  text = Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% (self.w,self.g,int(self.r)), t)
-
-    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'% (self.w,self.g,self.r,self.Lc), t)
-
- #   text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu'% (self.w,self.g,self.r), t)
-
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = self.r*0.017/dbu
-
-    print("Done drawing the layout for - DirectionalCoupler_HalfRing_Straight: %.3f-%g" % ( self.r, self.g) )
-
-
-
-
-class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
-  """
-  The PCell declaration for the DirectionalCoupler_HalfRing_Arc.
-  Consists of a half-ring with 1 waveguides.
-  """
-
-  def __init__(self):
-
-    # Important: initialize the super class
-    super(DirectionalCoupler_HalfRing_Arc, self).__init__()
-
-    # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
-    self.param("r", self.TypeDouble, "Radius", default = 10)
-    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
-    self.param("g", self.TypeDouble, "Gap", default = 0.2)
-    self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
-    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
-
-  def display_text_impl(self):
-    # Provide a descriptive text for the cell
-    return "DirectionalCoupler_HalfRing_Straight(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+    return "ebeam_dc_halfring_arc(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
 
   def can_create_from_shape_impl(self):
     return False
@@ -1120,13 +1131,11 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     ly = self.layout
     shapes = self.cell.shapes
     
-    LayerSi = self.silayer
-    LayerSiN = ly.layer(LayerSi)
+    LayerSiN = ly.layer(self.silayer)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
     TextLayerN = ly.layer(self.textl)
 
-    
     w = int(round(self.w/dbu))
     r = int(round(self.r/dbu))
     g = int(round(self.g/dbu))
@@ -1136,22 +1145,19 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     x = 0
     y = r+w+g
     
-    t = pya.Trans(pya.Trans.R0,x+Lc/2, y)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270, 360).transformed(t))
-    t = pya.Trans(pya.Trans.R0,x-Lc/2, y)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 180, 270).transformed(t))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x-Lc/2, y, r, w, 180, 270))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x+Lc/2, y, r, w, 270, 360))
         
     # Pins on the top side:
-    pin = pya.Path([Point(-r-Lc/2, y+PIN_LENGTH/2), Point(-r-Lc/2, y-PIN_LENGTH/2)], w)
+    pin = Path([Point(-r-Lc/2, y-PIN_LENGTH/2), Point(-r-Lc/2, y+PIN_LENGTH/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, -r-Lc/2, y)
-    text = Text ("pin2", t)
+    text = Text ("pin2", Trans(-r-Lc/2, y))
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = pya.Path([Point(r+Lc/2, y+PIN_LENGTH/2), Point(r+Lc/2, y-PIN_LENGTH/2)], w)
+    pin = Path([Point(r+Lc/2, y-PIN_LENGTH/2), Point(r+Lc/2, y+PIN_LENGTH/2)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, r+Lc/2, y)
+    t = Trans(Trans.R0, r+Lc/2, y)
     text = Text ("pin4", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1167,19 +1173,13 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
       shapes(LayerSiN).insert(wg1)
       
     dc_angle = 30.0
-    t = pya.Trans(pya.Trans.R0,Lc/2, -r)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90-dc_angle, 90).transformed(t))
-#    self.cell.shapes(LayerSiN).insert(arc_wg_xy(Lc/2,-r, r, w, 90-dc_angle, 90))
-    t = pya.Trans(pya.Trans.R0,-Lc/2, -r)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90, 90+dc_angle).transformed(t))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(Lc/2,-r, r, w, 90-dc_angle, 90))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-Lc/2, -r, r, w, 90, 90+dc_angle))
     y_bottom = round(-2*(1-cos(dc_angle/180.0*pi))*r)
     x_bottom = round(2*sin(dc_angle/180.0*pi)*r)
-    t = pya.Trans(pya.Trans.R0,-x_bottom-Lc/2, y_bottom+r)
-    print(t)
+    t = Trans(Trans.R0,-x_bottom-Lc/2, y_bottom+r)
     self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90, -90+dc_angle).transformed(t))
-#    print("%s" % [-x_bottom-Lc/2, y_bottom+r, r, w, -90, -90+dc_angle])
-#    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-x_bottom-Lc/2, y_bottom+r, r, w, -90, -90+dc_angle))
-    t = pya.Trans(pya.Trans.R0,x_bottom+Lc/2, y_bottom+r)
+    t = Trans(Trans.R0,x_bottom+Lc/2, y_bottom+r)
     self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90-dc_angle, -90).transformed(t))
     
     wg1 = Box(-r-w/2-w-Lc/2, y_bottom-w/2, -x_bottom-Lc/2, y_bottom+w/2)
@@ -1188,27 +1188,25 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
     shapes(LayerSiN).insert(wg1)
 
     # Pins on the bus waveguide side:
-    pin = pya.Path([Point(-r-w/2-w-PIN_LENGTH/2-Lc/2, y_bottom), Point(-r-w/2-w+PIN_LENGTH/2-Lc/2, y_bottom)], w)
+    pin = Path([Point(-r-w/2-w+PIN_LENGTH/2-Lc/2, y_bottom), Point(-r-w/2-w-PIN_LENGTH/2-Lc/2, y_bottom)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, -r-w/2-w-Lc/2, y_bottom)
-    text = Text ("pin1", t)
+    text = Text ("pin1", Trans(-r-w/2-w-Lc/2, y_bottom))
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = pya.Path([Point(r+w/2+w-PIN_LENGTH/2+Lc/2, y_bottom), Point(r+w/2+w+PIN_LENGTH/2+Lc/2, y_bottom)], w)
+    pin = Path([Point(r+w/2+w-PIN_LENGTH/2+Lc/2, y_bottom), Point(r+w/2+w+PIN_LENGTH/2+Lc/2, y_bottom)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, r+w/2+w+Lc/2, y_bottom)
-    text = Text ("pin3", t)
+    text = Text ("pin3", Trans(r+w/2+w+Lc/2, y_bottom))
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     # Merge all the waveguide shapes, to avoid any small gaps
-    layer_temp = self.layout.layer(pya.LayerInfo(913, 0))
+    layer_temp = self.layout.layer(LayerInfo(913, 0))
     shapes_temp = self.cell.shapes(layer_temp)
-    pya.ShapeProcessor().merge(self.layout,self.cell,LayerSiN,shapes_temp,True,0,True,True)
+    ShapeProcessor().merge(self.layout,self.cell,LayerSiN,shapes_temp,True,0,True,True)
     self.cell.shapes(LayerSiN).clear()
     shapes_SiN = self.cell.shapes(LayerSiN)
-    pya.ShapeProcessor().merge(self.layout,self.cell,layer_temp, shapes_SiN,True,0,True,True)
+    ShapeProcessor().merge(self.layout,self.cell,layer_temp, shapes_SiN,True,0,True,True)
     self.cell.shapes(layer_temp).clear()
 
 
@@ -1218,55 +1216,21 @@ class DirectionalCoupler_HalfRing_Arc(pya.PCellDeclarationHelper):
 
 
     # Compact model information
-    t = Trans(pya.Trans.R0, r/4, 0)
+    t = Trans(Trans.R0, r/4, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(pya.Trans.R0, r/4, r/4)
+    t = Trans(Trans.R0, r/4, r/4)
     text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_arc_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
-    t = Trans(pya.Trans.R0, r/4, r/2)
+    t = Trans(Trans.R0, r/4, r/2)
     text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu'%(self.w,self.g,self.r,self.Lc), t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
-    print("Done drawing the layout for - DirectionalCoupler_HalfRing_Arc: %.3f-%g" % ( self.r, self.g) )
+    print("Done drawing the layout for - ebeam_dc_halfring_arc: %.3f-%g" % ( self.r, self.g) )
 
-
-
-def layout_arc_wg_dbu(cell, LayerSiN, x, y, r, w, theta_start, theta_stop):
-  # function to draw an arc of waveguide
-  # cell: layout cell to place the layout
-  # LayerSiN: which layer to use
-  # x, y: location of the origin
-  # r: radius
-  # w: waveguide width
-  # length units in dbu
-  # theta_start, theta_stop: angles for the arc
-  # angles in degrees
-
-  # example usage.  Places the ring layout in the presently selected cell.
-  # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-  # layout_Ring(cell, cell.layout().layer(LayerInfo(1, 0)), 0, 0, 10*1000, 0.5*1000, 0, 360)
-
-  from math import pi, cos, sin
-  from SiEPIC.utils import points_per_circle
-
-  dbu = cell.layout().dbu
-  
-  circle_fraction = abs(theta_stop-theta_start) / 360.0
-  npoints = int(points_per_circle(r*dbu) * circle_fraction)
-  if npoints==0:
-    npoints = 1
-  da = 2 * pi / npoints * circle_fraction # increment, in radians
-  pts = []
-  th = theta_start / 360.0 * 2 * pi
-  for i in range(0, npoints+1):
-    pts.append(Point.from_dpoint(pya.DPoint((x+(r+w/2)*cos(i*da+th))/1, (y+(r+w/2)*sin(i*da+th))/1)))
-  for i in range(npoints, -1, -1):
-    pts.append(Point.from_dpoint(pya.DPoint((x+(r-w/2)*cos(i*da+th))/1, (y+(r-w/2)*sin(i*da+th))/1)))
-  cell.shapes(LayerSiN).insert(Polygon(pts))
 
 
 def layout_Ring(cell, layer, x, y, r, w, npoints):
@@ -1279,8 +1243,8 @@ def layout_Ring(cell, layer, x, y, r, w, npoints):
     # units in microns
 
     # example usage.  Places the ring layout in the presently selected cell.
-    # cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-    # layout_Ring(cell, cell.layout().layer(LayerInfo(1, 0)), 0, 0, 10, 0.5, 400)
+    # cell = Application.instance().main_window().current_view().active_cellview().cell
+    # layout_Ring(cell, cell.layout().layer(TECHNOLOGY['Si']), 0, 0, 10, 0.5, 400)
 
 
     # fetch the database parameters
@@ -1290,9 +1254,9 @@ def layout_Ring(cell, layer, x, y, r, w, npoints):
     pts = []
     da = math.pi * 2 / npoints
     for i in range(0, npoints+1):
-      pts.append(Point.from_dpoint(pya.DPoint((x+(r+w/2)*math.cos(i*da))/dbu, (y+(r+w/2)*math.sin(i*da))/dbu)))
+      pts.append(Point.from_dpoint(DPoint((x+(r+w/2)*math.cos(i*da))/dbu, (y+(r+w/2)*math.sin(i*da))/dbu)))
     for i in range(npoints, -1, -1):
-      pts.append(Point.from_dpoint(pya.DPoint((x+(r-w/2)*math.cos(i*da))/dbu, (y+(r-w/2)*math.sin(i*da))/dbu)))
+      pts.append(Point.from_dpoint(DPoint((x+(r-w/2)*math.cos(i*da))/dbu, (y+(r-w/2)*math.sin(i*da))/dbu)))
     
     # create the shape
     cell.shapes(layer).insert(Polygon(pts))
@@ -1300,7 +1264,7 @@ def layout_Ring(cell, layer, x, y, r, w, npoints):
     # end of layout_Ring
 
 
-class DoubleBus_Ring(pya.PCellDeclarationHelper):
+class DoubleBus_Ring(PCellDeclarationHelper):
   """
   The PCell declaration for the double bus ring resonator.
   Consists of a ring with 2 straight waveguides.
@@ -1310,18 +1274,19 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(DoubleBus_Ring, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("s", self.TypeShape, "", default = DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("npoints", self.TypeInt, "Number of points", default = 500)     
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -1355,9 +1320,9 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
  #   pcell = ly.create_cell("DirectionalCoupler_HalfRing_Straight", "SiEPIC", { "r": self.r, "w": self.w, "g": self.g, "silayer": LayerSi, "bustype": 0 } )
  #   print ("Cell: pcell: #%s" % pcell.cell_index())
  #   t = Trans(Trans.R0, 0, 0) 
- #   instance = self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+ #   instance = self.cell.insert(CellInstArray(pcell.cell_index(), t))
  #   t = Trans(Trans.R180, 0, 2*r+2*g+2*w) 
- #   instance = self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+ #   instance = self.cell.insert(CellInstArray(pcell.cell_index(), t))
 
 
     # Create the two waveguides
@@ -1370,30 +1335,30 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     # Create the pins, as short paths:
     pin_length = 200 # database units, = 0.2 microns
     
-    pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
+    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, 0, 0)
+    t = Trans(Trans.R0, 0, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = pya.Path([Point(w+2*r-pin_length/2, 0), Point(w+2*r+pin_length/2, 0)],w )
+    pin = Path([Point(w+2*r-pin_length/2, 0), Point(w+2*r+pin_length/2, 0)],w )
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, w+2*r, 0)
+    t = Trans(Trans.R0, w+2*r, 0)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = pya.Path([Point(-pin_length/2, y_offset), Point(pin_length/2, y_offset)], w)
+    pin = Path([Point(-pin_length/2, y_offset), Point(pin_length/2, y_offset)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, 0, y_offset)
+    t = Trans(Trans.R0, 0, y_offset)
     text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = pya.Path([Point(w+2*r-pin_length/2, y_offset), Point(w+2*r+pin_length/2, y_offset)], w)
+    pin = Path([Point(w+2*r-pin_length/2, y_offset), Point(w+2*r+pin_length/2, y_offset)], w)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(pya.Trans.R0, w+2*r, y_offset)
+    t = Trans(Trans.R0, w+2*r, y_offset)
     text = Text ("pin4", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -1412,7 +1377,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 
-class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
+class TestStruct_DoubleBus_Ring(PCellDeclarationHelper):
   """
   The PCell declaration for the DoubleBus_Ring test structure with grating couplers and waveguides
   """
@@ -1421,18 +1386,19 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("silayer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("s", self.TypeShape, "", default = DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("npoints", self.TypeInt, "Number of points", default = 500)     
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textlayer", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -1468,13 +1434,13 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 #    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC", {"r": r, "w": wg_width, "g": g, "l": LayerSi})
 #    print( "pcell: %s, %s" % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
 #    t = Trans(Trans.R270, 10 / dbu, y_ring / dbu) 
-#    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+#    instance = cell.insert(CellInstArray(pcell.cell_index(), t))
 #    print(instance.cell_index)
 
 
 
 
-    lib = pya.Library.library_by_name("SiEPIC-EBeam PCells")
+    lib = Library.library_by_name("SiEPIC-EBeam PCells")
     if lib == None:
       raise Exception("Unknown lib 'SiEPIC-EBeam PCells'")
 
@@ -1500,7 +1466,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     pcell = ly.create_cell("Ring")
     pcell_decl.produce(ly, [ LayerSiN ], pv, pcell)
     t = Trans(Trans.R270, 10 / dbu, y_ring / dbu) 
-    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+    instance = cell.insert(CellInstArray(pcell.cell_index(), t))
 
 
     # Grating couplers, Ports 1, 2, 3, 4 (top-down):
@@ -1512,11 +1478,11 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
       GC_imported = GC_imported.cell_index()  
     print( "Cell: GC_imported: #%s" % GC_imported )
     t = Trans(Trans.R0, 0, 0)
-    instance = cell.insert(pya.CellInstArray(GC_imported, t, Point(0,127/dbu), Point(0,0), 4, 1))
+    instance = cell.insert(CellInstArray(GC_imported, t, Point(0,127/dbu), Point(0,0), 4, 1))
     print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-    t = Trans(pya.Trans.R0, 0, 127*2/dbu)
+    t = Trans(Trans.R0, 0, 127*2/dbu)
     text = Text ("opt_in_TE_1550_device_DoubleBusRing", t)
     shape = cell.shapes(TextLayerN).insert(text)
     shape.text_size = 3/dbu
@@ -1551,7 +1517,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 
-class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
+class TestStruct_DoubleBus_Ring2(PCellDeclarationHelper):
   """
   The PCell declaration for the DoubleBus_Ring test structure with grating couplers and waveguides
   """
@@ -1560,18 +1526,19 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring2, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("silayer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("s", self.TypeShape, "", default = DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("npoints", self.TypeInt, "Number of points", default = 500)     
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textlayer", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -1606,7 +1573,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     print( "pcell: %s, %s" \
         % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
     t = Trans(Trans.R270, 10 / dbu, y_ring / dbu) 
-    instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+    instance = cell.insert(CellInstArray(pcell.cell_index(), t))
     print(instance.cell_index)
 
 
@@ -1619,11 +1586,11 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
       GC_imported = GC_imported.cell_index()  
     print("Cell: GC_imported: #%s" % GC_imported )
     t = Trans(Trans.R0, 0, 0)
-    instance = cell.insert(pya.CellInstArray(GC_imported, t, Point(0,127/dbu), Point(0,0), 4, 1))
+    instance = cell.insert(CellInstArray(GC_imported, t, Point(0,127/dbu), Point(0,0), 4, 1))
     print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-    t = Trans(pya.Trans.R0, 0, 127*2/dbu)
+    t = Trans(Trans.R0, 0, 127*2/dbu)
     text = Text ("opt_in_TE_1550_device_DoubleBusRing", t)
     shape = cell.shapes(TextLayerN).insert(text)
     shape.text_size = 3/dbu
@@ -1651,7 +1618,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
 
 
 
-class Waveguide_Route_simple(pya.PCellDeclarationHelper):
+class Waveguide_Route_simple(PCellDeclarationHelper):
   """
   The PCell declaration for a waveguide route
   """
@@ -1660,10 +1627,11 @@ class Waveguide_Route_simple(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Route_simple, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("path", self.TypeShape, "", default = pya.DPath([pya.DPoint(0,0), pya.DPoint(10,0), pya.DPoint(10,10)], 0.5)  )
+    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("path", self.TypeShape, "", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5)  )
     self.param("radius", self.TypeDouble, "Radius", default = 5)
 
   def display_text_impl(self):
@@ -1677,7 +1645,7 @@ class Waveguide_Route_simple(pya.PCellDeclarationHelper):
     return shape.is_path()
 
   def transformation_from_shape(self, layout, shape, layer):
-    return Trans(pya.Trans.R0, 0,0)
+    return Trans(Trans.R0, 0,0)
 
   def parameters_from_shape(self, layout, shape, layer):
     self._param_values = []
@@ -1699,7 +1667,7 @@ class Waveguide_Route_simple(pya.PCellDeclarationHelper):
       radius = float(radius_str)
       print("Radius taken from cell {%s} = %s" % (cell.name, radius) )
     else:
-      radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
+      radius = InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
       if radius == None:
         radius = 10.0
       else:
@@ -1730,8 +1698,9 @@ class Waveguide_Route_simple(pya.PCellDeclarationHelper):
     layout_waveguide_abs(self.cell, self.layer, points, self.path.width, self.radius)
     
     
-
-class Waveguide_Route(pya.PCellDeclarationHelper):
+'''
+has been replaced by Waveguide in SiEPIC General library
+class Waveguide_Route(PCellDeclarationHelper):
   """
   The PCell declaration for a waveguide route
   """
@@ -1740,10 +1709,11 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Route, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("path", self.TypeShape, "", default = pya.DPath([pya.DPoint(0,0), pya.DPoint(10,0), pya.DPoint(10,10)], 0.5)  )
+    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("path", self.TypeShape, "", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5)  )
     self.param("radius", self.TypeDouble, "Radius", default = 5)
 
   def display_text_impl(self):
@@ -1758,7 +1728,7 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
 
   def transformation_from_shape(self, layout, shape, layer):
 #    return Trans(shape.bbox().center())
-    return Trans(pya.Trans.R0, 0,0)
+    return Trans(Trans.R0, 0,0)
 
   def parameters_from_shape(self, layout, shape, layer):
     shapes = self.cell.shapes
@@ -1781,7 +1751,7 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
       radius = float(radius_str)
       print("Radius taken from cell {%s} = %s" % (cell.name, radius) )
     else:
-      radius = pya.InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
+      radius = InputDialog.ask_double_ex("Bend Radius", "Enter the bend radius (microns):", 5, 1, 500, 3)
       if radius == None:
         radius = 10.0
       else:
@@ -1842,7 +1812,7 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
       param = { "wg_width": self.path.width, "radius": radius, "silayer": LayerSi }
       pcell = ly.create_cell("Waveguide_Bend", "SiEPIC-EBeam PCells", param )
       trans = Trans(angle, True if rightvsleft_turn&lt;0 else False, Point(*points[i]))
-      instance = self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))
+      instance = self.cell.insert(CellInstArray(pcell.cell_index(), trans))
       
 #      PCell_get_parameters ( pcell )
       
@@ -1869,14 +1839,14 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
 
       # find wg_length, and rotation
       angle = ( angle_segment([points[i+1],points[i+2]]) ) / 90
-      wg_length = p2t.distance(p1t) # pya.Path([p2, p1], w).length()
+      wg_length = p2t.distance(p1t) # Path([p2, p1], w).length()
       if wg_length &gt; 0:
         # place the waveguide:      
         param = { "wg_width": w, "wg_length": wg_length, "layer": LayerSi }
         pcell = ly.create_cell("Waveguide_Straight", "SiEPIC-EBeam PCells", param )
         p3 = Point ((p2t.x+p1t.x)/2, (p2t.y+p1t.y)/2) # midpoint of p2t p1t
         trans = Trans(angle, False, p3)
-        self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
+        self.cell.insert(CellInstArray(pcell.cell_index(), trans))      
         print("straight wg mid-section inst: %s, %s, %s, [%s];   bend: %s, %s, p2 %s" % (i, angle, wg_length, p3, bends_instance[i], bends_pcell[i], p2) )
 
     # put in the straight segment at the beginning of the path
@@ -1893,7 +1863,7 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
         param = { "wg_width": w, "wg_length": wg_length, "layer": LayerSi }
         pcell = ly.create_cell("Waveguide_Straight", "SiEPIC-EBeam PCells", param )
         trans = Trans(angle, False, p3)
-        self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
+        self.cell.insert(CellInstArray(pcell.cell_index(), trans))      
         print("straight wg end-section inst: %s, %s, %s, [%s]; " % (i, angle, wg_length, p3) )
         
       # put in the straight segment at the end of the path
@@ -1910,7 +1880,7 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
         param = { "wg_width": w, "wg_length": wg_length, "layer": LayerSi }
         pcell = ly.create_cell("Waveguide_Straight", "SiEPIC-EBeam PCells", param )
         trans = Trans(angle, False, p3)
-        self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
+        self.cell.insert(CellInstArray(pcell.cell_index(), trans))      
         print("straight wg end-section inst: %s, %s, %s, [%s]; " % (i, angle, wg_length, p3) )
     else:
       # just a straight section:
@@ -1922,182 +1892,13 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
         param = { "wg_width": w, "wg_length": wg_length, "layer": LayerSi }
         pcell = ly.create_cell("Waveguide_Straight", "SiEPIC-EBeam PCells", param )
         trans = Trans(angle, False, p3)
-        self.cell.insert(pya.CellInstArray(pcell.cell_index(), trans))      
+        self.cell.insert(CellInstArray(pcell.cell_index(), trans))      
         print("straight wg end-section inst:  %s, %s, [%s]; " % (angle, wg_length, p3) )
 
-class Waveguide_Straight(pya.PCellDeclarationHelper):
-  """
-  Input: length, width
-  draws a straight waveguide with pins. centred at the instantiation point.
-  Usage: instantiate, and use transformations (rotation)
-  """
-
-  def __init__(self):
-
-    # Important: initialize the super class
-    super(Waveguide_Straight, self).__init__()
-
-    # declare the parameters
-    self.param("wg_length", self.TypeInt, "Waveguide Length", default = 10000)     
-    self.param("wg_width", self.TypeInt, "Waveguide width", default = 500)     
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
-#    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
-
-  def display_text_impl(self):
-    # Provide a descriptive text for the cell
-    return "Waveguide_Straight_%.3f-%.3f" % (self.wg_length/1000, self.wg_width/1000)
-  
-  def coerce_parameters_impl(self):
-    pass
-
-  def can_create_from_shape(self, layout, shape, layer):
-    return False
-    
-  def produce_impl(self):
-  
-    # fetch the parameters
-    dbu = self.layout.dbu
-    ly = self.layout
-    shapes = self.cell.shapes
-
-    LayerSi = self.layer
-    LayerSiN = ly.layer(LayerSi)
-    LayerPinRecN = ly.layer(self.pinrec)
-    LayerDevRecN = ly.layer(self.devrec)
-
-#    print("Waveguide_Straight:")
-    w = self.wg_width
-    length = self.wg_length
-    points = [[-length/2,0], [length/2, 0]]
-    path = points_to_path(points,w)
-#    print(path)
-
-    shapes(LayerSiN).insert(path.simple_polygon())
-    
-    # Pins on the bus waveguide side:
-    pin_length = 200
-    if length &lt; pin_length+1:
-      pin_length = int(length/3)
-      pin_length = math.ceil(pin_length / 2.) * 2
-    if pin_length == 0:
-      pin_length = 2
-
-    t = Trans(pya.Trans.R0, -length/2,0)
-    pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
-    pin_t = pin.transformed(t)
-    shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin1", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    t = Trans(pya.Trans.R0, length/2,0)
-    pin_t = pin.transformed(t)
-    shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin2", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    # Compact model information
-    t = Trans(pya.Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
-    t = Trans(pya.Trans.R0, length/10, 0)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
-    t = Trans(pya.Trans.R0, length/9, 0)
-    text = Text ('Spice_param:wg_width=%.3fu wg_length=%.3fu'%(self.wg_width*dbu, self.wg_length*dbu), t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
-
-    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    path = points_to_path(points,w*3)
-    shapes(LayerDevRecN).insert(path.simple_polygon())
+'''
 
 
-
-class Waveguide_Straight2(pya.PCellDeclarationHelper):
-  """
-  Input: DPath with 2 points, units microns
-  draws a straight waveguide with pins.
-  """
-
-  def __init__(self):
-
-    # Important: initialize the super class
-    super(Waveguide_Straight2, self).__init__()
-
-    # declare the parameters
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(1, 0))
-    self.param("path", self.TypeShape, "", default = pya.DPath([pya.DPoint(0,0), pya.DPoint(10,0)], 0.5)  )
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
-#    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
-
-  def display_text_impl(self):
-    # Provide a descriptive text for the cell
-    return "Waveguide_Straight2_%s" % self.path
-  
-  def coerce_parameters_impl(self):
-    pass
-
-  def can_create_from_shape(self, layout, shape, layer):
-    return False
-    
-  def produce_impl(self):
-  
-    # fetch the parameters
-    dbu = self.layout.dbu
-    ly = self.layout
-    shapes = self.cell.shapes
-
-    LayerSi = self.layer
-    LayerSiN = ly.layer(LayerSi)
-    LayerPinRecN = ly.layer(self.pinrec)
-    LayerDevRecN = ly.layer(self.devrec)
-
-    print("Waveguide_Straight2:")
-    print(self.path)
-    w = int(round(self.path.width/dbu))
-#    print(self.path.width/dbu)    
-    points = points_mult(path_to_Dpoints(self.path), 1/dbu)
-#    print points
-    path = points_to_path(points,w)
-#    print path
-
-    shapes(LayerSiN).insert(path.simple_polygon())
-
-    angle = ( angle_segment([points[0],points[1]]) ) / 90
-    
-    # Pins on the bus waveguide side:
-    pin_length = 200
-    t = Trans(int(round(angle)), 0, Point(round(points[0][0]), round(points[0][1])))
-#    t = Trans(pya.Trans.R0, Point(round(points[0][0]), round(points[0][1])))
-
-#    Point(points[i][0], points[i][1])
-    pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
-    pin_t = pin.transformed(t)
-    shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin1", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    t = Trans(angle, 0, points[1][0], points[1][1])
-    pin_t = pin.transformed(t)
-    shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin2", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    path = points_to_path(points,w*3)
-    shapes(LayerDevRecN).insert(path.simple_polygon())
-
-
-class Waveguide_Arc(pya.PCellDeclarationHelper):
+class Waveguide_Arc(PCellDeclarationHelper):
   """
   The PCell declaration for the waveguide arc.
   
@@ -2108,18 +1909,19 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Arc, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("wg_width", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("start_angle", self.TypeDouble, "Start Angle (270 -&gt; 360)", default = 0)
     self.param("stop_angle", self.TypeDouble, "Stop Angle (270 -&gt; 360)", default = 45)
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     # hidden parameters, can be used to query this component:
-    self.param("p1", self.TypeShape, "DPoint location of pin1", default = pya.Point(-10000, 0), hidden = True, readonly = True)
-    self.param("p2", self.TypeShape, "DPoint location of pin2", default = pya.Point(0, 10000), hidden = True, readonly = True)
+    self.param("p1", self.TypeShape, "DPoint location of pin1", default = Point(-10000, 0), hidden = True, readonly = True)
+    self.param("p2", self.TypeShape, "DPoint location of pin2", default = Point(0, 10000), hidden = True, readonly = True)
     
 
   def display_text_impl(self):
@@ -2188,14 +1990,14 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     x_pin = math.cos( (90 - start_angle)*deg_to_rad ) *pin_length/2
     y_pin = math.sin( (90 - start_angle)*deg_to_rad ) *pin_length/2
     
-    p2 = [pya.Point(x-x_pin, y+y_pin), pya.Point(x+x_pin, y-y_pin)]
-    p2c = pya.Point(x, y)
+    p2 = [Point(x-x_pin, y+y_pin), Point(x+x_pin, y-y_pin)]
+    p2c = Point(x, y)
     self.set_p2 = p2c
     self.p2 = p2c
-    pin = pya.Path(p2, w)
+    pin = Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x, y)
-    text = pya.Text ("pin2", t)
+    t = Trans(Trans.R0, x, y)
+    text = Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
@@ -2207,14 +2009,14 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     x_pin = math.cos( (90 - stop_angle)*deg_to_rad ) *pin_length/2
     y_pin = math.sin( (90 - stop_angle)*deg_to_rad ) *pin_length/2
     
-    p1 = [pya.Point(x+x_pin, y-y_pin), pya.Point(x-x_pin, y+y_pin)]
-    p1c = pya.Point(x,y)
+    p1 = [Point(x+x_pin, y-y_pin), Point(x-x_pin, y+y_pin)]
+    p1c = Point(x,y)
     self.set_p1 = p1c
     self.p1 = p1c
-    pin = pya.Path(p1, w)
+    pin = Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x, y)
-    text = pya.Text ("pin1", t)
+    t = Trans(Trans.R0, x, y)
+    text = Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
@@ -2225,7 +2027,7 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, start_angle, stop_angle)
 
 
-class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
+class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
   """
   The PCell declaration for the bent-coupled half ring resonator pcell
   
@@ -2236,20 +2038,21 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Bent_Coupled_Half_Ring, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("bus_radius", self.TypeDouble, "Bus Radius", default = 5)
     self.param("gap", self.TypeDouble, "Gap", default = 0.2)
     self.param("bus_width", self.TypeDouble, "Bus Width", default = 0.5)
     self.param("ring_width", self.TypeDouble, "Ring Width", default = 0.5)
     self.param("bend_angle", self.TypeDouble, "Bend angle", default = 45)
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     # hidden parameters, can be used to query this component:
-    self.param("p1", self.TypeShape, "DPoint location of pin1", default = pya.Point(-10000, 0), hidden = True, readonly = True)
-    self.param("p2", self.TypeShape, "DPoint location of pin2", default = pya.Point(0, 10000), hidden = True, readonly = True)
+    self.param("p1", self.TypeShape, "DPoint location of pin1", default = Point(-10000, 0), hidden = True, readonly = True)
+    self.param("p2", self.TypeShape, "DPoint location of pin2", default = Point(0, 10000), hidden = True, readonly = True)
     
 
   def display_text_impl(self):
@@ -2317,26 +2120,26 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     pin_length = 200 # database units, = 0.2 microns
     
     # Pin on the bottom left side:
-    p3 = [pya.Point(x-r, pin_length/2 +y), pya.Point(x-r, -pin_length/2 +y)]
-    p3c = pya.Point(x-r, y)
+    p3 = [Point(x-r, pin_length/2 +y), Point(x-r, -pin_length/2 +y)]
+    p3c = Point(x-r, y)
     self.set_p3 = p3c
     self.p3 = p3c
-    pin = pya.Path(p3, w)
+    pin = Path(p3, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x-r, y)
-    text = pya.Text ("pin3", t)
+    t = Trans(Trans.R0, x-r, y)
+    text = Text ("pin3", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     # Pin on the bottom right side:
-    p4 = [pya.Point(x+r, y+pin_length/2), pya.Point(x+r,y-pin_length/2)]
-    p4c = pya.Point(x+r,y)
+    p4 = [Point(x+r, y+pin_length/2), Point(x+r,y-pin_length/2)]
+    p4c = Point(x+r,y)
     self.set_p4 = p4c
     self.p4 = p4c
-    pin = pya.Path(p4, w)
+    pin = Path(p4, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x+r, y)
-    text = pya.Text ("pin4", t)
+    t = Trans(Trans.R0, x+r, y)
+    text = Text ("pin4", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
@@ -2393,33 +2196,33 @@ class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
     x = -r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180) 
     y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) -r_bus
     
-    p2 = [pya.Point(x-pin_length/2, y), pya.Point(x+pin_length/2, y)]
-    p2c = pya.Point(x, y)
+    p2 = [Point(x-pin_length/2, y), Point(x+pin_length/2, y)]
+    p2c = Point(x, y)
     self.set_p2 = p2c
     self.p2 = p2c
-    pin = pya.Path(p2, w)
+    pin = Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x, y)
-    text = pya.Text ("pin2", t)
+    t = Trans(Trans.R0, x, y)
+    text = Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     # Pin on the right side:
-    p1 = [pya.Point(-x+pin_length/2,y), pya.Point(-x-pin_length/2,y)]
-    p1c = pya.Point(x,-r)
+    p1 = [Point(-x+pin_length/2,y), Point(-x-pin_length/2,y)]
+    p1c = Point(x,-r)
     self.set_p1 = p1c
     self.p1 = p1c
-    pin = pya.Path(p1, w)
+    pin = Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, -x, y)
-    text = pya.Text ("pin1", t)
+    t = Trans(Trans.R0, -x, y)
+    text = Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
 
     
     
-class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
+class Bent_CDC_Half_Ring(PCellDeclarationHelper):
   """
   The PCell declaration for the bent-CDC half ring resonator pcell
   
@@ -2430,9 +2233,10 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Bent_CDC_Half_Ring, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = pya.LayerInfo(1, 0))
+    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
     self.param("radius", self.TypeDouble, "Radius (um)", default = 10)
     self.param("gap", self.TypeDouble, "Gap (um)", default = 0.2)
     self.param("bus_width", self.TypeDouble, "Bus Width (um)", default = 0.5)
@@ -2445,11 +2249,11 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     
     self.param("busBend", self.TypeDouble, "Bus-to-straight bend raidus", default = 5)
     
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     # hidden parameters, can be used to query this component:
-    self.param("p1", self.TypeShape, "DPoint location of pin1", default = pya.Point(-10000, 0), hidden = True, readonly = True)
-    self.param("p2", self.TypeShape, "DPoint location of pin2", default = pya.Point(0, 10000), hidden = True, readonly = True)
+    self.param("p1", self.TypeShape, "DPoint location of pin1", default = Point(-10000, 0), hidden = True, readonly = True)
+    self.param("p2", self.TypeShape, "DPoint location of pin2", default = Point(0, 10000), hidden = True, readonly = True)
     
 
   def display_text_impl(self):
@@ -2568,52 +2372,52 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     # Pin on the right side:
     y_center = rBus * cos(bendAngleRad) + busBendR * cos(bendAngleRad) - busBendR;
   
-    p2 = [pya.Point(-pin_length/2 +x_center, y_center), pya.Point(pin_length/2 +x_center, y_center)]
-    p2c = pya.Point(x_center, y_center)
+    p2 = [Point(-pin_length/2 +x_center, y_center), Point(pin_length/2 +x_center, y_center)]
+    p2c = Point(x_center, y_center)
     self.set_p2 = p2c
     self.p2 = p2c
-    pin = pya.Path(p2, w)
+    pin = Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x-r, y)
-    text = pya.Text ("pin2", t)
+    t = Trans(Trans.R0, x-r, y)
+    text = Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
     # Pin on the left side:
     x_center = -x_center
-    p1 = [pya.Point(-pin_length/2 +x_center, y_center), pya.Point(pin_length/2 +x_center, y_center)]
-    p1c = pya.Point(x_center, y_center)
+    p1 = [Point(-pin_length/2 +x_center, y_center), Point(pin_length/2 +x_center, y_center)]
+    p1c = Point(x_center, y_center)
     self.set_p1 = p1c
     self.p1 = p1c
-    pin = pya.Path(p1, w)
+    pin = Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x-r, y)
-    text = pya.Text ("pin1", t)
+    t = Trans(Trans.R0, x-r, y)
+    text = Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
     
     # Pin on the bottom left side:
-    p3 = [pya.Point(x-r, pin_length/2 +y), pya.Point(x-r, -pin_length/2 +y)]
-    p3c = pya.Point(x-r, y)
+    p3 = [Point(x-r, pin_length/2 +y), Point(x-r, -pin_length/2 +y)]
+    p3c = Point(x-r, y)
     self.set_p3 = p3c
     self.p3 = p3c
-    pin = pya.Path(p3, w)
+    pin = Path(p3, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x-r, y)
-    text = pya.Text ("pin3", t)
+    t = Trans(Trans.R0, x-r, y)
+    text = Text ("pin3", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     # Pin on the bottom right side:
-    p4 = [pya.Point(x+r, y+pin_length/2), pya.Point(x+r,y-pin_length/2)]
-    p4c = pya.Point(x+r,y)
+    p4 = [Point(x+r, y+pin_length/2), Point(x+r,y-pin_length/2)]
+    p4c = Point(x+r,y)
     self.set_p4 = p4c
     self.p4 = p4c
-    pin = pya.Path(p4, w)
+    pin = Path(p4, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x+r, y)
-    text = pya.Text ("pin4", t)
+    t = Trans(Trans.R0, x+r, y)
+    text = Text ("pin4", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
@@ -2622,7 +2426,7 @@ class Bent_CDC_Half_Ring(pya.PCellDeclarationHelper):
     
     
     
-class Bezier_Bend(pya.PCellDeclarationHelper):
+class Bezier_Bend(PCellDeclarationHelper):
   """
   Input: bezier number, effective radius, waveguide width, layers
   draws a 90 degree bezier bend with a given bezier factor
@@ -2639,15 +2443,16 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Bezier_Bend, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
     self.param("bezier_num", self.TypeDouble, "Bezier factor ~(&amp;lt; 67)", default = 20)     
     self.param("eff_r", self.TypeDouble, "Effective bend radius (microns)", default = 5)
     self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.500)     
-    self.param("layer", self.TypeLayer, "Layer", default = pya.LayerInfo(1, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = pya.LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = pya.LayerInfo(68, 0))
-#    self.param("textl", self.TypeLayer, "Text Layer", default = pya.LayerInfo(10, 0))
+    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
+#    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -2808,28 +2613,28 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     y = r
     
     # Pin on the top side:
-    p2 = [pya.Point(x, y+pin_length/2), pya.Point(x, y-pin_length/2)]
-    p2c = pya.Point(x, y)
+    p2 = [Point(x, y+pin_length/2), Point(x, y-pin_length/2)]
+    p2c = Point(x, y)
     self.set_p2 = p2c
     self.p2 = p2c
-    pin = pya.Path(p2, w)
+    pin = Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x, y)
-    text = pya.Text ("pin2", t)
+    t = Trans(Trans.R0, x, y)
+    text = Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
     x = 0
     y = 0
     # Pin on the left side:
-    p1 = [pya.Point(pin_length/2+x,0), pya.Point(-pin_length/2+x,0)]
-    p1c = pya.Point(x,0)
+    p1 = [Point(pin_length/2+x,0), Point(-pin_length/2+x,0)]
+    p1c = Point(x,0)
     self.set_p1 = p1c
     self.p1 = p1c
-    pin = pya.Path(p1, w)
+    pin = Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = pya.Trans(pya.Trans.R0, x, 0)
-    text = pya.Text ("pin1", t)
+    t = Trans(Trans.R0, x, 0)
+    text = Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
@@ -2839,7 +2644,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
 
 
 
-class Tapered_Ring(pya.PCellDeclarationHelper):
+class Tapered_Ring(PCellDeclarationHelper):
   """
   The PCell declaration for the tapered ring.
   Author: Mustafa Hammood     mustafa@ece.ubc.ca
@@ -2849,14 +2654,15 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Tapered_Ring, self).__init__()
+    TECHNOLOGY = get_technology()
 
     # declare the parameters
     self.param("w_top", self.TypeDouble, "Top width", default = .5)
     self.param("w_bot", self.TypeDouble, "Bottom width (&gt;Top Width)", default = 2)
     self.param("radius", self.TypeDouble, "Radius", default = 10)
-    self.param("LayerSi", self.TypeLayer, "Si Layer", default = LayerInfo(1, 0))
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = LayerInfo(69, 0))
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = LayerInfo(68, 0))
+    self.param("LayerSi", self.TypeLayer, "Si Layer", [TECHNOLOGY['Waveguide']])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
 
   def display_text_impl(self):
@@ -2874,12 +2680,12 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
     
     #fetch parameters
   
-    Box = pya.Box
-    Point = pya.Point
-    Polygon = pya.Polygon
-    Text = pya.Text
-    Trans = pya.Trans
-    LayerInfo = pya.LayerInfo
+    Box = Box
+    Point = Point
+    Polygon = Polygon
+    Text = Text
+    Trans = Trans
+    LayerInfo = LayerInfo
 
     
     dbu = self.layout.dbu
@@ -2918,7 +2724,7 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
       theta =  2*math.pi / npts # increment, in radians
       pts = []
       for i in range(0, npts):
-        pts.append(Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1, (w_top+r*math.sin(i*theta))/1)))
+        pts.append(Point.from_dpoint(DPoint((x+r*math.cos(i*theta))/1, (w_top+r*math.sin(i*theta))/1)))
       return pts
   
     # function to generate points to create innercircle
@@ -2927,7 +2733,7 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
       theta =  2*math.pi / npts # increment, in radians
       pts = []
       for i in range(0, npts):
-        pts.append(Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1, (w_top+r*math.sin(i*theta))/1)))
+        pts.append(Point.from_dpoint(DPoint((x+r*math.cos(i*theta))/1, (w_top+r*math.sin(i*theta))/1)))
       return pts
      
   
@@ -2935,10 +2741,10 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
     x = 0
     y = 0
     r_out = r+w_top/2
-    ring = pya.Region()
+    ring = Region()
     ring_cell = circle(0,0,r_out)
-    ring_poly = pya.Polygon(ring_cell)  
-    #ring_t = ring_poly.transformed(pya.Trans(x,y))
+    ring_poly = Polygon(ring_cell)  
+    #ring_t = ring_poly.transformed(Trans(x,y))
     ring.insert(ring_poly)
     
     
@@ -2947,25 +2753,159 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
     x = 0
     y = -deltaW/2
     # Inner Circle 
-    hole = pya.Region()
+    hole = Region()
     hole_cell = inner_circle(x,y,r_in)
-    hole_poly = pya.Polygon(hole_cell)  
-    #hole_t = hole_poly.transformed(pya.Trans(x,y))
+    hole_poly = Polygon(hole_cell)  
+    #hole_t = hole_poly.transformed(Trans(x,y))
     hole.insert(hole_poly)           
     
     # perform inversion:
     phc = ring - hole
     self.cell.shapes(LayerSiN).insert(phc)
     # inversion can also be done by performing the XOR function
-    # upper_poly = xor(pya.Region(pya.Polygon(circleu_pts)),pya.Region(pya.Polygon(rectu_pts)))
+    # upper_poly = xor(Region(Polygon(circleu_pts)),Region(Polygon(rectu_pts)))
 
     
     return "Tapered_Ring(R=" + ('%.3f-%.3f' % (r,w_bot) ) + ")"
 
 
 
+class DirectionalCoupler_SeriesRings(PCellDeclarationHelper):
+  """
+  The PCell declaration for the DirectionalCoupler_SeriesRings.
 
-class SiEPIC_EBeam_dev(pya.Library):
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(DirectionalCoupler_SeriesRings, self).__init__()
+    TECHNOLOGY = get_technology()
+
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
+    self.param("r2", self.TypeDouble, "Radius of Upper Ring", default = 3)
+    self.param("r1", self.TypeDouble, "Radius of Lower Ring", default = 3)
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "DirectionalCoupler_SeriesRings(R1=" + ('%.3f' % self.r1)+ ",R2=" + ('%.3f' % self.r2) + ",g=" + ('%g' % (1000*self.g)) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    from math import pi, cos, sin
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+    
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    TextLayerN = ly.layer(self.textl)
+
+    
+    w = int(round( self.w/dbu))
+    r1 = int(round( self.r1/dbu))
+    r2 = int(round( self.r2/dbu))
+    g = int(round( self.g/dbu))
+    Lc = int(round( self.Lc/dbu))
+
+    # draw the half-circle
+    x = 0
+    y = r1+r2+g+w
+    layout_arc_wg_dbu( self.cell, LayerSiN, x-Lc/2, y, r2, w, 180, 270)
+    layout_arc_wg_dbu( self.cell, LayerSiN, x+Lc/2, y, r2, w, 270, 360)
+    
+    # Create the pins, as short paths:
+    pin_length = 200 # database units, = 0.2 microns
+    
+    # Pins on the top side:
+    pin = Path([Point(-r2-Lc/2, y+pin_length/2), Point(-r2-Lc/2, y-pin_length/2)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(Trans.R0, -r2-Lc/2, y)
+    text = Text ("pin2", t)
+    shape =  shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    pin = Path([Point(r2+Lc/2, y+pin_length/2), Point(r2+Lc/2, y-pin_length/2)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(Trans.R0, r2+Lc/2, y)
+    text = Text ("pin4", t)
+    shape =  shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    if Lc &gt; 0:
+      wg1 = Box(-Lc/2,w + w/2+ g+ r1 , Lc/2, w/2 + g+ r1)
+      shapes(LayerSiN).insert(wg1)
+
+
+    y = 0
+    layout_arc_wg_dbu( self.cell, LayerSiN, x-Lc/2, y, r1, w, 90, 180)
+    layout_arc_wg_dbu( self.cell, LayerSiN, x+Lc/2, y, r1, w, 0, 90)
+    
+    # Pins on the lower side:
+    pin = Path([Point(-r1-Lc/2, y+pin_length/2), Point(-r1-Lc/2, y-pin_length/2)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(Trans.R0, -r1-Lc/2, y)
+    text = Text ("pin1", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    pin = Path([Point(r1+Lc/2, y+pin_length/2), Point(r1+Lc/2, y-pin_length/2)], w)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(Trans.R0, r1+Lc/2, y)
+    text = Text ("pin3", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+
+    if Lc &gt; 0:
+      wg1 = Box(-Lc/2,  r1 -w/2, Lc/2, w/2 + r1)
+      shapes(LayerSiN).insert(wg1)
+
+    if(r1&gt;r2):
+      r = r1
+    else: 
+      r = r2
+    
+    
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    dev = Box(-r-w/2-w-Lc/2,r1+r2+g+w, r+w/2+w+Lc/2, y )
+    shapes(LayerDevRecN).insert(dev)
+
+
+    # Compact model information
+    t = Trans(Trans.R0, ((r1+r2)/2)/4, 0)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size =  r*0.017
+    t = Trans(Trans.R0, ((r1+r2)/2)/4, ((r1+r2)/2)/4)
+    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_seriesrings', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size =  r*0.017
+    t = Trans(Trans.R0, ((r1+r2)/2)/4, ((r1+r2)/2)/2)
+  #  text = Text ('Spice_param:wg_width=%.3fu gap="%s" radius="%s"'% ( w, g,int( r)), t)
+    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius1=%.3fu radius2=%.3fu'% ( self.w, self.g,int( self.r1), int(self.r2)), t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size =  r*0.017
+
+    print("Done drawing the layout for - DirectionalCoupler_SeriesRings: %.3f-%.3f-%g" % ( self.r1, self.r2, self.g) )
+
+
+
+class SiEPIC_EBeam_dev(Library):
   """
   The library where we will put the PCells and GDS into 
   """
@@ -2984,14 +2924,14 @@ class SiEPIC_EBeam_dev(pya.Library):
     
     # Create the PCell declarations
 
-    self.layout().register_pcell("DirectionalCoupler_HalfRing_Straight", DirectionalCoupler_HalfRing_Straight())
-    self.layout().register_pcell("DirectionalCoupler_HalfRing_Arc", DirectionalCoupler_HalfRing_Arc())
+
+    self.layout().register_pcell("DirectionalCoupler_SeriesRings", DirectionalCoupler_SeriesRings())
+    self.layout().register_pcell("ebeam_dc_halfring_arc", ebeam_dc_halfring_arc())
     self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring2", TestStruct_DoubleBus_Ring2())
-    self.layout().register_pcell("Waveguide_Route", Waveguide_Route())
-    self.layout().register_pcell("Waveguide_Route_simple", Waveguide_Route_simple())
-    self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
+#    self.layout().register_pcell("Waveguide_Route", Waveguide_Route())
+#    self.layout().register_pcell("Waveguide_Route_simple", Waveguide_Route_simple())
     self.layout().register_pcell("Waveguide_Arc", Waveguide_Arc())
     self.layout().register_pcell("Bent_Coupled_Half_Ring", Bent_Coupled_Half_Ring())
     self.layout().register_pcell("Bent_CDC_Half_Ring", Bent_CDC_Half_Ring())
@@ -3002,8 +2942,9 @@ class SiEPIC_EBeam_dev(pya.Library):
     self.layout().register_pcell("SWG_waveguide", SWG_waveguide())
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
     self.layout().register_pcell("strip_to_slot", strip_to_slot() )
+    self.layout().register_pcell("spiral", spiral())
 
-    # Register us with the name "SiEPIC_EBeam_PCells".
+    # Register us with the name "SiEPIC_EBeam_dev".
     # If a library with that name already existed, it will be replaced then.
     self.register("SiEPIC-EBeam-dev")
  
