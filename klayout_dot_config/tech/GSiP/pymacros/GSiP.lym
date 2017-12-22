@@ -599,7 +599,10 @@ class GSiP(pya.Library):
     self.layout().register_pcell("Double-bus Ring Filter", Ring_Filter_DB())
     
     self.register("SiEPIC GSiP")
-
+    
+    # KLayout v0.25 introduced technology variable:
+    print(self.technology())
+    
     
 GSiP()
  </text>
