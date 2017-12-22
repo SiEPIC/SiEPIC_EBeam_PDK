@@ -584,10 +584,15 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
 
 class GSiP(pya.Library):
   def __init__(self):
-    technology = 'SiEPIC GSiP'
-    print("Initializing '%s' Library." % technology)
+    tech_name = 'GSiP'
+    library = 'SiEPIC '+tech_name
+    
+    print("Initializing '%s' Library." % library)
 
-    self.description = "Generic Silicon Photonics"
+# windows only allows for a fixed width, short description 
+    self.description = "Generic SiP"
+# OSX does a resizing:
+#    self.description = "Generic Silicon Photonics"
 
     import os
     self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-GSiP.gds"))
@@ -595,16 +600,16 @@ class GSiP(pya.Library):
     
     
     self.layout().register_pcell("Ring", Ring())
-    self.layout().register_pcell("Double-bus Ring Modulator", Ring_Modulator_DB())
-    self.layout().register_pcell("Double-bus Ring Filter", Ring_Filter_DB())
+    self.layout().register_pcell("Modulator, Ring, Double-bus", Ring_Modulator_DB())
+    self.layout().register_pcell("Filter, Ring, Double-bus", Ring_Filter_DB())
     
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
-    self.register(technology)
+    self.register(library)
 
     if int(Application.instance().version().split('.')[1]) &gt; 24:
       # KLayout v0.25 introduced technology variable:
-      self.technology(technology)
+      self.technology=tech_name
     
 GSiP()
 
