@@ -134,9 +134,8 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     ly = self.layout
     shapes = self.cell.shapes
     
-    LayerSi = self.silayer
     LayerSi3N = ly.layer(self.si3layer)
-    LayerSiN = ly.layer(LayerSi)
+    LayerSiN = ly.layer(self.silayer)
     LayernN = ly.layer(self.nlayer)
     LayerpN = ly.layer(self.player)
     LayernpN = ly.layer(self.nplayer)
@@ -225,7 +224,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
    
     # Create the ring resonator
     t = pya.Trans(pya.Trans.R0,x0, y0)
-    pcell = ly.create_cell("Ring", "SiEPIC GSiP Library", { "layer": LayerSi, "radius": self.r, "width": self.w } )
+    pcell = ly.create_cell("Ring", "SiEPIC GSiP", { "layer": self.silayer, "radius": self.r, "width": self.w } )
     self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
 
     
@@ -347,22 +346,22 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     shapes(LayermhN).insert(boxMH4)
     
     # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, 0),
-                                          pya.Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, 0)], w))
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, 0),
+                                          pya.Point(x0 - (w_Si3 / 2 + taper_length) - pin_length/2, 0)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt1", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, 0),
-                                pya.Point(x0 + (w_Si3 / 2 + taper_length) + pin_length/2, 0)], w))
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length) - pin_length/2, 0),
+                                pya.Point(x0 + (w_Si3 / 2 + taper_length)           + pin_length/2, 0)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt2", pya.Trans(pya.Trans.R0,x0 + (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, y_offset),
-                                          pya.Point(x0 - (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)], w))
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, y_offset),
+                                          pya.Point(x0 - (w_Si3 / 2 + taper_length) - pin_length/2, y_offset)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt3", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, y_offset),
-                                          pya.Point(x0 + (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)], w))
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length) - pin_length/2, y_offset),
+                                          pya.Point(x0 + (w_Si3 / 2 + taper_length) + pin_length/2, y_offset)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt4", pya.Trans(pya.Trans.R0,x0 + (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
 
     # Create the device recognition layer
@@ -485,7 +484,7 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
    
     # Create the ring resonator
     t = pya.Trans(pya.Trans.R0,(self.r+self.w/2)/dbu, (self.r+self.g+self.w)/dbu)
-    pcell = ly.create_cell("Ring", "SiEPIC GSiP Library", { "layer": LayerSi, "radius": self.r, "width": self.w } )
+    pcell = ly.create_cell("Ring", "SiEPIC GSiP", { "layer": LayerSi, "radius": self.r, "width": self.w } )
     self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
     
     # Create the two waveguides
@@ -547,22 +546,22 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
     shapes(LayermhN).insert(boxMH4)
     
     # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, 0),
-                                          pya.Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, 0)], w))
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, 0),
+                                          pya.Point(x0 - (w_Si3 / 2 + taper_length) - pin_length/2, 0)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt1", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, 0),
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length) - pin_length/2, 0),
                                           pya.Point(x0 + (w_Si3 / 2 + taper_length) + pin_length/2, 0)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt2", pya.Trans(pya.Trans.R0,x0 + (w_Si3 / 2 + taper_length), 0))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length)- pin_length/2, y_offset),
-                                          pya.Point(x0 - (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)], w))
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2 + taper_length) + pin_length/2, y_offset),
+                                          pya.Point(x0 - (w_Si3 / 2 + taper_length) - pin_length/2, y_offset)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt3", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length)-pin_length/2, y_offset),
-                                          pya.Point(x0 + (w_Si3 / 2 + taper_length)+ pin_length/2, y_offset)], w))
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2 + taper_length) - pin_length/2, y_offset),
+                                          pya.Point(x0 + (w_Si3 / 2 + taper_length) + pin_length/2, y_offset)], w))
     shapes(LayerPinRecN).insert(pya.Text("opt4", pya.Trans(pya.Trans.R0,x0 + (w_Si3 / 2 + taper_length), y_offset))).text_size = 0.5/dbu
 
     # Create the device recognition layer
@@ -585,9 +584,10 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
 
 class GSiP(pya.Library):
   def __init__(self):
-    print("Initializing SiEPIC GSiP Library.")
+    technology = 'SiEPIC GSiP'
+    print("Initializing '%s' Library." % technology)
 
-    self.description = ""
+    self.description = "Generic Silicon Photonics"
 
     import os
     self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-GSiP.gds"))
@@ -598,12 +598,15 @@ class GSiP(pya.Library):
     self.layout().register_pcell("Double-bus Ring Modulator", Ring_Modulator_DB())
     self.layout().register_pcell("Double-bus Ring Filter", Ring_Filter_DB())
     
-    self.register("SiEPIC GSiP")
-    
-    # KLayout v0.25 introduced technology variable:
-    print(self.technology())
-    
+    # Register us the library with the technology name
+    # If a library with that name already existed, it will be replaced then.
+    self.register(technology)
+
+    if int(Application.instance().version().split('.')[1]) &gt; 24:
+      # KLayout v0.25 introduced technology variable:
+      self.technology(technology)
     
 GSiP()
- </text>
+
+</text>
 </klayout-macro>
