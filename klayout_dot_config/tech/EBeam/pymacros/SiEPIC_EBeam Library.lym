@@ -102,7 +102,7 @@ with:
 """
 
 import math
-from SiEPIC.utils import get_technology
+from SiEPIC.utils import get_technology, get_technology_by_name
 
 #import numpy as n
 MODULE_NUMPY = False
@@ -486,7 +486,7 @@ class Waveguide_bump(PCellDeclarationHelper):
 
 
     # Pins on the waveguide:
-    pin_length = 200
+    pin_length = 100
     x = self.length / dbu
     w = self.wg_width / dbu
     t = Trans(Trans.R0, x,0)
@@ -499,7 +499,7 @@ class Waveguide_bump(PCellDeclarationHelper):
 
     x = 0
     t = Trans(Trans.R0, x,0)
-    pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
+    pin = Path([Point(pin_length/2,0), Point(-pin_length/2,0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
@@ -952,13 +952,23 @@ class SiEPIC_EBeam(Library):
   """
 
   def __init__(self):
-
-    technology = 'SiEPIC-EBeam'
-    print("Initializing '%s' Library." % technology)
   
+    tech_name = 'EBeam'
+    library = 'SiEPIC-'+tech_name
+    
+    print("Initializing '%s' Library." % library)
+
+
     # Set the description
+# windows only allows for a fixed width, short description 
+    self.description = ""
+# OSX does a resizing:
     self.description = "Components &amp; models"
 
+
+    technology = 'SiEPIC-EBeam'
+    print("Initializing '%s' Library." % library)
+  
     import os
     self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-EBeam.gds"))
     [self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
@@ -975,11 +985,11 @@ class SiEPIC_EBeam(Library):
 
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
-    self.register(technology)
+    self.register(library)
 
     if int(Application.instance().version().split('.')[1]) &gt; 24:
       # KLayout v0.25 introduced technology variable:
-      self.technology(technology)
+      self.technology=tech_name
  
 # Instantiate and register the library
 SiEPIC_EBeam()
