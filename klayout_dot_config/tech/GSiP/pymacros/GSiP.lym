@@ -316,7 +316,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     # centre contact (P, anode):
     self.cell.shapes(LayervlN).insert(pya.Polygon(arc(r_vl, 0, 360)).transformed(t))
     self.cell.shapes(LayerPinRecN).insert(pya.Polygon(arc(r_vl, 0, 360)).transformed(t))
-    shapes(LayerPinRecN).insert(pya.Text ("elec1a", pya.Trans(x0,y0))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(pya.Text ("elec1a", pya.Trans(pya.Trans.R0,x0,y0))).text_size = 0.5/dbu
     shapes(LayerPinRecN).insert(pya.Box(x0-w_via/2, y0-w_via/2, x0+w_via/2, y0+w_via/2))
     
     # top contact (N, cathode):
