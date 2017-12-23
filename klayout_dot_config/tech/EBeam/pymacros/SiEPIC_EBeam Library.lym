@@ -702,7 +702,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     self.param("misalignment", self.TypeDouble, "Grating misalignment (microns)", default = 0.0)     
     self.param("sinusoidal", self.TypeBoolean, "Grating Type (Rectangular=False, Sinusoidal=True)", default = False)     
 #    self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.5)     
-    self.param("layer", self.TypeLayer, "Layer", default = LayerInfo(31, 0))
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
@@ -727,7 +727,6 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
-    LayerSiSPN = ly.layer(LayerSiSP)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
@@ -790,7 +789,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     pin_length = 200
 
     t = Trans(Trans.R0, 0,0)
-    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
+    pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
@@ -821,9 +820,8 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     shape.text_size = 0.1/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    points = [[0,0], [length, 0]]
-    path = points_to_path(points,w)
-    path = points_to_path(points,w*3)
+    t = Trans(Trans.R0, 0,0)
+    path = Path([Point(0, 0), Point(length, 0)], 3*w)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
 
