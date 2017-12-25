@@ -1,0 +1,1407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "index_table">
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=400,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">4.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=420,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">4.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=440,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">4.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=460,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">4.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=480,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">5e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">5.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=520,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">5.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=540,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">5.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=560,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">5.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=580,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=600,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">6.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=640,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">6.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=680,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">7.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=720,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">7.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=760,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=800,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">8.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=840,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">8.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=880,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">9.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=920,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">9.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=960,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1000,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.04e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1040,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.08e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1080,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.12e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1120,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.16e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1160,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1200,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.24e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1240,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.28e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1280,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.32e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1320,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.36e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1360,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1400,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1500,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.6e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1600,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.7e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1700,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.8e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1800,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">1.9e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1900,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2000,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2100,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2200,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2300,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2400,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2500,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.6e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2600,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.7e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2700,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.8e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2800,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">2.9e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2900,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3000,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">3.1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3100,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">3.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3200,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">3.3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3300,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">3.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3400,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.1e-07</value>
+        <value name="width" type="double">3.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3500,h=210.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=400,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">4.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=420,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">4.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=440,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">4.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=460,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">4.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=480,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">5e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">5.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=520,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">5.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=540,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">5.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=560,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">5.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=580,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=600,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">6.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=640,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">6.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=680,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">7.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=720,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">7.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=760,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=800,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">8.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=840,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">8.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=880,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">9.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=920,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">9.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=960,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1000,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.04e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1040,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.08e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1080,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.12e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1120,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.16e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1160,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1200,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.24e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1240,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.28e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1280,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.32e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1320,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.36e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1360,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1400,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1500,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.6e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1600,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.7e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1700,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.8e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1800,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">1.9e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1900,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2000,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2100,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2200,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2300,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2400,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2500,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.6e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2600,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.7e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2700,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.8e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2800,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">2.9e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2900,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3000,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">3.1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3100,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">3.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3200,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">3.3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3300,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">3.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3400,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.2e-07</value>
+        <value name="width" type="double">3.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3500,h=220.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=400,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">4.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=420,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">4.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=440,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">4.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=460,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">4.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=480,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">5e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">5.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=520,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">5.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=540,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">5.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=560,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">5.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=580,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=600,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">6.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=640,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">6.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=680,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">7.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=720,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">7.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=760,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=800,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">8.4e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=840,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">8.8e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=880,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">9.2e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=920,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">9.6e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=960,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1000,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.04e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1040,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.08e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1080,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.12e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1120,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.16e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1160,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1200,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.24e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1240,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.28e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1280,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.32e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1320,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.36e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1360,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1400,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1500,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.6e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1600,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.7e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1700,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.8e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1800,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">1.9e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=1900,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2000,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2100,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2200,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2300,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2400,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2500,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.6e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2600,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.7e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2700,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.8e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2800,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">2.9e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=2900,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3000,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">3.1e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3100,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">3.2e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3200,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">3.3e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3300,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">3.4e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3400,h=230.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="height" type="double">2.3e-07</value>
+        <value name="width" type="double">3.5e-06</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=3500,h=230.txt</value>
+    </extracted>
+</association>
+</lumerical_lookup_table>
