@@ -100,7 +100,7 @@ with:
 """
 
 import math
-from SiEPIC.utils import get_technology, get_technology_by_name
+from SiEPIC.utils import get_technology, get_technology_by_name, arc_wg_xy
 
 #import numpy as n
 MODULE_NUMPY = False
@@ -423,7 +423,7 @@ class Waveguide_Bend(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("wg_width", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
@@ -458,7 +458,7 @@ class Waveguide_Bend(PCellDeclarationHelper):
     # length units in dbu
 
     from math import pi, cos, sin
-
+    
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
@@ -475,53 +475,27 @@ class Waveguide_Bend(PCellDeclarationHelper):
     # draw the quarter-circle
     x = -r
     y = r
-    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 360)
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x,y, r, w, 270, 360))
     
     # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     
     # Pin on the top side:
-    p2 = [Point(0, y+pin_length/2), Point(0, y-pin_length/2)]
-    p2c = Point(0, y)
-    self.set_p2 = p2c
-    self.p2 = p2c
-    pin = Path(p2, w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, 0, y)
-    text = Text ("pin2", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(0, y-pin_length/2), pya.Point(0, y+pin_length/2)], w))
+    shapes(LayerPinRecN).insert(pya.Text("pin2", pya.Trans(pya.Trans.R0,0, y))).text_size = 0.5/dbu
+    
     # Pin on the left side:
-    p1 = [Point(pin_length/2+x,0), Point(-pin_length/2+x,0)]
-    p1c = Point(x,0)
-    self.set_p1 = p1c
-    self.p1 = p1c
-    pin = Path(p1, w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, x, 0)
-    text = Text ("pin1", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x+pin_length/2, 0), pya.Point(x-pin_length/2, 0)], w))
+    shapes(LayerPinRecN).insert(pya.Text("pin1", pya.Trans(pya.Trans.R0,x, 0))).text_size = 0.5/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 360)
+    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r, w*3, 270, 360))
+    
+    shapes(LayerDevRecN).insert(pya.Text("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", pya.Trans(pya.Trans.R0,x+r/10, 0))).text_size = 0.3/dbu
+    
+    shapes(LayerDevRecN).insert(pya.Text("Lumerical_INTERCONNECT_component=ebeam_bend_1550", pya.Trans(pya.Trans.R0,x+r/10, r/4))).text_size = 0.3/dbu
 
-    # Compact model information
-    t = Trans(Trans.R0, x+r/10, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = r/100
-    t = Trans(Trans.R0, x+r/10, r/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_bend_1550', t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = r/100
-    t = Trans(Trans.R0, x+r/10, r/2)
-    text = Text ('Spice_param:radius=%.3fu wg_width=%.3fu'% (self.radius,self.wg_width), t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = r/100
-
-  
+    shapes(LayerDevRecN).insert(pya.Text('Spice_param:radius=%.3fu wg_width=%.3fu'% (self.radius,self.wg_width), pya.Trans(pya.Trans.R0,x+r/10, r/2))).text_size = 0.3/dbu
 
 class ebeam_bragg_te1550(PCellDeclarationHelper):
   """
