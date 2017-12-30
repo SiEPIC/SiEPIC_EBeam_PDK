@@ -226,7 +226,7 @@ class ebeam_dc_halfring_straight(PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, r/4, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(Trans.R0, r/4, r/4)
@@ -383,7 +383,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, w*2)
@@ -508,7 +508,7 @@ class Waveguide_bump(PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, w*2)
@@ -670,7 +670,7 @@ class Waveguide_Bend(PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, x+r/10, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = Trans(Trans.R0, x+r/10, r/4)
@@ -805,7 +805,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)
@@ -927,7 +927,7 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, w1/10, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2", t)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = length/100
     t = Trans(Trans.R0, length/10, w1/4)
