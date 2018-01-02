@@ -370,7 +370,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     # Compact model information
     shape = shapes(LayerDevRecN).insert(pya.Text('Lumerical_INTERCONNECT_library=Design kits/GSiP', \
       pya.Trans(pya.Trans.R0,0, 0))).text_size = 0.3/dbu
-    shapes(LayerDevRecN).insert(pya.Text('Lumerical_INTERCONNECT_component=Ring_Modulator_DB', \
+    shapes(LayerDevRecN).insert(pya.Text('Component=Ring_Modulator_DB', \
       pya.Trans(pya.Trans.R0,0, w*2))).text_size = 0.3/dbu
     shapes(LayerDevRecN).insert(pya.Text \
       ('Spice_param:radius=%.3fu wg_width=%.3fu gap=%.3fu gap_monitor=%.3fu' %\
@@ -570,7 +570,7 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
     # Compact model information
     shape = shapes(LayerDevRecN).insert(pya.Text('Lumerical_INTERCONNECT_library=Design kits/GSiP', \
       pya.Trans(pya.Trans.R0,0, 0))).text_size = 0.3/dbu
-    shapes(LayerDevRecN).insert(pya.Text ('Lumerical_INTERCONNECT_component=Ring_Filter_DB', \
+    shapes(LayerDevRecN).insert(pya.Text ('Component=Ring_Filter_DB', \
       pya.Trans(pya.Trans.R0,0, w*2))).text_size = 0.3/dbu
     shapes(LayerDevRecN).insert(pya.Text \
       ('Spice_param:radius=%.3fu wg_width=%.3fu gap=%.3fu gap_monitor=%.3fu' %\

@@ -275,7 +275,7 @@ class ebeam_dc_halfring_arc(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(Trans.R0, r/4, r/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_arc_te1550', t)
+    text = Text ('Component=ebeam_dc_halfring_arc_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(Trans.R0, r/4, r/2)
@@ -484,7 +484,7 @@ class spiral(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, w*2)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_strip_1550', t)
+    text = Text ('Component=ebeam_wg_strip_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, -w*2)
@@ -1056,7 +1056,7 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)
-    text = Text ('Lumerical_INTERCONNECT_component=NO_MODEL_AVAILABLE', t)
+    text = Text ('Component=NO_MODEL_AVAILABLE', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/9, -w*2)
@@ -1168,7 +1168,7 @@ class SWG_waveguide(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)
-    text = Text ('Lumerical_INTERCONNECT_component=NO_MODEL_AVAILABLE', t)
+    text = Text ('Component=NO_MODEL_AVAILABLE', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/9, -box_width*2)
@@ -2788,7 +2788,7 @@ class DirectionalCoupler_SeriesRings(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size =  r*0.017
     t = Trans(Trans.R0, ((r1+r2)/2)/4, ((r1+r2)/2)/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_seriesrings', t)
+    text = Text ('Component=ebeam_dc_seriesrings', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size =  r*0.017
     t = Trans(Trans.R0, ((r1+r2)/2)/4, ((r1+r2)/2)/2)
@@ -2944,7 +2944,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, w*2)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
+    text = Text ('Component=ebeam_wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, -w*2)
