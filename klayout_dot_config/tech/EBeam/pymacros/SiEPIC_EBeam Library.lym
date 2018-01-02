@@ -230,7 +230,7 @@ class ebeam_dc_halfring_straight(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(Trans.R0, r/4, r/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_dc_halfring_straight', t)
+    text = Text ('Component=ebeam_dc_halfring_straight', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
     t = Trans(Trans.R0, r/4, r/2)
@@ -387,7 +387,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, w*2)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
+    text = Text ('Component=ebeam_wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, -w*2)
@@ -512,7 +512,7 @@ class Waveguide_bump(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, w*2)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_wg_integral_1550', t)
+    text = Text ('Component=ebeam_wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, -w*2)
@@ -674,7 +674,7 @@ class Waveguide_Bend(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = Trans(Trans.R0, x+r/10, r/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_bend_1550', t)
+    text = Text ('Component=ebeam_bend_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = Trans(Trans.R0, x+r/10, r/2)
@@ -809,7 +809,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_bragg_te1550', t)
+    text = Text ('Component=ebeam_bragg_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/9, 0)
@@ -931,7 +931,7 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = length/100
     t = Trans(Trans.R0, length/10, w1/4)
-    text = Text ('Lumerical_INTERCONNECT_component=ebeam_taper_te1550', t)
+    text = Text ('Component=ebeam_taper_te1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = length/100
     t = Trans(Trans.R0, length/10, w1/2)
