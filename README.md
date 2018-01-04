@@ -9,7 +9,7 @@
 "<a href="http://mina.ubc.ca/ref_design-and-simulation-sili">Design and simulation of silicon photonic schematics and layouts</a>," Proc. SPIE 9891, Silicon Photonics and Photonic Integrated Circuits V, 989114 (May 13, 2016); doi:10.1117/12.2230376.
 
 ## Download and Installation instructions:
- - In KLayout, Menu Tools | Managem Packages: find SiEPIC EBeam PDK.
+ - Details are provided in the Wiki page: <a href="https://github.com/lukasc-ubc/SiEPIC_EBeam_PDK/wiki/Installation-instructions">Installation instructions</a>.
 
  
 ## Objectives:
@@ -52,13 +52,16 @@
   </a>
 </p>
 
-## Package includes:
+## The SiEPIC-EBeam package includes:
 
 - Process Design Kit (PDK): this package, including fabrication documentation, scripts, etc.
 - EBeam Layer definitions for KLayout (klayout_Layers_EBeam.lyp).
 - PCells: directional couplers, ring resonator, taper, Bragg grating
 - Sample scripts to create a layout, including waveguide generation functions: Mach-Zehnder Interferometer test structures; Ring resonator test structure.
 - GDS Library, updated with marker layers for verification/netlist generation.
+
+## The SiEPIC-Tools package includes:
+
 - Verification: 
   - Scanning the layout. Finding waveguides, devices, pins.  
   - Verification: Identifying if there are missing connections, mismatched waveguides, too few points in a bend, etc. 
