@@ -1,0 +1,352 @@
+
+figs = 0; # 1: plots s params, Norm, and abs(S-S*); 0: no plots
+switchtolayout;
+FREQ_PTS = 51;    # f points for simulation
+
+
+lambda_min = 1.5e-6; 	#[m]
+lambda_max = 1.6e-6; 	#[m]
+#MESH = 1;   	# test,
+MESH = 3;   	# final
+SIM_TIME = 1000e-15; #Simulation time. 
+
+#Design parameters
+Y_length = 14e-6;
+wg_width = [480, 500, 520];    # [nm]
+wg_thickness = [210, 220, 230]; #    [nm]
+
+
+##############################
+
+
+# define global source settings
+setglobalsource("wavelength start", lambda_min);
+setglobalsource("wavelength stop", lambda_max);
+setglobalmonitor("frequency points", FREQ_PTS);
+# ********************************************************************************
+## WAVEGUIDE FOR COUPLER:
+# ********************************************************************************
+for(thickness_iter = 1:length(wg_thickness))
+{
+
+    for(width_iter = 1:length(wg_width))
+    {
+        switchtolayout;
+        groupscope("::model");
+        deleteall;
+        addgroup; set("name","coupler"); 
+        set("x",0);set("y",0); set("z",0);
+        groupscope("coupler");
+
+       
+
+        # # cladding
+        addrect; set("name", "Oxide");
+        set("x min", -20e-6); set("y min", -10e-6);
+        set("x max", 100e-6); set("y max", 10e-6);
+        set("z min", -5e-6); set("z max", 5e-6); 
+        set("material", 'SiO2 (Glass) - Palik');
+        set("alpha",0);
+        set("override mesh order from material database", 1);
+        set("mesh order", 3);
+
+        ###################################################
+        #  IMPORT GDS FOR LAYOUT
+        ###################################################
+        GDSfilename = 'y_' + num2str(wg_width(width_iter)) + '.gds';
+        gdsimport(GDSfilename, "y_branch", 1, 'Si (Silicon) - Palik');
+        set('z', 0.11e-6); set('z span', wg_thickness(thickness_iter)*1e-9);
+        set('x',0);
+
+        # ********************************************************************************
+        # Add the simulation area
+        # ********************************************************************************
+
+        groupscope("::model");
+        addfdtd; #Add simulation area
+        set("z min bc","metal"); set("z max bc","metal");
+        set("x min", -Y_length/2); set("x max", Y_length/2);
+        set("y min", -4e-6); set("y max", 4e-6);  
+        set("z", 0.11e-6);   set("z span", 2.5e-6);
+        set("mesh accuracy", MESH);
+        set("simulation time",SIM_TIME);
+	select("FDTD"); setview("extent"); 
+
+	if (MESH>2){
+		addmesh;
+		set("z min", 0.11e-6);   set("z max", wg_thickness(thickness_iter));
+		set("override x mesh",0);
+		set("dy",0.005e-6);
+		set("dz",0.02e-6);
+		set("x min",-6e-6); set("x max",-4e-6);
+		set("y min",-0.7e-6);
+		set("y max",0.7e-6);
+		set('z', 0.11e-6); set('z span', wg_thickness(thickness_iter)*1e-9);
+
+
+		}
+
+        addmode; set("name","simulation_port1"); #Add source to the simulation environment.
+        set("injection axis","x-axis"); set("direction","Forward");
+        set("x", -6.5e-6);  # simulate up to the layout port (wg_width x wg_width box)
+        set("y span",2e-6);  
+        set("y", 0e-6);
+        set("z", 0.11e-6);  set("z span", 2e-6);
+	set("theta", 0);
+        set('override global source settings', 1);
+        set('mode selection', 'fundamental TE mode'); 
+        set("enabled",0);      updatesourcemode;
+        
+
+        addmode; set("name","simulation_port2"); #Add source to the simulation environment.
+        set("injection axis","x-axis"); set("direction","Backward");
+        set("x", 6.6e-6);  # 
+        set("y span",2e-6);  
+        set("y", 2.7e-6);
+        set("z", 0.11e-6);  set("z span", 2e-6);
+	set("theta", 0);
+        set('override global source settings', 1);
+        set('mode selection', 'fundamental TE mode'); 
+        set("enabled",0);      updatesourcemode;
+
+        addmode; set("name","simulation_port3"); #Add source to the simulation environment.
+        set("injection axis","x-axis"); set("direction","Backward");
+        set("x", 6.6e-6);  # 
+        set("y span",2e-6);  
+        set("y", -2.7e-6);
+        set("z", 0.11e-6);  set("z span", 2e-6);
+	set("theta", 0);
+        set('override global source settings', 1);
+        set('mode selection', 'fundamental TE mode'); 
+        set("enabled",0);      updatesourcemode;
+        
+
+        #***********************************************************
+        #Monitors
+        #***********************************************************
+
+        addpower; set("name", "Port1");# Add power monitor for Port 1
+        set('monitor type', '2D X-normal');
+        set("x", -6.3e-6);
+        set('y', 0e-6); 
+        set("y span",2e-6); 
+        set("z", 0.11e-6);  set("z span", 2e-6);
+
+        addpower; set("name", "Port2");# Add power monitor for Port 2
+        set('monitor type', '2D X-normal');
+        set("x", 6.5e-6);
+        set('y', 2.7e-6); 
+        set("y span",2e-6); 
+        set("z", 0.11e-6);  set("z span", 2e-6);
+
+
+        addpower; set("name", "Port3");# Add power monitor for Port 3
+        set('monitor type', '2D X-normal');
+        set("x", 6.5e-6);
+        set('y', -2.7e-6); 
+        set("y span",2e-6); 
+        set("z", 0.11e-6);  set("z span", 2e-6);
+
+
+        #add expansion
+        Mode_Selection = 'fundamental TE mode';
+
+        addmodeexpansion; #the fraction of power transmitted into any modes
+        set('name', 'TEexpansion1');
+        set('monitor type', '2D X-normal');
+        set("x", -6.3e-6);
+        set('y', 0e-6); 
+        set("y span",2e-6); 
+        set("z", 0.11e-6);  set("z span", 2e-6);    
+        set('frequency points',FREQ_PTS);
+        set('mode selection', Mode_Selection);
+        setexpansion('Port1TEexpa','Port1');
+        
+        addmodeexpansion;
+        set('name', 'TEexpansion2');
+        set('monitor type', '2D X-normal');
+        set("x", 6.5e-6);
+        set('y', 2.7e-6); 
+        set("y span",2e-6); 
+        set("z", 0.11e-6);  set("z span", 2e-6);
+        set('frequency points',FREQ_PTS);
+        set('mode selection', Mode_Selection);
+        setexpansion('Port2TEexpa','Port2');
+
+        addmodeexpansion;
+        set('name', 'TEexpansion3');
+        set('monitor type', '2D X-normal');
+        set("x", 6.5e-6);
+        set('y', -2.7e-6); 
+        set("y span",2e-6); 
+        set("z", 0.11e-6);  set("z span", 2e-6);
+        set('frequency points',FREQ_PTS);
+        set('mode selection', Mode_Selection);
+        setexpansion('Port3TEexpa','Port3');
+
+	
+
+
+
+  
+        ############################################################################
+        #RUN
+        #################################################################
+ 
+        filename = "Ybranch_TE_Thickness =" + num2str(wg_thickness(thickness_iter)) + " width=" + num2str(wg_width(width_iter));
+
+        if(fileexists(filename)) {rm(filename);} # old files with same name get deleted. 
+        sparamFileName="sparam_files/" + filename+".sparam";
+        
+        textFile="txt_files/" + filename+".txt";  
+        matlabFileName="matlab/"+filename+".mat"; 
+        fdtdFileName = filename+".fsp";
+        if (fileexists(sparamFileName)) { rm(sparamFileName);} # delete Sparam file if it already exists
+        if (fileexists(textFile)) { rm(textFile);} # delete text file if it already exists
+        if (fileexists(matlabFileName)) { rm(matlabFileName);} # delete the matlab file if it already exists
+        if (fileexists(fdtdFileName)){rm(fdtdFileName);}
+        #save();
+        save(fdtdFileName);
+        ###########################################################
+
+        # TE input on port 1:
+        switchtolayout;
+        select("simulation_port1"); set("enabled",1);
+        select("simulation_port2"); set("enabled",0);
+        select("simulation_port3"); set("enabled",0);
+         run;
+
+        Port1TE=getresult("TEexpansion1","expansion for Port1TEexpa");
+        Port2TE=getresult("TEexpansion2","expansion for Port2TEexpa");
+        Port3TE=getresult("TEexpansion3","expansion for Port3TEexpa");
+
+	f=Port1TE.f;
+        TETE11=Port1TE.b/Port1TE.a;
+        TETE21=Port2TE.a/Port1TE.a;
+        TETE31=Port3TE.a/Port1TE.a;
+
+
+        ?"Center wavelength: " + num2str( c/f(length(f)/2+0.5) );
+        ?"1to2 power at center wavelength (Input1): " + num2str(abs(TETE21(length(f)/2+0.5))^2*100) + "%.";
+        ?"1to3 power at center wavelength (Input1): " + num2str(abs(TETE31(length(f)/2+0.5))^2*100) + "%.";
+        ?"                              Loss (Input1): " + num2str(100-abs(TETE31(length(f)/2+0.5))^2*100-abs(TETE21(length(f)/2+0.5))^2*100) + "%.";
+
+#         ###########################################################
+
+        # TE Input on Port 2:
+        switchtolayout;
+        select("simulation_port1"); set("enabled",0);
+        select("simulation_port2"); set("enabled",1);
+        select("simulation_port3"); set("enabled",0);
+        run;
+
+        Port1TE=getresult("TEexpansion1","expansion for Port1TEexpa");
+        Port2TE=getresult("TEexpansion2","expansion for Port2TEexpa");
+        Port3TE=getresult("TEexpansion3","expansion for Port3TEexpa");
+
+
+        f=Port2TE.f;
+        TETE12=Port1TE.b/Port2TE.b;
+        TETE22=Port2TE.a/Port2TE.b;
+        TETE32=Port3TE.a/Port2TE.b;
+
+       
+        ?"2to1 power at center wavelength (Input2): " + num2str(abs(TETE12(length(f)/2+0.5))^2*100) + "%.";
+        ?"2to3 power at center wavelength (Input2): " + num2str(abs(TETE32(length(f)/2+0.5))^2*100) + "%.";
+        ?"                              Loss (Input2): " + num2str(100-abs(TETE12(length(f)/2+0.5))^2*100-abs(TETE32(length(f)/2+0.5))^2*100) + "%.";
+        
+        ###########################################################
+
+        # TE Input on Port 3:
+        switchtolayout;
+        select("simulation_port1"); set("enabled",0);
+        select("simulation_port2"); set("enabled",0);
+        select("simulation_port3"); set("enabled",1);
+        run;
+
+        Port1TE=getresult("TEexpansion1","expansion for Port1TEexpa");
+        Port2TE=getresult("TEexpansion2","expansion for Port2TEexpa");
+        Port3TE=getresult("TEexpansion3","expansion for Port3TEexpa");
+
+
+        f=Port3TE.f;
+        TETE13=Port1TE.b/Port3TE.b;
+        TETE23=Port2TE.a/Port3TE.b;
+        TETE33=Port3TE.a/Port3TE.b;
+        
+        ?"3to1 power at center wavelength (Input3): " + num2str(abs(TETE13(length(f)/2+0.5))^2*100) + "%.";
+        ?"3to2 power at center wavelength (Input3): " + num2str(abs(TETE23(length(f)/2+0.5))^2*100) + "%.";
+        ?"                              Loss (Input3): " + num2str(100-abs(TETE13(length(f)/2+0.5))^2*100-abs(TETE23(length(f)/2+0.5))^2*100) + "%.";
+        
+
+
+        ##########################################
+        #WRITE MATRIX
+        ##########################################
+
+        freqPts = FREQ_PTS;
+
+        # write matrix for TE to TE
+ 	portNumber = 3;
+	TEModeLabel = "'TE'"; TEModeID = "1"; 
+        outMode = TEModeLabel; outModeNum = TEModeID;
+        inMode = TEModeLabel; inModeNum = TEModeID;
+        SMatrix = [TETE11, TETE21, TETE31, 
+                   TETE12, TETE22, TETE32,
+                   TETE13, TETE23, TETE33];
+        WriteMatrix;
+        SMatrixTETE = SMatrix;
+
+
+        matlabsave(matlabFileName, f, SMatrixTETE);
+        
+        write(textFile,"Center wavelength: " + num2str( c/f(length(f)/2+0.5) ));
+        write(textFile,"Mesh accuracy: " + num2str(MESH));
+        write(textFile,"1to2 power at center wavelength (Input1): " + num2str(abs(TETE21(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"1to3 power at center wavelength (Input1): " + num2str(abs(TETE31(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"                              Loss (Input1): " + num2str(100-abs(TETE31(length(f)/2+0.5))^2*100-abs(TETE21(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"2to1 power at center wavelength (Input2): " + num2str(abs(TETE12(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"2to3 power at center wavelength (Input2): " + num2str(abs(TETE32(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"                              Loss (Input2): " + num2str(100-abs(TETE12(length(f)/2+0.5))^2*100-abs(TETE32(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"3to1 power at center wavelength (Input3): " + num2str(abs(TETE13(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"3to2 power at center wavelength (Input3): " + num2str(abs(TETE23(length(f)/2+0.5))^2*100) + "%.");
+        write(textFile,"                              Loss (Input3): " + num2str(100-abs(TETE13(length(f)/2+0.5))^2*100-abs(TETE23(length(f)/2+0.5))^2*100) + "%.");
+      
+        
+#test passivity of Smatrix
+        ?'Checking TETE matrix';
+        TETE_norm = matrix(1,FREQ_PTS);
+        TETE_err = TETE_norm;
+        for (ff=1:FREQ_PTS)
+        {
+            TETE=[TETE11(ff),TETE12(ff),TETE13(ff),
+                  TETE21(ff),TETE22(ff),TETE23(ff),
+                  TETE31(ff),TETE32(ff),TETE33(ff)];
+
+            TETE_norm(ff)=norm(TETE); 
+                   TETE_err(ff) = max(abs( TETE-transpose(TETE)));
+        }
+
+        if (max(TETE_err) > 0.05)
+        {
+            ? '******* Warning: S parameters violate reciprocity by more than 5% *********';
+        }
+        if (max(TETE_norm) > 1.01)
+        {
+            ? '******* Warning: S parameters not passive *********';
+        }
+        else 
+        {
+            if (max(TETE_norm) <1){
+                ? '******* S paramters are passive ********'; 
+            }
+        }
+
+        if (figs ==1 )
+        {
+            plot (f, TETE_norm, 'Wavelength (um)', 
+            'Norm |S|', 'Thickness =' + num2str(si_thickness(thickness_iter)) + 'nm width=' + num2str(box_width + boxsize_variation(size_iter)) + ' um');
+            plot(c/f*1e6, TETE_err, 'Wavelength (um)', 'abs(s-transpose(S))','Reciprocity');
+        }
+    }
+}

@@ -6,11 +6,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si</name>
   <source>1/0@1</source>
@@ -21,11 +23,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>SiEtch1</name>
   <source>2/0@1</source>
@@ -36,11 +40,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>SiEtch2</name>
   <source>3/0@1</source>
@@ -51,11 +57,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Ge</name>
   <source>5/0@1</source>
@@ -66,11 +74,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>OxEtch</name>
   <source>6/0@1</source>
@@ -81,11 +91,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>DeepTrench</name>
   <source>7/0@1</source>
@@ -96,11 +108,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si N</name>
   <source>20/0@1</source>
@@ -111,11 +125,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si P</name>
   <source>21/0@1</source>
@@ -126,11 +142,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si P+</name>
   <source>22/0@1</source>
@@ -141,11 +159,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si N+</name>
   <source>23/0@1</source>
@@ -156,11 +176,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si N++</name>
   <source>24/0@1</source>
@@ -171,11 +193,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si P++</name>
   <source>25/0@1</source>
@@ -186,11 +210,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Ge N++</name>
   <source>26/0@1</source>
@@ -201,11 +227,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Ge P+</name>
   <source>27/0@1</source>
@@ -216,11 +244,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>VC</name>
   <source>40/0@1</source>
@@ -231,11 +261,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>M1</name>
   <source>41/0@1</source>
@@ -246,11 +278,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>VL</name>
   <source>44/0@1</source>
@@ -261,11 +295,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>ML</name>
   <source>45/0@1</source>
@@ -276,11 +312,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>MLOpen</name>
   <source>46/0@1</source>
@@ -291,11 +329,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>M Heater</name>
   <source>47/0@1</source>
@@ -306,11 +346,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>M1 KO</name>
   <source>60/0@1</source>
@@ -321,11 +363,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Si KO</name>
   <source>63/0@1</source>
@@ -336,11 +380,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I5</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Text</name>
   <source>66/0@1</source>
@@ -351,11 +397,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>DRCexclude</name>
   <source>67/0@1</source>
@@ -366,13 +414,15 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I1</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width>3</width>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
-  <name>99_FloorPlan</name>
+  <name>FloorPlan</name>
   <source>99/0@1</source>
  </properties>
  <properties>
@@ -381,11 +431,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width>2</width>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>FbrTgt</name>
   <source>81/0@1</source>
@@ -396,11 +448,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I9</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width>3</width>
   <marked>true</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>Errors</name>
   <source>999/0@1</source>
@@ -411,13 +465,15 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I1</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width>3</width>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
-  <name>733_Lumerical</name>
+  <name>Lumerical</name>
   <source>733/0@1</source>
  </properties>
  <properties>
@@ -426,11 +482,13 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I11</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width>2</width>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>PinRec</name>
   <source>69/0@1</source>
@@ -441,14 +499,50 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I1</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>true</transparent>
   <width>1</width>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
   <name>DevRec</name>
   <source>68/0@1</source>
+ </properties>
+ <properties>
+  <frame-color/>
+  <fill-color/>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern/>
+  <line-style/>
+  <valid>true</valid>
+  <visible>false</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>Extra</name>
+  <source>*/*@*</source>
+  <group-members>
+   <frame-color>#ff80a8</frame-color>
+   <fill-color>#ff80a8</fill-color>
+   <frame-brightness>0</frame-brightness>
+   <fill-brightness>0</fill-brightness>
+   <dither-pattern>I5</dither-pattern>
+   <line-style/>
+   <valid>true</valid>
+   <visible>true</visible>
+   <transparent>false</transparent>
+   <width>1</width>
+   <marked>false</marked>
+   <xfill>false</xfill>
+   <animation>0</animation>
+   <name>Waveguide</name>
+   <source>1/0@1</source>
+  </group-members>
  </properties>
  <name/>
 </layer-properties>
