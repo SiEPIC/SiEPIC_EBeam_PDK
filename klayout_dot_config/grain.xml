@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <salt-grain>
  <name>siepic_ebeam_pdk</name>
- <version>0.3.0</version>
+ <version>0.3.1</version>
  <api-version>0.25</api-version>
  <title>SiEPIC EBeam PDK</title>
  <doc>A Process Design Kit for Silicon Photonics fabricated using Electron Beam Lithography</doc>
