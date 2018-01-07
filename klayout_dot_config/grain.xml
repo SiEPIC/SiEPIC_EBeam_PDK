@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <salt-grain>
  <name>siepic_ebeam_pdk</name>
- <version>0.3.2</version>
+ <version>0.3.3</version>
  <api-version>0.25</api-version>
  <title>SiEPIC EBeam PDK</title>
  <doc>A Process Design Kit for Silicon Photonics fabricated using Electron Beam Lithography</doc>
@@ -13,6 +13,6 @@
  <depends>
   <name>siepic_tools</name>
   <url/>
-  <version>0.3.2</version>
+  <version>0.3.6</version>
  </depends>
 </salt-grain>

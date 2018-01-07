@@ -129,6 +129,9 @@ with:
 
 """
 
+# import xml before lumapi (SiEPIC.lumerical), otherwise XML doesn't work:
+from xml.etree import cElementTree
+
 import math
 from SiEPIC.utils import arc, arc_wg, arc_to_waveguide, points_per_circle
 from SiEPIC.utils import get_technology
