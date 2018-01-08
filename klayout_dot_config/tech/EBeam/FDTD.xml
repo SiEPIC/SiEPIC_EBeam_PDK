@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FDTD>
+	<floats>
+		<frequency_points_monitor>101</frequency_points_monitor>
+		<frequency_points_expansion>11</frequency_points_expansion>
+		<thickness_Si>0.22e-6</thickness_Si>
+		<thickness_BOX>2.0e-6</thickness_BOX>
+		<thickness_Clad>2.0e-6</thickness_Clad>
+		<wavelength_start>1450e-9</wavelength_start>
+		<wavelength_stop>1650e-9</wavelength_stop>
+	</floats>
+	<strings>
+		<material_Clad>SiO2 (Glass) - Palik</material_Clad>
+		<material_Si>Si (Silicon) - Palik</material_Si>
+		<mode_selection>fundamental TE mode</mode_selection>
+	</strings>
+</FDTD>
