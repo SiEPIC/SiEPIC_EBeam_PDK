@@ -8,10 +8,15 @@
 		<thickness_Clad>2.0e-6</thickness_Clad>
 		<wavelength_start>1450e-9</wavelength_start>
 		<wavelength_stop>1650e-9</wavelength_stop>
+		<Efield_intensity_cutoff_eigenmode>1e-3</Efield_intensity_cutoff_eigenmode>
+		<convergence_test_span_incremement>100e-9</convergence_test_span_incremement>
+		<convergence_test_rms_error_limit>1e-4</convergence_test_rms_error_limit>
+		<Initial_FDTD_Z_span>4e-6</Initial_FDTD_Z_span>
 	</floats>
 	<strings>
 		<material_Clad>SiO2 (Glass) - Palik</material_Clad>
 		<material_Si>Si (Silicon) - Palik</material_Si>
 		<mode_selection>fundamental TE mode</mode_selection>
+		<mesh_accuracy>4</mesh_accuracy>
 	</strings>
 </FDTD>
