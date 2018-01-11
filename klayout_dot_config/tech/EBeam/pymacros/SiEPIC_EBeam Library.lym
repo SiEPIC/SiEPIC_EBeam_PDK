@@ -800,6 +800,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     t = Trans(Trans.R0, length,0)
+    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)
