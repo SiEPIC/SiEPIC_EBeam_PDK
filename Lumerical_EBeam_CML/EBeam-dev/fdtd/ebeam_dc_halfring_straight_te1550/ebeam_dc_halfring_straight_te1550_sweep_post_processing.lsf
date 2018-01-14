@@ -1,0 +1,67 @@
+############################################################
+# Confidential Information:
+#
+# script file: ebeam_pc_te1550_post_processing.lsf
+#
+# Copyright 2016 Lumerical Solutions
+###########################################################
+
+clear;
+
+wg_width=5e-07;
+wg_thickness=2.2e-07;
+
+sweep=getsweepresult("sweep_radius","kappa");
+radius=sweep.radius;
+gap=sweep.gap;
+
+# define data export
+xml_filename="ebeam_dc_halfring_straight_te1550_map.xml";
+table = "point_coupler";
+lookupopen(xml_filename,table);
+
+# prepare data structure
+design = cell(2);
+extracted = cell(1);
+design{1}=struct;
+design{1}.name = "gap";
+design{2}=struct;
+design{2}.name = "radius";
+extracted{1} = struct;
+extracted{1}.name = "s-param";
+
+for (rr=1:length(radius)) {
+    for (gg=1:length(gap)) {
+        design{1}.value = gap(gg);
+        design{2}.value = radius(rr);
+        # merge S parameters
+        input_port=1;
+        filename = "ebeam_dc_halfring_straight_te1550_input_port=" + num2str(input_port) + "_gap=" + num2str(gap(gg)*1e9) + "nm_radius=" + num2str(radius(rr)*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm";
+        file=filename+".ldf";
+        loaddata(file);
+        S33=S11;
+        S43=-S21;
+        S13=S31;
+        S23=-S41;
+        input_port=2;
+        filename = "ebeam_dc_halfring_straight_te1550_input_port=" + num2str(input_port) + "_gap=" + num2str(gap(gg)*1e9) + "nm_radius=" + num2str(radius(rr)*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm";
+        file=filename+".ldf";
+        loaddata(file);
+        S34=-S12;
+        S22=0.1*S22;    # reduce the back reflection, as the mode mismatch loss is much lower in a realistic ring.
+        S44=S22;
+        S14=-S32;
+        S24=S42;
+        # scale S parameters to make passive
+        scale_factor=0.987;
+        scale_s_parameters;
+        sfile = "ebeam_dc_halfring_straight_te1550_gap=" + num2str(gap(gg)*1e9) + "nm_radius=" + num2str(radius(rr)*1e6) + "um_width=" + num2str(wg_width*1e9) +  "nm_thickness=" + num2str(wg_thickness*1e9) + "nm.dat";
+        if (fileexists(sfile)) { rm(sfile);}
+        mode_label = "TE";
+        mode_ID = "1";
+        write_s_parameters;
+        extracted{1}.value = sfile;
+        lookupwrite(xml_filename,design, extracted);
+    }
+}
+lookupclose(xml_filename);
