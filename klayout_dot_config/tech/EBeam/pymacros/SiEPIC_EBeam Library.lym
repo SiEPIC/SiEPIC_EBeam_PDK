@@ -1107,7 +1107,8 @@ class SiEPIC_EBeam(Library):
   def __init__(self):
   
     tech_name = 'EBeam'
-    library = 'SiEPIC-'+tech_name
+    library = tech_name
+#    library = 'SiEPIC-'+tech_name
     
     print("Initializing '%s' Library." % library)
 
@@ -1119,7 +1120,7 @@ class SiEPIC_EBeam(Library):
     self.description = "Components &amp; models"
 
 
-    technology = 'SiEPIC-EBeam'
+#    technology = 'SiEPIC-EBeam'
     print("Initializing '%s' Library." % library)
   
     import os
