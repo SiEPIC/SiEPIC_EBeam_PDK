@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<design-for-test>
+	<grating-couplers>
+		<gc-array-orientation>90</gc-array-orientation>
+		<detectors-above-laser>1</detectors-above-laser>
+		<detectors-below-laser>2</detectors-below-laser>
+		<gc-pitch>127</gc-pitch>
+		<minimum-gc-pitch-between-separate-circuits>40</minimum-gc-pitch-between-separate-circuits>
+		<gc-orientation>
+			<ebeam_gc_te1550>0</ebeam_gc_te1550>
+			<ebeam_gc_tm1550>180</ebeam_gc_tm1550>
+		</gc-orientation>
+	</grating-couplers>
+	<opt_in>
+		<max-distance-to-grating-coupler>10</max-distance-to-grating-coupler>
+	</opt_in>
+	<tunable-laser>
+		<wavelength>1550</wavelength>
+		<wavelength-start>1500</wavelength-start>
+		<wavelength-stop>1600</wavelength-stop>
+		<wavelength-points>3000</wavelength-points>
+		
+	</tunable-laser>
+</design-for-test>
