@@ -2971,7 +2971,7 @@ class SiEPIC_EBeam_dev(Library):
   def __init__(self):
 
     tech_name = 'EBeam'
-    library = 'SiEPIC-'+tech_name+'-dev'
+    library = tech_name+'-dev'
     
     print("Initializing '%s' Library." % library)
 
