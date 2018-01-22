@@ -18,7 +18,8 @@ mkdir $DEST/tech
 ln -s $SRC/$REPO/klayout_dot_config/tech/* $DEST/tech/
 ln -s $SRC/$REPO/klayout_dot_config/pymacros/* $DEST/pymacros
 
-ln -s $SRC/$REPO/Lumerical_IME_CML/* $INTC/Custom
+ln -s $SRC/$REPO/Lumerical_EBeam_CML/EBeam $INTC/Custom/
+ln -s $SRC/$REPO/Lumerical_EBeam_CML/EBeam-dev $INTC/Custom/
 
 grep -q -F '[Design%20kits]' $INTC/INTERCONNECT.ini || echo '[Design%20kits]' >> $INTC/INTERCONNECT.ini
 
