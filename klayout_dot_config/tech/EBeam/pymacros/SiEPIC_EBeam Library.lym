@@ -158,11 +158,14 @@ class Waveguide(PCellDeclarationHelper):
     from SiEPIC.utils import arc_xy, arc_bezier, angle_vector, angle_b_vectors, inner_angle_b_vectors, translate_from_normal
     from math import cos, sin, pi, sqrt
     import pya
+    from SiEPIC.extend import to_itype
     
     TECHNOLOGY = get_technology_by_name('EBeam')
     
     dbu = self.layout.dbu
-    path = self.path*(1/dbu)
+    wg_width = to_itype(self.width,dbu)
+    path = self.path.to_itype(dbu)
+
     if not (len(self.layers)==len(self.widths) and len(self.layers)==len(self.offsets) and len(self.offsets)==len(self.widths)):
       raise Exception("There must be an equal number of layers, widths and offsets")
     path.unique_points()
@@ -170,8 +173,8 @@ class Waveguide(PCellDeclarationHelper):
     for lr in range(0, len(self.layers)):
       layer = self.layout.layer(TECHNOLOGY[self.layers[lr]])
       
-      width = float(self.widths[lr])/dbu
-      offset = float(self.offsets[lr])/dbu
+      width = to_itype(self.widths[lr],dbu)
+      offset = to_itype(self.offsets[lr],dbu)
 
       pts = path.get_points()
       wg_pts = [pts[0]]
@@ -180,7 +183,7 @@ class Waveguide(PCellDeclarationHelper):
         dis1 = pts[i].distance(pts[i-1])
         dis2 = pts[i].distance(pts[i+1])
         angle = angle_vector(pts[i]-pts[i-1])/90
-        pt_radius = self.radius/dbu
+        pt_radius = to_itype(self.radius,dbu)
         # determine the radius, based on how much space is available
         if len(pts)==3:
           pt_radius = min (dis1, dis2, pt_radius)
@@ -230,23 +233,23 @@ class Waveguide(PCellDeclarationHelper):
     if angle_vec == 0: # horizontal
       halign = 2 # right
       angle=0
-      pt2=pts[0] + Point(0, self.width/dbu)
-      pt3=pts[0] + Point(0, -self.width/dbu)
+      pt2=pts[0] + Point(0, wg_width)
+      pt3=pts[0] + Point(0, -wg_width)
     if angle_vec == 2: # horizontal
       halign = 0 # left
       angle = 0
-      pt2=pts[0] + Point(0, self.width/dbu)
-      pt3=pts[0] + Point(0, -self.width/dbu)
+      pt2=pts[0] + Point(0, wg_width)
+      pt3=pts[0] + Point(0, -wg_width)
     if angle_vec == 1: # vertical
       halign = 2 # right
       angle = 1
-      pt2=pts[0] + Point(self.width/dbu,0)
-      pt3=pts[0] + Point(-self.width/dbu,0)
+      pt2=pts[0] + Point(wg_width,0)
+      pt3=pts[0] + Point(-wg_width,0)
     if angle_vec == -1: # vertical
       halign = 0 # left
       angle = 1
-      pt2=pts[0] + Point(self.width/dbu,0)
-      pt3=pts[0] + Point(-self.width/dbu,0)
+      pt2=pts[0] + Point(wg_width,0)
+      pt3=pts[0] + Point(-wg_width,0)
       
     t = Trans(angle, False, pts[0]) 
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t, 0.1/dbu, -1)
