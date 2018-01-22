@@ -450,9 +450,9 @@ class Waveguide_SBend(PCellDeclarationHelper):
     from math import pi, cos, sin, log, sqrt, acos
     
     length = self.length / dbu
-    w = self.wg_width / dbu
-    r = self.radius / dbu
-    h = self.height / dbu
+    w = round(self.wg_width / dbu)
+    r = round(self.radius / dbu)
+    h = round(self.height / dbu)
     theta = acos((r-abs(h/2))/r)*180/pi
     x = 2*r*sin(theta/180.0*pi)
     straight_l = (length - x)/2
