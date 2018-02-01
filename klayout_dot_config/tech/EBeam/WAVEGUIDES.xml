@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<waveguides>
+	<waveguide>
+	  <name>Strip TE 1550 nm, w=500 nm</name>
+	  <bezier>0.20</bezier>
+      <radius>5.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+	<waveguide>
+	  <name>Strip TM 1550 nm, w=500 nm</name>
+      <radius>15.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+	<waveguide>
+	  <name>Strip TE-TM 1550, w=450 nm</name>
+      <radius>10.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.45</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+</waveguides>
