@@ -699,7 +699,7 @@ class strip_to_slot(PCellDeclarationHelper):
 
     
     # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
+    pin_length = PIN_LENGTH # database units, = 0.2 microns
  
     # Create the waveguide
     wg1 = Box(0, -w/2, r+w/2+w+Lc/2, w/2)
@@ -931,7 +931,7 @@ class fswgc(PCellDeclarationHelper):
 
 
     # Pin on the waveguide:
-    pin_length = 200
+    pin_length = PIN_LENGTH
     x = 0
     t = Trans(Trans.R0, x,0)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], self.t/dbu)
@@ -1046,8 +1046,6 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-
-#    pin_length = self.period_strip * self.duty_strip / dbu
     w = max ( self.wg_width_strip, self.wg_width_taper) / dbu
     t = Trans(Trans.R0, length,0)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
@@ -1366,7 +1364,7 @@ class DoubleBus_Ring(PCellDeclarationHelper):
     shapes(LayerSiN).insert(wg2)
 
     # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
+    pin_length = PIN_LENGTH # database units, = 0.2 microns
     
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
@@ -2524,13 +2522,13 @@ class Bezier_Bend(PCellDeclarationHelper):
     y = r
     
     # Pin on the top side:
-    p2 = [Point(x, y-r-pin_length/2), Point(x, y-r+pin_length/2)]
+    p2 = [Point(0, y-pin_length/2), Point(0, y+pin_length/2)]
     p2c = Point(x, y)
     self.set_p2 = p2c
     self.p2 = p2c
     pin = Path(p2, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, x, y-r)
+    t = Trans(Trans.R0, 0, y)
     text = Text ("pin2", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -2538,13 +2536,13 @@ class Bezier_Bend(PCellDeclarationHelper):
     x = 0
     y = 0
     # Pin on the left side:
-    p1 = [Point(pin_length/2+x,-r), Point(-pin_length/2+x,-r)]
+    p1 = [Point(pin_length/2-r,0), Point(-pin_length/2-r,0)]
     p1c = Point(x,0)
     self.set_p1 = p1c
     self.p1 = p1c
     pin = Path(p1, w)
     self.cell.shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, x, -r)
+    t = Trans(Trans.R0, -r, 0)
     text = Text ("pin1", t)
     shape = self.cell.shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
@@ -2925,7 +2923,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
     waveguide_length = (2*pi*r*(2*theta/360.0)+straight_l*2)*dbu
 
     # Pins on the waveguide:
-    pin_length = 200
+    pin_length = PIN_LENGTH
     x = self.length / dbu
     t = Trans(Trans.R0, x,h)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
