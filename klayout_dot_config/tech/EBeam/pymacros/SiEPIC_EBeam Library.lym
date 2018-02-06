@@ -1079,7 +1079,7 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     points = [[0,0], [length, 0]]
-    path = points_to_path(points,w2+w1*2)
+    path = Path([Point(0,0),Point(length,0)],w2+w1*2)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
 
