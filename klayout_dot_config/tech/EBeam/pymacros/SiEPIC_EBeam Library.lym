@@ -518,7 +518,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
     waveguide_length = (2*pi*r*(2*theta/360.0)+straight_l*2)*dbu
 
     # Pins on the waveguide:
-    pin_length = 200
+    pin_length = PIN_LENGTH
     x = self.length / dbu
     t = Trans(Trans.R0, x,h)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
@@ -643,7 +643,7 @@ class Waveguide_bump(PCellDeclarationHelper):
 
 
     # Pins on the waveguide:
-    pin_length = 100
+    pin_length = PIN_LENGTH
     x = self.length / dbu
     w = self.wg_width / dbu
     t = Trans(Trans.R0, x,0)
@@ -796,7 +796,7 @@ class Waveguide_Bend(PCellDeclarationHelper):
     layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 360)
     
     # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
+    pin_length = PIN_LENGTH # database units, = 0.2 microns
     
     # Pin on the top side:
     p2 = [Point(0, y+pin_length/2), Point(0, y-pin_length/2)]
@@ -943,7 +943,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
 
     
     # Pins on the waveguide:
-    pin_length = 200
+    pin_length = PIN_LENGTH
 
     t = Trans(Trans.R0, 0,0)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
@@ -1051,7 +1051,7 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
 
     
     # Create the pins, as short paths:
-    pin_length = 200 # database units, = 0.2 microns
+    pin_length = PIN_LENGTH # database units, = 0.2 microns
     
     # Pin on the left side:
     p1 = [Point(pin_length/2,0), Point(-pin_length/2,0)]
@@ -1078,7 +1078,6 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    points = [[0,0], [length, 0]]
     path = Path([Point(0,0),Point(length,0)],w2+w1*2)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
