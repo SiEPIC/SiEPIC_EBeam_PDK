@@ -616,37 +616,34 @@ class Waveguide_bump(PCellDeclarationHelper):
 
 
     from math import pi, cos, sin, log, sqrt
-    from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle
+    from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle, arc_wg
     
     x = 0
     y = 0
     theta = self.theta
-    length = self.length
 #    2*pi*r*(4*theta/360) = length + self.delta_length
-    w = self.wg_width
+
+    from SiEPIC.extend import to_itype
+    w = to_itype(self.wg_width,dbu)
+    length = to_itype(self.length,dbu)
     r = length/4/sin(theta/180.0*pi)
     waveguide_length = 2*pi*r*(4*theta/360.0)
     
-# layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
-#with:
-# self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [Point(0, 0)]).transformed(t))
-    
     #arc_to_waveguide(pts, width):
     #arc(radius, start, stop)
-    t = Trans(Trans.R0,x/dbu, (y+r)/dbu)
-    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r/dbu, 270., 270.+theta), w/dbu).transformed(t))
+    t = Trans(Trans.R0,x, round(y+r))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270., 270.+theta).transformed(t))
 
-    t = Trans(Trans.R0,(x+length/2)/dbu, (y-r+ 2*r*(1-cos(theta/180.0*pi)))/dbu)
-    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r/dbu, 90.-theta, 90.+theta), w/dbu).transformed(t))
+    t = Trans(Trans.R0,round(x+length/2), round(y-r+ 2*r*(1-cos(theta/180.0*pi))))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90.-theta, 90.+theta).transformed(t))
 
-    t = Trans(Trans.R0,(x+length)/dbu, (y+r)/dbu)
-    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r/dbu, 270.-theta, 270), w/dbu).transformed(t))
+    t = Trans(Trans.R0,round(x+length), round(y+r))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270.-theta, 270).transformed(t))
 
 
     # Create the pins on the waveguides, as short paths:
     from SiEPIC._globals import PIN_LENGTH as pin_length
     x = self.length / dbu
-    w = self.wg_width / dbu
     t = Trans(Trans.R0, x,0)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
     pin_t = pin.transformed(t)
@@ -680,15 +677,16 @@ class Waveguide_bump(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
-    t = Trans(Trans.R0, self.length / dbu /6, -w*2)
+    t = Trans(Trans.R0, self.length /6, -w*2)
     text = Text ('dL = %.4f um' % ((waveguide_length-length)), t)
     shape = shapes(LayerTextN).insert(text)
     shape.text_size = 0.6/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    box1 = Box(0, -w*3, length/dbu, w*3+(2*r*(1-cos(theta/180.0*pi)))/dbu)
+    box1 = Box(0, -w*3, length, w*3+(2*r*(1-cos(theta/180.0*pi))))
     shapes(LayerDevRecN).insert(box1)
 
+    print("SiEPIC EBeam: Waveguide_bump complete.")
 
 def layout_pgtext(cell, layer, x, y, text, mag):
     # example usage:
