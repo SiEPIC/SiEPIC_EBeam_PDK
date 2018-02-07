@@ -100,10 +100,6 @@ with:
 
 
 """
-
-# import xml before lumapi (SiEPIC.lumerical), otherwise XML doesn't work:
-from xml.etree import cElementTree
-
 import math
 from SiEPIC.utils import get_technology, get_technology_by_name
 
@@ -794,8 +790,8 @@ class Waveguide_Bend(PCellDeclarationHelper):
     y = r
     layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 360)
     
-    # Create the pins, as short paths:
-    pin_length = PIN_LENGTH # database units, = 0.2 microns
+    # Create the pins on the waveguides, as short paths:
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     
     # Pin on the top side:
     p2 = [Point(0, y+pin_length/2), Point(0, y-pin_length/2)]
@@ -941,8 +937,8 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
         shapes(LayerSiN).insert(box3)
 
     
-    # Pins on the waveguide:
-    pin_length = PIN_LENGTH
+    # Create the pins on the waveguides, as short paths:
+    from SiEPIC._globals import PIN_LENGTH as pin_length
 
     t = Trans(Trans.R0, 0,0)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
@@ -1049,8 +1045,8 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
     shapes(LayerSiN).insert(Polygon(pts))
 
     
-    # Create the pins, as short paths:
-    pin_length = PIN_LENGTH # database units, = 0.2 microns
+    # Create the pins on the waveguides, as short paths:
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     
     # Pin on the left side:
     p1 = [Point(pin_length/2,0), Point(-pin_length/2,0)]
