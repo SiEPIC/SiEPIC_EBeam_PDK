@@ -444,10 +444,10 @@ class Waveguide_SBend(PCellDeclarationHelper):
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
-    LayerSiSPN = ly.layer(LayerSiSP)
+    #LayerSiSPN = ly.layer(LayerSiSP)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    LayerTextN = ly.layer(LayerText)
+    #LayerTextN = ly.layer(get_technology()['Text'])
 
 
     from math import pi, cos, sin, log, sqrt, acos
@@ -464,7 +464,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
 
     if (straight_l &gt;= 0):
       circle_fraction = abs(theta) / 360.0
-      npoints = int(points_per_circle(r*dbu) * circle_fraction)
+      npoints = int(points_per_circle(r) * circle_fraction)
       if npoints == 0:
         npoints = 1
       da = 2 * pi / npoints * circle_fraction # increment, in radians
@@ -517,8 +517,8 @@ class Waveguide_SBend(PCellDeclarationHelper):
     
     waveguide_length = (2*pi*r*(2*theta/360.0)+straight_l*2)*dbu
 
-    # Pins on the waveguide:
-    pin_length = PIN_LENGTH
+    # Create the pins on the waveguides, as short paths:
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     x = self.length / dbu
     t = Trans(Trans.R0, x,h)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
@@ -557,6 +557,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     box1 = Box(0, min(-w*3,h-w*3), length, max(w*3,h+w*3))
     shapes(LayerDevRecN).insert(box1)
+
 
 
 class Waveguide_bump(PCellDeclarationHelper):
@@ -642,8 +643,8 @@ class Waveguide_bump(PCellDeclarationHelper):
     self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r/dbu, 270.-theta, 270), w/dbu).transformed(t))
 
 
-    # Pins on the waveguide:
-    pin_length = PIN_LENGTH
+    # Create the pins on the waveguides, as short paths:
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     x = self.length / dbu
     w = self.wg_width / dbu
     t = Trans(Trans.R0, x,0)
