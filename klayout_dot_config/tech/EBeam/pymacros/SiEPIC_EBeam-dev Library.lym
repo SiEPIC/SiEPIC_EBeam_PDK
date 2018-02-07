@@ -2949,7 +2949,6 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
     self.layout().register_pcell("strip_to_slot", strip_to_slot() )
     #self.layout().register_pcell("spiral", spiral())
-    self.layout().register_pcell("Waveguide_SBend", Waveguide_SBend())
     self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
 
     # Register us the library with the technology name
