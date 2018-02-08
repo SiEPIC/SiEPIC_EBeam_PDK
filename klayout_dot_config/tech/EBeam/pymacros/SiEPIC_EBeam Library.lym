@@ -1061,7 +1061,7 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Pin on the right side:
-    p2 = [Point(length+pin_length/2,0), Point(length-pin_length/2,0)]
+    p2 = [Point(length-pin_length/2,0), Point(length+pin_length/2,0)]
     p2c = Point(length, 0)
     self.set_p2 = p2c
     self.p2 = p2c
