@@ -2512,23 +2512,7 @@ class Bezier_Bend(PCellDeclarationHelper):
     y = r
     
     points = arc_bezier(r, 270, 360, bezier)
-    a = pya.Path(points, w).simple_polygon()
-    d= [each for each in a.each_point()]
-    pt_idx = int(len(d)/2)
-    ptA = d[pt_idx]
-    ptB = d[pt_idx+1]
-    if(abs(ptA.x-ptB.x)*dbu  == wg_width):
-      new_y = (ptA.y+ptB.y)/2
-      d[pt_idx].y = new_y
-      d[pt_idx+1].y = new_y
-    elif(abs(ptA.y-ptB.y)*dbu  == wg_width):
-      new_x = (ptA.x + ptB.x)/2
-      d[pt_idx].x = new_x
-      d[pt_idx+1].x = new_x
-
-  
-    self.cell.shapes(LayerSiN).insert(Polygon(d))
-
+    self.cell.shapes(LayerSiN).insert(pya.Path(points, w).simple_polygon())
    
     
     # Create the pins, as short paths:
