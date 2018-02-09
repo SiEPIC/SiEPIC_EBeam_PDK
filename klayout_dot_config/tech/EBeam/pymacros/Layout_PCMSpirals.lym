@@ -14,39 +14,65 @@
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text># Python script
-# Layout_PCM Spiral
+ <text>'''
+MIT License
 
-"""
+Copyright (c) 2017 Stephen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
 Based on Lukas Chrowstowski's code
 Author: Stephen
 
-"""
-
+KNOWN BUG: The path_to_waveguide function has to be called twice to convert all the paths. If called once it will alternate between odd and even rows. Could not figure out the exact cause
+I suspect it has something to do with the way exceptions are raised or that the GUI interupts the script.
+'''
 
 import pya
+from SiEPIC.scripts import path_to_waveguide
 
-pol = 'te'
 
+###############PARAMETERS####################
 #Shared Sweep
 #sweep_length=[1, 2, 4, 6, 8, 10]
 #sweep_corrugation = [80, 100, 120]
-sweep_length=[1]
-sweep_corrugation = [80]
+sweep_length=[1,4,10]
+sweep_corrugation = [80,90]
 
 #450
 #sweep_period450=[392, 380, 370]
-sweep_period450=[370]
+sweep_period450=[370,400]
 #400
-sweep_period400=[413, 396, 382]
-#350
-sweep_period350=[445, 419, 400]
+#sweep_period400=[413, 396, 382]
+#############################################
 
-x_offset = 67
-y_ring = 127/2
-wg_bend_radius = 16
+##SECONDARY ADJUSTABLES########################
+wg_bend_radius = 16 #16 for tm
+wg_width=500
+gcte_width=500
+gctm_width=500
+##################################
 
-# Configure variables to draw structures in the presently selected cell:
+pol = 'te'
+
+######Configure variables to draw structures in the presently selected cell:
 lv = pya.Application.instance().main_window().current_view()
 if lv == None:
   raise Exception("No view selected")
@@ -55,113 +81,179 @@ ly = pya.Application.instance().main_window().current_view().active_cellview().l
 if ly == None:
   raise Exception("No layout")
 # find the currently selected cell:
-cell = pya.Application.instance().main_window().current_view().active_cellview().cell
-if cell == None:
+top_cell = pya.Application.instance().main_window().current_view().active_cellview().cell
+if top_cell == None:
   raise Exception("No cell")
-# fetch the database parameters
-dbu = ly.dbu
 
-# clean all cells within "cell"
-ly.prune_subcells(cell.cell_index(), 10)
-#delete_extra_top_cells(cell)
+ly.prune_subcells(top_cell.cell_index(), 10)#clean all cells within "cell"
 
 # Layer mapping:
 LayerSi = pya.LayerInfo(1, 0)
-LayerSiN = cell.layout().layer(LayerSi)
+LayerSiN = top_cell.layout().layer(LayerSi)
 fpLayer = pya.LayerInfo(99, 0)
-fpLayerN = cell.layout().layer(fpLayer)
+fpLayerN = top_cell.layout().layer(fpLayer)
 TextLayer = pya.LayerInfo(10, 0)
-TextLayerN = cell.layout().layer(TextLayer)
+TextLayerN = top_cell.layout().layer(TextLayer)
+############################################
+
+dbu = ly.dbu
 
 # Draw floor plan
-cell.shapes(fpLayerN).insert(pya.Box(0,0, 1900/dbu, 7900/dbu))
+#top_cell.shapes(fpLayerN).insert(pya.Box(0,0, 1000/dbu, 7000/dbu))
 
-# Create a sub-cell for our Ring resonator layout
-top_cell = cell
-cell = cell.layout().create_cell("PCMSpiral_"+pol)
-if pol == 'te':
-  t = pya.Trans(pya.Trans.R0, 40 / dbu, 12 / dbu)
-else:
-  t = pya.Trans(pya.Trans.R180, 560 / dbu, 393 / dbu)
+########Grating Coupler#################
+#GC_imported = ly.create_cell("TE1550_220_25d_oxide_broadband_w", "SiEPIC-EBeam").cell_index()
+GC_imported = ly.create_cell("ebeam_gc_te1550", "EBeam").cell_index()
+print ("Cell: GC_imported: #%s" % GC_imported)
 
-# place "cell" in the top cell
-top_cell.insert(pya.CellInstArray(cell.cell_index(), t))
+GC2_imported = ly.create_cell("ebeam_gc_tm1550", "EBeam").cell_index()
+#GC2_imported = ly.create_cell("tm_1550_220_10_oxide", "LIB").cell_index()
+print ("Cell: GC2_imported: #%s" % GC2_imported)
+########################################
 
-
-# Import cells from the SiEPIC GDS Library, and instantiate them
-
-# Grating couplers, Ports 1, 2, 3, 4 (top-down):
-if pol == 'te':
-  GC_imported = ly.create_cell("ebeam_gc_%s1550" % pol, "SiEPIC-EBeam").cell_index()
-  print ("Cell: GC_imported: #%s" % GC_imported)
-gc_length = 41
-
+x_offset = 0 #initialized as zero, each intereation increases it
+y_offset = 0
+countx=0 #incrementing count variable for drawing multiple devices
+county=0
+lasty_offset=0
 
 for i in range(len(sweep_length)):
-  for ii in range(len(sweep_corrugation)):
-      #450
-      for iii in range(len(sweep_period450)):
-        wg_width=450
-
-        # place layout at location:
-        x = iii * x_offset
-        devicelength= sweep_length[i]
-        cwidth=sweep_corrugation[ii]
-        period = sweep_period450[iii]
-        t = pya.Trans(pya.Trans.R0, x/dbu, 0)
-        cell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 2, 1))
+  for ii in range(len(sweep_period450)):
+    #450
+    for iii in range(len(sweep_corrugation)):
+      ###Loads Current Iteration Parameters####
+      cwidth=sweep_corrugation[iii]
+      period = sweep_period450[ii]
+      devicelength= sweep_length[i]
+      ########################################
       
-        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4 
-        t = pya.Trans(x/dbu, 127/2/dbu)
-        text = pya.Text ("opt_in_%s_1550_device_SpiralTEM_WG%sP%sdw%sL%s" % (pol,wg_width,period,cwidth,devicelength), t)
-        shape = cell.shapes(TextLayerN).insert(text)
-        shape.text_size = 3/dbu
+      #place layout at location:
+      x = x_offset
+      y = lasty_offset
+      
+      ####SPIRAL PCELL####
+      pcell = ly.create_cell("[1] Spiral_BraggGrating", "PCMSpiral", {"silayer": LayerSi , "w": wg_width, "DeviceLength": devicelength, "Cwidth": cwidth, "pitch": period, "Chirp_Rate": 0, "n": 1800 } )
+      print ("Cell: pcell: #%s" % pcell.cell_index())
+      ## SPIRAL BOUNDARY BOX DIMENSIONS FOR ROUTING
+      devicewidth = pcell.bbox().width()
+      deviceheight = pcell.bbox().height()  
+      deviceX = (10/dbu)+(wg_bend_radius/dbu*2)+(devicewidth/2.0) #Center of the device
+      deviceY = (deviceheight/2.0)+(wg_bend_radius/dbu)
+      deviceleft = (deviceX)-(devicewidth/2.0)+(0.25/dbu) #the x position of the left most side of our device, add half the devicewidth because our device box's center is 0,0
+      deviceright = (deviceX)+(devicewidth/2.0)-(0.25/dbu)#the x position of the right most side of our device
+            
+      ##TE DEVICE##
+      ###Creates a Single Cell for this one device, better for moving###
+      TEcell = top_cell.layout().create_cell("PCMSpiralTEM_WG%sP%sdw%sL%s_1" % (wg_width,period,cwidth,devicelength))
+      #Create the cell with correct naming    
+      t = pya.Trans(pya.Trans.R0, 0/dbu,0/dbu) 
+      #calculate the translate needed
+      top_cell.insert(pya.CellInstArray(TEcell.cell_index(), t))
+      # place "cell" in the top cell
+  
+      #Create GC#   
+      t = pya.Trans(pya.Trans.R0, (x/dbu),(y/dbu)) 
+      TEcell.insert(pya.CellInstArray(GC_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 2, 1))
+      GC1_X = 0#cell.bbox().width()
+      GC1_Y = 0#(cell.bbox().height()-127/dbu)/2     
+      
+      #Label for Input Port 2#         
+      t = pya.Trans(pya.Trans.R0,(GC1_X)+(x/dbu),(GC1_Y)+(127/dbu)+(y/dbu))#place on 2nd GC's port
+      text = pya.Text ("opt_in_%s_1550_device_SpiralTEM_WG%sP%sdw%sL%s" % (pol,wg_width,period,cwidth,devicelength), t) #Formats the label we want to display
+      shape = TEcell.shapes(TextLayerN).insert(text) #inserts into the Textlayer of our cell
+      shape.text_size = 3/dbu #text font size
+        
+      #Create Device from PCell
+      t1 = pya.Trans(pya.Trans.R0, (GC1_X)+(deviceX)+(x/dbu), (GC1_Y)+(deviceY)+(y/dbu))
+      instance = TEcell.insert(pya.CellInstArray(pcell.cell_index(), t1))      
+      
+      #Paths for Wavguides
+      TEGC1P1 = DPoint((GC1_X*dbu),(GC1_Y*dbu+y))
+      TEGC1P2 = DPoint((deviceleft*dbu),(GC1_Y*dbu+y))
+      TEGC1P3 = DPoint((deviceleft*dbu),(GC1_Y*dbu+y)+(wg_bend_radius))
 
+      dpath = DPath([TEGC1P1,TEGC1P2,TEGC1P3], wg_width*dbu).transformed(DTrans(DTrans.R0,x,0))
+      TEcell.shapes(LayerSiN).insert(dpath.to_itype(dbu))     
+      
+      #dpath = DPath([DPoint(0,GC1_Y*dbu+y+127),DPoint(10+wg_bend_radius,GC1_Y*dbu+y+127),DPoint(10+wg_bend_radius,GC1_Y*dbu+y+127+wg_bend_radius+deviceheight*dbu*0.5+wg_bend_radius),DPoint(deviceright*dbu-wg_width/2.0*dbu,GC1_Y*dbu+y+127+wg_bend_radius+deviceheight*dbu*0.5+wg_bend_radius),DPoint(deviceright*dbu-wg_width/2.0*dbu,GC1_Y*dbu+y+deviceheight*dbu+wg_bend_radius)], wg_width*dbu).transformed(DTrans(DTrans.R0,x,0))      
+      TEGC2P1 = DPoint((GC1_X*dbu),(GC1_Y*dbu+y+127))
+      TEGC2P2 = DPoint((GC1_X*dbu)+(10+wg_bend_radius),(GC1_Y*dbu+y+127))
+      TEGC2P3 = DPoint((GC1_X*dbu)+(10+wg_bend_radius),(GC1_Y*dbu+y)+(wg_bend_radius)+(deviceheight*dbu)+(wg_bend_radius))
+      TEGC2P4 = DPoint((GC1_X*dbu)+(deviceright*dbu),(GC1_Y*dbu+y)+(wg_bend_radius)+(deviceheight*dbu)+(wg_bend_radius))
+      TEGC2P5 = DPoint((GC1_X*dbu)+(deviceright*dbu),(GC1_Y*dbu+y)+(wg_bend_radius)+(deviceheight*dbu))
+      TEGC2P2_2 = DPoint((GC1_X*dbu)+(deviceright*dbu),(GC1_Y*dbu+y+127))
+      if (((GC1_Y*dbu)+(wg_bend_radius)+(deviceheight*dbu)+(wg_bend_radius))&lt;=127):
+        dpath = DPath([TEGC2P1,TEGC2P2_2,TEGC2P5],wg_width*dbu).transformed(DTrans(DTrans.R0,x,0))
+      else:
+        dpath = DPath([TEGC2P1,TEGC2P2,TEGC2P3,TEGC2P4,TEGC2P5],wg_width*dbu).transformed(DTrans(DTrans.R0,x,0))      
+      TEcell.shapes(LayerSiN).insert(dpath.to_itype(dbu))   
+  
+      path_to_waveguide(cell=TEcell)#Turns paths into waveguides via script function.
+      path_to_waveguide(cell=TEcell)#Has to be called twice to draw all WG. No idea why it alternates between odd and even rows when it should just draw in total. I suspect the way exceptions are raised/GUI is called disturb it?
+      ##########
+          
+      ##TM DEVICE##         
+      ###Creates a Single Cell for this one device, better for moving############
+      TMcell = top_cell.layout().create_cell("PCMSpiralTEM_WG%sP%sdw%sL%s_2" % (wg_width,period,cwidth,devicelength))
+      #Create the cell with correct naming    
+      t = pya.Trans(pya.Trans.R0, 0,0) 
+      #calculate the translate needed
+      top_cell.insert(pya.CellInstArray(TMcell.cell_index(), t))
+      # place "cell" in the top cell 
+       
+      #Create GC#
+      TMoffset = TEcell.bbox().width()+20/dbu #device 2 offset
+      t = pya.Trans(pya.Trans.R0,(TMoffset)+(x/dbu),(y/dbu))
+      TMcell.insert(pya.CellInstArray(GC2_imported, t, pya.Point(0,127/dbu), pya.Point(0,0), 2, 1))
+      GC2_X = 0#cell2.bbox().width()
+      GC2_Y = 0#(cell2.bbox().height()-127/dbu)/2   
+      
+      #Label for Input Port 2#        
+      t = pya.Trans(pya.Trans.R0,(TMoffset)+(GC2_X)+(x/dbu),(GC2_Y)+(127/dbu)+(y/dbu))#place on 2nd GC's port
+      text = pya.Text ("opt_in_tm_1550_device_SpiralTEM_WG%sP%sdw%sL%s" % (wg_width,period,cwidth,devicelength), t) #Formats the label we want to display
+      shape = TMcell.shapes(TextLayerN).insert(text) #inserts into the Textlayer of our cell
+      shape.text_size = 3/dbu #text font size
+      ##########################
+        
+      #Create Device from PCell
+      #t1 = pya.Trans(pya.Trans.R0, (GC2_X)+devicewidth/2+10/dbu+wg_bend_radius*2/dbu+d2offset+x/dbu, (GC2_Y)+deviceheight/2+wg_bend_radius/dbu+y/dbu)
+      t1 = pya.Trans(pya.Trans.R0, (TMoffset)+(GC2_X)+(deviceX)+(x/dbu), (GC2_Y)+(deviceY)+(y/dbu))
+      instance = TMcell.insert(pya.CellInstArray(pcell.cell_index(), t1))
+      
+      #Paths for Waveguides      
+      TMGC1P1 = DPoint((GC2_X*dbu),(GC2_Y*dbu+y))
+      TMGC1P2 = DPoint((GC2_X*dbu)+(deviceleft*dbu),(GC2_Y*dbu+y))
+      TMGC1P3 = DPoint((GC2_X*dbu)+(deviceleft*dbu),(GC2_Y*dbu+y)+(wg_bend_radius))  
+      dpath = DPath([TMGC1P1,TMGC1P2,TMGC1P3],wg_width*dbu).transformed(DTrans(DTrans.R0,(x)+(TMoffset*dbu),0))
+      TMcell.shapes(LayerSiN).insert(dpath.to_itype(dbu))    
+      
+      TMGC2P1 = DPoint((GC2_X*dbu),(GC2_Y*dbu+y+127))
+      TMGC2P2 = DPoint((GC2_X*dbu)+(10+wg_bend_radius),(GC2_Y*dbu+y+127))
+      TMGC2P3 = DPoint((GC2_X*dbu)+(10+wg_bend_radius),(GC2_Y*dbu+y)+(wg_bend_radius)+(deviceheight*dbu)+(wg_bend_radius))
+      TMGC2P4 = DPoint((GC2_X*dbu)+(deviceright*dbu),(GC2_Y*dbu+y)+(wg_bend_radius)+(deviceheight*dbu)+(wg_bend_radius))
+      TMGC2P5 = DPoint((GC2_X*dbu)+(deviceright*dbu),(GC2_Y*dbu+y)+(wg_bend_radius)+(deviceheight*dbu))
+      TMGC2P2_2 = DPoint((GC2_X*dbu)+(deviceright*dbu),(GC2_Y*dbu+y+127))
+      if (((GC2_Y*dbu)+(wg_bend_radius)+(deviceheight*dbu)+(wg_bend_radius))&lt;=127):
+        dpath = DPath([TMGC2P1,TMGC2P2_2,TMGC2P5],wg_width*dbu).transformed(DTrans(DTrans.R0,(x)+(TMoffset*dbu),0))
+      else:
+        dpath = DPath([TMGC2P1,TMGC2P2,TMGC2P3,TMGC2P4,TMGC2P5],wg_width*dbu).transformed(DTrans(DTrans.R0,(x)+(TMoffset*dbu),0)) 
+      TMcell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+      
+      path_to_waveguide(cell=TMcell)#Turns paths into waveguides via script function.      
+      path_to_waveguide(cell=TMcell)
+      
+      #Update Xoffset to calculate spacing between devices
+      x_offset = x_offset+TEcell.bbox().width()*dbu+TMcell.bbox().width()*dbu+20
+      y_offset = TEcell.bbox().height()*dbu+10
+         
+      countx = countx+1 #increments the count
+       
+    #Reset the x axis when the y axis increments
+    x_offset=0
+    countx = 0 
+    #county = county+1
     
-
-        # Ring resonator PCell
-        pcell = ly.create_cell("PCMSpiral_BraggGrating", "PCMSpiral", {"silayer": LayerSi , "w": wg_width, "DeviceLength": devicelength, "Cwidth": cwidth, "pitch": period, "Chirp_Rate": 0, "n": 1800 , "textpolygon": 0, "textl": pya.LayerInfo(10, 0), "pinrec": pya.LayerInfo(69, 0), "textl": pya.LayerInfo(68, 0)} )
-        print ("Cell: pcell: #%s" % pcell.cell_index())
-        
-        if devicelength==1:
-          t1 = pya.Trans(pya.Trans.R90, 5*(x+wg_bend_radius) / dbu, y_ring / dbu)
-        else:
-          print ('hi') 
-        instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t1))
-
-        
-        '''
-        if 2*r &lt; (gc_length+wg_bend_radius):
-          t1 = pya.Trans(pya.Trans.R0, (x+wg_bend_radius) * dbu, y_ring * dbu) 
-          t2 = pya.Trans(pya.Trans.R90, (x+wg_bend_radius+2*r+2*g+2*wg_width) * dbu, y_ring * dbu) 
-        else:
-          t1 = pya.Trans(pya.Trans.R90, (x+wg_bend_radius) * dbu, y_ring * dbu) 
-          t2 = pya.Trans(pya.Trans.R270, (x+wg_bend_radius-2*r-2*g-2*wg_width) * dbu, y_ring * dbu) 
-
-        #instance = cell.insert(pya.CellInstArray(pcell.cell_index(), t2))
-
-
-        # Create paths for waveguides
-        
-        # GC3 to bottom-left of ring
-        points = [ [0, 127], [wg_bend_radius,127], [wg_bend_radius, y_ring-1*r-1.5*wg_width] ] 
-        start_point = [ x, 0 ]
-        layout_waveguide_rel(cell, LayerSi, start_point, points, wg_width, wg_bend_radius)
-      
-        # GC2 to top-left of ring
-        points = [ [wg_bend_radius,y_ring+r+1.5*wg_width], [wg_bend_radius, 127*2], [0,127*2] ] 
-        layout_waveguide_rel(cell, LayerSi, start_point, points, wg_width, wg_bend_radius)
-        '''
-        '''
-        # GC1 to top-right of ring
-        # GC4 to bottom-right of ring
-        if l==1:
-          points_gc1 = [ [0, 127*2], [wg_bend_radius+2*r+2*g+2*wg_width,127*3], [wg_bend_radius+2*r+2*g+2*wg_width, y_ring+r+1.5*wg_width] ] 
-          points_gc4 = [ [0, 0], [wg_bend_radius+2*r+2*g+2*wg_width,0], [wg_bend_radius+2*r+2*g+2*wg_width, y_ring-1*r-1.5*wg_width]  ] ] 
-
-        layout_waveguide_rel(cell, LayerSi, start_point, points_gc1, wg_width, wg_bend_radius)
-        layout_waveguide_rel(cell, LayerSi, start_point, points_gc4, wg_width, wg_bend_radius)
-        '''
-        
-print ("done layout...")</text>
+    lasty_offset+=y_offset  
+            
+print ("LAYOUT COMPLETE")</text>
 </klayout-macro>
