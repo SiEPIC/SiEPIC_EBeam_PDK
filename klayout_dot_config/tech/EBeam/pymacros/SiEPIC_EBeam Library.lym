@@ -121,7 +121,7 @@ class Waveguide(PCellDeclarationHelper):
     super(Waveguide, self).__init__()
     # declare the parameters
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("path", self.TypeShape, "Path", default = Path([Point(0,0), Point(10,0), Point(10,10)], 0.5))
+    self.param("path", self.TypeShape, "Path", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5))
     self.param("radius", self.TypeDouble, "Radius", default = 5)
     self.param("width", self.TypeDouble, "Width", default = 0.5)
     self.param("adiab", self.TypeBoolean, "Adiabatic", default = False)
@@ -137,17 +137,14 @@ class Waveguide(PCellDeclarationHelper):
   def coerce_parameters_impl(self):
     pass
           
-  def can_create_from_shape(self, layout, shape, layer):
-    return shape.is_path()
+  def can_create_from_shape_impl(self):
+    return self.shape.is_path()
 
-  def transformation_from_shape(self, layout, shape, layer):
+  def transformation_from_shape_impl(self):
     return Trans(Trans.R0,0,0)
 
-  def parameters_from_shape(self, layout, shape, layer):
-    self._param_values = []
-    for pd in self._param_decls:
-      self._param_values.append(pd.default)
-    return self._param_values
+  def parameters_from_shape_impl(self):
+    self.path = self.shape.dpath
         
   def produce_impl(self):
 
@@ -263,9 +260,6 @@ class Waveguide(PCellDeclarationHelper):
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
 
-    if self.cell.shapes(self.layout.guiding_shape_layer()).is_empty():
-      self.cell.shapes(self.layout.guiding_shape_layer()).insert(Path(path.get_points(), 0))
-    
 
 class ebeam_dc_halfring_straight(PCellDeclarationHelper):
   """
