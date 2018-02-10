@@ -788,7 +788,9 @@ class Waveguide_Bend(PCellDeclarationHelper):
     # draw the quarter-circle
     x = -r
     y = r
-    layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 360)
+   # layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 360)
+    t = Trans(Trans.R0,x, y)
+    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r, 270, 360), w).transformed(t))
     
     # Create the pins on the waveguides, as short paths:
     from SiEPIC._globals import PIN_LENGTH as pin_length
@@ -818,11 +820,13 @@ class Waveguide_Bend(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 360)
+    t = Trans(Trans.R0,x, y)
+    self.cell.shapes(LayerDevRecN).insert(arc_to_waveguide(arc(r, 270, 360), w*3).transformed(t))
+    #layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 360)
 
     # Compact model information
     t = Trans(Trans.R0, x+r/10, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam", t)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/EBeam", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = Trans(Trans.R0, x+r/10, r/4)

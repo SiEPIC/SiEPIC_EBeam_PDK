@@ -2501,6 +2501,7 @@ class Bezier_Bend(PCellDeclarationHelper):
     LayerDevRecN = ly.layer(self.devrec)
 
     w = self.wg_width/dbu
+    wg_width = w
 
     from SiEPIC.utils import arc_bezier
     from SiEPIC._globals import PIN_LENGTH as pin_length
