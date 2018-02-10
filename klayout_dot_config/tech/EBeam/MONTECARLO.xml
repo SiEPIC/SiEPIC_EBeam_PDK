@@ -4,12 +4,12 @@
     <name>Electron Beam Lithography (University of Washington)</name>
     <wafer>
       <width>
-        <std_dev>2.0</std_dev>
-        <corr_length>1000.0</corr_length>
+        <std_dev>5.0</std_dev>
+        <corr_length>4.5e-3</corr_length>
       </width>
       <height>
         <std_dev>2.0</std_dev>
-        <corr_length>1000.0</corr_length>
+        <corr_length>4.5e-3</corr_length>
       </height>
     </wafer>
     <wafer_to_wafer>
@@ -17,7 +17,7 @@
         <std_dev>5.0</std_dev>
       </width>
       <thickness>
-        <std_dev>5.0</std_dev>
+        <std_dev>3.0</std_dev>
       </thickness>
     </wafer_to_wafer>
   </technology>
@@ -25,12 +25,12 @@
     <name>Electron Beam Lithography (Applied Nanotools)</name>
     <wafer>
       <width>
-        <std_dev>2.0</std_dev>
-        <corr_length>1000.0</corr_length>
+        <std_dev>5.0</std_dev>
+        <corr_length>4.5e-3</corr_length>
       </width>
       <height>
         <std_dev>2.0</std_dev>
-        <corr_length>1000.0</corr_length>
+        <corr_length>4.5e-3</corr_length>
       </height>
     </wafer>
     <wafer_to_wafer>
@@ -38,7 +38,7 @@
         <std_dev>5.0</std_dev>
       </width>
       <thickness>
-        <std_dev>5.0</std_dev>
+        <std_dev>3.0</std_dev>
       </thickness>
     </wafer_to_wafer>
   </technology>
