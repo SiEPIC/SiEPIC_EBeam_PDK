@@ -545,7 +545,7 @@ class cavity_hole(PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "cavity_hole(R=" + ('%.3f-%.3f' % (self.radius,self.gap) ) + ")"
 
-  def can_create_from_shape_impl(self, layout, shape, layer):
+  def can_create_from_shape(self, layout, shape, layer):
     return False
 
 
@@ -2594,7 +2594,7 @@ class Tapered_Ring(PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "Tapered_Ring(R=" + ('%.3f-%.3f' % (self.radius,self.w_bot) ) + ")"
 
-  def can_create_from_shape_impl(self, layout, shape, layer):
+  def can_create_from_shape(self, layout, shape, layer):
     return False
 
 
