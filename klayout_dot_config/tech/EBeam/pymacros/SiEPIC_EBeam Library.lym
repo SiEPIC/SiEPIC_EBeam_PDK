@@ -103,11 +103,6 @@ with:
 import math
 from SiEPIC.utils import get_technology, get_technology_by_name
 
-#import numpy as n
-MODULE_NUMPY = False
-
-dbu = 0.001
-
 # Import KLayout Python API methods:
 # Box, Point, Polygon, Text, Trans, LayerInfo, etc
 from pya import *
@@ -152,6 +147,8 @@ class Waveguide(PCellDeclarationHelper):
     from math import cos, sin, pi, sqrt
     import pya
     from SiEPIC.extend import to_itype
+    
+    print("EBeam.Waveguide")
     
     TECHNOLOGY = get_technology_by_name('EBeam')
     
