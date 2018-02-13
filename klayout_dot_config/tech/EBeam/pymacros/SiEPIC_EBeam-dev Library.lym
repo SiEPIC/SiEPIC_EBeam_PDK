@@ -1958,10 +1958,6 @@ class Waveguide_Arc(PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "Waveguide_Arc(R=" + ('%.3f' % self.radius) + ")"
 
-  def can_create_from_shape_impl(self):
-    return False
-
-
   def produce(self, layout, layers, parameters, cell):
     """
     coerce parameters (make consistent)
@@ -1981,7 +1977,8 @@ class Waveguide_Arc(PCellDeclarationHelper):
     # length units in dbu
 
     from math import pi, cos, sin
-
+    from SiEPIC.utils import arc_wg
+    
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
@@ -2008,10 +2005,10 @@ class Waveguide_Arc(PCellDeclarationHelper):
     x = 0
     y = 0
     
-    from SiEPIC.utils import arc_wg
+    
     from SiEPIC._globals import PIN_LENGTH as pin_length
     
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r, w, start_angle, stop_angle))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, start_angle, stop_angle))
     # Create the pins, as short paths:
 
     # Pin on the right side:
@@ -2056,7 +2053,7 @@ class Waveguide_Arc(PCellDeclarationHelper):
     x = 0
     y = 0
     #layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, start_angle, stop_angle)
-    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r, w*3, start_angle, stop_angle))
+    self.cell.shapes(LayerDevRecN).insert(arc_wg(r, w*3, start_angle, stop_angle))
 
 class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
   """
