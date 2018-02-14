@@ -2281,10 +2281,6 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "Bent_CDC(R=" + ('%.3f' % self.radius) + ")"
 
-  def can_create_from_shape_impl(self):
-    return False
-
-
   def produce(self, layout, layers, parameters, cell):
     """
     coerce parameters (make consistent)
@@ -2349,14 +2345,14 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     # Ring CDCs (set A)
     ii = periodAngle*2
     while ii &lt; N+periodAngle*1.5:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r, w_ring, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r-deltaWR/2, w_ring, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
       
     # Ring CDCs (set B)
     ii = periodAngle
     while ii &lt; N:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r+deltaWR, w_ring, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r+deltaWR/2, w_ring, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
 
@@ -2364,14 +2360,14 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     # Bus CDCs (set A)
     ii = periodAngle
     while ii &lt; N:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus, w_bus, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus-deltaWB/2, w_bus, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
 
     # Bus CDCs (set B)
     ii = periodAngle*2
     while ii &lt; N+periodAngle*1.5:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus+deltaWB, w_bus, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus+deltaWB/2, w_bus, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
 
