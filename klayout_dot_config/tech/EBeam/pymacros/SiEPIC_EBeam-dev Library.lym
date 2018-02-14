@@ -1989,8 +1989,9 @@ class Waveguide_Arc(PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
     
-    w = int(round(self.wg_width/dbu))
-    r = int(round(self.radius/dbu))
+    from SiEPIC.extend import to_itype
+    w = to_itype(self.wg_width,dbu)
+    r =  to_itype(self.radius,dbu)
     start_angle = self.start_angle
     stop_angle = self.stop_angle
     
@@ -2087,9 +2088,6 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     # Provide a descriptive text for the cell
     return "Bent_Coupler(R=" + ('%.3f' % self.radius) + ")"
 
-  def can_create_from_shape_impl(self):
-    return False
-
 
   def produce(self, layout, layers, parameters, cell):
     """
@@ -2110,7 +2108,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     from math import pi, cos, sin
     from SiEPIC.utils import arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH as pin_length
-
+    from SiEPIC.extend import to_itype
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
@@ -2121,23 +2119,26 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
     
-    w_bus = int(round(self.bus_width/dbu))
-    w_ring = int(round(self.ring_width/dbu))
-    r = int(round(self.radius/dbu))
-    r_bus = int(round(self.bus_radius/dbu))
+  
+
+      
+    w_bus = to_itype(self.bus_width,dbu)
+    w_ring = to_itype(self.ring_width,dbu)
+    r = to_itype(self.radius,dbu)
+    r_bus = to_itype(self.bus_radius,dbu)
     bend_angle = int(round(self.bend_angle))
-    gap = int(round(self.gap/dbu))
+    gap =to_itype(self.gap,dbu)
         
     #**********************
     # Draw the ring waveguide
     #**********************
 
-    w = w_ring    
+      
     
     x = 0
     y = 0
     
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r, w, 0, 180))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r, w_ring, 0, 180))
 
     # Create the pins, as short paths:
     
@@ -2146,7 +2147,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     p3c = Point(x-r, y)
     self.set_p3 = p3c
     self.p3 = p3c
-    pin = Path(p3, w)
+    pin = Path(p3, w_ring)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, x-r, y)
     text = Text ("pin3", t)
@@ -2158,7 +2159,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     p4c = Point(x+r,y)
     self.set_p4 = p4c
     self.p4 = p4c
-    pin = Path(p4, w)
+    pin = Path(p4, w_ring)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, x+r, y)
     text = Text ("pin4", t)
@@ -2166,7 +2167,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides. 
-    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r, w*3, 0, 180))
+    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r, w_ring*3, 0, 180))
     
     #**********************
     # Draw the bus waveguide (figure out how to call the existing class maybe??)
@@ -2174,17 +2175,23 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     
     r_original = int(round(self.radius/dbu))
     
-    w = w_bus
+    
     
     r = r + gap + w_ring/2 + w_bus/2
+    
+      # number of points per circle:
+     # npoints = int(points_per_circle(r))
+      # increment, in radians, for each point:
+      #da = 2 * pi / npoints  
+      
     # draw the first arc
     x = -r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180) 
     y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) 
     
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r_bus, w, 270, 270+bend_angle))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r_bus, w_bus, 270, 270+bend_angle))
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r_bus, w*3, 270, 270+bend_angle))
+    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r_bus, w_bus*3, 270, 270+bend_angle))
     
         
     # draw the second arc
@@ -2193,10 +2200,10 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     y = 0
     
     r = r + gap + w_ring/2 + w_bus/2
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r, w, 90-bend_angle, 90+bend_angle))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r, w_bus, 90-bend_angle, 90+bend_angle))
     
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r, w*3, 90-bend_angle, 90+bend_angle))
+    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r, w_bus*3, 90-bend_angle, 90+bend_angle))
     
     
     # draw the third arc
@@ -2204,10 +2211,10 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     x = r*math.sin(bend_angle * math.pi/180) + r_bus*math.sin(bend_angle * math.pi/180) 
     y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180)
     
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r_bus, w, 270-bend_angle, 270))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r_bus, w_bus, 270-bend_angle, 270))
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r_bus, w*3, 270-bend_angle, 270))
+    self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r_bus, w_bus*3, 270-bend_angle, 270))
     
 
     r = int(round(self.radius/dbu))
@@ -2220,7 +2227,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     p2c = Point(x, y)
     self.set_p2 = p2c
     self.p2 = p2c
-    pin = Path(p2, w)
+    pin = Path(p2, w_bus)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, x, y)
     text = Text ("pin2", t)
@@ -2232,7 +2239,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     p1c = Point(x,-r)
     self.set_p1 = p1c
     self.p1 = p1c
-    pin = Path(p1, w)
+    pin = Path(p1, w_bus)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, -x, y)
     text = Text ("pin1", t)
@@ -2258,14 +2265,14 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
     self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = [TECHNOLOGY['31_Si_p6nm']])
-    self.param("radius", self.TypeDouble, "Radius (um)", default = 10)
-    self.param("gap", self.TypeDouble, "Gap (um)", default = 0.2)
-    self.param("bus_width", self.TypeDouble, "Bus Width (um)", default = 0.5)
-    self.param("ring_width", self.TypeDouble, "Ring Width (um)", default = 0.5)
+    self.param("radius", self.TypeDouble, "Radius (um)", default = 25)
+    self.param("gap", self.TypeDouble, "Gap (um)", default = 0.28)
+    self.param("bus_width", self.TypeDouble, "Bus Width (um)", default = 0.45)
+    self.param("ring_width", self.TypeDouble, "Ring Width (um)", default = 0.55)
     
-    self.param("period", self.TypeDouble, "Gratings Period (nm)", default = 323)
-    self.param("deltaWB", self.TypeDouble, "Bus Corrugation Width (um)", default = 0.03)
-    self.param("deltaWR", self.TypeDouble, "Ring Corrugation Width (um)", default = 0.03)
+    self.param("period", self.TypeDouble, "Gratings Period (nm)", default = 318)
+    self.param("deltaWB", self.TypeDouble, "Bus Corrugation Width (um)", default = 0.04)
+    self.param("deltaWR", self.TypeDouble, "Ring Corrugation Width (um)", default = 0.05)
     self.param("gamma", self.TypeDouble, "N (number of corrugations)", default = 135)
     
     self.param("busBend", self.TypeDouble, "Bus-to-straight bend raidus", default = 5)
@@ -2311,8 +2318,10 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
     
-    w_bus = int(round(self.bus_width/dbu))
-    w_ring = int(round(self.ring_width/dbu))
+    from SiEPIC.extend import to_itype
+    
+    w_bus = to_itype(self.bus_width,dbu)
+    w_ring = to_itype(self.ring_width,dbu)
     w = w_ring
     r = int(round(self.radius/dbu))
     gap = int(round(self.gap/dbu))
@@ -2493,11 +2502,14 @@ class Bezier_Bend(PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
-    w = self.wg_width/dbu
-    wg_width = w
+    
+    
 
     from SiEPIC.utils import arc_bezier
     from SiEPIC._globals import PIN_LENGTH as pin_length
+    from SiEPIC.extend import to_itype
+    w = to_itype(self.wg_width,dbu)
+    wg_width = w
 
     r = self.eff_r/dbu
     bezier = self.bezier_num/100
@@ -2511,6 +2523,8 @@ class Bezier_Bend(PCellDeclarationHelper):
     pt_idx = int(len(d)/2)
     ptA = d[pt_idx]
     ptB = d[pt_idx+1]
+    print(pt_idx)
+    print(d)
     if(abs(ptA.x-ptB.x)*dbu  == wg_width):
       new_y = (ptA.y+ptB.y)/2
       d[pt_idx].y = new_y
@@ -2519,7 +2533,7 @@ class Bezier_Bend(PCellDeclarationHelper):
       new_x = (ptA.x + ptB.x)/2
       d[pt_idx].x = new_x
       d[pt_idx+1].x = new_x
-
+    print(d)
   
     self.cell.shapes(LayerSiN).insert(Polygon(d))
 
