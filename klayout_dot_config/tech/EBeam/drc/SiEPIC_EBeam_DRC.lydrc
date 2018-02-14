@@ -11,7 +11,7 @@
  <shortcut>D</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.verification_submenu.end</menu-path>
+ <menu-path>siepic_menu.verification.begin</menu-path>
  <interpreter>dsl</interpreter>
  <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
  <text># Basic DRC deck for SiEPIC_EBeam_PDK
