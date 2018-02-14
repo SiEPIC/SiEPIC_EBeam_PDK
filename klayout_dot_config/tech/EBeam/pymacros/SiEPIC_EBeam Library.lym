@@ -848,7 +848,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     self.param("corrugation_width", self.TypeDouble, "Corrugration width (microns)", default = 0.05)     
     self.param("misalignment", self.TypeDouble, "Grating misalignment (microns)", default = 0.0)     
     self.param("sinusoidal", self.TypeBoolean, "Grating Type (Rectangular=False, Sinusoidal=True)", default = False)     
-#    self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.5)     
+    self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.5)     
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
@@ -877,10 +877,12 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
+    from SiEPIC.extend import to_itype
+    
     # Draw the Bragg grating:
     box_width = int(round(self.grating_period/2/dbu))
     grating_period = int(round(self.grating_period/dbu))
-    w = 500
+    w = to_itype(self.wg_width,dbu)
     half_w = w/2
     half_corrugation_w = int(round(self.corrugation_width/2/dbu))
     misalignment = int(round(self.misalignment/dbu))
