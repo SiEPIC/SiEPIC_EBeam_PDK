@@ -2320,7 +2320,7 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     w = w_ring
     r = int(round(self.radius/dbu))
     gap = int(round(self.gap/dbu))
-    period = self.period/2
+    period = self.period
     deltaWR = int(round(self.deltaWR/dbu))
     N = int(self.gamma)
     deltaWB = int(round(self.deltaWB/dbu))
@@ -2347,16 +2347,16 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     # Convention:   Set A is the CDC portion that is not offsetted, set B is offsetted by corrugation width
       
     # Ring CDCs (set A)
-    ii = 0
+    ii = periodAngle*2
     while ii &lt; N+periodAngle*1.5:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r, w, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r, w_ring, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
       
     # Ring CDCs (set B)
     ii = periodAngle
     while ii &lt; N:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r+deltaWR, w, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, r+deltaWR, w_ring, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
 
@@ -2364,30 +2364,30 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     # Bus CDCs (set A)
     ii = periodAngle
     while ii &lt; N:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus, w, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus, w_bus, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
 
     # Bus CDCs (set B)
     ii = periodAngle*2
     while ii &lt; N+periodAngle*1.5:
-      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus+deltaWB, w, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
+      self.cell.shapes(LayerSiN_gratings).insert(arc_wg_xy(x,y, rBus+deltaWB, w_bus, 90+bendAngle-ii, 90+bendAngle-ii-periodAngle))
       ii = ii+periodAngle
       ii = ii+periodAngle
 
     # Ring non-CDC left
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x,y, r, w, 180-(90-bendAngle), 180))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x,y, r, w_ring, 180-(90-bendAngle), 180))
     
     # Ring non-CDC right
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x,y, r, w, 0, 90-bendAngle))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x,y, r, w_ring, 0, 90-bendAngle))
     
     bendAngleRad = (pi/180) * bendAngle
     # Draw Bus non-CDC Waveguide
     y_center = rBus * cos(bendAngleRad) + busBendR * cos(bendAngleRad);
     x_center = rBus * sin(bendAngleRad) + busBendR * sin(bendAngleRad);
     
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x_center,y_center, busBendR, w, 270-bendAngle,270))
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-x_center,y_center, busBendR, w, 270, 270-bendAngle))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x_center,y_center, busBendR, w_bus, 270-bendAngle,270))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-x_center,y_center, busBendR, w_bus, 270, 270-bendAngle))
     
     # Create the pins, as short paths:
     from SiEPIC._globals import PIN_LENGTH as pin_length
@@ -2398,7 +2398,7 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     p2c = Point(x_center, y_center)
     self.set_p2 = p2c
     self.p2 = p2c
-    pin = Path(p2, w)
+    pin = Path(p2, w_bus)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, x_center, y_center)
     text = Text ("pin2", t)
@@ -2411,7 +2411,7 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     p1c = Point(x_center, y_center)
     self.set_p1 = p1c
     self.p1 = p1c
-    pin = Path(p1, w)
+    pin = Path(p1, w_bus)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, x_center, y_center)
     text = Text ("pin1", t)
@@ -2424,7 +2424,7 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     p3c = Point(x-r, y)
     self.set_p3 = p3c
     self.p3 = p3c
-    pin = Path(p3, w)
+    pin = Path(p3, w_ring)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, x-r, y)
     text = Text ("pin3", t)
@@ -2436,7 +2436,7 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     p4c = Point(x+r,y)
     self.set_p4 = p4c
     self.p4 = p4c
-    pin = Path(p4, w)
+    pin = Path(p4, w_ring)
     self.cell.shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, x+r, y)
     text = Text ("pin4", t)
