@@ -2173,7 +2173,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     # Draw the bus waveguide (figure out how to call the existing class maybe??)
     #**********************
     
-    r_original = int(round(self.radius/dbu))
+    r_original = to_itype(self.radius,dbu)
     
     
     
@@ -2185,8 +2185,8 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
       #da = 2 * pi / npoints  
       
     # draw the first arc
-    x = -r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180) 
-    y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) 
+    x = round(-r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180) )
+    y = round(r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) )
     
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r_bus, w_bus, 270, 270+bend_angle))
 
@@ -2195,7 +2195,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     
         
     # draw the second arc
-    r = int(round(self.radius/dbu))
+    r = to_itype(self.radius,dbu)
     x = 0
     y = 0
     
@@ -2208,8 +2208,8 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     
     # draw the third arc
     
-    x = r*math.sin(bend_angle * math.pi/180) + r_bus*math.sin(bend_angle * math.pi/180) 
-    y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180)
+    x = round(r*math.sin(bend_angle * math.pi/180) + r_bus*math.sin(bend_angle * math.pi/180) )
+    y = round(r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180))
     
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r_bus, w_bus, 270-bend_angle, 270))
 
@@ -2217,11 +2217,11 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     self.cell.shapes(LayerDevRecN).insert(arc_wg_xy(x, y, r_bus, w_bus*3, 270-bend_angle, 270))
     
 
-    r = int(round(self.radius/dbu))
+    r = to_itype(self.radius,dbu)
     r = r + gap + w_ring/2 + w_bus/2
     # Pin on the left side:
-    x = -r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180) 
-    y = r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) -r_bus
+    x = round(-r*math.sin(bend_angle * math.pi/180) - r_bus*math.sin(bend_angle * math.pi/180)) 
+    y = round(r*math.cos(bend_angle * math.pi/180) + r_bus*math.cos(bend_angle * math.pi/180) -r_bus)
     
     p2 = [Point(x+pin_length/2, y), Point(x-pin_length/2, y)]
     p2c = Point(x, y)
