@@ -140,7 +140,7 @@ def dbl_bus_ring_res():
     dpath = DPath(points_gc4, 0.5).transformed(DTrans(DTrans.R0,x,0))
     cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))    
   
-  path_to_waveguide(cell = cell)
+  path_to_waveguide(cell = cell, verbose=True, params = {'width': 0.5, 'adiabatic': True, 'radius': 5.0, 'bezier': 0.2, 'wgs': [{'width': 0.5, 'layer': 'Si', 'offset': 0.0}]})
   print ("done layout...")
   
 dbl_bus_ring_res()
