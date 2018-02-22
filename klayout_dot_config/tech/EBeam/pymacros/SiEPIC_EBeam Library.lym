@@ -434,15 +434,15 @@ class Waveguide_SBend(PCellDeclarationHelper):
     #LayerSiSPN = ly.layer(LayerSiSP)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    #LayerTextN = ly.layer(get_technology()['Text'])
+    LayerTextN = ly.layer(get_technology()['Text'])
 
 
     from math import pi, cos, sin, log, sqrt, acos
     
     length = self.length / dbu
-    w = round(self.wg_width / dbu)
-    r = round(self.radius / dbu)
-    h = round(self.height / dbu)
+    w = self.wg_width / dbu
+    r = self.radius / dbu
+    h = self.height / dbu
     theta = acos((r-abs(h/2))/r)*180/pi
     x = 2*r*sin(theta/180.0*pi)
     straight_l = (length - x)/2
@@ -500,12 +500,14 @@ class Waveguide_SBend(PCellDeclarationHelper):
         for i in range(0, npoints+1): # lower right
          pts.append(Point.from_dpoint(DPoint((x2+(r+w/2)*cos(i*da+th2))/1, (y2+(r+w/2)*sin(i*da+th2))/1)))
         self.cell.shapes(LayerSiN).insert(Polygon(pts))
-      
-    
+
     waveguide_length = (2*pi*r*(2*theta/360.0)+straight_l*2)*dbu
 
-    # Create the pins on the waveguides, as short paths:
+    from math import pi, cos, sin
+    from SiEPIC.utils import arc_wg, arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH as pin_length
+
+    # Pins on the waveguide:
     x = self.length / dbu
     t = Trans(Trans.R0, x,h)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
@@ -517,7 +519,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
 
     x = 0
     t = Trans(Trans.R0, x,0)
-    pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
+    pin = Path([Point(pin_length/2,0), Point(-pin_length/2,0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
@@ -527,11 +529,11 @@ class Waveguide_SBend(PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/EBeam', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, w*2)
-    text = Text ('Component=ebeam_wg_integral_1550', t)
+    text = Text ('Component=wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 0, -w*2)
@@ -544,9 +546,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     box1 = Box(0, min(-w*3,h-w*3), length, max(w*3,h+w*3))
     shapes(LayerDevRecN).insert(box1)
-
-
-
+    
 class Waveguide_bump(PCellDeclarationHelper):
   """
   Input: 
@@ -799,7 +799,7 @@ class Waveguide_Bend(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Pin on the left side:
-    p1 = [Point(pin_length/2+x,0), Point(-pin_length/2+x,0)]
+    p1 = [Point(-pin_length/2+x,0), Point(pin_length/2+x,0)]
     p1c = Point(x,0)
     self.set_p1 = p1c
     self.p1 = p1c
