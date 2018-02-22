@@ -2508,8 +2508,8 @@ class Bezier_Bend(PCellDeclarationHelper):
     from SiEPIC.utils import arc_bezier
     from SiEPIC._globals import PIN_LENGTH as pin_length
     from SiEPIC.extend import to_itype
-    w = to_itype(self.wg_width,dbu)
-    wg_width = w
+    wg_width = self.wg_width
+    w = self.wg_width/dbu
 
     r = self.eff_r/dbu
     bezier = self.bezier_num/100
@@ -2536,8 +2536,6 @@ class Bezier_Bend(PCellDeclarationHelper):
     print(d)
   
     self.cell.shapes(LayerSiN).insert(Polygon(d))
-
-   
     
     # Create the pins, as short paths:
     w = int(round(self.wg_width/dbu))
