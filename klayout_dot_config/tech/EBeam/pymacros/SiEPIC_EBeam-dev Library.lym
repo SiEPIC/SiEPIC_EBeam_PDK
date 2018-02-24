@@ -3103,7 +3103,7 @@ class SiEPIC_EBeam_dev(Library):
 
     import os
     self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-EBeam-dev.gds"))
-    [self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
+#    [self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
     
     
     # Create the PCell declarations
