@@ -5,7 +5,7 @@
  <dbu>0.001</dbu>
  <base-path/>
  <original-base-path>C:/Users/lukasc2/KLayout/tech/EBeam</original-base-path>
- <layer-properties_file>libraries/klayout_Layers_EBeam.lyp</layer-properties_file>
+ <layer-properties_file>klayout_Layers_EBeam.lyp</layer-properties_file>
  <add-other-layers>true</add-other-layers>
  <reader-options>
   <cif>
