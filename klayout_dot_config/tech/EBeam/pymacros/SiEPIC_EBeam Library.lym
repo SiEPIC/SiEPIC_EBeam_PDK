@@ -1137,6 +1137,8 @@ class SiEPIC_EBeam(Library):
     # If a library with that name already existed, it will be replaced then.
     self.register(library)
 
+#    self.register('SiEPIC-EBeam')
+
     if int(Application.instance().version().split('.')[1]) &gt; 24:
       # KLayout v0.25 introduced technology variable:
       self.technology=tech_name
