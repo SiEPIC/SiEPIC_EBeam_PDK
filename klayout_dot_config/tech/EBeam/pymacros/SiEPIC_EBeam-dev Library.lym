@@ -160,7 +160,7 @@ class ebeam_dc_halfring_arc(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_dc_halfring_arc, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
@@ -304,7 +304,7 @@ class spiral(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(spiral, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Target Waveguide length", default = 10.0)     
@@ -529,7 +529,7 @@ class cavity_hole(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(cavity_hole, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("x", self.TypeDouble, "x coordinate", default = 0)
@@ -563,7 +563,7 @@ class cavity_hole(PCellDeclarationHelper):
     LayerSiN = ly.layer(self.LayerSi)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
     LayerTextN = TECHNOLOGY['Text']
     # cell: layout cell to place the layout
     # LayerSiN: which layer to use
@@ -630,7 +630,7 @@ class strip_to_slot(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(strip_to_slot, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
@@ -757,7 +757,7 @@ class fswgc(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(fswgc, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters  
     self.param("wavelength", self.TypeDouble, "Design Wavelength (micron)", default = 1.55)  
@@ -959,7 +959,7 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(SWG_to_strip_waveguide, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
@@ -1092,7 +1092,7 @@ class SWG_waveguide(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(SWG_waveguide, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
@@ -1305,7 +1305,7 @@ class DoubleBus_Ring(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(DoubleBus_Ring, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
@@ -1417,7 +1417,7 @@ class TestStruct_DoubleBus_Ring(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
@@ -1556,7 +1556,7 @@ class TestStruct_DoubleBus_Ring2(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring2, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
@@ -1657,7 +1657,7 @@ class Waveguide_Route_simple(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Route_simple, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
@@ -1739,7 +1739,7 @@ class Waveguide_Route(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Route, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
@@ -1939,7 +1939,7 @@ class Waveguide_Arc(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Arc, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
@@ -2470,7 +2470,7 @@ class Bezier_Bend(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Bezier_Bend, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("bezier_num", self.TypeDouble, "Bezier factor", default = 25)     
@@ -2585,7 +2585,7 @@ class Tapered_Ring(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Tapered_Ring, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("w_top", self.TypeDouble, "Top width", default = .5)
@@ -2702,7 +2702,7 @@ class DirectionalCoupler_SeriesRings(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(DirectionalCoupler_SeriesRings, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
