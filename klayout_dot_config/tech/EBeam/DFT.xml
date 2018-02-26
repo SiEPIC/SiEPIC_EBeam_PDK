@@ -19,6 +19,6 @@
 		<wavelength-start>1500</wavelength-start>
 		<wavelength-stop>1600</wavelength-stop>
 		<wavelength-points>3000</wavelength-points>
-		
+		<polarization>TE, TM</polarization>
 	</tunable-laser>
 </design-for-test>
