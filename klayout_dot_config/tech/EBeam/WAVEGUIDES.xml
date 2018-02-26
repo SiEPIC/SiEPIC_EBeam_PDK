@@ -2,7 +2,7 @@
 <waveguides>
 	<waveguide>
 	  <name>Strip TE 1550 nm, w=500 nm</name>
-	  <bezier>0.20</bezier>
+	  <bezier>0.35</bezier>
       <radius>5.0</radius>
 	  <component>
 	    <layer>Si</layer>
