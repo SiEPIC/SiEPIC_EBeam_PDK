@@ -3101,7 +3101,7 @@ class Contra_DC(PCellDeclarationHelper):
     self.param("gap", self.TypeDouble, "Gap (microns)", default = 0.15)          
     self.param("corrugation_width1", self.TypeDouble, "Waveguide 1 Corrugration width (microns)", default = 0.03)
     self.param("corrugation_width2", self.TypeDouble, "Waveguide 2 Corrugration width (microns)", default = 0.04)          
-    self.param("misalignment", self.TypeDouble, "Grating misalignment (microns)", default = 0.0)     
+    self.param("AR", self.TypeBoolean, "Anti-Reflection Coating", default =True)         
     self.param("sinusoidal", self.TypeBoolean, "Grating Type (Rectangular=False, Sinusoidal=True)", default = False)     
     self.param("wg1_width", self.TypeDouble, "Waveguide 1 width", default = 0.45)
     self.param("wg2_width", self.TypeDouble, "Waveguide 2 width", default = 0.55)          
@@ -3113,8 +3113,8 @@ class Contra_DC(PCellDeclarationHelper):
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "Contra_DC_%s-%.3f-%.3f" % \
-    (self.number_of_periods, self.grating_period, self.misalignment)
+    return "Contra_DC_%s-%.3f" % \
+    (self.number_of_periods, self.grating_period)
   
   def coerce_parameters_impl(self):
     pass
@@ -3143,7 +3143,11 @@ class Contra_DC(PCellDeclarationHelper):
     GaussianIndex = self.index
     half_w = w/2
     half_corrugation_w = int(round(self.corrugation_width1/2/dbu))
-    misalignment = int(round(self.misalignment/dbu))
+    
+    if self.AR:
+      misalignment = grating_period/2
+    else:
+      misalignment = 0
 
     N = self.number_of_periods
     if self.sinusoidal:
@@ -3327,7 +3331,7 @@ class Contra_DC(PCellDeclarationHelper):
     t = Trans(Trans.R0, length/9, 0)
     text = Text \
       ('Spice_param:number_of_periods=%s grating_period=%.3fu corrugation_width=%.3fu misalignment=%.3fu sinusoidal=%s' %\
-      (self.number_of_periods, self.grating_period, self.corrugation_width1, self.misalignment, int(self.sinusoidal)), t )
+      (self.number_of_periods, self.grating_period, self.corrugation_width1, misalignment, int(self.sinusoidal)), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
