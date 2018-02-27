@@ -3211,21 +3211,27 @@ class Contra_DC(PCellDeclarationHelper):
     vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/dbu))+int(round(self.wg1_width/2/dbu))
     
     if misalignment &gt; 0:
-      t = Trans(Trans.R0, grating_period/2,vertical_offset)
+      t = Trans(Trans.R0, 0,vertical_offset)
     else:
       t = Trans(Trans.R0, 0,vertical_offset)
     
     # Draw the Bragg grating (top):
+    box_width = int(round(self.grating_period/2/dbu))
+    grating_period = int(round(self.grating_period/dbu))
     w = to_itype(self.wg2_width,dbu)
+    GaussianIndex = self.index
     half_w = w/2
     half_corrugation_w = int(round(self.corrugation_width2/2/dbu))
+    
+
+    N = self.number_of_periods
     if self.sinusoidal:
       npoints_sin = 40
       for i in range(0,self.number_of_periods):
         x = (round((i * self.grating_period)/dbu))
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
-        box1 = Box(x, 0, x + box_width, half_w+profile).transformed(t)
+        box1 = Box(x, 0, x + box_width, -half_w+profile).transformed(t)
         pts1 = [Point(x,0)]
         pts3 = [Point(x + misalignment,0)]
         for i1 in range(0,npoints_sin+1):
@@ -3233,8 +3239,8 @@ class Contra_DC(PCellDeclarationHelper):
           y1 = round(profile*math.sin(x1))
           x1 = round(x1/2/math.pi*grating_period)
 #          print("x: %s, y: %s" % (x1,y1))
-          pts1.append( Point(x + x1,half_w+y1 ) )
-          pts3.append( Point(x + misalignment + x1,-half_w-y1 ) )
+          pts1.append( Point(x + x1,-half_w-y1 ) )
+          pts3.append( Point(x + misalignment + x1,+half_w+y1 ) )
         pts1.append( Point(x + grating_period, 0) )
         pts3.append( Point(x + grating_period + misalignment, 0) )
         shapes(LayerSiN).insert(Polygon(pts1).transformed(t))
@@ -3242,14 +3248,12 @@ class Contra_DC(PCellDeclarationHelper):
       length = x + grating_period + misalignment
       if misalignment &gt; 0:
         # extra piece at the end:
-        box2 = Box(x + grating_period, 0, length, half_w).transformed(t)
+        box2 = Box(x + grating_period, 0, length, -half_w).transformed(t)
         shapes(LayerSiN).insert(box2)
         # extra piece at the beginning:
-        box3 = Box(-grating_period/2, 0, misalignment, -half_w).transformed(t)
+        box3 = Box(0, 0, misalignment, half_w).transformed(t)
         shapes(LayerSiN).insert(box3)
-        box3 = Box(-grating_period/2, 0, 0, half_w).transformed(t)
-        shapes(LayerSiN).insert(box3)
-        
+
     else:
     
       
@@ -3258,11 +3262,11 @@ class Contra_DC(PCellDeclarationHelper):
         x = int(round((i * self.grating_period)/dbu))
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
-        box1 = Box(x, 0, x + box_width, half_w+profile).transformed(t)
-        box2 = Box(x + box_width, 0, x + grating_period, half_w-profile).transformed(t)
-        box3 = Box(x + misalignment, 0, x + box_width + misalignment, -half_w-profile).transformed(t)
-        box4 = Box(x + box_width + misalignment, 0, x + grating_period + misalignment, -half_w+profile).transformed(t)
+        profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
+        box1 = Box(x, 0, x + box_width, half_w-profile).transformed(t)
+        box2 = Box(x + box_width, 0, x + grating_period, half_w+profile).transformed(t)
+        box3 = Box(x + misalignment, 0, x + box_width + misalignment, -half_w+profile).transformed(t)
+        box4 = Box(x + box_width + misalignment, 0, x + grating_period + misalignment, -half_w-profile).transformed(t)
         shapes(LayerSiN).insert(box1)
         shapes(LayerSiN).insert(box2)
         shapes(LayerSiN).insert(box3)
@@ -3270,13 +3274,13 @@ class Contra_DC(PCellDeclarationHelper):
       length = x + grating_period + misalignment
       if misalignment &gt; 0:
         # extra piece at the end:
-        box2 = Box(x + grating_period, 0, length,half_w).transformed(t)
+        box2 = Box(x + grating_period, 0, length, half_w).transformed(t)
         shapes(LayerSiN).insert(box2)
         # extra piece at the beginning:
-        box3 = Box(-grating_period/2, 0, misalignment, -half_w).transformed(t)
+        box3 = Box(0, 0, misalignment, -half_w).transformed(t)
         shapes(LayerSiN).insert(box3)
-        box3 = Box(-grating_period/2, 0, misalignment, half_w).transformed(t)
-        shapes(LayerSiN).insert(box3)
+        
+         
     # Create the pins on the waveguides, as short paths:
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
@@ -3308,10 +3312,7 @@ class Contra_DC(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    if misalignment &gt; 0:
-      t = Trans(Trans.R0, length+grating_period/2,vertical_offset)
-    else:
-      t = Trans(Trans.R0, length,vertical_offset)
+    t = Trans(Trans.R0, length,vertical_offset)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
