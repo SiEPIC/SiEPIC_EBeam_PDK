@@ -987,7 +987,7 @@ class ebeam_taper_te1550(PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_taper_te1550, self).__init__()
-    TECHNOLOGY = get_technology()
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
