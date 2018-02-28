@@ -3262,11 +3262,11 @@ class Contra_DC(PCellDeclarationHelper):
         x = int(round((i * self.grating_period)/dbu))
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
-        box1 = Box(x, 0, x + box_width, half_w-profile).transformed(t)
-        box2 = Box(x + box_width, 0, x + grating_period, half_w+profile).transformed(t)
-        box3 = Box(x + misalignment, 0, x + box_width + misalignment, -half_w+profile).transformed(t)
-        box4 = Box(x + box_width + misalignment, 0, x + grating_period + misalignment, -half_w-profile).transformed(t)
+        profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
+        box1 = Box(x, 0, x + box_width, -half_w-profile).transformed(t)
+        box2 = Box(x + box_width, 0, x + grating_period, -half_w+profile).transformed(t)
+        box3 = Box(x + misalignment, 0, x + box_width + misalignment, half_w+profile).transformed(t)
+        box4 = Box(x + box_width + misalignment, 0, x + grating_period + misalignment, half_w-profile).transformed(t)
         shapes(LayerSiN).insert(box1)
         shapes(LayerSiN).insert(box2)
         shapes(LayerSiN).insert(box3)
@@ -3274,10 +3274,10 @@ class Contra_DC(PCellDeclarationHelper):
       length = x + grating_period + misalignment
       if misalignment &gt; 0:
         # extra piece at the end:
-        box2 = Box(x + grating_period, 0, length, half_w).transformed(t)
+        box2 = Box(x + grating_period, 0, length, -half_w).transformed(t)
         shapes(LayerSiN).insert(box2)
         # extra piece at the beginning:
-        box3 = Box(0, 0, misalignment, -half_w).transformed(t)
+        box3 = Box(0, 0, misalignment, half_w).transformed(t)
         shapes(LayerSiN).insert(box3)
         
          
