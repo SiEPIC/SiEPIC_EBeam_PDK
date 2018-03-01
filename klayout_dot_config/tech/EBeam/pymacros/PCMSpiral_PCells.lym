@@ -1212,12 +1212,12 @@ class CDCSpiralBraggGrating(pya.PCellDeclarationHelper):
     
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
-    self.param("w", self.TypeDouble, "Waveguide1 Width [nm]", default = 400)
-    self.param("w2", self.TypeDouble, "Waveguide2 Width [nm]", default = 500)
-    self.param("DeviceLength", self.TypeDouble, "Device Path Length [mm]", default = 0.5)
-    self.param("Cwidth", self.TypeDouble, "Corrugation Width [nm]", default = 80)
-    self.param("Cwidth2", self.TypeDouble, "Corrugation Width2 [nm]", default = 100)
-    self.param("period", self.TypeDouble, "period [nm]", default = 420 ) 
+    self.param("w", self.TypeDouble, "Waveguide1 Width [nm]", default = 450)
+    self.param("w2", self.TypeDouble, "Waveguide2 Width [nm]", default = 550)
+    self.param("num_periods", self.TypeInt, "Number of periods", default = 400)
+    self.param("Cwidth", self.TypeDouble, "Corrugation Width [nm]", default = 30)
+    self.param("Cwidth2", self.TypeDouble, "Corrugation Width2 [nm]", default = 40)
+    self.param("period", self.TypeDouble, "period [nm]", default = 320 ) 
     self.param("wgap", self.TypeDouble, "gap [nm]", default = 200 ) 
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
@@ -1247,7 +1247,8 @@ class CDCSpiralBraggGrating(pya.PCellDeclarationHelper):
     
     w = self.w*10**-3/2.0 #drawing from center line, only have to add half
     w2 = self.w2*10**-3/2.0 #drawing from center line, only have to add half
-    length = self.DeviceLength*1000/2.0#only drawing half and then copying
+    #length = self.DeviceLength*1000/2.0#only drawing half and then copying
+    length = self.num_periods*self.period/2*1e-3
     cwidth = self.Cwidth*10**-3/2.0 #same reason as width
     cwidth2 = self.Cwidth2*10**-3/2.0 #same reason as width
     grating_length = self.period/2.0*10**-3
