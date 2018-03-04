@@ -14,23 +14,25 @@
  <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text>from pya import *
+ <text># Import KLayout-Python API
+from pya import *
 
+# Example layout function
 def dbl_bus_ring_res():
 
-  # Python script to create a layout for testing a double-bus ring resonator.
+  # Create a layout for testing a double-bus ring resonator.
   # uses:
-  #  - the SiEPIC GSiP Library
+  #  - the SiEPIC EBeam Library
   # creates the layout in the presently selected cell
   # deletes everything first
 
   print("EBeam.dbl_bus_ring_res")
-  
+
+  # Configure parameter sweep  
   pol = 'te'
-  
   if pol == 'te':
     sweep_radius = [3, 3, 3, 3, 10, 10, 10, 10]
-    sweep_gap    = [0.05, 0.08, 0.1, 0.12, 0.05, 0.1, 0.15, 0.20]
+    sweep_gap    = [0.1, 0.12, 0.05, 0.08, 0.05, 0.1, 0.15, 0.20]
     x_offset = 67
     wg_bend_radius = 5
   else:
@@ -38,49 +40,44 @@ def dbl_bus_ring_res():
     sweep_gap    = [0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.60, 0.65]
     x_offset = 67
     wg_bend_radius = 15
+  wg_width = 0.5
   
-
+  # Import functions from SiEPIC-Tools, and get technology details
   from SiEPIC.utils import select_paths, get_layout_variables
   TECHNOLOGY, lv, ly, cell = get_layout_variables()
   dbu = ly.dbu
   from SiEPIC.extend import to_itype
   from SiEPIC.scripts import path_to_waveguide
-
-#  print(TECHNOLOGY['technology_name'])
   
-  # clean all cells within "cell"
+  # clean all cells within the present cell
   ly.prune_subcells(cell.cell_index(), 10)
   
   # Layer mapping:
-  LayerSi = LayerInfo(1, 0)
-  LayerSiN = cell.layout().layer(LayerSi)
-  fpLayer = LayerInfo(99, 0)
-  fpLayerN = cell.layout().layer(fpLayer)
-  TextLayer = LayerInfo(10, 0)
-  TextLayerN = cell.layout().layer(TextLayer)
+  LayerSiN = ly.layer(TECHNOLOGY['Si'])
+  fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
+  TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
   
-  
-  # Draw floor plan
-  cell.shapes(fpLayerN).insert(Box(0,0, 610*dbu, 405*dbu))
+  # Draw the floor plan
+  cell.shapes(fpLayerN).insert(Box(0,0, 610/dbu, 405/dbu))
   
   # Create a sub-cell for our Ring resonator layout
   top_cell = cell
   cell = cell.layout().create_cell("RingResonator")
   if pol == 'te':
-    t = Trans(Trans.R0, 40 * dbu, 12 * dbu)
+    t = Trans(Trans.R0, 40 / dbu, 12 / dbu)
   else:
-    t = Trans(Trans.R180, 560 * dbu, 393 * dbu)
-  # place "cell" in the top cell
+    t = Trans(Trans.R180, 560 / dbu, 393 / dbu)
+    
+  # place the cell in the top cell
   top_cell.insert(CellInstArray(cell.cell_index(), t))
-  
   
   # Import cells from the SiEPIC GDS Library, and instantiate them
   
   # Grating couplers, Ports 1, 2, 3, 4 (top-down):
   GC_imported = ly.create_cell("ebeam_gc_%s1550" % pol, "EBeam").cell_index()
-  print ("Cell: GC_imported: #%s" % GC_imported)
   gc_length = 41
   
+  # Loop through the parameter sweep
   for i in range(len(sweep_gap)):
     
     # place layout at location:
@@ -95,11 +92,10 @@ def dbl_bus_ring_res():
     t = Trans(Trans.R0, to_itype(x,dbu), to_itype(127*2,dbu))
     text = Text ("opt_in_%s_1550_device_RingDouble%sr%sg%s" % (pol.upper(), pol.upper(),r,int(round(g*1000))), t)
     shape = cell.shapes(TextLayerN).insert(text)
-    shape.text_size = 3*dbu
+    shape.text_size = 1.5/dbu
   
     # Ring resonator PCell
-    wg_width = 0.5
-    pcell = ly.create_cell("ebeam_dc_halfring_straight", "EBeam", { "r": r, "w": wg_width, "g": g, "silayer": LayerSi, "bustype": 0 } )
+    pcell = ly.create_cell("ebeam_dc_halfring_straight", "EBeam", { "r": r, "w": wg_width, "g": g, "bustype": 0 } )
     print ("Cell: pcell: #%s" % pcell.cell_index())
     y_ring = 127*3/2
     if 2*r &lt; (gc_length+wg_bend_radius):
@@ -117,7 +113,6 @@ def dbl_bus_ring_res():
     dpath = DPath([DPoint(0,127), DPoint(wg_bend_radius,127), DPoint(wg_bend_radius, y_ring-1*r-1.5*wg_width)], 0.5).transformed(DTrans(DTrans.R0,x,0))
     cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
     
-  
     # GC2 to top-left of ring
     dpath = DPath([DPoint(wg_bend_radius,y_ring+r+1.5*wg_width), DPoint(wg_bend_radius, 127*2), DPoint(0,127*2)], 0.5).transformed(DTrans(DTrans.R0,x,0))
     cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
@@ -139,9 +134,17 @@ def dbl_bus_ring_res():
     cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
     dpath = DPath(points_gc4, 0.5).transformed(DTrans(DTrans.R0,x,0))
     cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))    
-  
+
+  # Convert the paths to waveguides
   path_to_waveguide(cell = cell, verbose=True, params = {'width': 0.5, 'adiabatic': True, 'radius': 5.0, 'bezier': 0.2, 'wgs': [{'width': 0.5, 'layer': 'Si', 'offset': 0.0}]})
-  print ("done layout...")
+
+  lv.clear_object_selection()
+  lv.zoom_fit()
+  lv.max_hier()
+
+#  lv.save_screenshot('/tmp/a.png')
+
+  print (" done layout.")
   
 dbl_bus_ring_res()
 </text>
