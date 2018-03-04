@@ -31,7 +31,7 @@ def dbl_bus_ring_res():
   # Configure parameter sweep  
   pol = 'te'
   if pol == 'te':
-    sweep_radius = [3, 3, 3, 3, 10, 10, 10, 10]
+    sweep_radius = [3, 3, 3, 3, 5, 10, 10, 10]
     sweep_gap    = [0.1, 0.12, 0.05, 0.08, 0.05, 0.1, 0.15, 0.20]
     x_offset = 67
     wg_bend_radius = 5
