@@ -428,6 +428,7 @@ class Waveguide_SBend(PCellDeclarationHelper):
     ly = self.layout
     shapes = self.cell.shapes
 
+    from SiEPIC.utils import points_per_circle
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
@@ -588,8 +589,6 @@ class Waveguide_bump(PCellDeclarationHelper):
     
   def produce_impl(self):
   
-    from SiEPIC.utils import points_per_circle
-
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
@@ -762,6 +761,7 @@ class Waveguide_Bend(PCellDeclarationHelper):
     # length units in dbu
 
     from math import pi, cos, sin
+    from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle, arc_wg
 
     # fetch the parameters
     dbu = self.layout.dbu
