@@ -3399,6 +3399,7 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("Spiral_CDC_BraggGrating", spirals.CDCSpiralBraggGrating())
 
     from photonic_crystals import photonic_crystals
+    from importlib import reload
     reload(photonic_crystals)
 #    self.layout().register_pcell("SWG Fibre Coupler - litho test", swg_fc_test())
     self.layout().register_pcell("SWG Fibre Grating Coupler", photonic_crystals.swg_fc())
