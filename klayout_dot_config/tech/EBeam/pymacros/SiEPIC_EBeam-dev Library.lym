@@ -3392,6 +3392,12 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("Apodized Bragg Grating", ebeam_bragg_apodized())
     self.layout().register_pcell("Contra-Directional Coupler", Contra_DC())
 
+    import spirals
+    self.layout().register_pcell("Spiral_BraggGrating", spirals.PCMSpiralBraggGrating())
+    self.layout().register_pcell("Spiral_BraggGrating_Slab", spirals.PCMSpiralBraggGratingSlab())
+    self.layout().register_pcell("Spiral_NoCenterBraggGrating", spirals.Spiral_NoCenterBraggGrating())
+    self.layout().register_pcell("Spiral_CDC_BraggGrating", spirals.CDCSpiralBraggGrating())
+    
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
     self.register(library)
@@ -3399,7 +3405,13 @@ class SiEPIC_EBeam_dev(Library):
     if int(Application.instance().version().split('.')[1]) &gt; 24:
       # KLayout v0.25 introduced technology variable:
       self.technology=tech_name
-       
+
+# Setup path to load .py files in present folder:
+import os, inspect, sys
+path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+if not path in sys.path:
+  sys.path.append(path)
+
 # Instantiate and register the library
 SiEPIC_EBeam_dev()
 
