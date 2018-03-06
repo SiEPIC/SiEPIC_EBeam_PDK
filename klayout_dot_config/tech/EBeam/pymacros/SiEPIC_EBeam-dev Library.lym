@@ -3397,6 +3397,26 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("Spiral_BraggGrating_Slab", spirals.PCMSpiralBraggGratingSlab())
     self.layout().register_pcell("Spiral_NoCenterBraggGrating", spirals.Spiral_NoCenterBraggGrating())
     self.layout().register_pcell("Spiral_CDC_BraggGrating", spirals.CDCSpiralBraggGrating())
+
+    from photonic_crystals import photonic_crystals
+    reload(photonic_crystals)
+#    self.layout().register_pcell("SWG Fibre Coupler - litho test", swg_fc_test())
+    self.layout().register_pcell("SWG Fibre Grating Coupler", photonic_crystals.swg_fc())
+    self.layout().register_pcell("PhC H0 cavity with waveguide", photonic_crystals.H0c())
+    self.layout().register_pcell("PhC L3 cavity with waveguide", photonic_crystals.L3c())
+    self.layout().register_pcell("PhC H0 cavity with waveguide, no etching", photonic_crystals.H0c_oxide())
+    self.layout().register_pcell("PhC H0 cavity with waveguide, with hexagon cell", photonic_crystals.H0c_new())
+#    self.layout().register_pcell("PhC hole resolution test structure", photonic_crystals.PhC_test())
+#    self.layout().register_pcell("Half of the hole cell", photonic_crystals.Hole_cell_half())
+#    self.layout().register_pcell("Half of the hexagon cell", photonic_crystals.Hexagon_cell_half())
+#    self.layout().register_pcell("Waveguide Triangle Tapers", photonic_crystals.wg_triangle_tapers())
+#    self.layout().register_pcell("PhC H0c Test Structure", photonic_crystals.H0c_Test_Structure())
+#    self.layout().register_pcell("PhC H0c oxide Test Structure", photonic_crystals.H0c_oxide_Test_Structure())
+#    self.layout().register_pcell("PhC L3c Test Structure", photonic_crystals.L3c_Test_Structure())
+#    self.layout().register_pcell("Grating Coupler to Grating Coupler Reference Device", photonic_crystals.GC_to_GC_ref1())
+    self.layout().register_pcell("PhC W1 Waveguide", photonic_crystals.PhC_W1wg()) 
+#    self.layout().register_pcell("PhC W1 Reference Structure", photonic_crystals.PhC_W1wg_reference())
+
     
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
