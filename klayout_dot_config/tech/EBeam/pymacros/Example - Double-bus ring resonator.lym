@@ -76,6 +76,7 @@ def dbl_bus_ring_res():
   # Grating couplers, Ports 1, 2, 3, 4 (top-down):
   GC_imported = ly.create_cell("ebeam_gc_%s1550" % pol, "EBeam").cell_index()
   gc_length = 41
+  GC_pitch = 127
   
   # Loop through the parameter sweep
   for i in range(len(sweep_gap)):
@@ -86,10 +87,10 @@ def dbl_bus_ring_res():
     g = sweep_gap[i]
   
     t = Trans(Trans.R0, to_itype(x,dbu), 0)
-    cell.insert(CellInstArray(GC_imported, t, DPoint(0,127).to_itype(dbu), Point(0,0), 4, 1))
+    cell.insert(CellInstArray(GC_imported, t, DPoint(0,GC_pitch).to_itype(dbu), Point(0,0), 4, 1))
   
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-    t = Trans(Trans.R0, to_itype(x,dbu), to_itype(127*2,dbu))
+    t = Trans(Trans.R0, to_itype(x,dbu), to_itype(GC_pitch*2,dbu))
     text = Text ("opt_in_%s_1550_device_RingDouble%sr%sg%s" % (pol.upper(), pol.upper(),r,int(round(g*1000))), t)
     shape = cell.shapes(TextLayerN).insert(text)
     shape.text_size = 1.5/dbu
@@ -97,7 +98,7 @@ def dbl_bus_ring_res():
     # Ring resonator PCell
     pcell = ly.create_cell("ebeam_dc_halfring_straight", "EBeam", { "r": r, "w": wg_width, "g": g, "bustype": 0 } )
     print ("Cell: pcell: #%s" % pcell.cell_index())
-    y_ring = 127*3/2
+    y_ring = GC_pitch*3/2
     if 2*r &lt; (gc_length+wg_bend_radius):
       t1 = Trans(Trans.R270, to_itype(x+wg_bend_radius, dbu), to_itype(y_ring, dbu))
       t2 = Trans(Trans.R90, to_itype(x+wg_bend_radius+2*r+2*g+2*wg_width, dbu), to_itype(y_ring, dbu))
@@ -110,23 +111,23 @@ def dbl_bus_ring_res():
     # Create paths for waveguides
   
     # GC3 to bottom-left of ring
-    dpath = DPath([DPoint(0,127), DPoint(wg_bend_radius,127), DPoint(wg_bend_radius, y_ring-1*r-1.5*wg_width)], 0.5).transformed(DTrans(DTrans.R0,x,0))
+    dpath = DPath([DPoint(0,GC_pitch), DPoint(wg_bend_radius,GC_pitch), DPoint(wg_bend_radius, y_ring-1*r-1.5*wg_width)], 0.5).transformed(DTrans(DTrans.R0,x,0))
     cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
     
     # GC2 to top-left of ring
-    dpath = DPath([DPoint(wg_bend_radius,y_ring+r+1.5*wg_width), DPoint(wg_bend_radius, 127*2), DPoint(0,127*2)], 0.5).transformed(DTrans(DTrans.R0,x,0))
+    dpath = DPath([DPoint(wg_bend_radius,y_ring+r+1.5*wg_width), DPoint(wg_bend_radius, GC_pitch*2), DPoint(0,GC_pitch*2)], 0.5).transformed(DTrans(DTrans.R0,x,0))
     cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
   
     # GC1 to top-right of ring
     # GC4 to bottom-right of ring
     if 2*r &lt; (gc_length+wg_bend_radius):
-      points_gc1 = [ DPoint(0, 127*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width,127*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width, y_ring+r+1.5*wg_width) ] 
+      points_gc1 = [ DPoint(0, GC_pitch*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width,GC_pitch*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width, y_ring+r+1.5*wg_width) ] 
       points_gc4 = [ DPoint(0, 0), DPoint(wg_bend_radius+2*r+2*g+2*wg_width,0), DPoint(wg_bend_radius+2*r+2*g+2*wg_width, y_ring-1*r-1.5*wg_width)  ] 
     else:
-      points_gc1 = [ DPoint(0, 127*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width,127*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width, y_ring+r+1.5*wg_width) ] 
-      points_gc1 = [ DPoint(0, 127*3), DPoint(wg_bend_radius,127*3), DPoint(wg_bend_radius, 127*3-2*wg_bend_radius), 
-              DPoint((wg_bend_radius-2*r-2*g-2*wg_width), 127*3-2*wg_bend_radius),
-              DPoint((wg_bend_radius-2*r-2*g-2*wg_width), 127*3-y_ring-1*r-1.5*wg_width)  ] 
+      points_gc1 = [ DPoint(0, GC_pitch*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width,GC_pitch*3), DPoint(wg_bend_radius+2*r+2*g+2*wg_width, y_ring+r+1.5*wg_width) ] 
+      points_gc1 = [ DPoint(0, GC_pitch*3), DPoint(wg_bend_radius,GC_pitch*3), DPoint(wg_bend_radius, GC_pitch*3-2*wg_bend_radius), 
+              DPoint((wg_bend_radius-2*r-2*g-2*wg_width), GC_pitch*3-2*wg_bend_radius),
+              DPoint((wg_bend_radius-2*r-2*g-2*wg_width), GC_pitch*3-y_ring-1*r-1.5*wg_width)  ] 
       points_gc4 = [ DPoint(0, 0), DPoint(wg_bend_radius,0), DPoint(wg_bend_radius, 2*wg_bend_radius), 
               DPoint((wg_bend_radius-2*r-2*g-2*wg_width), 2*wg_bend_radius),
               DPoint((wg_bend_radius-2*r-2*g-2*wg_width), y_ring-1*r-1.5*wg_width)  ] 
