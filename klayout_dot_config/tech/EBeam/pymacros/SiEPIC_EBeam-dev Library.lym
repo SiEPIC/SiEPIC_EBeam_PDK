@@ -931,7 +931,7 @@ class fswgc(PCellDeclarationHelper):
 
 
     # Pin on the waveguide:
-    pin_length = PIN_LENGTH
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     x = 0
     t = Trans(Trans.R0, x,0)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], self.t/dbu)

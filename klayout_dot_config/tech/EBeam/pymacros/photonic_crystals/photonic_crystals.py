@@ -79,7 +79,7 @@ import pya
 import math
 
 from SiEPIC.utils import get_technology, get_technology_by_name
-
+from SiEPIC.utils import arc, arc_wg, arc_to_waveguide, points_per_circle
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------- #
