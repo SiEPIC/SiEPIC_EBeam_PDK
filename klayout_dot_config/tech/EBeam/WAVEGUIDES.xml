@@ -28,4 +28,54 @@
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>
+	<waveguide>
+	  <name>eskid TE 1550</name>
+      <radius>3.0</radius>
+	  <bezier>0.20</bezier>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.35</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>0.265</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>-0.265</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>0.385</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>-0.385</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>0.505</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>-0.505</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>0.625</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.06</width>
+	    <offset>-0.625</offset>
+	  </component>
+	</waveguide>
 </waveguides>
