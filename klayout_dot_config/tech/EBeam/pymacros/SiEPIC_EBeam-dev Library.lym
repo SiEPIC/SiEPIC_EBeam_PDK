@@ -3387,12 +3387,12 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("SWG_waveguide", SWG_waveguide())
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
     self.layout().register_pcell("strip_to_slot", strip_to_slot() )
-    #self.layout().register_pcell("spiral", spiral())
+    #self.layout().register_pcell("Spiral", spiral())
     self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
     self.layout().register_pcell("Apodized Bragg Grating", ebeam_bragg_apodized())
     self.layout().register_pcell("Contra-Directional Coupler", Contra_DC())
 
-    import spirals
+    import PCMSpiral_PCells as spirals
     self.layout().register_pcell("Spiral_BraggGrating", spirals.PCMSpiralBraggGrating())
     self.layout().register_pcell("Spiral_BraggGrating_Slab", spirals.PCMSpiralBraggGratingSlab())
     self.layout().register_pcell("Spiral_NoCenterBraggGrating", spirals.Spiral_NoCenterBraggGrating())

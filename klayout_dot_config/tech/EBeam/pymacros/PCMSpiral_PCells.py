@@ -1,20 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<klayout-macro>
- <description/>
- <version/>
- <category>pymacros</category>
- <prolog/>
- <epilog/>
- <doc/>
- <autorun>false</autorun>
- <autorun-early>false</autorun-early>
- <shortcut/>
- <show-in-menu>false</show-in-menu>
- <group-name/>
- <menu-path/>
- <interpreter>python</interpreter>
- <dsl-interpreter-name/>
- <text>import pya
+import pya
 import math
 import cmath
 from pya import *
@@ -47,7 +31,7 @@ LayerInfo = pya.LayerInfo
 def frange(start,stop,step):
   #Used to define a float range, since python doesnt have a built in one
   x = start
-  while x &lt;stop:
+  while x <stop:
       yield x #returns value as generator, speeding up stuff
       x+=step
         
@@ -60,8 +44,8 @@ def angle_from_corrugation(r, length, grating_length):
     current_total_length=0
     yield angle#yield acts as a return but gives a generator. This early yield is to return the 0 value
     
-    while current_total_length &lt; length+grating_length: #The spiral gen doesnt draw the last grating because it needs to calculate slope, thus we draw an extra
-        while current_length &lt; grating_length: #if the length has no reached the grating length, continue
+    while current_total_length < length+grating_length: #The spiral gen doesnt draw the last grating because it needs to calculate slope, thus we draw an extra
+        while current_length < grating_length: #if the length has no reached the grating length, continue
             deltaX = (r*sign(angle))*cmath.exp(-abs(angle)/alpha)    
             r_spiral = (r*sign(angle))+(gap*angle/pi)
             S = (r_spiral*cmath.exp(j*abs(angle)))-deltaX
@@ -228,7 +212,7 @@ def spiral_gen_NoCenter(r,angle_array,w,cwidth,grating_length):
     yc1 = []
     yc2 = []
 
-    while (angle&lt;pi):
+    while (angle<pi):
       angle=angle_array[i]
       angle_next=angle_array[i+1]
       
@@ -329,8 +313,8 @@ def angle_from_corrugation_NoCenter(r, length, grating_length):
     
     yield angle#yield acts as a return but gives a generator. This early yield is to return the 0 value
     
-    while current_total_length &lt; length+grating_length: #The spiral gen doesnt draw the last grating because it needs to calculate slope, thus we draw an extra
-        while current_length &lt; grating_length: #if the length has no reached the grating length, continue
+    while current_total_length < length+grating_length: #The spiral gen doesnt draw the last grating because it needs to calculate slope, thus we draw an extra
+        while current_length < grating_length: #if the length has no reached the grating length, continue
             deltaX = (r*sign(angle))*cmath.exp(-abs(angle)/alpha)    
             r_spiral = (r*sign(angle))+(gap*angle/pi)
             S = (r_spiral*cmath.exp(j*abs(angle)))-deltaX
@@ -344,7 +328,7 @@ def angle_from_corrugation_NoCenter(r, length, grating_length):
         yield angle
         x1=S.real
         y1=S.imag
-        if angle &gt; pi:
+        if angle > pi:
           current_total_length +=current_length
         current_length=0
 
@@ -1481,7 +1465,7 @@ class CDCSpiralBraggGrating(pya.PCellDeclarationHelper):
     spiral2_y.extend(reversed(BW21y))
     spiral2_y.extend(TW22y)
     
-    if spiral1_y[-2] &lt;0:#for drawing wgs laters, condition is to determine is the waveguide points up or down(since not symmetrical)
+    if spiral1_y[-2] <0:#for drawing wgs laters, condition is to determine is the waveguide points up or down(since not symmetrical)
       devicetop = max(max(spiral1_y),max(spiral2_y))
       devicebot = min(min(spiral1_y),min(spiral2_y))
       pin_direction = 1 #pins have to extend out from wg, if the wg switches direction, the pins have to switch signs
@@ -1555,35 +1539,3 @@ class CDCSpiralBraggGrating(pya.PCellDeclarationHelper):
           
     print("Done drawing the layout for - CDC Spiral")
 
-class SiEPIC(pya.Library):
-  """
-  The library where we will put the PCell into 
-  """
-
-  def __init__(self):
-  
-    tech_name = 'EBeam'
-    print("Initializing Adiabatic Spiral PCells library.")
-  
-    # Set the description
-    self.description = "EBeam"
-    
-    # Create the PCell declarations
-    self.layout().register_pcell("[1] Spiral_BraggGrating", PCMSpiralBraggGrating())
-    self.layout().register_pcell("[2] Spiral_BraggGrating_Slab", PCMSpiralBraggGratingSlab())
-    self.layout().register_pcell("[3] Spiral_NoCenterBraggGrating", Spiral_NoCenterBraggGrating())
-    self.layout().register_pcell("[4] CDC_BraggGrating", CDCSpiralBraggGrating())
-    
-    # Register us with the name "Adiabatic_Spirals".
-    # If a library with that name already existed, it will be replaced then.
-    self.register("PCMSpiral")
-    
-    if int(Application.instance().version().split('.')[1]) &gt; 24:
-      # KLayout v0.25 introduced technology variable:
-      self.technology=tech_name
-
-# Instantiate and register the library
-SiEPIC()
-
-</text>
-</klayout-macro>
