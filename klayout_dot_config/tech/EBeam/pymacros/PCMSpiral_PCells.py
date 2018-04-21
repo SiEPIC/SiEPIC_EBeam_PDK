@@ -838,7 +838,8 @@ class PCMSpiralBraggGratingSlab(pya.PCellDeclarationHelper):
         left_yS.append(coord[1])
         left2_xS.append(coord[2])
         left2_yS.append(coord[3])
-        
+    dx = coord[4]
+    dy = coord[5]
     #Flip coords for right side coords
     right_xS = [i*-1 for i in left_xS]
     right_yS = [i*-1 for i in left_yS]    
@@ -868,7 +869,7 @@ class PCMSpiralBraggGratingSlab(pya.PCellDeclarationHelper):
     del right2_xS[-1]
     del right2_yS[-1]
      
-    result = finish_spiral(r,angle_array[-1],sw,1,1)
+    result = finish_spiral(r,angle_array[-1],sw,dx,dy)
     left_xS.extend(result[0])
     left_yS.extend(result[1])
     left2_xS.extend(result[2])
@@ -1539,3 +1540,146 @@ class CDCSpiralBraggGrating(pya.PCellDeclarationHelper):
           
     print("Done drawing the layout for - CDC Spiral")
 
+class SpiralWaveguide(pya.PCellDeclarationHelper):
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(SpiralWaveguide, self).__init__()
+    TECHNOLOGY = get_technology_by_name('EBeam')
+    
+    # declare the parameters
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("w", self.TypeDouble, "Waveguide Width [nm]", default = 400)
+    self.param("DeviceLength", self.TypeDouble, "Device Path Length [mm]", default = 0.5)
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
+    
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "SpiralBraggGratingSlab"
+
+  def can_create_from_shape_impl(self):
+    return False   
+  
+  def produce_impl(self):
+    from SiEPIC._globals import PIN_LENGTH
+    
+    ly = self.layout
+    shapes = self.cell.shapes
+
+    LayerSi = self.silayer
+    LayerSiN = ly.layer(LayerSi)
+    TextLayerN = ly.layer(self.textl)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    TextLayerN = ly.layer(self.textl)
+    LayerSiN_Slab = LayerSiN
+    
+    w = self.w*10**-3/2.0 #drawing from center line, only have to add half
+    length = self.DeviceLength*1000/2.0#only drawing half and then copying
+    cwidth = 80*10**-3/2.0 #same reason as width
+    grating_length = 1000/2.0*10**-3
+    #Step1 Find the Angles of each grating#######    
+    angle_array=[]
+    for theta in angle_from_corrugation(r,length,grating_length):
+        angle_array.append(theta)
+    ####################
+
+    
+    #Step4 Draw slab spiral
+    #Step2 Find the Coordinates of the gratings via the angles
+    #Wall1 of the Left    
+    left_xS = []
+    left_yS = []
+    #Wall2 of the Left
+    left2_xS = []
+    left2_yS = []
+    
+    #Calculate the Spiral Coordinates
+    for coord in spiral_gen(r,angle_array,w,0,grating_length):
+    #for coord in spiral_gen_legacy(r,angle_array,sw):
+        left_xS.append(coord[0])
+        left_yS.append(coord[1])
+        left2_xS.append(coord[2])
+        left2_yS.append(coord[3])
+    dx = coord[4]
+    dy = coord[5]
+    #Flip coords for right side coords
+    right_xS = [i*-1 for i in left_xS]
+    right_yS = [i*-1 for i in left_yS]    
+    right2_xS = [i*-1 for i in left2_xS]
+    right2_yS = [i*-1 for i in left2_yS]
+    #Obtain a sorted list of the coordinates of one wall.
+     
+    result = finish_spiral(r,angle_array[-1],w,dx,dy)
+    left_xS.extend(result[0])
+    left_yS.extend(result[1])
+    left2_xS.extend(result[2])
+    left2_yS.extend(result[3])
+    
+    right_xS.extend(i*-1 for i in result[0])
+    right_yS.extend(i*-1 for i in result[1])
+    right2_xS.extend(i*-1 for i in result[2])
+    right2_yS.extend(i*-1 for i in result[3])
+    #########################################
+    
+    #Step4.5 Organize all the points into a single matrix to be drawn in klayout.
+    slab_x = []
+    slab_y = []
+    
+    slab_x.extend(reversed(left_xS))
+    slab_x.extend(right2_xS)
+    slab_x.extend(reversed(right_xS))
+    slab_x.extend(left2_xS)
+    
+    slab_y.extend(reversed(left_yS))
+    slab_y.extend(right2_yS)
+    slab_y.extend(reversed(right_yS))
+    slab_y.extend(left2_yS)
+    
+    #makes Dpoints from the coordinates
+    dptsS=[pya.DPoint(slab_x[i], slab_y[i]) for i in range(len(slab_x))]
+    dpolygonS = DPolygon(dptsS)    
+    #dmult_pts = mult_pts(dpts,1)
+        
+
+    #Step6 Pins!      
+    #insert slab
+    #dpoint polygon solution thanks to Jaspreet#
+    elementS = Polygon.from_dpoly(dpolygonS*(1.0/dbu))
+    shapes(LayerSiN_Slab).insert(elementS)
+
+    DeviceHeight = self.cell.bbox().height()*dbu
+    DeviceWidthNS = self.cell.bbox().width() #width of device without slab included yet, for drawing WG
+    
+    #WG1  
+    wg1 = Box(DeviceWidthNS/2.0,0,DeviceWidthNS/2.0-2*w/dbu,DeviceHeight/dbu/2.0)
+    shapes(LayerSiN).insert(wg1)
+    #WG2  
+    wg2 = Box(-DeviceWidthNS/2.0,0,-DeviceWidthNS/2.0+2*w/dbu,-DeviceHeight/dbu/2.0)
+    shapes(LayerSiN).insert(wg2)
+    
+    #Pin1
+    pin = pya.Path([Point((-DeviceWidthNS/2.0)+w/dbu, -DeviceHeight/2.0/dbu+PIN_LENGTH/2.0), Point((-DeviceWidthNS/2.0)+w/dbu,-DeviceHeight/2.0/dbu-PIN_LENGTH/2.0)], w/dbu*2.0)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(Trans.R0,-(DeviceWidthNS/2.0)+w/dbu, -DeviceHeight/2.0/dbu)
+    text = Text ("pin1", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    #Pin2
+    pin = pya.Path([Point((DeviceWidthNS/2.0)-w/dbu, DeviceHeight/2.0/dbu-PIN_LENGTH/2.0), Point((DeviceWidthNS/2.0)-w/dbu, DeviceHeight/2.0/dbu+PIN_LENGTH/2.0)], w/dbu*2.0)
+    shapes(LayerPinRecN).insert(pin)
+    t = Trans(Trans.R0,(DeviceWidthNS/2.0)-w/dbu, DeviceHeight/2.0/dbu)
+    text = Text ("pin2", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+     
+    # Create the device recognition layer
+    #I literally declared the size of this box based on the other box. Lol.
+    dev = Box(-self.cell.bbox().width()/2.0,-self.cell.bbox().height()/2.0+PIN_LENGTH/2.0,self.cell.bbox().width()/2.0,self.cell.bbox().height()/2.0-PIN_LENGTH/2.0)
+    shapes(LayerDevRecN).insert(dev)
+    
+          
+    print("Done drawing the layout for - SpiralWaveguide")
