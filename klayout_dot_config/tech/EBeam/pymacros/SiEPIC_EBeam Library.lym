@@ -880,23 +880,23 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
     from SiEPIC.extend import to_itype
     
     # Draw the Bragg grating:
-    box_width = int(round(self.grating_period/2/dbu))
-    grating_period = int(round(self.grating_period/dbu))
+    box_width = self.grating_period/2/dbu
+    grating_period = self.grating_period/dbu
     w = to_itype(self.wg_width,dbu)
     half_w = w/2
-    half_corrugation_w = int(round(self.corrugation_width/2/dbu))
-    misalignment = int(round(self.misalignment/dbu))
+    half_corrugation_w = self.corrugation_width/2/dbu
+    misalignment = int(self.misalignment/dbu)
     if self.sinusoidal:
       npoints_sin = 40
       for i in range(0,self.number_of_periods):
-        x = (round((i * self.grating_period)/dbu))
+        x = ((i * self.grating_period)/dbu)
         box1 = Box(x, 0, x + box_width, half_w+half_corrugation_w)
         pts1 = [Point(x,0)]
         pts3 = [Point(x + misalignment,0)]
         for i1 in range(0,npoints_sin+1):
           x1 = i1 * 2* math.pi / npoints_sin
-          y1 = round(half_corrugation_w*math.sin(x1))
-          x1 = round(x1/2/math.pi*grating_period)
+          y1 = half_corrugation_w*math.sin(x1)
+          x1 = x1/2/math.pi*grating_period
 #          print("x: %s, y: %s" % (x1,y1))
           pts1.append( Point(x + x1,half_w+y1 ) )
           pts3.append( Point(x + misalignment + x1,-half_w-y1 ) )
@@ -915,7 +915,7 @@ class ebeam_bragg_te1550(PCellDeclarationHelper):
 
     else:
       for i in range(0,self.number_of_periods):
-        x = int(round((i * self.grating_period)/dbu))
+        x = (i * self.grating_period)/dbu
         box1 = Box(x, 0, x + box_width, half_w+half_corrugation_w)
         box2 = Box(x + box_width, 0, x + grating_period, half_w-half_corrugation_w)
         box3 = Box(x + misalignment, 0, x + box_width + misalignment, -half_w-half_corrugation_w)
