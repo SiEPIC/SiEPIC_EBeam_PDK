@@ -1999,7 +1999,7 @@ class Waveguide_Arc(PCellDeclarationHelper):
       start_angle = self.stop_angle
       stop_angle = self.start_angle
     
-    deg_to_rad = math.pi / 180
+    deg_to_rad = math.pi / 180.0
     
     
     # draw the arc
@@ -2032,11 +2032,11 @@ class Waveguide_Arc(PCellDeclarationHelper):
 
 
     # Pin on the left side:
-    x = r*math.cos( stop_angle * deg_to_rad ) 
-    y = r*math.sin( stop_angle * deg_to_rad )
+    x = round(r*math.cos( stop_angle * deg_to_rad ))
+    y = round(r*math.sin( stop_angle * deg_to_rad ))
     
-    x_pin = math.cos( (90 - stop_angle)*deg_to_rad ) *pin_length/2
-    y_pin = math.sin( (90 - stop_angle)*deg_to_rad ) *pin_length/2
+    x_pin = math.cos( (90.0 - stop_angle)*deg_to_rad ) *pin_length/2
+    y_pin = math.sin( (90.0 - stop_angle)*deg_to_rad ) *pin_length/2
     
     p1 = [Point(x+x_pin, y-y_pin), Point(x-x_pin, y+y_pin)]
     p1c = Point(x,y)
@@ -3387,16 +3387,17 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("SWG_waveguide", SWG_waveguide())
     self.layout().register_pcell("SWG_to_strip_waveguide", SWG_to_strip_waveguide())
     self.layout().register_pcell("strip_to_slot", strip_to_slot() )
-    #self.layout().register_pcell("spiral", spiral())
+    #self.layout().register_pcell("Spiral", spiral())
     self.layout().register_pcell("Waveguide_Straight", Waveguide_Straight())
     self.layout().register_pcell("Apodized Bragg Grating", ebeam_bragg_apodized())
     self.layout().register_pcell("Contra-Directional Coupler", Contra_DC())
 
-    import spirals
+    import PCMSpiral_PCells as spirals
     self.layout().register_pcell("Spiral_BraggGrating", spirals.PCMSpiralBraggGrating())
     self.layout().register_pcell("Spiral_BraggGrating_Slab", spirals.PCMSpiralBraggGratingSlab())
     self.layout().register_pcell("Spiral_NoCenterBraggGrating", spirals.Spiral_NoCenterBraggGrating())
     self.layout().register_pcell("Spiral_CDC_BraggGrating", spirals.CDCSpiralBraggGrating())
+    self.layout().register_pcell("SpiralWaveguide", spirals.SpiralWaveguide())
 
     from photonic_crystals import photonic_crystals
     # only need to reload if we are debugging, and are making changes to the code
