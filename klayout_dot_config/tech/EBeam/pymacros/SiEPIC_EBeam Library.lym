@@ -659,12 +659,12 @@ class Waveguide_bump(PCellDeclarationHelper):
     t = Trans(Trans.R0, 0, -w*2)
     text = Text \
       ('Spice_param:wg_length=%.3fu wg_width=%.3fu' %\
-      (waveguide_length, self.wg_width), t )
+      (waveguide_length*dbu, self.wg_width), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
     t = Trans(Trans.R0, self.length /6, -w*2)
-    text = Text ('dL = %.4f um' % ((waveguide_length-length)), t)
+    text = Text ('dL = %.4f um' % ((waveguide_length-length)*dbu), t)
     shape = shapes(LayerTextN).insert(text)
     shape.text_size = 0.6/dbu
 
