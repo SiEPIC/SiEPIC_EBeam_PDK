@@ -130,7 +130,23 @@ class Waveguide(PCellDeclarationHelper):
     return "Waveguide_%s" % self.path
   
   def coerce_parameters_impl(self):
-    pass
+    from SiEPIC.extend import to_itype
+    print("EBeam.Waveguide coerce parameters")
+    
+    TECHNOLOGY = get_technology_by_name('EBeam')
+    dbu = self.layout.dbu
+    wg_width = to_itype(self.width,dbu)
+    for lr in range(0, len(self.layers)):
+      layer = self.layout.layer(TECHNOLOGY[self.layers[lr]])
+      width = to_itype(self.widths[lr],dbu)
+      # check to make sure that the waveguide with parameters are consistent in both places
+      if self.layout.layer(TECHNOLOGY['Waveguide']) == layer:
+        if width != wg_width:
+          self.widths[lr] = self.width
+      # check to make sure that the DevRec is bigger than the waveguide width
+      if self.layout.layer(TECHNOLOGY['DevRec']) == layer:
+        if width &lt; wg_width:
+          self.widths[lr] = self.width*2
           
   def can_create_from_shape_impl(self):
     return self.shape.is_path()
