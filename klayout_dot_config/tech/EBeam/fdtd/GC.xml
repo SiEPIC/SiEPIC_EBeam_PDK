@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GC>
+	<floats>
+		<angle>13</angle>
+		<target_length>25e-6</target_length>
+		<thickness_Si>0.22e-6</thickness_Si>
+		<etch_depth>0.13e-6</etch_depth>
+		<duty_cycle>0.63</duty_cycle>
+		<pitch>0.66e-6</pitch>
+		<radius>25e-6</radius>
+		<y_span>15e-6</y_span>
+		<length_extra>40e-6</length_extra>
+		<waveguide_width>0.5e-6</waveguide_width>
+		<waveguide_length>3.5e-6</waveguide_length>
+	</floats>
+	<strings>
+		<material_Clad>SiO2 (Glass) - Palik</material_Clad>
+		<material_Si>Si (Silicon) - Palik</material_Si>
+		<polarization>TM</polarization>
+		<particle_swarm_optimization>yes</particle_swarm_optimization>
+	</strings>
+</GC>

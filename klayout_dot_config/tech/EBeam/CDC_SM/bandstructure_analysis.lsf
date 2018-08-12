@@ -1,0 +1,85 @@
+##########################################################
+# bandstructure_analysis
+# Ajay Mistry,January 2017
+##########################################################
+
+# Determine which kx where minimum bandgap occurs
+# get a from model
+a = getnamed("::model","ax");
+# get fs data from the sweeps
+sweepname="band_structure";
+spectrum=getsweepresult(sweepname,"spectrum");
+kx=spectrum.kx;
+points = length(kx);
+f=spectrum.f;
+fs_all=matrix(length(f),points); # initialize matrix to store fs data in
+fs_all(1:length(f),1:points)=spectrum.fs;
+
+# simple imaging of fs vs k
+image(kx,f,transpose(fs_all),"kx","f (Hz)","bandstructure, logscale","logplot");
+exportfigure(filename+'_bandstructure_logplot_'+num2str(iter));
+
+# plot bandstructure
+bandstructure=matrix(num_band,points); # initialize matrix in which to store band frequency information
+
+# loop over sweep results to locate central kx with 
+# smallest frequency difference between peaks to determine bandgap
+
+cent_kx_new = 0;
+check_band_num = 6;
+
+for (i=1:points){
+  #use findpeaks to find num_band number of peaks
+  temp = findpeaks(fs_all(1:length(f),i),check_band_num);
+
+  #ensure that the array is sorted. FOR num_band == 4
+  #and singular elements are removed.
+  
+  tempx = unique(temp);
+  if (tempx(1) == 1){
+      temp = tempx(2:num_band+1);
+  }else{
+      temp = tempx(1:num_band);
+  }
+  
+  #collect data for any peaks that are more than 'tolerance' of the maximum peak (to avoid minor peaks like sidelobes)
+  minvalue = fs_all(temp(4),i)*tolerance;
+  f_band=matrix(num_band);
+  for(bandcount = 1:num_band) {
+    if( fs_all(temp(bandcount),i) > minvalue) { 
+      f_band(bandcount) = f(temp(bandcount)); 
+    }
+  }
+  
+  bandstructure(1:num_band,i)=f_band;
+
+  #if non-zero entry - this is the kx where the smallest band gap occurs
+  #else we can determine the kx after the sweep completes
+  if (!all(f_band)){
+     cent_kx_new = kx(i);
+     bandwidth = 0;
+     lambda_0 = c/bandstructure(2,i);
+  }
+
+}
+
+bandstructure=transpose(bandstructure);  
+plot(kx,bandstructure(1:length(kx),1:4),"kx","f (Hz)","bandstructure","plot points");
+exportfigure(filename+'_bandstructure_'+num2str(iter));
+plot(kx,bandstructure(1:length(kx),2:3),"kx","f (Hz)","bandstructure","plot points");
+exportfigure(filename+'_bandstructure_zoom_'+num2str(iter));
+
+#determine kx at which minimum peak spacing occurs
+if (!cent_kx_new){
+    ?diff = abs(c/bandstructure(1:length(kx),2)-c/bandstructure(1:length(kx),3));
+    index = (find(diff==min(diff)));
+    cent_kx_new = kx(index);
+    bandwidth = abs(c/bandstructure(index,2)-c/bandstructure(index,3));
+    lambda_0 = 0.5*(c/bandstructure(index,2)+c/bandstructure(index,3));
+}
+
+?cent_kx = cent_kx_new;
+?"Iterration: "+num2str(iter);
+?"kx_0: "+num2str(cent_kx);
+?"Bandwidth: "+num2str(bandwidth);
+?"Lambda_0: "+num2str(lambda_0);
