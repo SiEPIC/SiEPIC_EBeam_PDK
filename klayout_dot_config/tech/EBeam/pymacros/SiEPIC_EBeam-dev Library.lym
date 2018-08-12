@@ -3326,7 +3326,7 @@ class Contra_DC(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)
-    text = Text ('Component=ebeam_bragg_te1550', t)
+    text = Text ('Component=ebeam_contra_dc', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/9, 0)
