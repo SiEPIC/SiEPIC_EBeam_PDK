@@ -72,6 +72,7 @@ setsweep("band_structure", "number of points", points);
 sim_time_x = 1e-15*[10000,12500,15000,175000];
 spacing_x = [.01/2, .001, .0001, .00001];
 
+if (0){
 for (i = 1:2){
     
     iter = i;
@@ -85,5 +86,8 @@ for (i = 1:2){
         break;
     }
 }
-
-matlabsave(filename, cent_kx, bandwidth, lambda_0);
+}
+run;
+bandwidth = 9e-9;
+lambda_0 = 1550e-9;
+#matlabsave(filename, cent_kx, bandwidth, lambda_0);
