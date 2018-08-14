@@ -80,7 +80,7 @@ set("alpha", 0.2);
 
 wavelength=1.5e-6;
 wavelength_stop = 1.6e-6;
-meshsize = 100e-9; # mesh size
+meshsize = 10e-9; # mesh size
 
 # add 2D mode solver 
 addfde; set("solver type","2D X normal");
@@ -105,9 +105,11 @@ frequencysweep;  # run frequency sweep
 
 
 n_eff1 =abs(getdata("frequencysweep","neff"));
+n_g1 =c/abs(getdata("frequencysweep","vg"));
 f= getdata("frequencysweep","f");
 plot(c/f*1e6,n_eff1,"Wavelength (um)", "Effective Index");
-n_eff1_fit = polyfit(c/f,n_eff1,2);
+n_eff1_fit = polyfit(c/f,n_eff1,1);
+n_g1_fit = polyfit(c/f(1:9),n_g1,1);
 
 
 selectmode(2);
@@ -115,9 +117,34 @@ frequencysweep;  # run frequency sweep for all modes
 
 
 n_eff2=abs(getdata("frequencysweep","neff"));
+n_g2 =c/abs(getdata("frequencysweep","vg"));
 f=getdata("frequencysweep","f");
 plot(c/f*1e6,n_eff2,"Wavelength (um)", "Effective Index");
-n_eff2_fit = polyfit(c/f,n_eff2,2);
+n_eff2_fit = polyfit(c/f,n_eff2,1);
+n_g2_fit = polyfit(c/f(1:9),n_g2,1);
 
+lambda = c/f;
 
+filename = "n_eff1_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_eff1_fit));
 
+filename = "n_g1_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_g1_fit));
+
+filename = "n_eff2_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_eff2_fit));
+
+filename = "n_g2_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_g2_fit));
