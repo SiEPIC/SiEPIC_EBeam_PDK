@@ -29,6 +29,26 @@
 	  </component>
 	</waveguide>
 	<waveguide>
+	  <name>Multimode Strip TE 1550 nm, w=2000 nm</name>
+	  <bezier>0.20</bezier>
+      <radius>300.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>2.0</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+	<waveguide>
+	  <name>Multimode Strip TE 1550 nm, w=3000 nm</name>
+	  <bezier>0.20</bezier>
+      <radius>500.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>3.0</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+	<waveguide>
 	  <name>eskid TE 1550</name>
       <radius>3.0</radius>
 	  <bezier>0.20</bezier>
