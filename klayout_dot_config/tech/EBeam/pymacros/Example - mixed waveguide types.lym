@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Mixed waveguide types</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.exlayout.begin</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Import KLayout-Python API
+from pya import *
+
+# Example layout function
+def Example_mixed_waveguide_types():
+
+  # Create a layout using different waveguide types.
+  # uses:
+  #  - the SiEPIC EBeam Library
+  # creates the layout in the presently selected cell
+  # deletes everything first
+
+  # parameter definitions
+  taper_length = 10
+  wg_width1 = 0.5
+  wg_width2 = 3.0
+
+  print("EBeam.Example_mixed_waveguide_types")
+
+  # Import functions from SiEPIC-Tools, and get technology details
+  from SiEPIC.utils import select_paths, get_layout_variables
+  TECHNOLOGY, lv, ly, cell = get_layout_variables()
+  dbu = ly.dbu
+  from SiEPIC.extend import to_itype
+  from SiEPIC.scripts import path_to_waveguide
+  
+  # clean all cells within the present cell
+  ly.prune_subcells(cell.cell_index(), 10)
+  
+  # Layer mapping:
+  LayerSiN = ly.layer(TECHNOLOGY['Waveguide'])
+  TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+    
+  # Create a sub-cell for our layout, place the cell in the top cell
+  top_cell = cell
+  cell = cell.layout().create_cell("example_cell")
+#  t = Trans(Trans.R0, 0 / dbu, 0 / dbu)
+  top_cell.insert(CellInstArray(cell.cell_index(), Trans.R0))
+  
+  # Import cells from the SiEPIC Library, and instantiate them
+  
+  # taper, from waveguide1 to waveguide2
+  cell_taper = ly.create_cell("ebeam_taper_te1550", "EBeam", 
+    {"wg_width1":wg_width1,"wg_width2":wg_width2, "wg_length":taper_length }
+    ).cell_index()
+    
+  # place tapers  
+  t = Trans(Trans.R0, 0, 0)
+  cell.insert(CellInstArray(cell_taper, t))
+  t = Trans(Trans.R0, 0, 30/dbu)
+  cell.insert(CellInstArray(cell_taper, t))
+    
+  # Create paths for waveguides type 1, then convert path to waveguide
+  dpath = DPath([DPoint(0,0), DPoint(-30,0), DPoint(-30, 30),DPoint(0, 30)], 0.5)
+  cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+  path_to_waveguide(cell = cell, verbose=True, params = 
+    {'width': wg_width1, 'adiabatic': True, 'radius': 5.0, 'bezier': 0.2, 
+    'wgs': [{'width': wg_width1, 'layer': 'Si', 'offset': 0.0}]})
+    
+  # Create paths for waveguides type 2, then convert path to waveguide
+  dpath = DPath([DPoint(10,0), DPoint(30,0), DPoint(30, 30),DPoint(10, 30)], 0.5)
+  cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+  path_to_waveguide(cell = cell, verbose=True, params = 
+    {'width': wg_width2, 'adiabatic': True, 'radius': 15.0, 'bezier': 0.2, 
+    'wgs': [{'width': wg_width2, 'layer': 'Si', 'offset': 0.0}]})
+
+  # finish up, unselect, zoom, show all hierarchy 
+  lv.clear_object_selection()
+  lv.zoom_fit()
+  lv.max_hier()
+
+  print (" done layout.")
+  
+Example_mixed_waveguide_types()
+</text>
+</klayout-macro>
