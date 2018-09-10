@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>Spiral bragg grating layout</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,9 +9,9 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>'''
@@ -108,7 +108,7 @@ for i in range(len(sweep_length)):
       y = lasty_offset
       
       ####SPIRAL PCELL####
-      pcell = ly.create_cell("[1] Spiral_BraggGrating", "PCMSpiral", {"silayer": LayerSi , "w": wg_width, "DeviceLength": devicelength, "Cwidth": cwidth, "pitch": period, "Chirp_Rate": 0, "n": 1800 } )
+      pcell = ly.create_cell("Spiral_BraggGrating", "EBeam-dev", {"silayer": LayerSi , "w": wg_width, "DeviceLength": devicelength, "Cwidth": cwidth, "pitch": period, "Chirp_Rate": 0, "n": 1800 } )
       print ("Cell: pcell: #%s" % pcell.cell_index())
       ## SPIRAL BOUNDARY BOX DIMENSIONS FOR ROUTING
       devicewidth = pcell.bbox().width()
