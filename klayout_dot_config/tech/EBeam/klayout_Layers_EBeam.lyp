@@ -5,7 +5,7 @@
   <fill-color>#ff80a8</fill-color>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
-  <dither-pattern>I4</dither-pattern>
+  <dither-pattern>I6</dither-pattern>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>true</transparent>
@@ -14,36 +14,7 @@
   <animation>0</animation>
   <name>Si</name>
   <source>1/0@1</source>
- </properties>
- <properties>
-  <frame-color>#0000ff</frame-color>
-  <fill-color>#0000ff</fill-color>
-  <frame-brightness>0</frame-brightness>
-  <fill-brightness>0</fill-brightness>
-  <dither-pattern>I5</dither-pattern>
-  <valid>true</valid>
-  <visible>true</visible>
-  <transparent>false</transparent>
-  <width/>
-  <marked>false</marked>
-  <animation>0</animation>
-  <name>Text</name>
-  <source>10/0@1</source>
- </properties>
- <properties>
-  <frame-color>#ff00ff</frame-color>
-  <fill-color>#ff00ff</fill-color>
-  <frame-brightness>0</frame-brightness>
-  <fill-brightness>0</fill-brightness>
-  <dither-pattern>I5</dither-pattern>
-  <valid>true</valid>
-  <visible>true</visible>
-  <transparent>false</transparent>
-  <width>1</width>
-  <marked>false</marked>
-  <animation>0</animation>
-  <name>26_SEM_ROI</name>
-  <source>26/0@1</source>
+  <width>2.0</width>
  </properties>
  <properties>
   <frame-color>#ff0000</frame-color>
@@ -61,34 +32,65 @@
   <source>31/0@1</source>
  </properties>
  <properties>
-  <frame-color>#ff0080</frame-color>
-  <fill-color>#ff0080</fill-color>
+  <frame-color>#0000ff</frame-color>
+  <fill-color>#0000ff</fill-color>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
-  <dither-pattern>I4</dither-pattern>
+  <dither-pattern>I5</dither-pattern>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
-  <width>1</width>
+  <width/>
   <marked>false</marked>
   <animation>0</animation>
-  <name>32_Si_p4nm</name>
-  <source>32/0@1</source>
+  <name>Text</name>
+  <source>10/0@1</source>
+ </properties>
+  <properties>
+    <animation>0</animation>
+    <marked>false</marked>
+    <source>20/0@1</source>
+    <name>Si N</name>
+    <visible>true</visible>
+    <dither-pattern>I6</dither-pattern>
+    <frame-color>#000000</frame-color>
+    <fill-color>#7000FF</fill-color>
+    <frame-brightness>0</frame-brightness>
+    <transparent>false</transparent>
+    <width>0.0</width>
+    <fill-brightness>0</fill-brightness>
+  </properties>
+ <properties>
+  <frame-color>#0000ff</frame-color>
+  <fill-color>#0000ff</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I2</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>Si N++</name>
+  <source>24/0@1</source>
  </properties>
  <properties>
-  <frame-color>#ff80a8</frame-color>
-  <fill-color>#ff80a8</fill-color>
+  <frame-color>#ff00ff</frame-color>
+  <fill-color>#ff00ff</fill-color>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
-  <dither-pattern>I9</dither-pattern>
+  <dither-pattern>I5</dither-pattern>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
   <width>1</width>
   <marked>false</marked>
   <animation>0</animation>
-  <name>33_Si_p2nm</name>
-  <source>33/0@1</source>
+  <name>26_SEM_ROI</name>
+  <source>26/0@1</source>
  </properties>
  <properties>
   <frame-color>#805000</frame-color>
@@ -134,6 +136,57 @@
   <animation>0</animation>
   <name>13_MLopen</name>
   <source>13/0@1</source>
+ </properties>
+ <properties>
+  <frame-color>#8086ff</frame-color>
+  <fill-color>#8086ff</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I17</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>VC</name>
+  <source>40/0@1</source>
+ </properties>
+ <properties>
+  <frame-color>#80a8ff</frame-color>
+  <fill-color>#80a8ff</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I15</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>2.0</width>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>M1</name>
+  <source>41/0@1</source>
+ </properties>
+ <properties>
+  <frame-color>#0080ff</frame-color>
+  <fill-color>#0080ff</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I5</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>M Heater</name>
+  <source>47/0@1</source>
  </properties>
  <properties>
   <frame-color>#8000ff</frame-color>
