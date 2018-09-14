@@ -28,7 +28,7 @@
   #                   Mustafa@ece.ubc.ca
   # September 2018
 
-  # Uncomment line 260 to enable path_to_waveguide, or just do it on your own.
+  # Uncomment line 263 to enable path_to_waveguide, or just do it on your own.
   
   
 # Import KLayout-Python API
@@ -46,7 +46,7 @@ class parameters():
   # parameter to sweep
   
   # number of devices (i.e. length of this array) MUST BE EVEN as this is interleaved routing configuration!
-  parameterToSweep = linspace_without_numpy(1000,3000,100)
+  parameterToSweep = linspace_without_numpy(1000,2000,50)
   parameterName = 'N'
   
   # contraDC device parameters (refer to PCell definition)
@@ -68,13 +68,13 @@ class parameters():
   wg_bend_radius = 5    # waveguide routes bend radius
   bezier = 1                   # Use adiabatic bezier bends (if 1)
   bezier_N = 0.2            # Bezier bend parameter
-  device_spacing = 10   # spacing between devices
-  wg_width = 0.5          # waveguide routes width
+  device_spacing = 7.3   # spacing between devices
+  wg_width = 1          # waveguide routes width
   taper_L = sbend_L     # keep this relation!
   GC_pitch = 127         # spacing between grating couplers array (for a single device)
   
-  wg_pitch = 3            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
-  route_down = -200   # FIXIT gonna define in a sec
+  wg_pitch = 13            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
+  route_down = -153-wg_bend_radius   # FIXIT gonna define in a sec
   route_up = 200        # FIXIT gonna define in a sec
 
   

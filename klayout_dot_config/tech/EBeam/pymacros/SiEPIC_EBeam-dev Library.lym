@@ -1363,8 +1363,8 @@ class DoubleBus_Ring(PCellDeclarationHelper):
     wg2 = Box(0, y_offset-w/2, w+2*r, y_offset+w/2)
     shapes(LayerSiN).insert(wg2)
 
+    from SiEPIC._globals import PIN_LENGTH as pin_length
     # Create the pins, as short paths:
-    pin_length = PIN_LENGTH # database units, = 0.2 microns
     
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
@@ -1470,9 +1470,9 @@ class TestStruct_DoubleBus_Ring(PCellDeclarationHelper):
 
 
 
-    lib = Library.library_by_name("SiEPIC-EBeam-dev")
+    lib = Library.library_by_name("EBeam-dev")
     if lib == None:
-      raise Exception("Unknown lib 'SiEPIC-EBeam PCells'")
+      raise Exception("Unknown lib 'EBeam-dev'")
 
     pcell_decl = lib.layout().pcell_declaration("DoubleBus_Ring");
     if pcell_decl == None:
@@ -1599,7 +1599,7 @@ class TestStruct_DoubleBus_Ring2(PCellDeclarationHelper):
     g = self.g
     y_ring = 127*3/2+r
 
-    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC-EBeam PCells", {"r": r, "w": wg_width, "g": g, "silayer": LayerSi, "devrec": self.devrec, "pinrec": self.pinrec })
+    pcell = ly.create_cell("DoubleBus_Ring", "EBeam-dev", {"r": r, "w": wg_width, "g": g, "silayer": LayerSi, "devrec": self.devrec, "pinrec": self.pinrec })
     print( "pcell: %s, %s" \
         % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
     t = Trans(Trans.R270, 10 / dbu, y_ring / dbu) 
