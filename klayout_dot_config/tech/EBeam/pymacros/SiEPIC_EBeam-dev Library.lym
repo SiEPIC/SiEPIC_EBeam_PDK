@@ -3579,7 +3579,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     deltaW1 = self.corrugation_width1/dbu
     deltaW2 = self.corrugation_width2/dbu
 
-    vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/dbu))+int(round(self.wg1_width/2/dbu))
+    vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/dbu))+int(round(self.wg1_width/2/dbu))+(-int(round(deltaW1))+int(round(deltaW2)))/2
     t = Trans(Trans.R0, 0,vertical_offset)
           
     for i in range(0,N_boxes+1):
