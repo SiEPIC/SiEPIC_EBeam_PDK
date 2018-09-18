@@ -45,35 +45,37 @@ def linspace_without_numpy(low, up, length):
 class parameters():
   # parameter to sweep
   
-  # number of devices (i.e. length of this array) MUST BE EVEN as this is interleaved routing configuration!
-  parameterToSweep = linspace_without_numpy(1000,2000,50)
-  parameterName = 'N'
   
+  # number of devices (i.e. length of this array) MUST BE EVEN as this is interleaved routing configuration!
+  Num_sweep = 50
+
   # contraDC device parameters (refer to PCell definition)
-  N = 1000
-  period = .318
-  g = .15
-  w1 = .56
-  w2 = .44
-  dW1 = .048
-  dW2 = .024
+  N =  linspace_without_numpy(1000,2000,Num_sweep)
+  period = linspace_without_numpy(.318,.318,Num_sweep)
+  g = linspace_without_numpy(.15,.15,Num_sweep)
+  w1 = linspace_without_numpy(.56,.56,Num_sweep)
+  w2 = linspace_without_numpy(.44,.44,Num_sweep)
+  dW1 = linspace_without_numpy(.048,.048,Num_sweep)
+  dW2 = linspace_without_numpy(.024,.024,Num_sweep)
   sine = 0
-  a = 2.7
+  a = linspace_without_numpy(2.7,2.7,Num_sweep)
+  
+  # routing and device placement parameters
+  
   sbend_L = 13
   sbend_R = 14
   sbend_H = 3
-
-  # routing and device placement parameters
+  
   x_offset = 70              # spacing between grating couplers columns
   wg_bend_radius = 5    # waveguide routes bend radius
   bezier = 1                   # Use adiabatic bezier bends (if 1)
   bezier_N = 0.2            # Bezier bend parameter
   device_spacing = 7.3   # spacing between devices
-  wg_width = 1          # waveguide routes width
+  wg_width = .5          # waveguide routes width
   taper_L = sbend_L     # keep this relation!
   GC_pitch = 127         # spacing between grating couplers array (for a single device)
   
-  wg_pitch = 13            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
+  wg_pitch = 5            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
   route_down = -153-wg_bend_radius   # FIXIT gonna define in a sec
   route_up = 200        # FIXIT gonna define in a sec
 
@@ -90,7 +92,7 @@ def contraDC_array():
   # grab layout parameters
   params = parameters()
     
-  print('Number of parameters to sweep: '+str(len(params.parameterToSweep)))
+  print('Number of parameters to sweep: '+str(params.Num_sweep))
 
   # Import functions from SiEPIC-Tools, and get technology details
   from SiEPIC.utils import select_paths, get_layout_variables
@@ -123,7 +125,7 @@ def contraDC_array():
   # Instatiate GC array sufficient enough for the number of devices to be swept
   x = params.x_offset
   t = Trans(Trans.R0, 0, 0)
-  cell.insert(CellInstArray(GC_imported, t, DPoint(0,GC_pitch/2).to_itype(dbu), DPoint(params.x_offset,0).to_itype(dbu), 8, len(params.parameterToSweep)/2))
+  cell.insert(CellInstArray(GC_imported, t, DPoint(0,GC_pitch/2).to_itype(dbu), DPoint(params.x_offset,0).to_itype(dbu), 8, params.Num_sweep/2))
    
   create_deviceArray()
   
@@ -141,138 +143,94 @@ def create_deviceArray():
 
    # Instatiate the devices array
   # Loop through the parameter sweep
-  for i in range(len(params.parameterToSweep)):
-    if params.parameterName == 'N':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = int(params.parameterToSweep[i]), 
-      period = params.period, g = params.g, w1 = params.w1, w2 = params.w2, dW1 = params.dW1, dW2 = params.dW2, sine = params.sine, 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'period':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.parameterToSweep[i], g = params.g, w1 = params.w1, w2 = params.w2, dW1 = params.dW1, dW2 = params.dW2, sine = params.sine, 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'g':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.period, g = params.parameterToSweep[i], w1 = params.w1, w2 = params.w2, dW1 = params.dW1, dW2 = params.dW2, sine = params.sine, 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'w1':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.period, g = params.g, w1 = params.parameterToSweep[i], w2 = params.w2, dW1 = params.dW1, dW2 = params.dW2, sine = params.sine, 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'w2':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.period, g = params.g, w1 = params.w1, w2 = params.parameterToSweep[i], dW1 = params.dW1, dW2 = params.dW2, sine = params.sine, 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'dW1':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.period, g = params.g, w1 = params.w1, w2 = params.w2, dW1 = params.parameterToSweep[i], dW2 = params.dW2, sine = params.sine, 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'dW2':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.period, g = params.g, w1 = params.w1, w2 = params.w2, dW1 = params.dW1, dW2 = params.parameterToSweep[i], sine = params.sine, 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'sine':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.period, g = params.g, w1 = params.w1, w2 = params.w2, dW1 = params.dW1, dW2 = params.dW2, sine = params.parameterToSweep[i], 
-      a = params.a, sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    elif params.parameterName == 'a':
-      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*len(params.parameterToSweep)/2, y_pos = 0, N = params.N, 
-      period = params.period, g = params.g, w1 = params.w1, w2 = params.w2, dW1 = params.dW1, dW2 = params.dW2, sine = params.sine, 
-      a = params.parameterToSweep[i], sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
-    
-    
-    # Interleaved compact routing
-    
-    # Regular routing points if device ID (i) is even
-    if i % 2 == 0:
-      initial_x = params.x_offset*(len(params.parameterToSweep)-2-i)/2
-      device_x1 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)+params.sbend_H      
-      device_x2 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)-params.w1/2-params.g-params.w2/2
-      device_y = -params.taper_L-params.sbend_L
+  for i in range(params.Num_sweep):
+      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*params.Num_sweep/2, y_pos = 0, N = int(params.N[i]), 
+      period = params.period[i], g = params.g[i], w1 = params.w1[i], w2 = params.w2[i], dW1 = params.dW1[i], dW2 = params.dW2[i], sine = params.sine, 
+      a = params.a[i], sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
       
-      if (params.parameterName != 'N' and params.parameterName != 'period'):
-        device_y_top = params.N*params.period+params.period/2+params.sbend_L+params.taper_L
-      elif(params.parameterName == 'N'):
-        device_y_top = int(params.parameterToSweep[i])*params.period+params.period/2+params.sbend_L+params.taper_L
-      elif(params.parameterName == 'period'):
-        device_y_top = params.N*params.parameterToSweep[i]+params.parameterToSweep[i]/2+params.sbend_L+params.taper_L
-
-      # GC4 to device - downward routing
-      route_y4 = params.route_down+params.GC_pitch-params.wg_pitch*i*2-params.wg_pitch
-      dpath = DPath([DPoint(0,0), DPoint(params.wg_bend_radius,0), DPoint(params.wg_bend_radius,route_y4),
-                               DPoint(device_x1,route_y4),DPoint(device_x1,device_y)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 0))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-       
-      # GC3 to device - downward routing
-      route_y3 = params.route_down-params.wg_pitch*i*2
-      dpath = DPath([DPoint(0,0), DPoint(params.wg_pitch + params.wg_bend_radius,0), DPoint(params.wg_pitch+params.wg_bend_radius, route_y3),
-                               DPoint(device_x2,route_y3),DPoint(device_x2,device_y-params.GC_pitch)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+      # Interleaved compact routing
       
-      # GC2 to device - upward routing (measurement label here!)
-      route_y2 = params.route_up+params.wg_pitch*i*2
-      dpath = DPath([DPoint(0,0), DPoint(params.wg_pitch + params.wg_bend_radius*2,0), DPoint(params.wg_pitch+params.wg_bend_radius*2, route_y2),
-                               DPoint(device_x2,route_y2),DPoint(device_x2,device_y_top-params.GC_pitch*2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch*2))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+      # Regular routing points if device ID (i) is even
+      if i % 2 == 0:
+        initial_x = params.x_offset*(params.Num_sweep-2-i)/2
+        device_x1 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)+params.sbend_H      
+        device_x2 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)-params.w1[i]/2-params.g[i]-params.w2[i]/2
+        device_y = -params.taper_L-params.sbend_L
+        
+        device_y_top = params.N[i]*params.period[i]+params.period[i]/2+params.sbend_L+params.taper_L
+  
+       # GC4 to device - downward routing
+        route_y4 = params.route_down+params.GC_pitch-params.wg_pitch*i*2-params.wg_pitch
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_bend_radius,0), DPoint(params.wg_bend_radius,route_y4),
+                                 DPoint(device_x1,route_y4),DPoint(device_x1,device_y)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 0))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+         
+        # GC3 to device - downward routing
+        route_y3 = params.route_down-params.wg_pitch*i*2
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_pitch + params.wg_bend_radius,0), DPoint(params.wg_pitch+params.wg_bend_radius, route_y3),
+                                 DPoint(device_x2,route_y3),DPoint(device_x2,device_y-params.GC_pitch)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # GC2 to device - upward routing (measurement label here!)
+        route_y2 = params.route_up+params.wg_pitch*i*2
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_pitch + params.wg_bend_radius*2,0), DPoint(params.wg_pitch+params.wg_bend_radius*2, route_y2),
+                                 DPoint(device_x2,route_y2),DPoint(device_x2,device_y_top-params.GC_pitch*2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch*2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
+        t = Trans(Trans.R0, to_itype(initial_x,dbu),to_itype(params.GC_pitch*2,dbu) )
+        text = Text ("opt_in_TE_1550_device_contraDC%sN%speriod%sg%swa%swb%sdwa%sdwb%ssine%sa" % (params.N[i],params.period[i],params.g[i],params.w1[i],params.w2[i],params.dW1[i],params.dW2[i],params.sine,params.a[i]),t)
+        #text = Text ("opt_in_TE_1550_device_contraDC%f" % (int(params.N)),t)
+        shape = cell.shapes(TextLayerN).insert(text)
+        shape.text_size = 1.5/dbu
       
-      # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-      t = Trans(Trans.R0, to_itype(initial_x,dbu),to_itype(params.GC_pitch*2,dbu) )
-      text = Text ("opt_in_TE_1550_device_contraDC%sN%speriod%sg%swa%swb%sdwa%sdwb%ssine%sa" % (params.N,params.period,params.g,params.w1,params.w2,params.dW1,params.dW2,params.sine,params.a),t)
-      #text = Text ("opt_in_TE_1550_device_contraDC%f" % (int(params.N)),t)
-      shape = cell.shapes(TextLayerN).insert(text)
-      shape.text_size = 1.5/dbu
-    
-      # GC1 to device - upward routing
-      route_y4 = params.route_up-params.GC_pitch+params.wg_pitch*i*2+params.wg_pitch
-      dpath = DPath([DPoint(0,0), DPoint(params.wg_bend_radius*2,0), DPoint(params.wg_bend_radius*2,route_y4),
-                               DPoint(device_x1,route_y4),DPoint(device_x1,device_y_top-params.GC_pitch*3)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch*3))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-    
+        # GC1 to device - upward routing
+        route_y4 = params.route_up-params.GC_pitch+params.wg_pitch*i*2+params.wg_pitch
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_bend_radius*2,0), DPoint(params.wg_bend_radius*2,route_y4),
+                                 DPoint(device_x1,route_y4),DPoint(device_x1,device_y_top-params.GC_pitch*3)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch*3))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+      
     
     # Backwards routing points if device ID (i) is odd
-    else:
-      initial_x = params.x_offset*(len(params.parameterToSweep)-2-i)/2
-      GC_x = params.x_offset/2
-      device_x1 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)+params.sbend_H
-      device_x2 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)-params.w1/2-params.g-params.w2/2
-      device_y = -params.taper_L-params.sbend_L
-      
-      if (params.parameterName != 'N' and params.parameterName != 'period'):
-        device_y_top = params.N*params.period+params.period/2+params.sbend_L+params.taper_L
-      elif(params.parameterName == 'N'):
-        device_y_top = int(params.parameterToSweep[i])*params.period+params.period/2+params.sbend_L+params.taper_L
-      elif(params.parameterName == 'period'):
-        device_y_top = params.N*params.parameterToSweep[i]+params.parameterToSweep[i]/2+params.sbend_L+params.taper_L
+      else:
+        initial_x = params.x_offset*(params.Num_sweep-2-i)/2
+        GC_x = params.x_offset/2
+        device_x1 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)+params.sbend_H
+        device_x2 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)-params.w1[i]/2-params.g[i]-params.w2[i]/2
+        device_y = -params.taper_L-params.sbend_L
   
-      # GC4 to device - downward routing
-      route_y4 = params.route_down+params.GC_pitch/2-params.wg_pitch*i*2
-      dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2,route_y4),
-                               DPoint(device_x2,route_y4),DPoint(device_x2,device_y-params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch/2))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-      
-      # GC3 to device - downward routing
-      route_y3 = params.route_down+params.GC_pitch/2-params.wg_pitch*i*2-params.wg_pitch-params.GC_pitch
-      dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2-params.wg_pitch,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2-params.wg_pitch,route_y3),
-                               DPoint(device_x1,route_y3),DPoint(device_x1,device_y-params.GC_pitch/2-params.GC_pitch)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 3*params.GC_pitch/2))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-      
-      # GC2 to device - upward routing (measurement label here!)
-      route_y2 = params.route_up+params.wg_pitch*i*2-params.GC_pitch/2+params.wg_pitch
-      dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2-params.wg_pitch,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2-params.wg_pitch,route_y2),
-                               DPoint(device_x1,route_y2),DPoint(device_x1,device_y_top-5*params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 5*params.GC_pitch/2))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-      
-      # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-      t = Trans(Trans.R0, to_itype(initial_x+GC_x,dbu),to_itype(5*params.GC_pitch/2,dbu) )
-      text = Text ("opt_in_TE_1550_device_contraDC%sN%speriod%sg%swa%swb%sdwa%sdwb%ssine%sa" % (params.N,params.period,params.g,params.w1,params.w2,params.dW1,params.dW2,params.sine,params.a),t)
-      #text = Text ("opt_in_TE_1550_device_contraDC%f" % (int(params.N)),t)
-      shape = cell.shapes(TextLayerN).insert(text)
-      shape.text_size = 1.5/dbu
-      
-      # GC1 to device
-      route_y1 = params.route_up+params.wg_pitch*i*2-params.GC_pitch/2+params.wg_pitch-params.GC_pitch-params.wg_pitch
-      dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2,route_y1),
-                               DPoint(device_x2,route_y1),DPoint(device_x2,device_y_top-7*params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 7*params.GC_pitch/2))
-      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        device_y_top = params.N[i]*params.period[i]+params.period[i]/2+params.sbend_L+params.taper_L
+  
+        # GC4 to device - downward routing
+        route_y4 = params.route_down+params.GC_pitch/2-params.wg_pitch*i*2
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2,route_y4),
+                                 DPoint(device_x2,route_y4),DPoint(device_x2,device_y-params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # GC3 to device - downward routing
+        route_y3 = params.route_down+params.GC_pitch/2-params.wg_pitch*i*2-params.wg_pitch-params.GC_pitch
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2-params.wg_pitch,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2-params.wg_pitch,route_y3),
+                                 DPoint(device_x1,route_y3),DPoint(device_x1,device_y-params.GC_pitch/2-params.GC_pitch)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 3*params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # GC2 to device - upward routing (measurement label here!)
+        route_y2 = params.route_up+params.wg_pitch*i*2-params.GC_pitch/2+params.wg_pitch
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2-params.wg_pitch,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2-params.wg_pitch,route_y2),
+                                 DPoint(device_x1,route_y2),DPoint(device_x1,device_y_top-5*params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 5*params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
+        t = Trans(Trans.R0, to_itype(initial_x+GC_x,dbu),to_itype(5*params.GC_pitch/2,dbu) )
+        text = Text ("opt_in_TE_1550_device_contraDC%sN%speriod%sg%swa%swb%sdwa%sdwb%ssine%sa" % (params.N[i],params.period[i],params.g[i],params.w1[i],params.w2[i],params.dW1[i],params.dW2[i],params.sine,params.a[i]),t)
+        #text = Text ("opt_in_TE_1550_device_contraDC%f" % (int(params.N)),t)
+        shape = cell.shapes(TextLayerN).insert(text)
+        shape.text_size = 1.5/dbu
+        
+        # GC1 to device
+        route_y1 = params.route_up+params.wg_pitch*i*2-params.GC_pitch/2+params.wg_pitch-params.GC_pitch-params.wg_pitch
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2,route_y1),
+                                 DPoint(device_x2,route_y1),DPoint(device_x2,device_y_top-7*params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 7*params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
       
 
   # Convert the paths to waveguides (very time consuming!)
