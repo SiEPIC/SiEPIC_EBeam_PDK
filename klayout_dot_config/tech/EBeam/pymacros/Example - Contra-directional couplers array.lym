@@ -28,7 +28,7 @@
   #                   Mustafa@ece.ubc.ca
   # September 2018
 
-  # Uncomment line 263 to enable path_to_waveguide, or just do it on your own.
+  # Uncomment path_to_waveguide to convert everything to waveguides, or just do it on your own from SiEPIC Tools menu.
   
   
 # Import KLayout-Python API
