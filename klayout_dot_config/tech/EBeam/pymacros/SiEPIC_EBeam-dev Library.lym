@@ -3722,7 +3722,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     half_w = w/2
     gap = int(round(self.gap/dbu))
     
-    vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/dbu))+int(round(self.wg1_width/2/dbu))
+    vertical_offset = int(round(self.wg2_width/2/dbu))+2*gap+int(round(self.wg1_width/2/dbu))+int(round(w))
 
     t = Trans(Trans.R0, 0,vertical_offset)
           
@@ -3733,13 +3733,13 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
         box1_a = Box(x, -half_w1, x + box_width, half_w1)
         shapes(LayerSiN).insert(box1_a)
 
-        boxw_a = Box(x+grating_period, -half_w1-gap/3, x + 2*grating_period, -w-half_w1-gap/3,)
+        boxw_a = Box(x+grating_period, -half_w1-gap, x + 2*grating_period, -w-half_w1-gap,)
         shapes(LayerSiN).insert(boxw_a)
                 
         box2_a = Box(x+grating_period, -half_w2, x + grating_period+box_width, half_w2).transformed(t)
         shapes(LayerSiN).insert(box2_a)
         
-        boxw_a = Box(x+grating_period, half_w2+gap/3, x + 2*grating_period, w+half_w2+gap/3,).transformed(t)
+        boxw_a = Box(x+grating_period, half_w2+gap, x + 2*grating_period, w+half_w2+gap,).transformed(t)
         shapes(LayerSiN).insert(boxw_a)
         
       else:
@@ -3747,7 +3747,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
         box1_b = Box(x, -half_w1, x + box_width, half_w1)
         shapes(LayerSiN).insert(box1_b)
         
-        boxw_a = Box(x+grating_period, half_w1+gap/3, x +2*grating_period, w+half_w1+gap/3,)
+        boxw_a = Box(x+grating_period, half_w1+gap, x +2*grating_period, w+half_w1+gap,)
         shapes(LayerSiN).insert(boxw_a)
         
         box2_b = Box(x+grating_period, -half_w2, x +grating_period+ box_width, half_w2).transformed(t)
@@ -3850,8 +3850,8 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("Apodized Bragg Grating", ebeam_bragg_apodized())
     self.layout().register_pcell("Contra-Directional Coupler", Contra_DC())
     self.layout().register_pcell("Contra-Directional Coupler (coupler apodized)", Contra_DC_couplerApodized())
-    self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength)", Contra_DC_SWG())
-    self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength segmented)", Contra_DC_SWG_segmented())
+    #self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength)", Contra_DC_SWG())
+    #self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength segmented)", Contra_DC_SWG_segmented())
     
     import PCMSpiral_PCells as spirals
     self.layout().register_pcell("Spiral_BraggGrating", spirals.PCMSpiralBraggGrating())
