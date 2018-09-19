@@ -3858,7 +3858,8 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("Spiral_BraggGrating_Slab", spirals.PCMSpiralBraggGratingSlab())
     self.layout().register_pcell("Spiral_NoCenterBraggGrating", spirals.Spiral_NoCenterBraggGrating())
     self.layout().register_pcell("Spiral_CDC_BraggGrating", spirals.CDCSpiralBraggGrating())
-    self.layout().register_pcell("SpiralWaveguide", spirals.SpiralWaveguide())
+    self.layout().register_pcell("SpiralWaveguide", spirals.SpiralWaveguide()) 
+    self.layout().register_pcell("Spiral", spirals.spiral()) 
 
     # only need to reload if we are debugging, and are making changes to the code
     if sys.version_info[0] == 3:
