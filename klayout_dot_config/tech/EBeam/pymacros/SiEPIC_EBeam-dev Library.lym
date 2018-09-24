@@ -163,7 +163,7 @@ class ebeam_dc_halfring_arc(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
@@ -514,10 +514,6 @@ class spiral(PCellDeclarationHelper):
     print("spiral done.")
 
 
-
-
-
-
 class cavity_hole(PCellDeclarationHelper):
   """
   The PCell declaration for the cavity hole.
@@ -536,7 +532,7 @@ class cavity_hole(PCellDeclarationHelper):
     self.param("y", self.TypeDouble, "y coordinate", default = 0)
     self.param("radius", self.TypeDouble, "hole radius", default = 10)
     self.param("gap", self.TypeDouble, "half of the gap between surrounding holes (microns)", default = 2)
-    self.param("LayerSi", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("LayerSi", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     
@@ -633,7 +629,7 @@ class strip_to_slot(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
@@ -773,7 +769,7 @@ class fswgc(PCellDeclarationHelper):
     self.param("theta_c", self.TypeDouble, "Insertion Angle (deg)", default = -31.0)
     
     # Layer parameters
-    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
@@ -971,7 +967,7 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
     self.param("wg_width_taper", self.TypeDouble, "Waveguide width at strip nanotaper end (microns)", default = 0.06)     
     self.param("duty_strip", self.TypeDouble, "SWG duty cycle at strip end (0 to 1)", default = 0.500)     
     self.param("duty_swg", self.TypeDouble, "SWG duty cycle at SWG end (0 to 1)", default = 0.700)     
-    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
@@ -1055,6 +1051,7 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
+    '''
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
@@ -1070,18 +1067,14 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
       (self.length, self.period_swg, (self.period_strip), self.wg_width_swg, self.wg_width_strip, self.duty_swg, self.duty_strip), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-
+    blabla
+    '''
     
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     points = [pya.Point(0,0), pya.Point(length, 0)]
     path = pya.Path(points,w)
     path = pya.Path(points,w*3)
     shapes(LayerDevRecN).insert(path.simple_polygon())
-
-
-
-
-
 
 class SWG_waveguide(PCellDeclarationHelper):
   """
@@ -1099,7 +1092,7 @@ class SWG_waveguide(PCellDeclarationHelper):
     self.param("target_period", self.TypeDouble, "Target period (microns)", default = 0.200)     
     self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.5)     
     self.param("duty", self.TypeDouble, "Duty Cycle (0 to 1)", default = 0.7)
-    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
@@ -1308,7 +1301,7 @@ class DoubleBus_Ring(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("s", self.TypeShape, "", default = DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
@@ -1420,7 +1413,7 @@ class TestStruct_DoubleBus_Ring(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("s", self.TypeShape, "", default = DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
@@ -1559,7 +1552,7 @@ class TestStruct_DoubleBus_Ring2(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("s", self.TypeShape, "", default = DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
@@ -1660,7 +1653,7 @@ class Waveguide_Route_simple(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("path", self.TypeShape, "", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5)  )
     self.param("radius", self.TypeDouble, "Radius", default = 5)
 
@@ -1742,7 +1735,7 @@ class Waveguide_Route(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("path", self.TypeShape, "", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5)  )
     self.param("radius", self.TypeDouble, "Radius", default = 5)
 
@@ -1942,7 +1935,7 @@ class Waveguide_Arc(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("wg_width", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("start_angle", self.TypeDouble, "Start Angle", default = 0)
@@ -2070,7 +2063,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("bus_radius", self.TypeDouble, "Bus Radius", default = 5)
     self.param("gap", self.TypeDouble, "Gap", default = 0.2)
@@ -2263,8 +2256,8 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
-    self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = [TECHNOLOGY['31_Si_p6nm']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = TECHNOLOGY['31_Si_p6nm'])
     self.param("radius", self.TypeDouble, "Radius (um)", default = 25)
     self.param("gap", self.TypeDouble, "Gap (um)", default = 0.28)
     self.param("bus_width", self.TypeDouble, "Bus Width (um)", default = 0.45)
@@ -2476,7 +2469,7 @@ class Bezier_Bend(PCellDeclarationHelper):
     self.param("bezier_num", self.TypeDouble, "Bezier factor", default = 25)     
     self.param("eff_r", self.TypeDouble, "Effective bend radius (microns)", default = 5)
     self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.500)     
-    self.param("layer", self.TypeLayer, "Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
@@ -2591,7 +2584,7 @@ class Tapered_Ring(PCellDeclarationHelper):
     self.param("w_top", self.TypeDouble, "Top width", default = .5)
     self.param("w_bot", self.TypeDouble, "Bottom width (&gt;Top Width)", default = 2)
     self.param("radius", self.TypeDouble, "Radius", default = 10)
-    self.param("LayerSi", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("LayerSi", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 
@@ -3850,8 +3843,8 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("Apodized Bragg Grating", ebeam_bragg_apodized())
     self.layout().register_pcell("Contra-Directional Coupler", Contra_DC())
     self.layout().register_pcell("Contra-Directional Coupler (coupler apodized)", Contra_DC_couplerApodized())
-    #self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength)", Contra_DC_SWG())
-    #self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength segmented)", Contra_DC_SWG_segmented())
+    self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength)", Contra_DC_SWG())
+    self.layout().register_pcell("Contra-Directional Coupler (Sub-wavelength segmented)", Contra_DC_SWG_segmented())
     
     import PCMSpiral_PCells as spirals
     self.layout().register_pcell("Spiral_BraggGrating", spirals.PCMSpiralBraggGrating())
