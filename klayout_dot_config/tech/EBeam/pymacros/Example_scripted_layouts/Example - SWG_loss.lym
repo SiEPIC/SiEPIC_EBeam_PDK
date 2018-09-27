@@ -104,7 +104,7 @@ def draw_layout():
     print(i)
     x_pos = 0
     y_pos = y_pos+2*int(round(p.ly_spacing/dbu))
-    pcell = ly.create_cell("SWG_waveguide", "EBeam-dev", { "length": p.wg_length, "target_period": p.wg_period, "wg_width": p.wg_width, "duty": p.wg_duty} )
+    pcell = ly.create_cell("SWG_waveguide", "EBeam-dev", { "length": p.wg_length/dbu, "target_period": p.wg_period/dbu, "wg_width": p.wg_width/dbu, "duty": p.wg_duty/dbu} )
     t = Trans(Trans.R0, x_pos, y_pos)
     cell.insert(CellInstArray(pcell.cell_index(),t))
     
