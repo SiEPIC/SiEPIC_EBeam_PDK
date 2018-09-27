@@ -98,4 +98,13 @@
 	    <offset>-0.625</offset>
 	  </component>
 	</waveguide>
+	<waveguide>
+	  <name>Rib (90 nm slab) TE 1550 nm, w=500 nm</name>
+      <radius>15.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
 </waveguides>
