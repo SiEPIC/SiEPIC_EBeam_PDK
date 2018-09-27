@@ -1365,18 +1365,20 @@ class SiEPIC_EBeam(Library):
 # windows only allows for a fixed width, short description 
     self.description = ""
 # OSX does a resizing:
-    self.description = "Components &amp; models"
+    self.description = "Components with models"
 
-
-#    technology = 'SiEPIC-EBeam'
-    print("Initializing '%s' Library." % library)
   
-    import os
-    print(" reading: %s" % os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-EBeam.gds"))
-    self.layout().read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "SiEPIC-EBeam.gds"))
-#    [self.layout().rename_cell(i, self.layout().cell_name(i).replace('_', ' ')) for i in range(0, self.layout().cells())]
+    # Import all the GDS files from the tech folder "gds"
+    import os, fnmatch
+    dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/mature")
+    search_str = '*' + '.gds'
+    for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+        for filename in fnmatch.filter(filenames, search_str):
+            file1=os.path.join(root, filename)
+            print(" - reading %s" % file1 )
+            self.layout().read(file1)
     
-    
+       
     # Create the PCell declarations
 
     self.layout().register_pcell("ebeam_dc_te1550", ebeam_dc_te1550())
