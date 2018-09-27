@@ -89,8 +89,8 @@
   <width>1</width>
   <marked>false</marked>
   <animation>0</animation>
-  <name>26_SEM_ROI</name>
-  <source>26/0@1</source>
+  <name>SEM</name>
+  <source>200/0@1</source>
  </properties>
  <properties>
   <frame-color>#805000</frame-color>
