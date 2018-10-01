@@ -24,7 +24,8 @@ Chip1 process:
  
 Process Layers
  - Si 1/0
- - M Heater: 47/0
+ - Si N++: 24/0
+ - Metal (12_M2): 12/0
  - Text: for automated measurement labels
 
 '''
@@ -32,21 +33,36 @@ Process Layers
 # Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
 # http://klayout.de/doc/manual/drc_basic.html
 
-report("DRC ELEC463-2018 Chip1")
+report("DRC ELEC463-2018 Chip2")
 
 # Layers:
 LayerSi=input(1,0)
-LayerM=input(47,0)
+LayerM=input(12,0)
+LayerNpp=input(24,0)
 DevRec=input(68,0)
 LayerFP=input(99)
+
+# minimum feature size:
 
 # minimum feature size of 60nm
 LayerSi.width(0.06, angle_limit(80)).output("Si_width","Si minimum feature size violation; min 60 nm")
 LayerSi.space(0.06).output("Si_space","Si minimum space violation; min 60 nm")
 
 # minimum feature size of 3 µm
-LayerM.width(3.0, angle_limit(80)).output("M_width","Si minimum feature size violation; min 3 µm")
-LayerM.space(3.0).output("M_space","Metal minimum space violation; min 3 µm")
+LayerM.width(3.0, angle_limit(80)).output("M_width","Metal minimum feature size violation; min 3 µm")
+LayerM.space(3.0).output("M_space","Metal minimum space violation; min 5 µm")
+
+# minimum feature size of 3 µm
+LayerNpp.width(3.0, angle_limit(80)).output("Npp_width","Doping minimum feature size violation; min 3 µm")
+LayerNpp.space(5.0).output("Npp_space","Doping minimum space violation; min 5 µm")
+
+# minimum separation:
+LayerM.separation(LayerSi, 4.0).output("M_Si_separation","Metal-Si minimum separation violation; min 4 µm")
+LayerNpp.separation(LayerSi, 4.0).output("Npp_Si_separation","Npp-Si minimum separation violation; min 4 µm")
+
+# minimum overlap:
+LayerM.overlap(LayerNpp, 7.0).output("M_Npp_overlap","Metal-Npp minimum overlap violation; min 7 µm")
+
 
 # make sure the devices are within the floor plan layer region;
 LayerSi.outside(LayerFP).output("Boundary","devices are out of boundary")
