@@ -254,12 +254,12 @@ def create_contraDC(x_pos = 0, y_pos = 0, N = 1000, period = .242, g = .15, w1 =
   
   # contraDC PCell
   pcell = ly.create_cell("Contra-Directional Coupler (Sub-wavelength)", "EBeam-dev", { "number_of_periods": N, "grating_period": period, "gap": g, "wg1_width": w1, "wg2_width": w2, "corrugation_width1": dW1, "corrugation_width2": dW2 , "sinusoidal": sine, "a": a} )
-  t = Trans(Trans.R90, to_itype(x_pos,dbu), (y_pos+period/4+swgtaper_L)/dbu)
+  t = Trans(Trans.R90, to_itype(x_pos,dbu), to_itype(y_pos+period/4+swgtaper_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
-
+  
   # SWG-strip taper w1 PCells (top and bottom)
   pcell = ly.create_cell("SWG_to_strip_waveguide", "EBeam-dev", {"length": swgtaper_L,"taper_fraction": 1.0, "period_strip":swgtaper_period, "period_swg":swgtaper_period,"wg_width_taper":swgtaper_wswg,"wg_width_strip":w1,"wg_width_swg":swgtaper_w1stop,"duty_swg":0.5} )
-  t = Trans(Trans.R270, to_itype(x_pos,dbu), (y_pos+swgtaper_L)/dbu)
+  t = Trans(Trans.R270, to_itype(x_pos,dbu), to_itype(y_pos+swgtaper_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
   
   pcell = ly.create_cell("SWG_to_strip_waveguide", "EBeam-dev", {"length": swgtaper_L,"taper_fraction": 1.0, "period_strip":swgtaper_period, "period_swg":swgtaper_period,"wg_width_taper":swgtaper_wswg,"wg_width_strip":w1,"wg_width_swg":swgtaper_w1stop,"duty_swg":0.5} )
@@ -268,7 +268,7 @@ def create_contraDC(x_pos = 0, y_pos = 0, N = 1000, period = .242, g = .15, w1 =
 
   # SWG-strip taper w2 PCells (top and bottom)
   pcell = ly.create_cell("SWG_to_strip_waveguide", "EBeam-dev", {"length": swgtaper_L,"taper_fraction": 1.0, "period_strip":swgtaper_period, "period_swg":swgtaper_period,"wg_width_taper":swgtaper_wswg,"wg_width_strip":w2,"wg_width_swg":swgtaper_w2stop,"duty_swg":0.5} )
-  t = Trans(Trans.R270, to_itype(x_pos-w1/2-g-w2/2,dbu), (y_pos+swgtaper_L)/dbu)
+  t = Trans(Trans.R270, to_itype(x_pos-w1/2-g-w2/2,dbu), to_itype(y_pos+swgtaper_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
   
   pcell = ly.create_cell("SWG_to_strip_waveguide", "EBeam-dev", {"length": swgtaper_L,"taper_fraction": 1.0, "period_strip":swgtaper_period, "period_swg":swgtaper_period,"wg_width_taper":swgtaper_wswg,"wg_width_strip":w2,"wg_width_swg":swgtaper_w2stop,"duty_swg":0.5} )
@@ -277,30 +277,30 @@ def create_contraDC(x_pos = 0, y_pos = 0, N = 1000, period = .242, g = .15, w1 =
     
   # S-Bend PCells (top and bottom)
   pcell = ly.create_cell("Waveguide_SBend", "EBeam", { "length": sbend_L, "height": sbend_H, "wg_width": w1, "radius": sbend_R} )
-  t = Trans(Trans.R90, to_itype(x_pos+sbend_H,dbu), (y_pos-sbend_L)/dbu)
+  t = Trans(Trans.R90, to_itype(x_pos+sbend_H,dbu), to_itype(y_pos-sbend_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
-  t = Trans(Trans.R270.M45, (x_pos)/dbu, (y_pos+N*period+period+period/2+2*swgtaper_L)/dbu)
+  t = Trans(Trans.R270.M45, (x_pos)/dbu, to_itype(y_pos+N*period+period+period/2+2*swgtaper_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
   
   # Waveguide straight PCells (top and bottom)
   pcell = ly.create_cell("Waveguide_Straight", "EBeam", { "wg_length": sbend_L/dbu, "wg_width": w2/dbu} )
-  t = Trans(Trans.R90, to_itype(x_pos-w1/2-g-w2/2,dbu), (y_pos-sbend_L/2)/dbu)
+  t = Trans(Trans.R90, to_itype(x_pos-w1/2-g-w2/2,dbu), to_itype(y_pos-sbend_L/2,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
-  t = Trans(Trans.R270.M45, to_itype(x_pos-w1/2-g-w2/2,dbu), (y_pos+N*period+period/2+period+sbend_L/2+2*swgtaper_L)/dbu)
+  t = Trans(Trans.R270.M45, to_itype(x_pos-w1/2-g-w2/2,dbu), to_itype(y_pos+N*period+period/2+period+sbend_L/2+2*swgtaper_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
   
   # Waveguide taper PCells (top and bottom, left)
   pcell = ly.create_cell("ebeam_taper_te1550", "EBeam", { "wg_length": taper_L, "wg_width1": wg_width, "wg_width2": w2} )
-  t = Trans(Trans.R90, to_itype(x_pos-w1/2-g-w2/2,dbu), (y_pos-2*sbend_L)/dbu)
+  t = Trans(Trans.R90, to_itype(x_pos-w1/2-g-w2/2,dbu), to_itype(y_pos-2*sbend_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
-  t = Trans(Trans.R270, to_itype(x_pos-w1/2-g-w2/2,dbu), (y_pos+N*period+period/2+period+2*sbend_L+2*swgtaper_L)/dbu)
+  t = Trans(Trans.R270, to_itype(x_pos-w1/2-g-w2/2,dbu), to_itype(y_pos+N*period+period/2+period+2*sbend_L+2*swgtaper_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
 
   # Waveguide taper PCells (top and bottom, right)
   pcell = ly.create_cell("ebeam_taper_te1550", "EBeam", { "wg_length": taper_L, "wg_width1": wg_width, "wg_width2": w1} )
-  t = Trans(Trans.R90, to_itype(x_pos+sbend_H,dbu), (y_pos-2*sbend_L)/dbu)
+  t = Trans(Trans.R90, to_itype(x_pos+sbend_H,dbu), to_itype(y_pos-2*sbend_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
-  t = Trans(Trans.R270, to_itype(x_pos+sbend_H,dbu), (y_pos+N*period+period+period/2+2*sbend_L+2*swgtaper_L)/dbu)
+  t = Trans(Trans.R270, to_itype(x_pos+sbend_H,dbu), to_itype(y_pos+N*period+period+period/2+2*sbend_L+2*swgtaper_L,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
 
   
