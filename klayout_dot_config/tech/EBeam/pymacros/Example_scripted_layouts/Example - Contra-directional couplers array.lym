@@ -76,8 +76,8 @@ class parameters():
   GC_pitch = 127         # spacing between grating couplers array (for a single device)
   
   wg_pitch = 5            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
-  route_down = -153-wg_bend_radius   # FIXIT gonna define in a sec
-  route_up = 200        # FIXIT gonna define in a sec
+  route_up = 250        # y-space (from top GC) for upward routing, increase if length of the contraDC is too exceeding the length of routes
+  route_down = -153-wg_bend_radius   # y-space (from bottom GC) for downward routing, do not change this one
 
   
   
