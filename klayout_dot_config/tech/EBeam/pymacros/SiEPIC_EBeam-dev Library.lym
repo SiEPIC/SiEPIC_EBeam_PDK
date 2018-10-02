@@ -1151,7 +1151,7 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
     # Draw the Bragg grating:
     
     x = - self.period_swg * self.duty_swg / 2 / dbu
-    for i in range(0,N_boxes+1):
+    for i in range(0,N_boxes):
       local_duty = 1.0 * (N_boxes - i) / N_boxes * self.duty_swg + 1.0*i / N_boxes * self.duty_strip 
       local_period = (1.0*(N_boxes - i) / N_boxes * self.period_swg + 1.0*i / N_boxes * self.period_strip )/dbu
       local_wg_width = (1.0*(N_boxes - i) / N_boxes * self.wg_width_swg + 1.0*i / N_boxes * self.wg_width_strip  ) /dbu
@@ -1160,12 +1160,13 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
       local_box_width = int(round(local_period*local_duty))
 #      x = int(round((i * local_period - local_box_width/2)))
       box1 = Box(x, -local_wg_width/2, x + local_box_width, local_wg_width/2)
-      shapes(LayerSiN).insert(box1)
+      if i != 0:
+        shapes(LayerSiN).insert(box1)
       x = x + int(round((local_period)))
-#    i = i + 1
-#    x = int(round((i * grating_period)))
-#    box1 = Box(x, -half_w, x + box_width, half_w)
-#    shapes(LayerSiN).insert(box1)
+  #    i = i + 1
+  #    x = int(round((i * grating_period)))
+  #    box1 = Box(x, -half_w, x + box_width, half_w)
+  #    shapes(LayerSiN).insert(box1)
     length = self.length / dbu
 
     # Triangle
@@ -3718,8 +3719,8 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     half_w1 = w1/2
     w2 = self.wg2_width / dbu
     half_w2 = w2/2
-    deltaW1_max = self.corrugation_width1/dbu
-    deltaW2_max = self.corrugation_width2/dbu
+    deltaW1_max = to_itype(self.corrugation_width1,dbu)
+    deltaW2_max = to_itype(self.corrugation_width2,dbu)
 
 
           
@@ -3730,7 +3731,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
       deltaW1 = deltaW1_max*profileFunction
       deltaW2 = deltaW2_max*profileFunction
       
-      vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/dbu))+int(round(self.wg1_width/2/dbu))+(-int(round(deltaW1))+int(round(deltaW2)))/2
+      vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/dbu))+int(round(self.wg1_width/2/dbu))#+(-int(round(deltaW1))+int(round(deltaW2)))/2
       t = Trans(Trans.R0, 0,vertical_offset)
       
       if i%2 == True:
@@ -3759,7 +3760,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, -box_width/2,-deltaW1/2)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),0)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3768,7 +3769,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, -box_width/2,vertical_offset-deltaW2/2)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),vertical_offset)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3777,7 +3778,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, x+grating_period+box_width,vertical_offset-deltaW2/2)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),vertical_offset)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3786,7 +3787,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, x+grating_period+box_width,-deltaW1/2)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),0)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3810,7 +3811,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
     self.param("grating_period", self.TypeDouble, "Grating period (microns)", default = 0.24)
-    self.param("gap", self.TypeDouble, "Minimum gap (microns)", default = 0.36)          
+    self.param("gap", self.TypeDouble, "Minimum gap (microns)", default = 0.1)          
     self.param("corrugation_width", self.TypeDouble, "Waveguide Corrugration width (microns)", default = 0.12)
     self.param("wg1_width", self.TypeDouble, "Waveguide 1 width", default = 0.5)
     self.param("wg2_width", self.TypeDouble, "Waveguide 2 width", default = 0.38)
@@ -3865,7 +3866,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     
     vertical_offset = int(round(self.wg2_width/2/dbu))+2*gap+int(round(self.wg1_width/2/dbu))+int(round(w))
 
-    t = Trans(Trans.R0, 0,vertical_offset)
+    t = Trans(Trans.R0, to_itype(0,dbu),vertical_offset)
           
     for i in range(0,N_boxes+1):
 
@@ -3908,7 +3909,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, -box_width/2,0)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),0)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3917,7 +3918,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, -box_width/2,vertical_offset)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),vertical_offset)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3926,7 +3927,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, x+grating_period+box_width,vertical_offset)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),vertical_offset)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -3935,7 +3936,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, x+grating_period+box_width,0)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),0)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
