@@ -3810,7 +3810,8 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
 
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
-    self.param("grating_period", self.TypeDouble, "Grating period (microns)", default = 0.24)
+    self.param("grating_period", self.TypeDouble, "Sub-wavelength period (microns)", default = 0.24)
+    self.param("cdc_period", self.TypeDouble, "Pertrubation period (microns)", default = 0.464)
     self.param("gap", self.TypeDouble, "Minimum gap (microns)", default = 0.1)          
     self.param("corrugation_width", self.TypeDouble, "Waveguide Corrugration width (microns)", default = 0.12)
     self.param("wg1_width", self.TypeDouble, "Waveguide 1 width", default = 0.5)
@@ -3848,6 +3849,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     
     N = self.number_of_periods
     grating_period = int(round(self.grating_period/dbu))
+    cdc_period = int(round(self.cdc_period/dbu))
     misalignment = 0
      
     # Determine the period such that the waveguide length is as desired.  Slight adjustment to period
@@ -3868,34 +3870,49 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
 
     t = Trans(Trans.R0, to_itype(0,dbu),vertical_offset)
           
+    
     for i in range(0,N_boxes+1):
 
       if i%2 == True:
         x = int(round((i * grating_period - box_width/2)))
+
         box1_a = Box(x, -half_w1, x + box_width, half_w1)
         shapes(LayerSiN).insert(box1_a)
-
-        boxw_a = Box(x+grating_period, -half_w1-gap, x + 2*grating_period, -w-half_w1-gap,)
-        shapes(LayerSiN).insert(boxw_a)
-                
+   
         box2_a = Box(x+grating_period, -half_w2, x + grating_period+box_width, half_w2).transformed(t)
         shapes(LayerSiN).insert(box2_a)
         
-        boxw_a = Box(x+grating_period, half_w2+gap, x + 2*grating_period, w+half_w2+gap,).transformed(t)
-        shapes(LayerSiN).insert(boxw_a)
-        
       else:
         x = int(round((i * grating_period - box_width/2)))
+               
         box1_b = Box(x, -half_w1, x + box_width, half_w1)
         shapes(LayerSiN).insert(box1_b)
-        
-        boxw_a = Box(x+grating_period, half_w1+gap, x +2*grating_period, w+half_w1+gap,)
-        shapes(LayerSiN).insert(boxw_a)
-        
+
         box2_b = Box(x+grating_period, -half_w2, x +grating_period+ box_width, half_w2).transformed(t)
         shapes(LayerSiN).insert(box2_b)
         
-    
+    # compensate length of SWG boxes vs cdc boxes
+    x_cdc = int(round(N_boxes * cdc_period)/2)
+    xk = int(round(N_boxes * grating_period))
+    N_cdc_boxes = 2*int(round((xk - x_cdc)/cdc_period))
+    print(N_cdc_boxes)
+    for i in range(0,N_boxes+1+N_cdc_boxes):
+
+      if i%2 == True:
+        x_cdc = int(round((i * cdc_period/2 - box_width/2)))
+
+        boxw_a = Box(x_cdc, -half_w1-gap, x_cdc + cdc_period/2, -w-half_w1-gap,)
+        shapes(LayerSiN).insert(boxw_a)
+        
+        boxw_a = Box(x_cdc, half_w2+gap, x_cdc + cdc_period/2, w+half_w2+gap,).transformed(t)
+        shapes(LayerSiN).insert(boxw_a)
+        
+      else:
+        x_cdc = int(round((i * cdc_period/2 - box_width/2)))
+        boxw_a = Box(x_cdc, half_w1+gap, x_cdc +cdc_period/2, w+half_w1+gap,)
+        shapes(LayerSiN).insert(boxw_a)
+        
+         
       
     # missing periods due to misalignments
     box_final = Box(x+grating_period, -half_w1, x +grating_period+ box_width, half_w1)
