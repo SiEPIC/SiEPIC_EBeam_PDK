@@ -53,8 +53,8 @@ class parameters():
   N =  linspace_without_numpy(1000,1000,Num_sweep)
   period = linspace_without_numpy(.242,.242,Num_sweep)
   g = linspace_without_numpy(.2,.2,Num_sweep)
-  w1 = linspace_without_numpy(.6,.6,Num_sweep)
-  w2 = linspace_without_numpy(.52,.52,Num_sweep)
+  w1 = linspace_without_numpy(.56,.56,Num_sweep)
+  w2 = linspace_without_numpy(.42,.42,Num_sweep)
   dW1 = linspace_without_numpy(.12,.12,Num_sweep)
   dW2 = linspace_without_numpy(.08,.08,Num_sweep)
   sine = 0
@@ -64,7 +64,7 @@ class parameters():
   
   # SWG-strip taper params
   swgtaper_L = linspace_without_numpy(30,30,Num_sweep)
-  swgtaper_w1stop = linspace_without_numpy(.43,.43,Num_sweep)
+  swgtaper_w1stop = linspace_without_numpy(.5,.5,Num_sweep)
   swgtaper_w2stop = linspace_without_numpy(.33,.33,Num_sweep)
   swgtaper_wswg = linspace_without_numpy(.12,.12,Num_sweep)
   swgtaper_period = linspace_without_numpy(.24,.24,Num_sweep)
