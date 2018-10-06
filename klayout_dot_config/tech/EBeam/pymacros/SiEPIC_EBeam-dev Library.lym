@@ -3185,7 +3185,7 @@ class Contra_DC(PCellDeclarationHelper):
     w = to_itype(self.wg1_width,dbu)
     GaussianIndex = self.index
     half_w = w/2
-    half_corrugation_w = int(round(self.corrugation_width1/2/dbu))
+    half_corrugation_w = to_itype(self.corrugation_width1/2,dbu)
     
     if self.AR:
       misalignment = grating_period/2
@@ -3224,17 +3224,15 @@ class Contra_DC(PCellDeclarationHelper):
 
     else:
     
-      
-      
       for i in range(0,self.number_of_periods):
         x = int(round((i * self.grating_period)/dbu))
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
-        box1 = Box(x, 0, x + box_width, half_w+profile)
-        box2 = Box(x + box_width, 0, x + grating_period, half_w-profile)
-        box3 = Box(x + misalignment, 0, x + box_width + misalignment, -half_w-profile)
-        box4 = Box(x + box_width + misalignment, 0, x + grating_period + misalignment, -half_w+profile)
+        box1 = Box(x, 0, x + box_width, to_itype(half_w+profile,dbu*1000))
+        box2 = Box(x + box_width, 0, x + grating_period, to_itype(half_w-profile,dbu*1000))
+        box3 = Box(x + misalignment, 0, x + box_width + misalignment, to_itype(-half_w-profile,dbu*1000))
+        box4 = Box(x + box_width + misalignment, 0, x + grating_period + misalignment, to_itype(-half_w+profile,dbu*1000))
         shapes(LayerSiN).insert(box1)
         shapes(LayerSiN).insert(box2)
         shapes(LayerSiN).insert(box3)
