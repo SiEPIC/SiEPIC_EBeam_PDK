@@ -3467,7 +3467,9 @@ class Contra_DC_chirped(PCellDeclarationHelper):
       x = 0
       npoints_sin = 40
       for i in range(0,self.number_of_periods):
-        x = x + grating_period[i]
+        if i != 0:
+          x = x + grating_period[i]
+        
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
         box1 = Box(x, 0, x + box_width[i], half_w+profile)
@@ -3534,7 +3536,9 @@ class Contra_DC_chirped(PCellDeclarationHelper):
       npoints_sin = 40
       x = 0
       for i in range(0,self.number_of_periods):
-        x = x * grating_period[i]
+        if i != 0:
+          x = x + grating_period[i]
+        
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
         box1 = Box(x, 0, x + box_width[i], -half_w+profile).transformed(t)
