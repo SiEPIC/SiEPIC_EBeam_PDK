@@ -3438,6 +3438,7 @@ class Contra_DC_chirped(PCellDeclarationHelper):
 
     from SiEPIC.extend import to_itype
     
+    
     # Draw the Bragg grating (bottom):
     # create chirped period array
     grating_period_start = int(round(self.grating_period_start/dbu))
@@ -3454,6 +3455,7 @@ class Contra_DC_chirped(PCellDeclarationHelper):
       box_width.append(int(round(grating_period[i]/2)))
       misalignment.append( int(round(grating_period[i]/2)))
       
+    print(step/2)
     
     w = to_itype(self.wg1_width,dbu)
     GaussianIndex = self.index
@@ -3462,9 +3464,10 @@ class Contra_DC_chirped(PCellDeclarationHelper):
       
     N = self.number_of_periods
     if self.sinusoidal:
+      x = 0
       npoints_sin = 40
       for i in range(0,self.number_of_periods):
-        x = i *grating_period[i]
+        x = x + grating_period[i]
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
         box1 = Box(x, 0, x + box_width[i], half_w+profile)
@@ -3489,9 +3492,10 @@ class Contra_DC_chirped(PCellDeclarationHelper):
       shapes(LayerSiN).insert(box3)
 
     else:
-    
+      x = 0
       for i in range(0,self.number_of_periods):
-        x = i * grating_period[i]
+        if i != 0:
+          x = x + grating_period[i]
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
@@ -3528,8 +3532,9 @@ class Contra_DC_chirped(PCellDeclarationHelper):
     N = self.number_of_periods
     if self.sinusoidal:
       npoints_sin = 40
+      x = 0
       for i in range(0,self.number_of_periods):
-        x = i * grating_period[i]
+        x = x * grating_period[i]
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
         box1 = Box(x, 0, x + box_width[i], -half_w+profile).transformed(t)
@@ -3555,10 +3560,10 @@ class Contra_DC_chirped(PCellDeclarationHelper):
       shapes(LayerSiN).insert(box3)
 
     else:
-    
-      
+      x = 0
       for i in range(0,self.number_of_periods):
-        x = i * grating_period[i]
+        if i != 0:
+          x = x + grating_period[i]
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
         profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
@@ -3623,7 +3628,7 @@ class Contra_DC_chirped(PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)
-    text = Text ('Component=ebeam_contra_dc', t)
+    text = Text ('Component=ebeam_contra_dc_chirped', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/9, 0)
