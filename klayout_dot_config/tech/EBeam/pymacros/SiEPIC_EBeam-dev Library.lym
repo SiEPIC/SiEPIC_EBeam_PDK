@@ -247,8 +247,8 @@ class mmi_2x2(PCellDeclarationHelper):
     self.cell.insert(CellInstArray(cell.cell_index(), Trans(Trans.R180, -L_mmi/2, -w_a)))
 
 
-    pin(500,"pin1", Trans(Trans.R0, -L_mmi/2-L_a, w_a), LayerPinRecN, dbu, self.cell)
-    pin(500,"pin2", Trans(Trans.R0, -L_mmi/2-L_a, -w_a), LayerPinRecN, dbu, self.cell)
+    pin(500,"pin1", Trans(Trans.R180, -L_mmi/2-L_a, w_a), LayerPinRecN, dbu, self.cell)
+    pin(500,"pin2", Trans(Trans.R180, -L_mmi/2-L_a, -w_a), LayerPinRecN, dbu, self.cell)
     pin(500,"pin3", Trans(Trans.R0, L_mmi/2+L_a, w_a), LayerPinRecN, dbu, self.cell)
     pin(500,"pin4", Trans(Trans.R0, L_mmi/2+L_a, -w_a), LayerPinRecN, dbu, self.cell)
 
