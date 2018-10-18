@@ -165,7 +165,7 @@ class Waveguide(PCellDeclarationHelper):
     import pya
     from SiEPIC.extend import to_itype
     
-    print("EBeam.Waveguide")
+    # print("EBeam.Waveguide")
     
     TECHNOLOGY = get_technology_by_name('EBeam')
     
