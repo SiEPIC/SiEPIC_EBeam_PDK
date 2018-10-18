@@ -1116,7 +1116,8 @@ class fswgc(PCellDeclarationHelper):
         #small_one = core.Boundary(points)
         
         polygon = Polygon(pts)
-        shapes(LayerSiN).insert(polygon)
+        if self.ff &gt; 0:
+            shapes(LayerSiN).insert(polygon)
         
         ##big one
         r_up = []
