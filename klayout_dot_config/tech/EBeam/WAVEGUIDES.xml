@@ -11,6 +11,15 @@
 	  </component>
 	</waveguide>
 	<waveguide>
+	  <name>Strip TE 1310 nm, w=410 nm</name>
+      <radius>5.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.41</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+	<waveguide>
 	  <name>Strip TM 1550 nm, w=500 nm</name>
       <radius>15.0</radius>
 	  <component>
