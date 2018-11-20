@@ -4121,7 +4121,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
         shapes(LayerSiN).insert(box2_b)
       
     # missing periods due to misalignments
-    box_final = Box(x+grating_period, -half_w1-deltaW1, x +grating_period+ box_width, half_w1-deltaW1)
+    box_final = Box(x+grating_period, -half_w1, x +grating_period+ box_width, half_w1)
     shapes(LayerSiN).insert(box_final)
     box_final = Box(-box_width/2, -half_w2-deltaW2, box_width/2, half_w2-deltaW2).transformed(t)
     shapes(LayerSiN).insert(box_final)
@@ -4130,7 +4130,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),0)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),-deltaW1/2)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -4139,7 +4139,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),vertical_offset)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),vertical_offset-deltaW2/2)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -4148,7 +4148,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),vertical_offset)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),vertical_offset-deltaW2/2)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -4157,7 +4157,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),0)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),-deltaW1/2)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
