@@ -4370,7 +4370,7 @@ class UGC(PCellDeclarationHelper):
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "fswgc_%.1f-%.2f-%.2f-%.2f-%.2f-%.2f" % \
+    return "ugc_%.1f-%.2f-%.2f-%.2f-%.2f-%.2f" % \
     (self.wavelength, self.theta_c, self.dc, self.angle_e, self.taper_length, self.t)
     
 #    return "temporary placeholder"
@@ -4603,11 +4603,24 @@ class UGC(PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
+    # Reference information
+    t = Trans(Trans.R0, 0,-4000)
+    text = Text ("Ref: 'Universal grating coupler design'\nhttps://doi.org/10.1117/12.2042185\nPCell implementation by: Yun Wang, Timothy Richards, Adam DeAbreu,\nJonas Flueckiger, Charlie Lin, Lukas Chrostowski, Connor Mosquera", t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    shape.text_halign=2 # right alignment
+
+    t = Trans(Trans.R0, 0,4000)
+    text = Text ("Wavelength: %s\nIncident Angle: %s\nPolarization: %s\nSilicon thickness: %s\nSilicon etch depth: %s" % (self.wavelength, self.theta_c, self.pol, self.Si_thickness, self.etch_depth), t)
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu
+    shape.text_halign=2 # right alignment
+    shape.text_valign=2 # bottom alignment
 
     # Device recognition layer 
     yr = sin(start) * (N*lambda_0 / ( n_e*( 1 - e*cos(float(start)) )) + gc_number*period )
     box1 = Box(-(self.grating_length+self.taper_length)/dbu-pin_length*2, yr/dbu, 0, -yr/dbu)
-    shapes(LayerDevRecN).insert(box1)    
+    shapes(LayerDevRecN).insert(box1)       
 
 class SiEPIC_EBeam_dev(Library):
   """
