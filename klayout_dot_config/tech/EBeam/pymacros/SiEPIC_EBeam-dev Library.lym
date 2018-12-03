@@ -4751,29 +4751,38 @@ class ebeam_irph_mrr(PCellDeclarationHelper):
     shape.text_size = 0.4/dbu      
 
     #draw N
-    shapes(LayerNN).insert(arc_xy(x, y, n_w,  theta_start, theta_stop)) 
+    arc_pts = arc_xy(x, y, n_w,  theta_start, theta_stop)
+    arc_pts.append(pya.Point.from_dpoint(pya.DPoint(0,0))) #adding center point for polygon
+    shapes(LayerNN).insert(pya.Polygon(arc_pts)) 
     
     #draw NPP
     #center
-    shapes(LayerNPPN).insert(arc_xy(x, y, npp_w - 1/dbu,  0, 360)) 
+    arc_pts = arc_xy(x, y, npp_w - 1/dbu,  0, 360)
+    arc_pts.append(pya.Point.from_dpoint(pya.DPoint(0,0))) #adding center point for polygon    
+    shapes(LayerNPPN).insert(pya.Polygon(arc_pts)) 
     #outer donut
     shapes(LayerNPPN).insert(arc_wg_xy(x, y,  2.5/dbu +  r + npp_w/2, npp_w , theta_start, theta_stop))     
 
 
     #draw via
      #center
-    shapes(LayerVCN).insert(arc_xy(x, y, vc_cw ,  0, 360)) 
+    arc_pts = arc_xy(x, y, vc_cw ,  0, 360)
+    arc_pts.append(pya.Point.from_dpoint(pya.DPoint(0,0))) #adding center point for polygon        
+    shapes(LayerVCN).insert(pya.Polygon(arc_pts))
+     
     #outer donut
     shapes(LayerVCN).insert(arc_wg_xy(x, y,  4/dbu +  r + npp_w/2, vc_aw , theta_start+10, theta_stop-10))     
     
     #draw metal
     #center
-    shapes(LayerMN).insert(arc_xy(x, y, m_cw ,  0, 360)) 
+    arc_pts = arc_xy(x, y, m_cw ,  0, 360)
+    arc_pts.append(pya.Point.from_dpoint(pya.DPoint(0,0))) #adding center point for polygon 
+    shapes(LayerMN).insert(pya.Polygon(arc_pts)) 
     #outer donut
     shapes(LayerMN).insert(arc_wg_xy(x, y,  4/dbu +  r + npp_w/2 , m_aw , theta_start, theta_stop))     
-  
 
     print("Done drawing the layout for - ebeam_IRPH_MRR: %.3f-%g" % ( self.r, self.g) )
+
 
 
 class SiEPIC_EBeam_dev(Library):
