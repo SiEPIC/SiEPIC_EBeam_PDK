@@ -17,6 +17,22 @@
   <width>2.0</width>
  </properties>
  <properties>
+  <frame-color>#cc80a8</frame-color>
+  <fill-color>#cc80a8</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I7</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>true</transparent>
+  <width/>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>Si_Litho193</name>
+  <source>1/69@1</source>
+  <width>2.0</width>
+ </properties>
+ <properties>
   <frame-color>#ff0000</frame-color>
   <fill-color>#ff0000</fill-color>
   <frame-brightness>0</frame-brightness>
