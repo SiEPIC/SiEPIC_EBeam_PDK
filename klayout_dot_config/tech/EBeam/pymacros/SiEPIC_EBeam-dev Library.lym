@@ -4786,7 +4786,7 @@ class ebeam_irph_mrr(PCellDeclarationHelper):
     ytop = -1*(r+g+w/2)
     xbottom = 4/3*r
     ybottom = ytop-w
-    dev_array = [pya.Point.from_dpoint(pya.DPoint(ytop +w,xbottom+npp_w)),pya.Point.from_dpoint(pya.DPoint(ytop +w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xtop)),pya.Point.from_dpoint(pya.DPoint(ytop + w,xtop)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom+2*w)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom-w)),pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom-w)), pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom+2*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,ybottom+2*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,xbottom+npp_w)) ]
+    dev_array = [pya.Point.from_dpoint(pya.DPoint(ytop + 4*w,xbottom+npp_w)),pya.Point.from_dpoint(pya.DPoint(ytop +4*w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xtop)),pya.Point.from_dpoint(pya.DPoint(ytop + 3*w,xtop)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom+4*w)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom-w)),pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom-w)), pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom+4*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,ybottom+4*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,xbottom+npp_w)) ]
     #left waveguide
     #wg1 = Box(ytop, xtop , ybottom, xbottom)
     shapes(LayerDevRecN).insert(pya.Polygon(dev_array)) 
