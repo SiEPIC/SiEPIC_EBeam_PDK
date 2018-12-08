@@ -4781,8 +4781,24 @@ class ebeam_irph_mrr(PCellDeclarationHelper):
     #outer donut
     shapes(LayerMN).insert(arc_wg_xy(x, y,  4/dbu +  r + npp_w/2 , m_aw , theta_start, theta_stop))     
 
-    print("Done drawing the layout for - ebeam_IRPH_MRR: %.3f-%g" % ( self.r, self.g) )
-
+    #devrec layer
+    xtop = -2/3*r
+    ytop = -1*(r+g+w/2)
+    xbottom = 4/3*r
+    ybottom = ytop-w
+    dev_array = [pya.Point.from_dpoint(pya.DPoint(ytop +w,xbottom+npp_w)),pya.Point.from_dpoint(pya.DPoint(ytop +w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xtop)),pya.Point.from_dpoint(pya.DPoint(ytop + w,xtop)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom+2*w)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom-w)),pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom-w)), pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom+2*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,ybottom+2*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,xbottom+npp_w)) ]
+    #left waveguide
+    #wg1 = Box(ytop, xtop , ybottom, xbottom)
+    shapes(LayerDevRecN).insert(pya.Polygon(dev_array)) 
+    #shapes(LayerNPPN).insert(pya.Polygon(arc_pts)) 
+    
+    t = Trans(Trans.R0, 0,0)
+    text = Text ('Component=ebeam_irph_mrr', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = self.r*0.07/dbu
+    
+    print("Done drawing the layout for - ebeam_IRPH_MRR: %.3f-%g" % ( self.r, self.g))
+    
 
 
 class SiEPIC_EBeam_dev(Library):
