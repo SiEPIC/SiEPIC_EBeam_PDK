@@ -4866,11 +4866,10 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
       s2 = pitch-s1 #gap
       
       #calculate best radius
-      pi = math.pi
-      const = math.ceil(2*pi*r/(s1+s2))
+      const = math.ceil(2*math.pi*r/(s1+s2))
       #if doesn't divide evenly, replace r with best possible r
-      if ((2*pi*r)%(s1+s2) != 0):
-        r = const*(s1+s2)/(2*pi)
+      if ((2*math.pi*r)%(s1+s2) != 0):
+        r = const*(s1+s2)/(2*math.pi)
         print('r adjusted to '+str(r)+'um to fit periods perfectly.')
       
       #theta1 = (s1/r)
@@ -4960,41 +4959,52 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
           dpolygon = DPolygon(dpts)
           element = Polygon.from_dpoly(dpolygon*(1.0/dbu))
           shapes(LayerSiN).insert(element)   
-  
+          
+     
       #DEV BOX
-      dev = Box(-self.cell.bbox().width()/2,yd[-4]/dbu,self.cell.bbox().width()/2,yu[-1]/dbu)
-      shapes(LayerDevRecN).insert(dev)
-      dev_width = self.cell.bbox().width()/2
-      dev_up = yu[-1]/dbu
-      dev_down = yd[-4]/dbu 
-  # Create the pins on the waveguides, as short paths:
+      if doublebus is False:
+        half_l = (self.cell.bbox().width()-w/dbu-gap/dbu)/2
+        half_r = self.cell.bbox().width()-half_l
+        dev = Box(-half_l,yd[-4]/dbu,half_r,yu[-1]/dbu)
+        shapes(LayerDevRecN).insert(dev)
+        dev_width = self.cell.bbox().width()/2
+      else:
+        half_l = (self.cell.bbox().width())/2
+        half_r = self.cell.bbox().width()-half_l
+        dev = Box(-half_l,yd[-4]/dbu,half_r,yu[-1]/dbu)
+        shapes(LayerDevRecN).insert(dev)
+        dev_width = self.cell.bbox().width()/2
+    
+    # Create the pins on the waveguides, as short paths:
       from SiEPIC._globals import PIN_LENGTH as pin_length
-  
+    
       w = to_itype(self.w,dbu)
       gap = to_itype(self.gap,dbu)
       bus_length = to_itype(bus_length/2,dbu)
-
-      #Pin1
-      t = Trans(Trans.R0, dev_width-w/2,dev_up)
+  
+        #Pin1
+      t = Trans(Trans.R0, half_r-w/2,yu[-1]/dbu)
       pin = Path([Point(0, -pin_length/2), Point(0, pin_length/2)], w)
       pin_t = pin.transformed(t)
       shapes(LayerPinRecN).insert(pin_t)
       text = Text ("pin1", t)
       shape = shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
-      
-      #Pin2
-      t = Trans(Trans.R0, dev_width-w/2,dev_down)
+        
+        #Pin2
+      t = Trans(Trans.R0, half_r-w/2,yd[-4]/dbu)
       pin = Path([Point(0, pin_length/2), Point(0, -pin_length/2)], w)
       pin_t = pin.transformed(t)
       shapes(LayerPinRecN).insert(pin_t)
       text = Text ("pin2", t)
       shape = shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
-      
-      if doublebus:
+        
+      if doublebus is True:
+        half_l = self.cell.bbox().width()/2
+        half_r = self.cell.bbox().width()-half_l
         #pin 3
-        t = Trans(Trans.R0, -dev_width+w/2,dev_up)
+        t = Trans(Trans.R0, -half_l+w/2,yu[-1]/dbu)
         pin = Path([Point(0, -pin_length/2), Point(0, pin_length/2)], w)
         pin_t = pin.transformed(t)
         shapes(LayerPinRecN).insert(pin_t)
@@ -5003,7 +5013,7 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
         shape.text_size = 0.4/dbu
         
         #Pin4
-        t = Trans(Trans.R0, -dev_width+w/2,dev_down)
+        t = Trans(Trans.R0, -half_l+w/2,yd[-4]/dbu)
         pin = Path([Point(0, pin_length/2), Point(0, -pin_length/2)], w)
         pin_t = pin.transformed(t)
         shapes(LayerPinRecN).insert(pin_t)
