@@ -4579,7 +4579,7 @@ class UGC(PCellDeclarationHelper):
       
     L_o = (y_max - self.t/2)/tan((pi/180)*self.angle_e/2)
       
-    xr = [L_o+xl[iy_max], 0, 0, L_o+xl[iy_max]]
+    xr = [0, 0]
      
     x = xr + xl
     y = yr + yl  
