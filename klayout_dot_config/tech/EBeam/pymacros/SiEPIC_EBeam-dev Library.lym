@@ -4340,7 +4340,7 @@ class UGC(PCellDeclarationHelper):
   Some PCell implementation adapted from the SiEPIC_EBeam library by Dr. Lukas Chrostowski, University of British Columbia, Canada
   Orignal script written by Timothy Richards (Simon Fraser University, BC, Canada) and Adam DeAbreu (Simon Fraser University, BC, Canada)
   Modified to use UGC method presented in : Yun Wang, Jonas Flueckiger, Charlie Lin, Lukas Chrostowski, "Universal grating coupler design," Proc. SPIE 8915, Photonics North 2013, 89150Y (11 October 2013), 
-  Transfered from Mentor Grpahics to KLayout by Connor Mosquera (University of British Columbia, Canada)
+  Transfered from Mentor Graphics to KLayout by Connor Mosquera (University of British Columbia, Canada)
   
   """
 
@@ -4568,7 +4568,7 @@ class UGC(PCellDeclarationHelper):
       xl = xl + [(r_down[k])*cos(theta_down[k])]
       yl = yl + [(r_down[k])*sin(theta_down[k])]
       
-    yr = [self.t/2., self.t/2., -self.t/2., -self.t/2.]
+    yr = [self.t/2., -self.t/2.]
     
     yl_abs = []
     for k in range(len(yl)):
