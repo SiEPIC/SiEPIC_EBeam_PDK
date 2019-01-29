@@ -165,7 +165,7 @@ for i in range(len(sweep_length)):
       TEcell.shapes(LayerSiN).insert(dpath.to_itype(dbu))   
   
       path_to_waveguide(cell=TEcell)#Turns paths into waveguides via script function.
-      path_to_waveguide(cell=TEcell)#Has to be called twice to draw all WG. No idea why it alternates between odd and even rows when it should just draw in total. I suspect the way exceptions are raised/GUI is called disturb it?
+#      path_to_waveguide(cell=TEcell)#Has to be called twice to draw all WG. No idea why it alternates between odd and even rows when it should just draw in total. I suspect the way exceptions are raised/GUI is called disturb it?
       ##########
           
       ##TM DEVICE##         
@@ -215,8 +215,9 @@ for i in range(len(sweep_length)):
         dpath = DPath([TMGC2P1,TMGC2P2,TMGC2P3,TMGC2P4,TMGC2P5],wg_width*dbu).transformed(DTrans(DTrans.R0,(x)+(TMoffset*dbu),0)) 
       TMcell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
       
-      path_to_waveguide(cell=TMcell)#Turns paths into waveguides via script function.      
-      path_to_waveguide(cell=TMcell)
+      lv.clear_object_selection()
+      path_to_waveguide(cell=TMcell, verbose=True)#Turns paths into waveguides via script function.      
+#      path_to_waveguide(cell=TMcell)
       
       #Update Xoffset to calculate spacing between devices
       x_offset = x_offset+TEcell.bbox().width()*dbu+TMcell.bbox().width()*dbu+20
@@ -230,6 +231,8 @@ for i in range(len(sweep_length)):
     #county = county+1
     
     lasty_offset+=y_offset  
+    
+# path_to_waveguide(cell=TMcell)
             
 print ("LAYOUT COMPLETE")</text>
 </klayout-macro>
