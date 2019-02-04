@@ -9,7 +9,7 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
  <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
@@ -50,7 +50,7 @@ class parameters():
   Num_sweep = 20
 
   # contraDC device parameters (refer to PCell definition)
-  N =  linspace_without_numpy(1000,1000,Num_sweep)
+  N =  linspace_without_numpy(100,1500,Num_sweep)
   period = linspace_without_numpy(.318,.318,Num_sweep)
   g = linspace_without_numpy(.22,.22,Num_sweep)
   w1 = linspace_without_numpy(.56,.56,Num_sweep)
@@ -67,7 +67,7 @@ class parameters():
   sbend_H = 3
   
   x_offset = 70              # spacing between grating couplers columns
-  wg_bend_radius = 5    # waveguide routes bend radius
+  wg_bend_radius = 10    # waveguide routes bend radius
   bezier = 1                   # Use adiabatic bezier bends (if 1)
   bezier_N = 0.2            # Bezier bend parameter
   device_spacing = 7.3   # spacing between devices
