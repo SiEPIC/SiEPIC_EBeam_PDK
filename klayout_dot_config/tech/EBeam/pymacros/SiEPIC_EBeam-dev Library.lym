@@ -1621,7 +1621,7 @@ class DoubleBus_Ring(PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
     # Create the pins, as short paths:
     
-    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
+    pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, 0, 0)
     text = Text ("pin1", t)
@@ -1635,7 +1635,7 @@ class DoubleBus_Ring(PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = Path([Point(-pin_length/2, y_offset), Point(pin_length/2, y_offset)], w)
+    pin = Path([Point(pin_length/2, y_offset), Point(-pin_length/2, y_offset)], w)
     shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, 0, y_offset)
     text = Text ("pin3", t)
