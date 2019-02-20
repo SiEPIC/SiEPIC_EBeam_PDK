@@ -53,7 +53,12 @@ LayerM1.space(10.0).output("M1_space","M1 minimum space violation; min 10 micron
 LayerM2=input(12,0)
 LayerM2.width(4.0).output("M2_width","M2 minimum feature size violation; min 4 micron")
 LayerM2.space(10.0).output("M2_space","M2 minimum space violation; min 10 micron")
+LayerM2.overlap(LayerM1,3.0).output("M2_M1_overlap","M2 minimum overlap with M1 violation; min 3 micron")
 
+# Metal pad air opening, MLOpen
+LayerMLOpen=input(13,0)
+LayerMLOpen.width(10.0).output("MLOpen_width","MLOpen minimum feature size violation; min 10 micron")
+LayerMLOpen.space(10.0).output("MLOpen_space","MLOpen minimum space violation; min 10 micron")
 
 </text>
 </klayout-macro>
