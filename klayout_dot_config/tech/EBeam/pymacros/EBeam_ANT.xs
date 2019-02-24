@@ -37,8 +37,8 @@ x_ml = mask(ml).grow(0.7,0)
 
 x_oxide = x_oxide.or(grow(0.3, 0.3, :mode => :round ))
 
-x_mlopen = mask(mlopen).grow(0.3, :into => x_oxide)
-
+#x_mlopen = mask(mlopen).grow(0.3, :into => x_oxide)
+mask(mlopen).etch(0.3, :taper => etch_angle, :bias =>  0, :into => x_oxide) 
 
 # output
 
@@ -47,7 +47,7 @@ output("300/0", x_oxide)
 output("300/0", bulk)
 output("301/0", x_si1)
 output("345/0", x_ml)
-output("346/0", x_mlopen)
+#output("346/0", x_mlopen)
 output("347/0", x_mh)
 
 
