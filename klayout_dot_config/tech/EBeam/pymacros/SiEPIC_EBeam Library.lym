@@ -27,7 +27,7 @@ This Python file implements a library called "SiEPIC_EBeam", consisting of matur
     - ebeam_bragg_te1550: waveguide Bragg grating 
 		- ebeam_taper_te1550: Waveguide Taper
 		- Waveguide_bump
-		- Waveguide_SBend
+		- 
 		- Waveguide_Bend 
 
 NOTE: after changing the code, the macro needs to be rerun to install the new
@@ -84,7 +84,7 @@ Lukas Chrostowski           2017/02/14
  - code simplifications: Box -&gt; Box
 
 Lukas Chrostowski           2017/03/08
- - S-Bend - Waveguide_SBend
+ - S-Bend - 
 
 Lukas Chrostowski           2017/03/18
  - ebeam_dc_halfring_straight, with TE/TM support.  Zeqin Lu adding CML for this component. 
@@ -558,6 +558,10 @@ class Waveguide_SBend(PCellDeclarationHelper):
     text = Text \
       ('Spice_param:wg_length=%.3fu wg_width=%.3fu' %\
       (waveguide_length, self.wg_width), t )
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+    t = Trans(Trans.R0, 0, -w*3)
+    text = Text ('Extra length = %.4fu, Shortest length = %.4fu' % (straight_l*dbu, (length-2*straight_l)*dbu), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
