@@ -18,5 +18,6 @@
 		<material_Si>Si (Silicon) - Palik</material_Si>
 		<polarization>TM</polarization>
 		<particle_swarm_optimization>yes</particle_swarm_optimization>
+		<simulate_3d>yes</simulate_3d>
 	</strings>
 </GC>
