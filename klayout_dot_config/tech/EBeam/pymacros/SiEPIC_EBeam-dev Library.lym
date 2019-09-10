@@ -5785,6 +5785,7 @@ class SiEPIC_EBeam_dev(Library):
       self.layout().register_pcell("PhC L3 cavity with waveguide", photonic_crystals.L3c())
       self.layout().register_pcell("PhC H0 cavity with waveguide, no etching", photonic_crystals.H0c_oxide())
       self.layout().register_pcell("PhC H0 cavity with waveguide, with hexagon cell", photonic_crystals.H0c_new())
+      self.layout().register_pcell("PhC Grating Coupler", photonic_crystals.pc_gc_hex())      
   #    self.layout().register_pcell("PhC hole resolution test structure", photonic_crystals.PhC_test())
   #    self.layout().register_pcell("Half of the hole cell", photonic_crystals.Hole_cell_half())
   #    self.layout().register_pcell("Half of the hexagon cell", photonic_crystals.Hexagon_cell_half())
