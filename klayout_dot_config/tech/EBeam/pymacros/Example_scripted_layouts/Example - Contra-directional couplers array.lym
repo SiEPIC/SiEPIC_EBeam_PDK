@@ -64,7 +64,7 @@ class parameters():
   # contraDC device parameters (refer to PCell definition)
   N =  linspace_without_numpy(1000,1000,Num_sweep)
   period = linspace_without_numpy(.318,.318,Num_sweep)
-  g = linspace_without_numpy(.1,.1,Num_sweep)
+  g = linspace_without_numpy(.13,.13,Num_sweep)
   w1 = linspace_without_numpy(.44,.44,Num_sweep)
   w2 = linspace_without_numpy(.56,.56,Num_sweep)
   dW1 = linspace_without_numpy(.03,.03,Num_sweep)
@@ -80,8 +80,8 @@ class parameters():
   sbend_R = 14
   sbend_H = 3
   
-  x_offset = 100              # spacing between grating couplers columns
-  wg_bend_radius = 10    # waveguide routes bend radius
+  x_offset = 90              # spacing between grating couplers columns
+  wg_bend_radius = 15    # waveguide routes bend radius
   bezier = 1                   # Use adiabatic bezier bends (if 1)
   bezier_N = 0.2            # Bezier bend parameter
   device_spacing = 7.3   # spacing between devices
@@ -93,7 +93,7 @@ class parameters():
   route_up = 250        # y-space (from top GC) for upward routing, increase if length of the contraDC is too exceeding the length of routes
   route_down = -153-wg_bend_radius   # y-space (from bottom GC) for downward routing, do not change this one
 
-  name = 'contra DC'
+  name = 'contra_DC'
   
 
     
@@ -158,6 +158,7 @@ def create_deviceArray():
    # Instatiate the devices array
   # Loop through the parameter sweep
   for i in range(params.Num_sweep):
+      
       create_contraDC(x_pos = params.device_spacing*i + params.x_offset*params.Num_sweep/2, y_pos = 0, N = int(params.N[i]), 
       period = params.period[i], g = params.g[i], w1 = params.w1[i], w2 = params.w2[i], dW1 = params.dW1[i], dW2 = params.dW2[i], sine = params.sine, 
       a = params.a[i], sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
@@ -259,9 +260,10 @@ def create_contraDC(x_pos = 0, y_pos = 0, N = 1000, period = .318, g = .15, w1 =
   from SiEPIC.utils import select_paths, get_layout_variables
   TECHNOLOGY, lv, ly, cell = get_layout_variables()
   
+  contraDC_offset = -w1/2-g/2
   # contraDC PCell
   pcell = ly.create_cell("Contra-Directional Coupler", "EBeam-dev", { "number_of_periods": N, "grating_period": period, "gap": g, "wg1_width": w1, "wg2_width": w2, "corrugation_width1": dW1, "corrugation_width2": dW2 , "sinusoidal": sine, "index": a} )
-  t = Trans(Trans.R90, x_pos/dbu, to_itype(y_pos,dbu))
+  t = Trans(Trans.R90, (x_pos+contraDC_offset)/dbu, to_itype(y_pos,dbu))
   cell.insert(CellInstArray(pcell.cell_index(),t))
 
   # S-Bend PCells (top and bottom)

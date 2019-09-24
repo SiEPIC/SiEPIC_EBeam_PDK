@@ -3972,8 +3972,7 @@ class Contra_DC_chirped(PCellDeclarationHelper):
       grating_period[i] = round(grating_period_end+i*step)
       box_width.append(int(round(grating_period[i]/2)))
       misalignment.append( int(round(grating_period[i]/2)))
-      
-    print(step/2)
+    
     
     w = to_itype(self.wg1_width,dbu)
     GaussianIndex = self.index
