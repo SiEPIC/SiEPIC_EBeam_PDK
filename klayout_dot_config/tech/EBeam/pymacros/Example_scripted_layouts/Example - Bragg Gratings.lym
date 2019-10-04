@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description/>
+ <description>Bragg gratings sweep layout</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,9 +9,9 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path/>
+ <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>  # SiEPIC-Tools scripted layout 
@@ -57,10 +57,10 @@ class parameters():
   Num_sweep = 20
 
   # contraDC device parameters (refer to PCell definition)
-  N =  linspace(1000,1000,Num_sweep)
-  period = linspace(.318,.318,Num_sweep)
+  N =  linspace(500,500,Num_sweep)
+  period = linspace(.317,.317,Num_sweep)
   w = linspace(.5,.5,Num_sweep)
-  dW = linspace(.03,.03,Num_sweep)
+  dW = linspace(0,.1,Num_sweep)
   sine = 0
   misalignment = linspace(0,0,Num_sweep)
 
@@ -68,7 +68,7 @@ class parameters():
   device_spacing = 10.5   # spacing between devices
 
   GC_pitch = 127         # Vertical spacing between grating couplers array (i.e. pitch of the fibers)
-  GC_offset = 70          # Horizontal spacing between grating couplers in the array  
+  GC_offset = 80          # Horizontal spacing between grating couplers in the array  
   GC_device_spacing = 50 # spacing between the GC array and the device array
   
   wg_bend_radius = 15    # waveguide routes bend radius
@@ -76,7 +76,7 @@ class parameters():
   bezier_N = 0.2            # Bezier bend parameter
   wg_width = .5          # waveguide routes width  
   wg_pitch = 5            # spacing between waveguides ( keep &gt; 3 microns to minimize cross coupling)
-  route_up = 350        # y-space (from top GC) for upward routing, increase if length of the device length is exceeding the length of routes
+  route_up = 330        # y-space (from top GC) for upward routing, increase if length of the device length is exceeding the length of routes
   route_down = -2*wg_bend_radius   # y-space (from bottom GC) for downward routing, do not change this one
 
   name = 'BraggSweep'
