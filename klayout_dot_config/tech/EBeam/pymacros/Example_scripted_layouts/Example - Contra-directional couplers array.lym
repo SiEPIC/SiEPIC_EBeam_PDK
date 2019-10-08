@@ -63,12 +63,12 @@ class parameters():
 
   # contraDC device parameters (refer to PCell definition)
   N =  linspace_without_numpy(1000,1000,Num_sweep)
-  period = linspace_without_numpy(.318,.318,Num_sweep)
-  g = linspace_without_numpy(.1,.3,Num_sweep)
-  w1 = linspace_without_numpy(.44,.44,Num_sweep)
-  w2 = linspace_without_numpy(.56,.56,Num_sweep)
-  dW1 = linspace_without_numpy(.03,.03,Num_sweep)
-  dW2 = linspace_without_numpy(.07,.07,Num_sweep)
+  period = linspace_without_numpy(.562,.562,Num_sweep)
+  g = linspace_without_numpy(.2,.2,Num_sweep)
+  w1 = linspace_without_numpy(1.1,1.1,Num_sweep)
+  w2 = linspace_without_numpy(.9,.9,Num_sweep)
+  dW1 = linspace_without_numpy(0,.2,Num_sweep)
+  dW2 = linspace_without_numpy(0,.1,Num_sweep)
   sine = 0
   a = linspace_without_numpy(2.7,2.7,Num_sweep);  
   #a = stepper(0, 0.15, Num_sweep)
@@ -76,25 +76,25 @@ class parameters():
   
   # routing and device placement parameters
   
-  sbend_L = 13
-  sbend_R = 14
+  sbend_L = 25
+  sbend_R = 20
   sbend_H = 3
   
-  x_offset = 90              # spacing between grating couplers columns
-  wg_bend_radius = 15    # waveguide routes bend radius
+  x_offset = 120              # spacing between grating couplers columns
+  wg_bend_radius = 20 # waveguide routes bend radius
   bezier = 1                   # Use adiabatic bezier bends (if 1)
   bezier_N = 0.2            # Bezier bend parameter
   device_spacing = 7.3   # spacing between devices
-  wg_width = .5          # waveguide routes width
+  wg_width = 1          # waveguide routes width
   taper_L = sbend_L     # keep this relation!
   GC_pitch = 127         # spacing between grating couplers array (for a single device)
   
   wg_pitch = 5            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
-  route_up = 250        # y-space (from top GC) for upward routing, increase if length of the contraDC is too exceeding the length of routes
-  route_down = -153-wg_bend_radius   # y-space (from bottom GC) for downward routing, do not change this one
+  route_up = 450        # y-space (from top GC) for upward routing, increase if length of the contraDC is too exceeding the length of routes
+  route_down = -200-wg_bend_radius   # y-space (from bottom GC) for downward routing, do not change this one
 
-  name = 'contra_DC'
-  pol = 'te'
+  name = 'contraDC'
+  pol = 'tm'
 
     
 # TOP Function: Instatiate the layout functions
@@ -197,7 +197,7 @@ def create_deviceArray():
         
         ApodizationStr =str(params.a[i]).replace(".", "p");
         polarization = (params.pol).upper()
-        text = Text ("opt_in_%s_1550_%s%dN%dperiod%dg%dwa%dwb%ddwa%ddwb%dsine%sa_input2" % (polarization, params.name,params.N[i],1000*params.period[i],1000*params.g[i],1000*params.w1[i],1000*params.w2[i],1000*params.dW1[i],1000*params.dW2[i],params.sine,ApodizationStr),t)
+        text = Text ("opt_in_%s_1550_device_%s%dN%dperiod%dg%dwa%dwb%ddwa%ddwb%dsine%sa_input2" % (polarization, params.name,params.N[i],1000*params.period[i],1000*params.g[i],1000*params.w1[i],1000*params.w2[i],1000*params.dW1[i],1000*params.dW2[i],params.sine,ApodizationStr),t)
         #text = Text ("opt_in_TE_1550_device_contraDC%f" % (int(params.N)),t)
         shape = cell.shapes(TextLayerN).insert(text)
         shape.text_size = 1.5/dbu
