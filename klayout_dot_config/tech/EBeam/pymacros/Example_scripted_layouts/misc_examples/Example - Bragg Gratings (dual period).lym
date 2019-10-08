@@ -59,12 +59,12 @@ class parameters():
   # Bragg device parameters (refer to PCell definition)
   Nbits = 2
   ID = '11'
-  L =  linspace(200,200,Num_sweep)
+  L =  linspace(100,370,Num_sweep)
   startPeriod = linspace(.317,.317,Num_sweep)
   stopPeriod = linspace(.437,.437,Num_sweep)   
-  w = linspace(.5,.5,Num_sweep)
-  dW1 = linspace(0,.15,Num_sweep)
-  dW2 = linspace(0,.15,Num_sweep)
+  w = linspace(.5,.35,Num_sweep)
+  dW1 = linspace(0.12,.12,Num_sweep)
+  dW2 = linspace(0.12,.12,Num_sweep)
   
   SumFormat = 2
 

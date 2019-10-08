@@ -47,21 +47,21 @@ class parameters():
   
   
   # number of devices (i.e. length of this array) MUST BE EVEN as this is interleaved routing configuration!
-  Num_sweep = 40
+  Num_sweep =10
 
   # contraDC device parameters (refer to PCell definition)
   N =  linspace_without_numpy(1000,1000,Num_sweep)
-  N_swg = linspace_without_numpy(727,727,Num_sweep)
-  period = linspace_without_numpy(.318,.318,Num_sweep)
+  N_swg = linspace_without_numpy(1000,1000,Num_sweep)
+  period = linspace_without_numpy(.438,.438,Num_sweep)
   period_swg = linspace_without_numpy(.438,.438,Num_sweep)
-  g = linspace_without_numpy(.16,.16,Num_sweep)
+  g = linspace_without_numpy(.16,.2,Num_sweep)
   w1 = linspace_without_numpy(.56,.56,Num_sweep)
   w2 = linspace_without_numpy(.44,.44,Num_sweep)
-  dW1 = linspace_without_numpy(.048,.048,Num_sweep)
-  dW2 = linspace_without_numpy(.024,.024,Num_sweep)
-  dW_swg = linspace_without_numpy(.025,.025,Num_sweep)
+  dW1 = linspace_without_numpy(.0,.0,Num_sweep)
+  dW2 = linspace_without_numpy(.0,.0,Num_sweep)
+  dW_swg = linspace_without_numpy(.02,.02,Num_sweep)
   sine = 0
-  a = linspace_without_numpy(0,4,Num_sweep)
+  a = linspace_without_numpy(2.7,2.7,Num_sweep)
   
   # routing and device placement parameters
   
