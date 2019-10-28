@@ -109,7 +109,7 @@ from pya import *
 
 
 
-class Waveguide(PCellDeclarationHelper):
+class Waveguide(pya.PCellDeclarationHelper):
 
   def __init__(self):
     # Important: initialize the super class
