@@ -1686,7 +1686,7 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
 
 
 
-class spiral(PCellDeclarationHelper):
+class spiral(pya.PCellDeclarationHelper):
   """
   Input: 
   """

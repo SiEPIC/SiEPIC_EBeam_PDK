@@ -177,7 +177,7 @@ def pin(w,pin_text, trans, LayerPinRecN, dbu, cell):
 
 
 
-class mmi_2x2(PCellDeclarationHelper):
+class mmi_2x2(pya.PCellDeclarationHelper):
   """
   """
 
@@ -264,7 +264,7 @@ class mmi_2x2(PCellDeclarationHelper):
 
 
 
-class ebeam_dc(PCellDeclarationHelper):
+class ebeam_dc(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the Directional Coupler
   by Lukas Chrostowski, 2018/09
@@ -410,7 +410,7 @@ class ebeam_dc(PCellDeclarationHelper):
 
 
 
-class ebeam_dc_halfring_arc(PCellDeclarationHelper):
+class ebeam_dc_halfring_arc(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the Directional Coupler Half Ring with Arc for the bus waveguide.
   Consists of a half-ring with 1 waveguide.
@@ -555,7 +555,7 @@ class ebeam_dc_halfring_arc(PCellDeclarationHelper):
 
 
 
-class spiral(PCellDeclarationHelper):
+class spiral(pya.PCellDeclarationHelper):
   """
   Input: 
   """
@@ -774,7 +774,7 @@ class spiral(PCellDeclarationHelper):
     print("spiral done.")
 
 
-class cavity_hole(PCellDeclarationHelper):
+class cavity_hole(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the cavity hole.
   This is an example of how to perform inversion operations
@@ -875,7 +875,7 @@ class cavity_hole(PCellDeclarationHelper):
 
 
 
-class strip_to_slot(PCellDeclarationHelper):
+class strip_to_slot(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the strip_to_slot.
   draft by Lukas Chrostowski july 24, 2017
@@ -984,7 +984,7 @@ class strip_to_slot(PCellDeclarationHelper):
 
 
 
-class fswgc(PCellDeclarationHelper):
+class fswgc(pya.PCellDeclarationHelper):
   """
   Focusing Sub-wavelength grating coupler PCell implementation.
   Analytical design based on "Grating Coupler Design Based on Silicon-On-Insulator", Yun Wang (2013). Master's Thesis, University of British Columbia, Canada
@@ -1206,7 +1206,7 @@ class fswgc(PCellDeclarationHelper):
 
 
 
-class SWG_to_strip_waveguide(PCellDeclarationHelper):
+class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
   """
   Input: length, period_strip, period_swg, wg_width_strip, wg_width_swg, duty_strip, duty_swg
   continuously (linearly) variable period, width, duty along the length
@@ -1338,7 +1338,7 @@ class SWG_to_strip_waveguide(PCellDeclarationHelper):
     path = pya.Path(points,w*3)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
-class SWG_waveguide(PCellDeclarationHelper):
+class SWG_waveguide(pya.PCellDeclarationHelper):
   """
   Input: length, target_period, wg_width, width, duty
   """
@@ -1550,7 +1550,7 @@ def layout_Ring(cell, layer, x, y, r, w, npoints):
     # end of layout_Ring
 
 
-class DoubleBus_Ring(PCellDeclarationHelper):
+class DoubleBus_Ring(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the double bus ring resonator.
   Consists of a ring with 2 straight waveguides.
@@ -1663,7 +1663,7 @@ class DoubleBus_Ring(PCellDeclarationHelper):
 
 
 
-class TestStruct_DoubleBus_Ring(PCellDeclarationHelper):
+class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the DoubleBus_Ring test structure with grating couplers and waveguides
   """
@@ -1802,7 +1802,7 @@ class TestStruct_DoubleBus_Ring(PCellDeclarationHelper):
 
 
 
-class TestStruct_DoubleBus_Ring2(PCellDeclarationHelper):
+class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the DoubleBus_Ring test structure with grating couplers and waveguides
   """
@@ -1903,7 +1903,7 @@ class TestStruct_DoubleBus_Ring2(PCellDeclarationHelper):
 
 
 
-class Waveguide_Route_simple(PCellDeclarationHelper):
+class Waveguide_Route_simple(pya.PCellDeclarationHelper):
   """
   The PCell declaration for a waveguide route
   """
@@ -1985,7 +1985,7 @@ class Waveguide_Route_simple(PCellDeclarationHelper):
     
 '''
 has been replaced by Waveguide in SiEPIC General library
-class Waveguide_Route(PCellDeclarationHelper):
+class Waveguide_Route(pya.PCellDeclarationHelper):
   """
   The PCell declaration for a waveguide route
   """
@@ -2183,7 +2183,7 @@ class Waveguide_Route(PCellDeclarationHelper):
 '''
 
 
-class Waveguide_Arc(PCellDeclarationHelper):
+class Waveguide_Arc(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the waveguide arc.
   
@@ -2311,7 +2311,7 @@ class Waveguide_Arc(PCellDeclarationHelper):
     #layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, start_angle, stop_angle)
     self.cell.shapes(LayerDevRecN).insert(arc_wg(r, w*3, start_angle, stop_angle))
 
-class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
+class Bent_Coupled_Half_Ring(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the bent-coupled half ring resonator pcell
   
@@ -2504,7 +2504,7 @@ class Bent_Coupled_Half_Ring(PCellDeclarationHelper):
 
     
     
-class Bent_Contra_DC(PCellDeclarationHelper):
+class Bent_Contra_DC(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the bent-CDC half ring resonator pcell
   
@@ -2708,7 +2708,7 @@ class Bent_Contra_DC(PCellDeclarationHelper):
     
     
     
-class Bezier_Bend(PCellDeclarationHelper):
+class Bezier_Bend(pya.PCellDeclarationHelper):
   """
   Input: bezier number, effective radius, waveguide width, layers
   draws a 90 degree bezier bend with a given bezier factor
@@ -2830,7 +2830,7 @@ class Bezier_Bend(PCellDeclarationHelper):
 
 
 
-class Tapered_Ring(PCellDeclarationHelper):
+class Tapered_Ring(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the tapered ring.
   Author: Mustafa Hammood     mustafa@ece.ubc.ca
@@ -2947,7 +2947,7 @@ class Tapered_Ring(PCellDeclarationHelper):
 
 
 
-class DirectionalCoupler_SeriesRings(PCellDeclarationHelper):
+class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the DirectionalCoupler_SeriesRings.
 
@@ -3083,7 +3083,7 @@ class DirectionalCoupler_SeriesRings(PCellDeclarationHelper):
 
 
 
-class ebeam_bragg_apodized(PCellDeclarationHelper):
+class ebeam_bragg_apodized(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                 Mustafa@ece.ubc.ca
@@ -3239,7 +3239,7 @@ class ebeam_bragg_apodized(PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
 
-class Contra_DC(PCellDeclarationHelper):
+class Contra_DC(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                 Mustafa@ece.ubc.ca
@@ -3504,7 +3504,7 @@ class Contra_DC(PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(path.simple_polygon())
     
 
-class Contra_DC_dualBragg(PCellDeclarationHelper):
+class Contra_DC_dualBragg(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                 Mustafa@ece.ubc.ca
@@ -3703,7 +3703,7 @@ class Contra_DC_dualBragg(PCellDeclarationHelper):
     
 
 
-class Contra_DC_custom(PCellDeclarationHelper):
+class Contra_DC_custom(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                 Mustafa@ece.ubc.ca
@@ -3902,7 +3902,7 @@ class Contra_DC_custom(PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(path.simple_polygon())
     
         
-class Contra_DC_chirped(PCellDeclarationHelper):
+class Contra_DC_chirped(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                 Mustafa@ece.ubc.ca
@@ -4161,7 +4161,7 @@ class Contra_DC_chirped(PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(path.simple_polygon())
     
     
-class Contra_DC_couplerApodized(PCellDeclarationHelper):
+class Contra_DC_couplerApodized(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                 Mustafa@ece.ubc.ca
@@ -4429,7 +4429,7 @@ class Contra_DC_couplerApodized(PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(path.simple_polygon())
     
     
-class Contra_DC_SWG(PCellDeclarationHelper):
+class Contra_DC_SWG(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                Mustafa@ece.ubc.ca
@@ -4571,7 +4571,7 @@ class Contra_DC_SWG(PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
-class Contra_DC_SWG_Chirped(PCellDeclarationHelper):
+class Contra_DC_SWG_Chirped(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                Mustafa@ece.ubc.ca
@@ -4730,7 +4730,7 @@ class Contra_DC_SWG_Chirped(PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
-class Contra_DC_SWG_segmented(PCellDeclarationHelper):
+class Contra_DC_SWG_segmented(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
                Mustafa@ece.ubc.ca
@@ -4895,7 +4895,7 @@ class Contra_DC_SWG_segmented(PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
-class UGC(PCellDeclarationHelper):
+class UGC(pya.PCellDeclarationHelper):
   """
   Universal Grating Coupler PCell implementation.
   Analytical design based on "Grating Coupler Design Based on Silicon-On-Insulator", Yun Wang (2013). Master's Thesis, University of British Columbia, Canada
@@ -5185,7 +5185,7 @@ class UGC(PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(box1)       
 
 
-class ebeam_irph_mrr(PCellDeclarationHelper):
+class ebeam_irph_mrr(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the IRPH MRR.
   
@@ -5595,7 +5595,7 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
         shape = shapes(LayerPinRecN).insert(text)
         shape.text_size = 0.4/dbu
 
-class encoder(PCellDeclarationHelper):
+class encoder(pya.PCellDeclarationHelper):
   def __init__(self):
     #Important: initialize the super class
     super(encoder,self).__init__()
