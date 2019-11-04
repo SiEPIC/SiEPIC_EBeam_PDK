@@ -54,17 +54,17 @@ def stepper(a, step, n):
 class parameters():
   # parameter to sweep
   # number of devices (i.e. length of this array) MUST BE EVEN as this is interleaved routing configuration!
-  Num_sweep = 20
+  Num_sweep = 10
 
   # Bragg device parameters (refer to PCell definition)
   Nbits = 2
   ID = '11'
-  L =  linspace(100,370,Num_sweep)
-  startPeriod = linspace(.317,.317,Num_sweep)
-  stopPeriod = linspace(.437,.437,Num_sweep)   
-  w = linspace(.5,.35,Num_sweep)
-  dW1 = linspace(0.12,.12,Num_sweep)
-  dW2 = linspace(0.12,.12,Num_sweep)
+  L =  linspace(370,370,Num_sweep)
+  startPeriod = linspace(.314,.314,Num_sweep)
+  stopPeriod = linspace(.32,.32,Num_sweep)   
+  w = linspace(.5,.5,Num_sweep)
+  dW1 = linspace(0.02,.12,Num_sweep)
+  dW2 = linspace(0.02,.12,Num_sweep)
   
   SumFormat = 2
 
@@ -80,7 +80,7 @@ class parameters():
   bezier_N = 0.2            # Bezier bend parameter
   wg_width = .5          # waveguide routes width  
   wg_pitch = 5            # spacing between waveguides ( keep &gt; 3 microns to minimize cross coupling)
-  route_up = 330        # y-space (from top GC) for upward routing, increase if length of the device length is exceeding the length of routes
+  route_up = 420        # y-space (from top GC) for upward routing, increase if length of the device length is exceeding the length of routes
   route_down = -2*wg_bend_radius   # y-space (from bottom GC) for downward routing, do not change this one
 
   name = 'BraggDual'
