@@ -63,12 +63,12 @@ class parameters():
 
   # contraDC device parameters (refer to PCell definition)
   N =  linspace_without_numpy(1000,1000,Num_sweep)
-  period = linspace_without_numpy(.562,.562,Num_sweep)
-  g = linspace_without_numpy(.2,.2,Num_sweep)
-  w1 = linspace_without_numpy(1.1,1.1,Num_sweep)
-  w2 = linspace_without_numpy(.9,.9,Num_sweep)
-  dW1 = linspace_without_numpy(0,.2,Num_sweep)
-  dW2 = linspace_without_numpy(0,.1,Num_sweep)
+  period = linspace_without_numpy(.462,.462,Num_sweep)
+  g = linspace_without_numpy(.28,.28,Num_sweep)
+  w1 = linspace_without_numpy(.920,.92,Num_sweep)
+  w2 = linspace_without_numpy(.68,.68,Num_sweep)
+  dW1 = linspace_without_numpy(0,.1,Num_sweep)
+  dW2 = linspace_without_numpy(0,.05,Num_sweep)
   sine = 0
   a = linspace_without_numpy(2.7,2.7,Num_sweep);  
   #a = stepper(0, 0.15, Num_sweep)
@@ -76,16 +76,16 @@ class parameters():
   
   # routing and device placement parameters
   
-  sbend_L = 25
-  sbend_R = 20
+  sbend_L = 45
+  sbend_R = 35
   sbend_H = 3
   
-  x_offset = 120              # spacing between grating couplers columns
-  wg_bend_radius = 20 # waveguide routes bend radius
+  x_offset = 170              # spacing between grating couplers columns
+  wg_bend_radius = 35 # waveguide routes bend radius
   bezier = 1                   # Use adiabatic bezier bends (if 1)
   bezier_N = 0.2            # Bezier bend parameter
   device_spacing = 7.3   # spacing between devices
-  wg_width = 1          # waveguide routes width
+  wg_width = .8          # waveguide routes width
   taper_L = sbend_L     # keep this relation!
   GC_pitch = 127         # spacing between grating couplers array (for a single device)
   
