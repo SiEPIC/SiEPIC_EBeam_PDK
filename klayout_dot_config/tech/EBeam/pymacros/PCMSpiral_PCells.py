@@ -1686,7 +1686,7 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
 
 
 
-class spiral(PCellDeclarationHelper):
+class spiral(pya.PCellDeclarationHelper):
   """
   Input: 
   """
@@ -1845,7 +1845,7 @@ class spiral(PCellDeclarationHelper):
     #layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(-b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180))
     #layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0))
     print("spiral length: %s microns" % spiral_length) 
 
     # Pins on the waveguide:

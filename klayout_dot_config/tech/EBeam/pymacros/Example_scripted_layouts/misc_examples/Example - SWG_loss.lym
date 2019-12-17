@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># SiEPIC-Tools scripted layout benchmark
+#
+# Create a test structure to calculate the loss of SWG waveguides using cutback method
+# usage:
+#  - the SiEPIC EBeam Library
+# Modify parameters in layout_parameters() function to create a parameter sweep on selected  SWG parameter.
+# 
+# Script will generate an array of the devices with the selected parameters, and generate GCs for testing with automated measurement labels
+#
+# Author:       Mustafa Hammood 
+#                   Mustafa@ece.ubc.ca
+# September 2018
+
+# Uncomment path_to_waveguide to convert everything to waveguides, or just do it on your own from SiEPIC Tools menu.
+
+# Import KLayout-Python API
+from pya import *
+
+# linspace function without using numpy, because why not?
+def linspace_without_numpy(low, up, length):
+    step = ((up-low) * 1.0 / length)
+    return [low+i*step for i in range(length)]
+    
+  
+# define layout parameters in the class below
+# ALL distance parameters are in microns unless specified otherwise
+class parameters():
+
+  # Layout variables  
+  ly_num = 5
+  ly_bend_r = 5
+  ly_spacing = 8
+  ly_wg_width = .5
+  
+  # SWG waveguide parameters
+  wg_length = 100
+  wg_period = 0.2
+  wg_width = .5
+  wg_duty = 0.5
+  
+  # Strip-SWG taper parameters
+  taper_length = 24
+  taper_fraction = 0.99
+  taper_period_strip = 0.24
+  taper_period_swg = 0.24
+  taper_wg_width_strip = ly_wg_width
+  taper_wg_width_swg = 0.42
+  taper_wg_width_taper = 0.12
+  taper_duty_strip = 0.5
+  taper_duty_swg = 0.5
+  
+
+  
+# TOP Function: Instatiate the layout functions
+def draw_layout():
+  
+  # Import functions from SiEPIC-Tools, and get technology details
+  from SiEPIC.scripts import path_to_waveguide
+  from SiEPIC.extend import to_itype
+  from SiEPIC.utils import select_paths, get_layout_variables
+  TECHNOLOGY, lv, ly, cell = get_layout_variables()
+  dbu = ly.dbu
+  
+  # grab parameters from master class
+  p = parameters()
+  
+  # clean all cells within the present cell
+  ly.prune_subcells(cell.cell_index(), 100)
+
+  # Layer mapping:
+  LayerSiN = ly.layer(TECHNOLOGY['Waveguide'])
+  fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
+  TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+  
+  # Create a sub-cell for our layout
+  top_cell = cell
+  cell = cell.layout().create_cell("SWG_loss")
+  t = Trans(Trans.R0, 0, 0)
+  
+  # place the cell in the top cell
+  top_cell.insert(CellInstArray(cell.cell_index(), t))
+  
+
+  y_pos = 0
+  for i in range(p.ly_num):
+    # SWG PCell
+    i = i+1
+    print(i)
+    x_pos = 0
+    y_pos = y_pos+2*int(round(p.ly_spacing/dbu))
+    pcell = ly.create_cell("SWG_waveguide", "EBeam-dev", { "length": p.wg_length/dbu, "target_period": p.wg_period/dbu, "wg_width": p.wg_width/dbu, "duty": p.wg_duty/dbu} )
+    t = Trans(Trans.R0, x_pos, y_pos)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+    # SWG-strip PCell
+    pcell = ly.create_cell("SWG_to_strip_waveguide", "EBeam-dev", { "length": p.taper_length, "taper_fraction": p.taper_fraction, "period_strip": p.taper_period_strip, "period_swg": p.taper_period_swg
+                                    ,"wg_width_strip":p.taper_wg_width_strip,"wg_width_swg":p.taper_wg_width_swg,"wg_width_taper":p.taper_wg_width_taper,"duty_strip":p.taper_duty_strip,"duty_swg":p.taper_duty_swg} )
+    taper_length_dbu = int(round(p.taper_length/dbu)) 
+    t = Trans(Trans.R180,x_pos, y_pos)
+    cell.insert(CellInstArray(pcell.cell_index(),t))  
+    
+    pcell = ly.create_cell("SWG_to_strip_waveguide", "EBeam-dev", { "length": p.taper_length, "taper_fraction": p.taper_fraction, "period_strip": p.taper_period_strip, "period_swg": p.taper_period_swg
+                                    ,"wg_width_strip":p.taper_wg_width_strip,"wg_width_swg":p.taper_wg_width_swg,"wg_width_taper":p.taper_wg_width_taper,"duty_strip":p.taper_duty_strip,"duty_swg":p.taper_duty_swg} )
+    taper_length_dbu = int(round(p.taper_length/dbu)) 
+    t = Trans(Trans.R0,x_pos+int(round(p.wg_length/dbu)), y_pos)
+    cell.insert(CellInstArray(pcell.cell_index(),t)) 
+    
+    # Bends PCell
+    bend_r_dbu = int(round(p.ly_bend_r/dbu)) 
+    spacing_dbu = int(round(p.ly_spacing/dbu))  
+    bends_x_pos = x_pos-2*i*bend_r_dbu-taper_length_dbu-bend_r_dbu
+  
+    # Straight section to bends
+    pcell = ly.create_cell("Waveguide_Straight", "EBeam", { "wg_length": 2*i*p.ly_bend_r/dbu, "wg_width": p.ly_wg_width/dbu} )
+    t = Trans(Trans.R0,-taper_length_dbu-i*bend_r_dbu, y_pos)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+      
+    pcell = ly.create_cell("Waveguide_Bend", "EBeam", { "radius": p.ly_bend_r, "wg_width": p.ly_wg_width} )
+    t = Trans(Trans.R180,bends_x_pos, y_pos)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+    # Straight section spacing between bends
+    pcell = ly.create_cell("Waveguide_Straight", "EBeam", { "wg_length": p.ly_spacing/dbu, "wg_width": p.ly_wg_width/dbu} )
+    y_pos_straight = y_pos-int(round(p.ly_bend_r/dbu))-int(round(p.ly_spacing/dbu/2))
+    t = Trans(Trans.R90,bends_x_pos, y_pos_straight)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+    pcell = ly.create_cell("Waveguide_Bend", "EBeam", { "radius": p.ly_bend_r, "wg_width": p.ly_wg_width} )
+    t = Trans(Trans.R270,bends_x_pos, y_pos-2*bend_r_dbu-spacing_dbu)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+    pcell = ly.create_cell("Waveguide_Bend", "EBeam", { "radius": p.ly_bend_r, "wg_width": p.ly_wg_width} )
+    t = Trans(Trans.R0,bends_x_pos+2*bend_r_dbu, y_pos-2*bend_r_dbu-spacing_dbu)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+    pcell = ly.create_cell("Waveguide_Bend", "EBeam", { "radius": p.ly_bend_r, "wg_width": p.ly_wg_width} )
+    t = Trans(Trans.R180,bends_x_pos+2*bend_r_dbu, y_pos-spacing_dbu)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+    # Straight section to bends
+    
+    straight_length = 2*i*p.ly_bend_r/dbu-2*p.ly_bend_r/dbu
+    pcell = ly.create_cell("Waveguide_Straight", "EBeam", { "wg_length": straight_length, "wg_width": p.ly_wg_width/dbu} )
+    y_pos_straight = y_pos-spacing_dbu
+    x_pos_straight = -taper_length_dbu-i*bend_r_dbu+bend_r_dbu
+    t = Trans(Trans.R0,x_pos_straight, y_pos_straight)
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+  
+  y_offset = int(round(p.ly_spacing/dbu))
+  x_offset = int(round(p.wg_length/dbu))
+  t = Trans(Trans.M90, x_offset, y_offset)
+  top_cell.insert(CellInstArray(cell.cell_index(), t))
+  
+draw_layout()</text>
+</klayout-macro>
