@@ -16,8 +16,8 @@ thick_Slab = 0;          # for strip waveguides
 #gap = 200e-9;	# Directional coupler gap
 
 # define materials
-material_Clad = "SiO2 (Glass) - Palik";
-material_BOX  = "SiO2 (Glass) - Palik";
+material_Clad = "SiO2 (Glass) - Dispersive & Lossless";
+material_BOX  = "SiO2 (Glass) - Dispersive & Lossless";
 material_Si   = "Si (Silicon) - Dispersive & Lossless";
 materials;     # run script to add materials
 
