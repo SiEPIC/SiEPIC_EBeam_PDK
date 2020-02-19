@@ -7,12 +7,20 @@
 #
 #clear;
 
-n_modes_EME = 1;  # for testing simulation flow
-# n_modes_EME = 50; # accurate simulation
-
 closeall; 
 switchtolayout;
 groupscope("::model");
+
+ACCURATE = 0;
+
+if (ACCURATE == 1) {
+  n_modes_EME = 50; # accurate simulation
+  mesh_override = true; # accurate simulation
+} else {
+  n_modes_EME = 1;  # for testing simulation flow
+  mesh_override = false; # 
+}
+
 
 # Frequency sweep parameters
 number_of_plot_points=1000;
@@ -33,6 +41,9 @@ number_of_plot_points=1000;
 # Set contra DC object parameters
 closeall;
 switchtolayout;
+
+select("mesh");
+set("enabled",mesh_override);
 
 select("ContraDC");
 set("widthA",Wa);
