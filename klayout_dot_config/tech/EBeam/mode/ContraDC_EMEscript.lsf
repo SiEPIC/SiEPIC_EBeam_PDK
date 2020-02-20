@@ -23,7 +23,7 @@ if (ACCURATE == 1) {
 
 
 # Frequency sweep parameters
-number_of_plot_points=1000;
+#number_of_plot_points=1000;
 #min_wavelength=1.5e-6;
 #max_wavelength=1.6e-6;
 
