@@ -39,7 +39,7 @@ def phaseMatch_analysis(contraDC, simulation_setup, plot = True):
 
     #%% plot phase match (optional)
     if plot == True:
-        plt.figure(0)
+        plt.figure()
         plt.plot(lambda_fit*1e9, phaseMatch, '-.', label='Phase matching condition')
         plt.plot(lambda_fit*1e9, neff1, label='Waveguide 1 effective index')
         plt.plot(lambda_fit*1e9, neff2, label='Waveguide 2 effective index')

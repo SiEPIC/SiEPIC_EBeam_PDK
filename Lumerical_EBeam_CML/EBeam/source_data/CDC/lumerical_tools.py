@@ -10,52 +10,52 @@
 #%% find lumapi 
 import sys, os, platform
 
+mode = None # variable for the Lumerical Python API
+
 # Lumerical Python API path on system
 
 cwd = os.getcwd()
 
-if platform.system() == 'Windows':
-    try:
-        lumapi_path = 'C:/Program Files/Lumerical/2019b/api/python'
-        os.chdir(lumapi_path)
-        import lumapi
-    except FileNotFoundError:
-        lumapi_path = 'C:/Program Files/Lumerical/FDTD/api/python'
-        os.chdir(lumapi_path)
-        import lumapi
-
 if platform.system() == 'Darwin':
     path_app = '/Applications'
-    # Application folder paths containing Lumerical
-    p = [s for s in os.listdir(path_app) if "Lumerical" in s]
-    # check sub-folders for lumapi.py
-    import fnmatch
-    for dir_path in p:
-      search_str = 'lumapi.py'
-      matches = []
-      for root, dirnames, filenames in os.walk(os.path.join(path_app,dir_path), followlinks=True):
-         for filename in fnmatch.filter(filenames, search_str):
+elif platform.system() == 'Linux':
+    path_app = '/opt'
+elif platform.system() == 'Windows': 
+    path_app = 'C:\\Program Files'
+else:
+    print('Not a supported OS')
+    exit()
+
+
+# Application folder paths containing Lumerical
+p = [s for s in os.listdir(path_app) if "Lumerical" in s]
+# check sub-folders for lumapi.py
+import fnmatch
+for dir_path in p:
+    search_str = 'lumapi.py'
+    matches = []
+    for root, dirnames, filenames in os.walk(os.path.join(path_app,dir_path), followlinks=True):
+        for filename in fnmatch.filter(filenames, search_str):
             matches.append(root)
-      if matches:
-        print(matches)
+    if matches:
         lumapi_path = matches[0]
     if not lumapi_path in sys.path:
         sys.path.append(lumapi_path)
-    import lumapi
+#    os.chdir(lumapi_path)
+
+print('Lumerical lumapi.py path: %s' % lumapi_path)
+
+import lumapi
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+print('Simulation project path: %s' % dir_path)
 
-if os.path.exists(os.path.join(lumapi_path,'lumapi.py')):
-    print('Found lumapi path at' + ': ' +lumapi_path)
-    sys.path.append(lumapi_path)
-else:
-    print('lumapi path does not exist, edit lumapi_path variable')
-    
-os.chdir(cwd)
 
 #%% run MODE for dispersion analysis
-def run_mode(contraDC, simulation_setup, close = True):
-    mode = lumapi.open('mode')
+def run_mode(contraDC, simulation_setup, close = False):
+    global mode
+    if not(mode):
+        mode = lumapi.open('mode')
     
     # feed parameters into model
     command = "gap = %s; width_1 = %s; width_2 = %s; thick_Si = %s; period = %s;" 
@@ -67,9 +67,9 @@ def run_mode(contraDC, simulation_setup, close = True):
                       % (simulation_setup.lambda_start, simulation_setup.lambda_end))
     
     if contraDC.pol == 'TE':
-        lumapi.evalScript(mode,"pol = 1;")
+        lumapi.evalScript(mode,"pol = 'TE';")
     elif contraDC.pol == 'TM':
-        lumapi.evalScript(mode,"pol = 2;")
+        lumapi.evalScript(mode,"pol = 'TM';")
  
     if contraDC.slab == True:
         lumapi.evalScript(mode,"slab = 1;")
@@ -99,8 +99,10 @@ def run_mode(contraDC, simulation_setup, close = True):
     return [neff_data, lambda_fit, ng_contra, ng1, ng2, lambda_self1, lambda_self2]
 
 #%% run MODE for EME simulation of device
-def run_EME(contraDC, simulation_setup, close = True):
-    mode = lumapi.open('mode')
+def run_EME(contraDC, simulation_setup, close = False):
+    global mode
+    if not(mode):
+        mode = lumapi.open('mode')
     
     projectname = 'ContraDC_EME'
     filename = 'ContraDC_EMEscript'
@@ -126,7 +128,7 @@ def run_EME(contraDC, simulation_setup, close = True):
         
     command += "load('%s');"%projectname
     command += '%s;'%filename
-    
+   
     lumapi.evalScript(mode, command)
     
     delta_lambda_contra = lumapi.getVar(mode,"delta_lambda")
@@ -141,7 +143,7 @@ def run_EME(contraDC, simulation_setup, close = True):
     return [delta_lambda_contra, delta_lambda_self1, delta_lambda_self2, lambda_contra]
 
 #%% run FDTD for bandstructure simulation of device
-def run_FDTD(contraDC, simulation_setup, close = True):
+def run_FDTD(contraDC, simulation_setup, close = False):
     c = 299792458           #[m/s]
     frequency_start = c/simulation_setup.lambda_end
     frequency_end = c/simulation_setup.lambda_start
@@ -178,8 +180,10 @@ def run_FDTD(contraDC, simulation_setup, close = True):
     return [delta_lambda_contra, delta_lambda_self1, delta_lambda_self2, lambda_contra]
 
 #%% run MODE to generate S-parameters .dat file
-def generate_dat( contraDC, simulation_setup, S_Matrix, close = True ):
-    mode = lumapi.open('mode')
+def generate_dat( contraDC, simulation_setup, S_Matrix, close = False ):
+    global mode
+    if not(mode):
+        mode = lumapi.open('mode')
     
     # feed polarization into model
     if contraDC.pol == 'TE':
@@ -198,7 +202,7 @@ def generate_dat( contraDC, simulation_setup, S_Matrix, close = True ):
     return
 
 #%% run INTERCONNECT with compact model loaded
-def run_INTC(close = True):
+def run_INTC(close = False):
     intc = lumapi.open('interconnect')
     
     print(dir_path)

@@ -28,7 +28,7 @@ def amplitude( contraDC, simulation, plot = True):
     dropAmplitude = 10*np.log10(np.abs(contraDC.E_Drop[0,:])**2)
     
     if plot == True:
-        plt.figure(2)
+        plt.figure()
         plt.plot(contraDC.wavelength[:]*1e9, thruAmplitude, label='Through Port')
         plt.plot(contraDC.wavelength[:]*1e9, dropAmplitude, label='Drop Port')
         plt.legend()
@@ -43,7 +43,7 @@ def phase( contraDC, simulation, plot = True):
     dropPhase = np.unwrap(np.angle(contraDC.E_Drop))
     
     if plot == True:
-        plt.figure(3)
+        plt.figure()
         plt.plot(contraDC.wavelength[:]*1e9, thruPhase[0,:], label='Through Port Phase')
         plt.plot(contraDC.wavelength[:]*1e9, dropPhase[0,:], label='Drop Port Phase')
         plt.legend()
@@ -64,7 +64,7 @@ def group_delay( contraDC, simulation, plot = True):
     thruGroupDelay = -np.diff(thruPhase)/np.diff(omega)
     
     if plot == True:
-        plt.figure(4)
+        plt.figure()
         plt.plot(contraDC.wavelength[:-1]*1e9, 1e12*thruGroupDelay[0,:], label='Through Port Group Delay')
         plt.plot(contraDC.wavelength[:-1]*1e9, 1e12*dropGroupDelay[0,:], label='Drop Port Group Delay')
         plt.legend()
