@@ -147,7 +147,7 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = True):
         kappa_apod=kappaMin+(kappaMax-kappaMin)*profile
         
         if plot == True:
-                plt.figure(1)
+                plt.figure()
                 plt.plot(zaxis*1e6, kappa_apod)
                 plt.ylabel('kappa profile')
                 plt.xlabel('Length (um)')
@@ -167,7 +167,7 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = True):
     randomChirpFrac = np.random.rand(1,N_seg)*rch/100; randomChirpFrac = randomChirpFrac[0,:]
     
     if plot == True:
-        plt.figure(0)
+        plt.figure()
         plt.plot(zaxis*1e6, couplingChirpFrac, label="Coupling chirp")
         plt.plot(zaxis*1e6, lengthChirpFrac, label="Length chirp")
         plt.plot(zaxis*1e6, randomChirpFrac, label="Random chirp")
