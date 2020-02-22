@@ -7,6 +7,8 @@
     SiEPIC Kits Ltd. 2019     ; University of British Columbia
             
 """
+
+
 #%% find lumapi 
 import sys, os, platform
 
@@ -39,8 +41,8 @@ for dir_path in p:
             matches.append(root)
     if matches:
         lumapi_path = matches[0]
-    if not lumapi_path in sys.path:
-        sys.path.append(lumapi_path)
+if not lumapi_path in sys.path:
+    sys.path.append(lumapi_path)
 #    os.chdir(lumapi_path)
 
 print('Lumerical lumapi.py path: %s' % lumapi_path)
@@ -180,7 +182,7 @@ def run_FDTD(contraDC, simulation_setup, close = False):
     return [delta_lambda_contra, delta_lambda_self1, delta_lambda_self2, lambda_contra]
 
 #%% run MODE to generate S-parameters .dat file
-def generate_dat( contraDC, simulation_setup, S_Matrix, close = False ):
+def generate_dat( contraDC, simulation_setup, S_Matrix, sfile, close = False ):
     global mode
     if not(mode):
         mode = lumapi.open('mode')
@@ -192,13 +194,13 @@ def generate_dat( contraDC, simulation_setup, S_Matrix, close = False ):
         lumapi.evalScript(mode,"mode_label = 'TM'; mode_ID = '2';")
         
     # run write sparams script
-    lumapi.evalScript(mode,"cd('%s');"%dir_path)
+    lumapi.evalScript(mode,"cd('%s'); sfile = '%s'; " % (dir_path, sfile) )
     lumapi.evalScript(mode,'write_sparams;')
     
     if close == True:
         lumapi.close(mode)
     
-    run_INTC()
+#    run_INTC()
     return
 
 #%% run INTERCONNECT with compact model loaded

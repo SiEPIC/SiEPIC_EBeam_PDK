@@ -102,23 +102,28 @@ def bandwidth( response, wavelength, limit):
 
 # find performance of the device
 def performance( S ):
-    #find 3 dB bandwidth of drop port
-    bw_3dB = bandwidth( 10*np.log10(np.abs(S['S21'])**2), S['lambda'],  3)
-    #find 20 dB bandwidth of drop port
-    bw_20dB = bandwidth( 10*np.log10(np.abs(S['S21'])**2), S['lambda'],  20)
     
-    print("######## Contra-DC Analysis ########")
-    print("3 dB bandwidth = %s nm"%bw_3dB)
-    print("20 dB bandwidth = %s nm"%bw_20dB)
+    try:
+        #find 3 dB bandwidth of drop port
+        bw_3dB = bandwidth( 10*np.log10(np.abs(S['S21'])**2), S['lambda'],  3)
+        #find 20 dB bandwidth of drop port
+        bw_20dB = bandwidth( 10*np.log10(np.abs(S['S21'])**2), S['lambda'],  20)
     
-    return [bw_3dB, bw_20dB]
-
+        print("######## Contra-DC Analysis ########")
+        print("3 dB bandwidth = %s nm"%bw_3dB)
+        print("20 dB bandwidth = %s nm"%bw_20dB)
+    
+        return [bw_3dB, bw_20dB]
+    except:
+        print('cannot compute the bandwidths')
+        
 #%% generate S-parameters
 # Source: J. Frei, X.-D. Cai, and S. Muller. Multiport s-parameter and 
 # T-parameter conversion with symmetry extension. IEEE Transactions on 
 # Microwave Theory and Techniques, 56(11):2493?2504, 2008.
 
-def gen_sparams( contraDC, simulation, run_INTC = True):
+def gen_sparams( contraDC, simulation, sfile, run_INTC = True):
+    import os
     T = contraDC.TransferMatrix
     lambda0 = contraDC.wavelength*1e9
     f =  299792458/lambda0
@@ -188,9 +193,10 @@ def gen_sparams( contraDC, simulation, run_INTC = True):
     S['S34'] = S34
     S['S44'] = np.matrix.transpose(S44)
     
-    sio.savemat('ContraDC_sparams.mat', S)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    sio.savemat(os.path.join(dir_path,'ContraDC_sparams.mat'), S)
     
     # create .dat file for circuit simulations
-    lumerical_tools.generate_dat(contraDC, simulation, S)
+    lumerical_tools.generate_dat(contraDC, simulation, S, sfile)
     
     return S

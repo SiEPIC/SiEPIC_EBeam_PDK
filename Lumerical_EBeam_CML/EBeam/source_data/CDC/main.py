@@ -15,10 +15,13 @@
 # where 
 #   - PCell_parameters.xml = path to the XML file containing PCell parameters
 #   - 0 = Variable 'ID' in the XML file. which component to simulate; can have multiple cells in one XML filepath. 
+#
+# python3 main.py 
+#  will simulate with the default parameters 
 
-import dispersion_analysis
-import analysis
-import contraDC_CMT_TMM
+# required Python modules:
+# pip3 install numpy scipy matplotlib
+
 
 # XML to Dict parser, from:
 # https://stackoverflow.com/questions/2148119/how-to-convert-an-xml-string-to-a-dictionary-in-python/10077069
@@ -113,15 +116,67 @@ class simulation():
         
         self.central_lambda = 1550e-9
 
+
+
+import xmltodict, sys
+from collections import OrderedDict
+
 # for XML import
 import sys
 from xml.etree import cElementTree as ET
 
 
-
 #%% instantiate the class constructors        
 device = contra_DC()
 simulation = simulation()
+
+# load the XML file, add an entry for the current parameters, save
+def update_xml (device, simulation, sfile):
+    import os
+    
+    # Load the XML file into an OrderedDict
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    filepath = os.path.join(dir_path,'CDC.xml')
+    print('Loading component simulation database XML file: %s' % filepath)
+    with open(filepath, 'r') as file:
+        mydict = xmltodict.parse(file.read())
+    if ( type(mydict['lumerical_lookup_table']['association'])==OrderedDict):
+        print('Error: please ensure that the XML has 2 or more <association> entries.')
+        exit()
+                
+    # Add an entry to the OrderedDict, in the Lumerical format
+    mydict_add = OrderedDict([('design', OrderedDict([('value', [
+        OrderedDict([('@name', 'wg1_width'), ('@type', 'double'), ('#text', str(device.w1))]), 
+        OrderedDict([('@name', 'wg2_width'), ('@type', 'double'), ('#text', str(device.w2))]), 
+        OrderedDict([('@name', 'corrugation_width1'), ('@type', 'double'), ('#text', str(device.dW1))]), 
+        OrderedDict([('@name', 'corrugation_width2'), ('@type', 'double'), ('#text', str(device.dW2))]), 
+        OrderedDict([('@name', 'gap'), ('@type', 'double'), ('#text', str(device.gap))]), 
+        OrderedDict([('@name', 'grating_period'), ('@type', 'double'), ('#text', str(device.period))]), 
+        OrderedDict([('@name', 'number_of_periods'), ('@type', 'int'), ('#text', str(device.N))]), 
+        OrderedDict([('@name', 'sinusoidal'), ('@type', 'double'), ('#text', str(device.sinusoidal))]), 
+        OrderedDict([('@name', 'index'), ('@type', 'double'), ('#text', str(device.apodization))]), 
+        OrderedDict([('@name', 'lambda_start'), ('@type', 'double'), ('#text', str(simulation.lambda_start))]), 
+        OrderedDict([('@name', 'lambda_end'), ('@type', 'double'), ('#text', str(simulation.lambda_end))]), 
+        OrderedDict([('@name', 'resolution'), ('@type', 'double'), ('#text', str(simulation.resolution))])])])), 
+        ('extracted', OrderedDict([('value', 
+        OrderedDict([('@name', 'sparam'), ('@type', 'string'), ('#text', sfile)]))]))])
+    mydict['lumerical_lookup_table']['association'].append ( mydict_add )
+    
+    # Convert the OrderedDict into XML
+    xml_out = xmltodict.unparse(mydict, pretty=True)
+
+    # Write the XML to a file
+    f = open(filepath, "w")
+    f.write(xml_out)
+    f.close()
+    print('Saved component simulation database XML file: %s' % filepath)
+
+def sfilename(device,simulation):
+    return 'w1=%s,w2=%s,dW1=%s,dW2=%s,gap=%s,p=%s,N=%s,s=%s,a=%s,l1=%s,l2=%s,ln=%s.dat' % (
+        int(device.w1*1e6), int(device.w2*1e6), int(device.dW1*1e6), int(device.dW2*1e6), 
+        int(device.gap*1e6), int(device.period*1e6), device.N, int(device.sinusoidal), 
+        str(device.apodization), int(simulation.lambda_start*1e6), int(simulation.lambda_end*1e6), int(simulation.resolution), 
+        )    
 
 #%% load parameters from XML files
 # can pass an XML file with these parameters, as an argument to python on the command line
@@ -130,17 +185,31 @@ if(len(sys.argv)>1):
     filepath = sys.argv[1]
     print('Loading XML file: %s' % filepath)
     with open(filepath, 'r') as file:
-        PCells_params = etree_to_dict(ET.XML(file.read()))['PCells']['PCell']
+        d=etree_to_dict(ET.XML(file.read()))['PCells']
+#        print(len(d))
+#        print(d)
+        if type(d['PCell'])==list:
+            PCells_params = d['PCell']
+        elif len(d)==1:
+            PCells_params = [d['PCell']]
+        else:
+            print('Error: problem with XML file')
+            exit()
 
     IDs = []
     if(len(sys.argv)>2):  # argument is one component to simulate; otherwise simulate all of them.
         IDs = [sys.argv[2]]
     else:
         for PCell_params in PCells_params:
+#            print(PCell_params)
             if PCell_params['Name'] == 'Contra-Directional Coupler':
                 IDs.append(PCell_params['ID'])
 else:
     IDs = [0]
+
+import dispersion_analysis
+import analysis
+import contraDC_CMT_TMM
 
 for ID in IDs:
     # load parameters from XML
@@ -153,7 +222,10 @@ for ID in IDs:
     
     #%% analysis and export parameters
     analysis.plot_all(device, simulation)
-    S = analysis.gen_sparams(device, simulation)
+    sfile = sfilename(device,simulation)
+    S = analysis.gen_sparams(device, simulation, sfile)
+    print('Saved sparameter file: %s' % sfile)
+    update_xml (device, simulation, sfile)
     analysis.performance(S)
     
     
