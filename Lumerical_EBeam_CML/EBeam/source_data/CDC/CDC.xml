@@ -2,69 +2,18 @@
 <lumerical_lookup_table version="1.0" name="index_table">
 	<association>
 		<design>
-			<value name="wg1_width" type="double">500e-9</value>
-			<value name="wg2_width" type="double">500e-9</value>
-			<value name="corrugation_width1" type="double">40e-9</value>
-			<value name="corrugation_width2" type="double">40e-9</value>
-			<value name="gap" type="double">0e-9</value>
-			<value name="grating_period" type="double">300e-9</value>
-			<value name="gap" type="double">0e-9</value>
-			<value name="sinusoidal" type="int">0</value>
-			<value name="index" type="double">0</value>
-		</design>
-		<extracted>
-			<value name="sparam" type="string">xxx.sparam</value>
-		</extracted>
-	</association>
-	<association>
-		<design>
-			<value name="wg1_width" type="double">500e-9</value>
-			<value name="wg2_width" type="double">510e-9</value>
-			<value name="corrugation_width1" type="double">40e-9</value>
-			<value name="corrugation_width2" type="double">40e-9</value>
-			<value name="gap" type="double">0e-9</value>
-			<value name="grating_period" type="double">300e-9</value>
-			<value name="gap" type="double">0e-9</value>
-			<value name="sinusoidal" type="int">0</value>
-			<value name="index" type="double">0</value>
-		</design>
-		<extracted>
-			<value name="sparam" type="string">xxx.sparam</value>
-		</extracted>
-	</association>
-	<association>
-		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
-			<value name="corrugation_width2" type="double">4e-08</value>
-			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.13e-07</value>
-			<value name="number_of_periods" type="int">1000</value>
-			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
-		</design>
-		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=1000,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
-		</extracted>
-	</association>
-	<association>
-		<design>
 			<value name="wg1_width" type="double">4.5e-07</value>
 			<value name="wg2_width" type="double">5.5e-07</value>
 			<value name="corrugation_width1" type="double">3e-08</value>
 			<value name="corrugation_width2" type="double">4e-08</value>
 			<value name="gap" type="double">1.5e-07</value>
 			<value name="grating_period" type="double">3.19e-07</value>
-			<value name="number_of_periods" type="int">300</value>
-			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
+			<value name="number_of_periods" type="double">300</value>
+			<value name="sinusoidal" type="double">0</value>
+			<value name="apodization_index" type="double">2.8</value>
+			<value name="lambda_start" type="double">1500</value>
+			<value name="lambda_end" type="double">1600</value>
+			<value name="lambda_points" type="double">51</value>
 		</design>
 		<extracted>
 			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=300,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
@@ -72,135 +21,78 @@
 	</association>
 	<association>
 		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
+			<value name="wg1_width" type="double">4.4e-07</value>
+			<value name="wg2_width" type="double">5.6e-07</value>
+			<value name="corrugation_width1" type="double">4e-08</value>
+			<value name="corrugation_width2" type="double">2e-08</value>
+			<value name="gap" type="double">1.5e-07</value>
+			<value name="grating_period" type="double">3.18e-07</value>
+			<value name="number_of_periods" type="double">1000</value>
+			<value name="sinusoidal" type="double">0</value>
+			<value name="apodization_index" type="double">0</value>
+			<value name="lambda_start" type="double">1500</value>
+			<value name="lambda_end" type="double">1600</value>
+			<value name="lambda_points" type="double">501</value>
+		</design>
+		<extracted>
+			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=1000,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
+		</extracted>
+	</association>
+	<association>
+		<design>
+			<value name="wg1_width" type="double">4.3999999999999997e-07</value>
+			<value name="wg2_width" type="double">5.6e-07</value>
+			<value name="corrugation_width1" type="double">2e-08</value>
 			<value name="corrugation_width2" type="double">4e-08</value>
 			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.13e-07</value>
+			<value name="grating_period" type="double">3.18e-07</value>
 			<value name="number_of_periods" type="int">1000</value>
 			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8000000000000003</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
+			<value name="apodization_index" type="double">2.0</value>
+			<value name="lambda_start" type="double">1.5</value>
+			<value name="lambda_end" type="double">1.5999999999999999</value>
+			<value name="lambda_points" type="double">51</value>
 		</design>
 		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=1000,s=1,a=2.8000000000000003,l1=1,l2=1,ln=51.dat</value>
+			<value name="sparam" type="string">w1=439,w2=560,dW1=20,dW2=40,gap=150,p=318,N=1000,s=1,a=2.0,l1=1500,l2=1600,ln=51.dat</value>
 		</extracted>
 	</association>
 	<association>
 		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
+			<value name="wg1_width" type="double">4.4e-07</value>
+			<value name="wg2_width" type="double">5.6e-07</value>
+			<value name="corrugation_width1" type="double">2e-08</value>
 			<value name="corrugation_width2" type="double">4e-08</value>
 			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.17e-07</value>
-			<value name="number_of_periods" type="int">900</value>
+			<value name="grating_period" type="double">3.18e-07</value>
+			<value name="number_of_periods" type="int">1000</value>
 			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
+			<value name="apodization_index" type="double">2.0</value>
+			<value name="lambda_start" type="double">1.5</value>
+			<value name="lambda_end" type="double">1.5999999999999999</value>
+			<value name="lambda_points" type="double">51</value>
 		</design>
 		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=900,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
+			<value name="sparam" type="string">w1=440,w2=560,dW1=20,dW2=40,gap=150,p=318,N=1000,s=1,a=2.0,l1=1500,l2=1600,ln=51.dat</value>
 		</extracted>
 	</association>
 	<association>
 		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
-			<value name="corrugation_width2" type="double">4e-08</value>
+			<value name="wg1_width" type="double">5.6e-07</value>
+			<value name="wg2_width" type="double">4.4e-07</value>
+			<value name="corrugation_width1" type="double">4e-08</value>
+			<value name="corrugation_width2" type="double">2e-08</value>
 			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.17e-07</value>
-			<value name="number_of_periods" type="int">1100</value>
-			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
+			<value name="grating_period" type="double">3.18e-07</value>
+			<value name="number_of_periods" type="int">1000</value>
+			<value name="sinusoidal" type="double">False</value>
+			<value name="apodization_index" type="double">2.0</value>
+			<value name="lambda_start" type="double">1.5</value>
+			<value name="lambda_end" type="double">1.5999999999999999</value>
+			<value name="lambda_points" type="double">51</value>
 		</design>
 		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=1100,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
-		</extracted>
-	</association>
-	<association>
-		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
-			<value name="corrugation_width2" type="double">4e-08</value>
-			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.17e-07</value>
-			<value name="number_of_periods" type="int">9</value>
-			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
-		</design>
-		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=9,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
-		</extracted>
-	</association>
-	<association>
-		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
-			<value name="corrugation_width2" type="double">4e-08</value>
-			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.17e-07</value>
-			<value name="number_of_periods" type="int">9</value>
-			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
-		</design>
-		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=9,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
-		</extracted>
-	</association>
-	<association>
-		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
-			<value name="corrugation_width2" type="double">4e-08</value>
-			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.17e-07</value>
-			<value name="number_of_periods" type="int">9</value>
-			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
-		</design>
-		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=9,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
-		</extracted>
-	</association>
-	<association>
-		<design>
-			<value name="wg1_width" type="double">4.5e-07</value>
-			<value name="wg2_width" type="double">5.5e-07</value>
-			<value name="corrugation_width1" type="double">3e-08</value>
-			<value name="corrugation_width2" type="double">4e-08</value>
-			<value name="gap" type="double">1.5e-07</value>
-			<value name="grating_period" type="double">3.17e-07</value>
-			<value name="number_of_periods" type="int">11</value>
-			<value name="sinusoidal" type="double">True</value>
-			<value name="index" type="double">2.8</value>
-			<value name="lambda_start" type="double">1.5e-06</value>
-			<value name="lambda_end" type="double">1.6e-06</value>
-			<value name="resolution" type="double">51</value>
-		</design>
-		<extracted>
-			<value name="sparam" type="string">w1=0,w2=0,dW1=0,dW2=0,gap=0,p=0,N=11,s=1,a=2.8,l1=1,l2=1,ln=51.dat</value>
+			<value name="sparam" type="string">w1=560,w2=440,dW1=40,dW2=20,gap=150,p=318,N=1000,s=0,a=2.0,l1=1500,l2=1600,ln=51.dat</value>
 		</extracted>
 	</association>
 </lumerical_lookup_table>
