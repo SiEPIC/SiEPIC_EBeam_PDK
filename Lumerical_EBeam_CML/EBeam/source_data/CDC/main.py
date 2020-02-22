@@ -82,17 +82,17 @@ class contra_DC():
         
         # find the component 'ID' in the PCells_params dict
         for PCell_params in PCells_params:
-            if PCell_params['Name'] == 'Contra-Directional Coupler' and PCell_params['ID'] == ID:
+            if PCell_params['Name'] == 'contra_directional_coupler' and PCell_params['ID'] == ID:
                 print(PCell_params)
-                self.w1 = float(PCell_params['wg1_width'])*1e-6
-                self.w2 = float(PCell_params['wg2_width'])*1e-6
-                self.dW1 = float(PCell_params['corrugation_width1'])*1e-6
-                self.dW2 = float(PCell_params['corrugation_width2'])*1e-6
-                self.gap = float(PCell_params['gap'])*1e-6
+                self.w1 = round(float(PCell_params['wg1_width'])*1e-6,10)
+                self.w2 = round(float(PCell_params['wg2_width'])*1e-6,10)
+                self.dW1 = round(float(PCell_params['corrugation_width1'])*1e-6,10)
+                self.dW2 = round(float(PCell_params['corrugation_width2'])*1e-6,10)
+                self.gap = round(float(PCell_params['gap'])*1e-6,10)
                 self.period = float(PCell_params['grating_period'])*1e-6
                 self.N = int(PCell_params['number_of_periods'])
-                self.sinusoidal = bool(PCell_params['sinusoidal'])
-                self.apodization = float(PCell_params['index'])
+                self.sinusoidal = bool(int(PCell_params['sinusoidal']))
+                self.apodization = round(float(PCell_params['apodization_index']),10)
 
     def results(self, *args):
         self.E_thru = 0
@@ -154,10 +154,10 @@ def update_xml (device, simulation, sfile):
         OrderedDict([('@name', 'grating_period'), ('@type', 'double'), ('#text', str(device.period))]), 
         OrderedDict([('@name', 'number_of_periods'), ('@type', 'int'), ('#text', str(device.N))]), 
         OrderedDict([('@name', 'sinusoidal'), ('@type', 'double'), ('#text', str(device.sinusoidal))]), 
-        OrderedDict([('@name', 'index'), ('@type', 'double'), ('#text', str(device.apodization))]), 
-        OrderedDict([('@name', 'lambda_start'), ('@type', 'double'), ('#text', str(simulation.lambda_start))]), 
-        OrderedDict([('@name', 'lambda_end'), ('@type', 'double'), ('#text', str(simulation.lambda_end))]), 
-        OrderedDict([('@name', 'resolution'), ('@type', 'double'), ('#text', str(simulation.resolution))])])])), 
+        OrderedDict([('@name', 'apodization_index'), ('@type', 'double'), ('#text', str(device.apodization))]), 
+        OrderedDict([('@name', 'lambda_start'), ('@type', 'double'), ('#text', str(simulation.lambda_start*1e6))]), 
+        OrderedDict([('@name', 'lambda_end'), ('@type', 'double'), ('#text', str(simulation.lambda_end*1e6))]), 
+        OrderedDict([('@name', 'lambda_points'), ('@type', 'double'), ('#text', str(simulation.resolution))])])])), 
         ('extracted', OrderedDict([('value', 
         OrderedDict([('@name', 'sparam'), ('@type', 'string'), ('#text', sfile)]))]))])
     mydict['lumerical_lookup_table']['association'].append ( mydict_add )
@@ -173,9 +173,9 @@ def update_xml (device, simulation, sfile):
 
 def sfilename(device,simulation):
     return 'w1=%s,w2=%s,dW1=%s,dW2=%s,gap=%s,p=%s,N=%s,s=%s,a=%s,l1=%s,l2=%s,ln=%s.dat' % (
-        int(device.w1*1e6), int(device.w2*1e6), int(device.dW1*1e6), int(device.dW2*1e6), 
-        int(device.gap*1e6), int(device.period*1e6), device.N, int(device.sinusoidal), 
-        str(device.apodization), int(simulation.lambda_start*1e6), int(simulation.lambda_end*1e6), int(simulation.resolution), 
+        int(round(device.w1*1e9,14)), int(device.w2*1e9), int(device.dW1*1e9), int(device.dW2*1e9), 
+        int(device.gap*1e9), int(device.period*1e9), device.N, int(device.sinusoidal), 
+        str(device.apodization), int(simulation.lambda_start*1e9), int(simulation.lambda_end*1e9), int(simulation.resolution), 
         )    
 
 #%% load parameters from XML files
@@ -202,7 +202,7 @@ if(len(sys.argv)>1):
     else:
         for PCell_params in PCells_params:
 #            print(PCell_params)
-            if PCell_params['Name'] == 'Contra-Directional Coupler':
+            if PCell_params['Name'] == 'contra_directional_coupler':
                 IDs.append(PCell_params['ID'])
 else:
     IDs = [0]
@@ -211,12 +211,17 @@ import dispersion_analysis
 import analysis
 import contraDC_CMT_TMM
 
+print('Performing %s CDC simulations.' % len(IDs))
+
 for ID in IDs:
     # load parameters from XML
     device.set_params(PCells_params, ID)
     
     #%% main program
     [waveguides, simulation] = dispersion_analysis.phaseMatch_analysis(device, simulation)
+    sfile = sfilename(device,simulation)
+    print('working on sparameter file: %s' % sfile)
+    
     device = dispersion_analysis.kappa_analysis(device, simulation, waveguides, sim_type = 'EME', close = False)
     device = contraDC_CMT_TMM.contraDC_model(device, simulation, waveguides)
     
