@@ -1,0 +1,8 @@
+Steps to update the PDK, and publish on KLayout Salt:
+
+- update grain.xml file version number
+- zip new CML
+- create new GitHub release with tag = version number
+- update Salt database
+
+
