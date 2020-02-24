@@ -39,7 +39,7 @@ def swap_rows(arr, frm, to):
     return arr
     
 #%% the bread and butter
-def contraDC_model(contraDC, simulation_setup, waveguides,plot = True):
+def contraDC_model(contraDC, simulation_setup, waveguides,plot = True, progress=False):
     
     #%% System constants Constants
     c = 299792458           #[m/s]
@@ -182,14 +182,16 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = True):
     #https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
     #Thank Greenstick.
     
-    # A List of Items
-    progressbar_width = lenghtLambda
-    # Initial call to print 0% progress
-    printProgressBar(0, progressbar_width, prefix = 'Progress:', suffix = 'Complete', length = 50)
+    if progress:
+        # A List of Items
+        progressbar_width = lenghtLambda
+        # Initial call to print 0% progress
+        printProgressBar(0, progressbar_width, prefix = 'Progress:', suffix = 'Complete', length = 50)
             
     for ii in range(lenghtLambda):
-        #Update Bar
-        printProgressBar(ii + 1, progressbar_width, prefix = 'Progress:', suffix = 'Complete', length = 50)
+        if progress:
+            #Update Bar
+            printProgressBar(ii + 1, progressbar_width, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
         randomChirp = randomChirpFrac
         chirpWL = chirpDev + randomChirp
