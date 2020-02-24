@@ -139,6 +139,11 @@ def run_EME(contraDC, simulation_setup, close = False):
     delta_lambda_self1 = lumapi.getVar(mode,"delta_lambda_self1")
     delta_lambda_self2 = lumapi.getVar(mode,"delta_lambda_self2")
     
+    # return the MODE project file to its small size
+    command ='switchtolayout; save;'
+    # select('EME::Ports::port_1'); cleardataset; select('EME::Ports::port_2'); cleardataset; 
+    lumapi.evalScript(mode, command)
+    
     if close == True:
         lumapi.close(mode)
 

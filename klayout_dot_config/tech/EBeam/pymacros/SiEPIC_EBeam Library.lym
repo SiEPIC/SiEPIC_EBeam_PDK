@@ -1733,18 +1733,18 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     # Compact model information
-    t = Trans(Trans.R0, 0, 0)
+    t = Trans(Trans.R0, 10, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(Trans.R0, length/20, 0)
+    t = Trans(Trans.R0, 10, 500)
     text = Text ('Component=contra_directional_coupler', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(Trans.R0, length/10, 0)
+    t = Trans(Trans.R0, 10, -500)
     text = Text \
-      ('Spice_param:number_of_periods=%s grating_period=%.3fu corrugation_width=%.3fu misalignment=%.3fu sinusoidal=%s' %\
-      (self.number_of_periods, self.grating_period, self.corrugation_width1, misalignment, int(self.sinusoidal)), t )
+      ('Spice_param:number_of_periods=%s grating_period=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation_width1=%.3fu corrugation_width2=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s' %\
+      (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation_width1, self.corrugation_width2, self.apodization_index, int(self.AR), int(self.sinusoidal)), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 

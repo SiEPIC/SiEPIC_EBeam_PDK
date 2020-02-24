@@ -20,7 +20,9 @@
 #  will simulate with the default parameters 
 
 # required Python modules:
-# pip3 install numpy scipy matplotlib
+# pip3 install numpy scipy matplotlib xmltodict
+# or 
+# conda install numpy scipy matplotlib xmltodict
 
 
 # XML to Dict parser, from:
@@ -155,8 +157,8 @@ def update_xml (device, simulation, sfile):
         OrderedDict([('@name', 'number_of_periods'), ('@type', 'int'), ('#text', str(device.N))]), 
         OrderedDict([('@name', 'sinusoidal'), ('@type', 'double'), ('#text', str(device.sinusoidal))]), 
         OrderedDict([('@name', 'apodization_index'), ('@type', 'double'), ('#text', str(device.apodization))]), 
-        OrderedDict([('@name', 'lambda_start'), ('@type', 'double'), ('#text', str(simulation.lambda_start*1e6))]), 
-        OrderedDict([('@name', 'lambda_end'), ('@type', 'double'), ('#text', str(simulation.lambda_end*1e6))]), 
+        OrderedDict([('@name', 'lambda_start'), ('@type', 'double'), ('#text', str(simulation.lambda_start*1e9))]), 
+        OrderedDict([('@name', 'lambda_end'), ('@type', 'double'), ('#text', str(simulation.lambda_end*1e9))]), 
         OrderedDict([('@name', 'lambda_points'), ('@type', 'double'), ('#text', str(simulation.resolution))])])])), 
         ('extracted', OrderedDict([('value', 
         OrderedDict([('@name', 'sparam'), ('@type', 'string'), ('#text', sfile)]))]))])
@@ -172,10 +174,10 @@ def update_xml (device, simulation, sfile):
     print('Saved component simulation database XML file: %s' % filepath)
 
 def sfilename(device,simulation):
-    return 'w1=%s,w2=%s,dW1=%s,dW2=%s,gap=%s,p=%s,N=%s,s=%s,a=%s,l1=%s,l2=%s,ln=%s.dat' % (
-        int(round(device.w1*1e9,14)), int(device.w2*1e9), int(device.dW1*1e9), int(device.dW2*1e9), 
-        int(device.gap*1e9), int(device.period*1e9), device.N, int(device.sinusoidal), 
-        str(device.apodization), int(simulation.lambda_start*1e9), int(simulation.lambda_end*1e9), int(simulation.resolution), 
+    return 'w1=%d,w2=%d,dW1=%d,dW2=%d,gap=%d,p=%d,N=%d,s=%d,a=%.2f,l1=%d,l2=%d,ln=%d.dat' % (
+        round(device.w1*1e9,14), round(device.w2*1e9,14), round(device.dW1*1e9,14), round(device.dW2*1e9,14), 
+        round(device.gap*1e9,14), round(device.period*1e9,14), device.N, device.sinusoidal, 
+        device.apodization, round(simulation.lambda_start*1e9,14), round(simulation.lambda_end*1e9,14), simulation.resolution, 
         )    
 
 #%% load parameters from XML files
@@ -186,15 +188,16 @@ if(len(sys.argv)>1):
     print('Loading XML file: %s' % filepath)
     with open(filepath, 'r') as file:
         d=etree_to_dict(ET.XML(file.read()))['PCells']
-#        print(len(d))
-#        print(d)
-        if type(d['PCell'])==list:
+        if d==None:
+            print('Error: no PCells found in the XML file')
+            sys.exit('Error: no PCells found in the XML file')
+        elif type(d['PCell'])==list:
             PCells_params = d['PCell']
         elif len(d)==1:
             PCells_params = [d['PCell']]
         else:
             print('Error: problem with XML file')
-            exit()
+            sys.exit('Error: problem with XML file')
 
     IDs = []
     if(len(sys.argv)>2):  # argument is one component to simulate; otherwise simulate all of them.
@@ -216,21 +219,23 @@ print('Performing %s CDC simulations.' % len(IDs))
 for ID in IDs:
     # load parameters from XML
     device.set_params(PCells_params, ID)
-    
-    #%% main program
-    [waveguides, simulation] = dispersion_analysis.phaseMatch_analysis(device, simulation)
+
+    # target output XML file
     sfile = sfilename(device,simulation)
     print('working on sparameter file: %s' % sfile)
-    
+
+    #%% main program
+    [waveguides, simulation] = dispersion_analysis.phaseMatch_analysis(device, simulation)
     device = dispersion_analysis.kappa_analysis(device, simulation, waveguides, sim_type = 'EME', close = False)
     device = contraDC_CMT_TMM.contraDC_model(device, simulation, waveguides)
     
-    #%% analysis and export parameters
+    #%% export parameters
     analysis.plot_all(device, simulation)
-    sfile = sfilename(device,simulation)
     S = analysis.gen_sparams(device, simulation, sfile)
     print('Saved sparameter file: %s' % sfile)
     update_xml (device, simulation, sfile)
+
+    #%% analysis
     analysis.performance(S)
     
     
