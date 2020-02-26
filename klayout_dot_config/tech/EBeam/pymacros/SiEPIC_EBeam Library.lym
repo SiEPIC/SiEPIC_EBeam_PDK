@@ -584,84 +584,21 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     ly = self.layout
     shapes = self.cell.shapes
 
-    from SiEPIC.utils import points_per_circle
+    from SiEPIC.utils.layout import layout_waveguide_sbend
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
-    #LayerSiSPN = ly.layer(LayerSiSP)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
     LayerTextN = ly.layer(get_technology()['Text'])
 
-
-    from math import pi, cos, sin, log, sqrt, acos
-    
     length = self.length / dbu
     w = self.wg_width / dbu
     r = self.radius / dbu
     h = self.height / dbu
-    theta = acos((r-abs(h/2))/r)*180/pi
-    x = 2*r*sin(theta/180.0*pi)
-    straight_l = (length - x)/2
 
-    # define the cell origin as the left side of the waveguide sbend
-
-    if (straight_l &gt;= 0):
-      circle_fraction = abs(theta) / 360.0
-      npoints = int(points_per_circle(r) * circle_fraction)
-      if npoints == 0:
-        npoints = 1
-      da = 2 * pi / npoints * circle_fraction # increment, in radians
-      x1=straight_l
-      x2=length-straight_l
-
-      if h&gt;0:
-        y1=r
-        theta_start1 = 270
-        y2=h-r
-        theta_start2 = 90
-        pts = []
-        th1 = theta_start1 / 360.0 * 2 * pi
-        th2 = theta_start2 / 360.0 * 2 * pi
-        pts.append(Point.from_dpoint(DPoint(0,w/2)))
-        pts.append(Point.from_dpoint(DPoint(0,-w/2)))
-        for i in range(0, npoints+1): # lower left
-          pts.append(Point.from_dpoint(DPoint((x1+(r+w/2)*cos(i*da+th1))/1, (y1+(r+w/2)*sin(i*da+th1))/1)))
-        for i in range(npoints, -1, -1): # lower right
-          pts.append(Point.from_dpoint(DPoint((x2+(r-w/2)*cos(i*da+th2))/1, (y2+(r-w/2)*sin(i*da+th2))/1)))
-        pts.append(Point.from_dpoint(DPoint(length,h-w/2)))
-        pts.append(Point.from_dpoint(DPoint(length,h+w/2)))
-        for i in range(0, npoints+1): # upper right
-         pts.append(Point.from_dpoint(DPoint((x2+(r+w/2)*cos(i*da+th2))/1, (y2+(r+w/2)*sin(i*da+th2))/1)))
-        for i in range(npoints, -1, -1): # upper left
-          pts.append(Point.from_dpoint(DPoint((x1+(r-w/2)*cos(i*da+th1))/1, (y1+(r-w/2)*sin(i*da+th1))/1)))
-        self.cell.shapes(LayerSiN).insert(Polygon(pts))
-      else:
-        y1=-r
-        theta_start1 = 90-theta
-        y2=r+h
-        theta_start2 = 270-theta
-        pts = []
-        th1 = theta_start1 / 360.0 * 2 * pi
-        th2 = theta_start2 / 360.0 * 2 * pi
-        pts.append(Point.from_dpoint(DPoint(length,h-w/2)))
-        pts.append(Point.from_dpoint(DPoint(length,h+w/2)))
-        for i in range(npoints, -1, -1): # upper right
-          pts.append(Point.from_dpoint(DPoint((x2+(r-w/2)*cos(i*da+th2))/1, (y2+(r-w/2)*sin(i*da+th2))/1)))
-        for i in range(0, npoints+1): # upper left
-          pts.append(Point.from_dpoint(DPoint((x1+(r+w/2)*cos(i*da+th1))/1, (y1+(r+w/2)*sin(i*da+th1))/1)))
-        pts.append(Point.from_dpoint(DPoint(0,w/2)))
-        pts.append(Point.from_dpoint(DPoint(0,-w/2)))
-        for i in range(npoints, -1, -1): # lower left
-          pts.append(Point.from_dpoint(DPoint((x1+(r-w/2)*cos(i*da+th1))/1, (y1+(r-w/2)*sin(i*da+th1))/1)))
-        for i in range(0, npoints+1): # lower right
-         pts.append(Point.from_dpoint(DPoint((x2+(r+w/2)*cos(i*da+th2))/1, (y2+(r+w/2)*sin(i*da+th2))/1)))
-        self.cell.shapes(LayerSiN).insert(Polygon(pts))
-
-    waveguide_length = (2*pi*r*(2*theta/360.0)+straight_l*2)*dbu
-
-    from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg, arc_wg_xy
+    waveguide_length = layout_waveguide_sbend(self.cell, LayerSiN, pya.DPoint(0,0), w, r, h, length, None) * dbu
+    
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
     # Pins on the waveguide:
@@ -699,10 +636,10 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
       (waveguide_length, self.wg_width), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
-    t = Trans(Trans.R0, 0, -w*3)
-    text = Text ('Extra length = %.4fu, Shortest length = %.4fu' % (straight_l*dbu, (length-2*straight_l)*dbu), t )
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
+#    t = Trans(Trans.R0, 0, -w*3)
+#    text = Text ('Extra length = %.4fu, Shortest length = %.4fu' % (straight_l*dbu, (length-2*straight_l)*dbu), t )
+#    shape = shapes(LayerDevRecN).insert(text)
+#    shape.text_size = 0.1/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     box1 = Box(0, min(-w*3,h-w*3), length, max(w*3,h+w*3))
