@@ -25,6 +25,11 @@
 # conda install numpy scipy matplotlib xmltodict
 
 
+import xmltodict, sys, os
+from collections import OrderedDict
+from xml.etree import cElementTree as ET
+
+
 # XML to Dict parser, from:
 # https://stackoverflow.com/questions/2148119/how-to-convert-an-xml-string-to-a-dictionary-in-python/10077069
 def etree_to_dict(t):
@@ -85,7 +90,6 @@ class contra_DC():
         # find the component 'ID' in the PCells_params dict
         for PCell_params in PCells_params:
             if PCell_params['Name'] == 'contra_directional_coupler' and PCell_params['ID'] == ID:
-                print(PCell_params)
                 self.w1 = round(float(PCell_params['wg1_width'])*1e-6,10)
                 self.w2 = round(float(PCell_params['wg2_width'])*1e-6,10)
                 self.dW1 = round(float(PCell_params['corrugation_width1'])*1e-6,10)
@@ -120,12 +124,6 @@ class simulation():
 
 
 
-import xmltodict, sys
-from collections import OrderedDict
-
-# for XML import
-import sys
-from xml.etree import cElementTree as ET
 
 
 #%% instantiate the class constructors        
@@ -174,7 +172,6 @@ def update_xml (device, simulation, sfile):
     print('Saved component simulation database XML file: %s' % filepath)
 
 def sfilename(device,simulation):
-    print(device.period)
     return 'w1=%d,w2=%d,dW1=%d,dW2=%d,gap=%d,p=%d,N=%d,s=%d,a=%.2f,l1=%d,l2=%d,ln=%d.dat' % (
         round(device.w1*1e9,14), round(device.w2*1e9,14), round(device.dW1*1e9,14), round(device.dW2*1e9,14), 
         round(device.gap*1e9,14), round(device.period*1e9,14), device.N, device.sinusoidal, 
@@ -223,21 +220,24 @@ for ID in IDs:
 
     # target output XML file
     sfile = sfilename(device,simulation)
-    print('working on sparameter file: %s' % sfile)
+    if (os.path.exists(sfile)):
+        print('already exists, skipping: %s' % sfile)
+    else:
+        print('working on sparameter file: %s' % sfile)
 
-    #%% main program
-    [waveguides, simulation] = dispersion_analysis.phaseMatch_analysis(device, simulation)
-    device = dispersion_analysis.kappa_analysis(device, simulation, waveguides, sim_type = 'EME', close = False)
-    device = contraDC_CMT_TMM.contraDC_model(device, simulation, waveguides)
+        #%% main program
+        [waveguides, simulation] = dispersion_analysis.phaseMatch_analysis(device, simulation)
+        device = dispersion_analysis.kappa_analysis(device, simulation, waveguides, sim_type = 'EME', close = False)
+        device = contraDC_CMT_TMM.contraDC_model(device, simulation, waveguides)
     
-    #%% export parameters
-    if(len(sys.argv)<2):
-        analysis.plot_all(device, simulation)
-    S = analysis.gen_sparams(device, simulation, sfile)
-    print('Saved sparameter file: %s' % sfile)
-    update_xml (device, simulation, sfile)
+        #%% export parameters
+        if(len(sys.argv)<2):
+            analysis.plot_all(device, simulation)
+        S = analysis.gen_sparams(device, simulation, sfile)
+        print('Saved sparameter file: %s' % sfile)
+        update_xml (device, simulation, sfile)
 
-    #%% analysis
-    analysis.performance(S)
+        #%% analysis
+        analysis.performance(S)
     
     
