@@ -91,7 +91,7 @@ class contra_DC():
                 self.dW1 = round(float(PCell_params['corrugation_width1'])*1e-6,10)
                 self.dW2 = round(float(PCell_params['corrugation_width2'])*1e-6,10)
                 self.gap = round(float(PCell_params['gap'])*1e-6,10)
-                self.period = float(PCell_params['grating_period'])*1e-6
+                self.period = round(float(PCell_params['grating_period'])*1e-6,10)
                 self.N = int(PCell_params['number_of_periods'])
                 self.sinusoidal = bool(int(PCell_params['sinusoidal']))
                 self.apodization = round(float(PCell_params['apodization_index']),10)
@@ -108,8 +108,8 @@ class simulation():
         # make sure range is large enouh to capture all Bragg coupling conditions (both self-Bragg and contra-coupling)
         self.lambda_start = 1500e-9
         self.lambda_end = 1600e-9
-#        self.resolution = 501
-        self.resolution = 51
+        self.resolution = 501
+#        self.resolution = 51
         
         self.deviceTemp = 300
         self.chipTemp = 300
@@ -174,6 +174,7 @@ def update_xml (device, simulation, sfile):
     print('Saved component simulation database XML file: %s' % filepath)
 
 def sfilename(device,simulation):
+    print(device.period)
     return 'w1=%d,w2=%d,dW1=%d,dW2=%d,gap=%d,p=%d,N=%d,s=%d,a=%.2f,l1=%d,l2=%d,ln=%d.dat' % (
         round(device.w1*1e9,14), round(device.w2*1e9,14), round(device.dW1*1e9,14), round(device.dW2*1e9,14), 
         round(device.gap*1e9,14), round(device.period*1e9,14), device.N, device.sinusoidal, 
@@ -230,7 +231,8 @@ for ID in IDs:
     device = contraDC_CMT_TMM.contraDC_model(device, simulation, waveguides)
     
     #%% export parameters
-    analysis.plot_all(device, simulation)
+    if(len(sys.argv)<2):
+        analysis.plot_all(device, simulation)
     S = analysis.gen_sparams(device, simulation, sfile)
     print('Saved sparameter file: %s' % sfile)
     update_xml (device, simulation, sfile)

@@ -1696,8 +1696,8 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, 10, -500)
     text = Text \
-      ('Spice_param:number_of_periods=%s grating_period=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation_width1=%.3fu corrugation_width2=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s' %\
-      (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation_width1, self.corrugation_width2, self.apodization_index, int(self.AR), int(self.sinusoidal)), t )
+      ('Spice_param:number_of_periods=%s grating_period=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation_width1=%.3fu corrugation_width2=%.3fu gap=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s' %\
+      (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation_width1, self.corrugation_width2, self.gap, self.apodization_index, int(self.AR), int(self.sinusoidal)), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 
