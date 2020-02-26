@@ -68,6 +68,10 @@ if (make_plot==1 ){
 
 # prepare data and write
 
+if (fileexists(sfile)) {
+  rm(sfile);
+}
+
 S11_data=[f,abs(S11),unwrap(angle(S11))];
 write(sfile,"('port 1',"+mode_label+','+mode_ID+','+"'port 1',"+mode_ID+','+"'transmission')"
        +endl+"("
