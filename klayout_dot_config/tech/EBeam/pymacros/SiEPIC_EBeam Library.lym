@@ -1657,7 +1657,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], port_w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin3", t)
+    text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
@@ -1669,7 +1669,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], port_w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin2", t)
+    text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     
