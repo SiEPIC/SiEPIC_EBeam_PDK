@@ -596,8 +596,8 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     w = self.wg_width / dbu
     r = self.radius / dbu
     h = self.height / dbu
-
-    waveguide_length = layout_waveguide_sbend(self.cell, LayerSiN, pya.DPoint(0,0), w, r, h, length, None) * dbu
+   
+    waveguide_length = layout_waveguide_sbend(self.cell, LayerSiN, pya.Trans(Trans.R0, 0,0), w, r, h, length) * dbu
     
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
@@ -1637,7 +1637,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     sbend_r = 25000; sbend_length = 15000
     sbend_offset= 2*port_w + port_w - (w1+w2)/2 - int(round(self.gap/dbu))
     taper_length = 20*max(abs(w1-port_w), abs(w2-port_w))
-
+    
     t = Trans(Trans.R180, 0,y_offset_top)
     layout_waveguide_sbend(self.cell, LayerSiN, t, w1, sbend_r, sbend_offset, sbend_length)
     t = Trans(Trans.R0, -sbend_length-taper_length,y_offset_top-sbend_offset)
