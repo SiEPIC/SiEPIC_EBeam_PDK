@@ -173,9 +173,9 @@ def update_xml (device, simulation, sfile):
 
 def sfilename(device,simulation):
     return 'w1=%d,w2=%d,dW1=%d,dW2=%d,gap=%d,p=%d,N=%d,s=%d,a=%.2f,l1=%d,l2=%d,ln=%d.dat' % (
-        round(device.w1*1e9,14), round(device.w2*1e9,14), round(device.dW1*1e9,14), round(device.dW2*1e9,14), 
-        round(device.gap*1e9,14), round(device.period*1e9,14), device.N, device.sinusoidal, 
-        device.apodization, round(simulation.lambda_start*1e9,14), round(simulation.lambda_end*1e9,14), simulation.resolution, 
+        round(device.w1*1e9,10), round(device.w2*1e9,10), round(device.dW1*1e9,10), round(device.dW2*1e9,10), 
+        round(device.gap*1e9,10), round(device.period*1e9,10), device.N, device.sinusoidal, 
+        device.apodization, round(simulation.lambda_start*1e9,10), round(simulation.lambda_end*1e9,10), simulation.resolution, 
         )    
 
 #%% load parameters from XML files
