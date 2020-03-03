@@ -1526,10 +1526,10 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
       length = x + grating_period + misalignment
       if misalignment &gt; 0:
         # extra piece at the end:
-        box2 = Box(x + grating_period, 0, length, y_offset_top + half_w)
+        box2 = Box(x + grating_period, y_offset_top, length, y_offset_top + half_w)
         shapes(LayerSiN).insert(box2)
         # extra piece at the beginning:
-        box3 = Box(0, 0, misalignment, y_offset_top -half_w)
+        box3 = Box(0, y_offset_top, misalignment, y_offset_top -half_w)
         shapes(LayerSiN).insert(box3)
 
     else:
