@@ -38,7 +38,7 @@ def swap_rows(arr, frm, to):
     return arr
     
 #%% the bread and butter
-def contraDC_model(contraDC, simulation_setup, waveguides,plot = True, progress=False):
+def contraDC_model(contraDC, simulation_setup, waveguides,plot = False, progress=False):
     
     #%% System constants Constants
     c = 299792458           #[m/s]
