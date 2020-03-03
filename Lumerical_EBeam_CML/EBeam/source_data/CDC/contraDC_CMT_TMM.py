@@ -10,7 +10,6 @@ import cmath, math
 import sys, os, time
 import numpy as np
 import scipy.linalg
-import matplotlib.pyplot as plt
 
 #%% linear algebra numpy manipulation functions
 # Takes a 4*4 matrix and switch the first 2 inputs with first 2 outputs
@@ -147,6 +146,7 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = True, progress=
         kappa_apod=kappaMin+(kappaMax-kappaMin)*profile
         
         if plot == True:
+                import matplotlib.pyplot as plt
                 plt.figure()
                 plt.plot(zaxis*1e6, kappa_apod)
                 plt.ylabel('kappa profile')
@@ -166,6 +166,7 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = True, progress=
     randomChirpFrac = np.random.rand(1,N_seg)*rch/100; randomChirpFrac = randomChirpFrac[0,:]
     
     if plot == True:
+        import matplotlib.pyplot as plt
         plt.figure()
         plt.plot(zaxis*1e6, couplingChirpFrac, label="Coupling chirp")
         plt.plot(zaxis*1e6, lengthChirpFrac, label="Length chirp")
