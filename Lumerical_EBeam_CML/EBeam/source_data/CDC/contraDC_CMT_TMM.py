@@ -153,8 +153,7 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = True, progress=
                 plt.xlabel('Length (um)')
     else:
         kappa_apod = contraDC.kappa_contra*np.ones(N_seg)
-        profile = 0
-
+        profile = np.ones(N_seg)
 
             
     lenghtLambda=Lambda.size
