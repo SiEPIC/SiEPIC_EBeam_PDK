@@ -8,7 +8,6 @@
             
 """
 #%% import dependencies
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio
 import lumerical_tools
@@ -22,12 +21,13 @@ def plot_all( contraDC, simulation):
     return
 
 #%% plot amplitude response (log scale)
-def amplitude( contraDC, simulation, plot = True):
+def amplitude( contraDC, simulation, plot = False):
     
     thruAmplitude = 10*np.log10(np.abs(contraDC.E_Thru[0,:])**2)
     dropAmplitude = 10*np.log10(np.abs(contraDC.E_Drop[0,:])**2)
     
     if plot == True:
+        import matplotlib.pyplot as plt
         plt.figure()
         plt.plot(contraDC.wavelength[:]*1e9, thruAmplitude, label='Through Port')
         plt.plot(contraDC.wavelength[:]*1e9, dropAmplitude, label='Drop Port')
@@ -38,11 +38,12 @@ def amplitude( contraDC, simulation, plot = True):
     return [thruAmplitude, dropAmplitude]
 
 #%% plot phase response
-def phase( contraDC, simulation, plot = True):
+def phase( contraDC, simulation, plot = False):
     thruPhase = np.unwrap(np.angle(contraDC.E_Thru))
     dropPhase = np.unwrap(np.angle(contraDC.E_Drop))
     
     if plot == True:
+        import matplotlib.pyplot as plt
         plt.figure()
         plt.plot(contraDC.wavelength[:]*1e9, thruPhase[0,:], label='Through Port Phase')
         plt.plot(contraDC.wavelength[:]*1e9, dropPhase[0,:], label='Drop Port Phase')
@@ -63,7 +64,8 @@ def group_delay( contraDC, simulation, plot = True):
     dropGroupDelay = -np.diff(dropPhase)/np.diff(omega)
     thruGroupDelay = -np.diff(thruPhase)/np.diff(omega)
     
-    if plot == True:
+    if plot == False:
+        import matplotlib.pyplot as plt
         plt.figure()
         plt.plot(contraDC.wavelength[:-1]*1e9, 1e12*thruGroupDelay[0,:], label='Through Port Group Delay')
         plt.plot(contraDC.wavelength[:-1]*1e9, 1e12*dropGroupDelay[0,:], label='Drop Port Group Delay')
