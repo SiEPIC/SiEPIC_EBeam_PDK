@@ -10,10 +10,9 @@
 #%% import dependencies
 import lumerical_tools
 import numpy as np
-import matplotlib.pyplot as plt
 
 #%% phase matching analysis        
-def phaseMatch_analysis(contraDC, simulation_setup, plot = True):
+def phaseMatch_analysis(contraDC, simulation_setup, plot = False):
     [neff_data, lambda_fit, ng_contra, ng1, ng2, lambda_self1, lambda_self2] = lumerical_tools.run_mode( contraDC, simulation_setup)
 
     neff1_fit = np.polyfit(lambda_fit[:,0], neff_data[:,0],1)
@@ -39,6 +38,7 @@ def phaseMatch_analysis(contraDC, simulation_setup, plot = True):
 
     #%% plot phase match (optional)
     if plot == True:
+        import matplotlib.pyplot as plt
         plt.figure()
         plt.plot(lambda_fit*1e9, phaseMatch, '-.', label='Phase matching condition')
         plt.plot(lambda_fit*1e9, neff1, label='Waveguide 1 effective index')
