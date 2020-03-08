@@ -112,7 +112,7 @@ def run_EME(contraDC, simulation_setup, close = False):
     command ='cd("%s");'%dir_path
     command += 'min_wavelength=%s;'%simulation_setup.lambda_start
     command += 'max_wavelength=%s;'%simulation_setup.lambda_end
-    
+    command += 'ACCURATE=%s;'%int(simulation_setup.accuracy)
     command += 'grating_period=%s;'%contraDC.period
     command += 'Wa=%s;'%contraDC.w1
     command += 'Wb=%s;'%contraDC.w2
@@ -131,6 +131,7 @@ def run_EME(contraDC, simulation_setup, close = False):
     command += "load('%s');"%projectname
     command += '%s;'%filename
    
+    print(command)
     lumapi.evalScript(mode, command)
     
     delta_lambda_contra = lumapi.getVar(mode,"delta_lambda")

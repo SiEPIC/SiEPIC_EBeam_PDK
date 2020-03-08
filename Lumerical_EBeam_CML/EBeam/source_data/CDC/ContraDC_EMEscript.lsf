@@ -11,7 +11,7 @@ closeall;
 switchtolayout;
 groupscope("::model");
 
-ACCURATE = 0;
+#ACCURATE = 1;
 
 if (ACCURATE == 1) {
   n_modes_EME = 50; # accurate simulation
