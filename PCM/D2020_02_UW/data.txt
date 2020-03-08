@@ -1,0 +1,9 @@
+101160: -57 dB (approx)
+1200: -27 dB (approx, best)
+
+= 10 cm
+
+30 dB / 10cm = 3 dB/cm
+
+
+
