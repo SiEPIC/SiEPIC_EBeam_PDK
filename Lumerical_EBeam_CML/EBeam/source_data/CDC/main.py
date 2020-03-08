@@ -165,6 +165,7 @@ def update_xml (device, simulation, sfile):
         OrderedDict([('@name', 'number_of_periods'), ('@type', 'int'), ('#text', str(device.N))]), 
         OrderedDict([('@name', 'sinusoidal'), ('@type', 'double'), ('#text', str(device.sinusoidal))]), 
         OrderedDict([('@name', 'apodization_index'), ('@type', 'double'), ('#text', str(device.apodization))]), 
+        OrderedDict([('@name', 'accuracy'), ('@type', 'double'), ('#text', str(simulation.accuracy))]), 
         OrderedDict([('@name', 'lambda_start'), ('@type', 'double'), ('#text', str(simulation.lambda_start*1e9))]), 
         OrderedDict([('@name', 'lambda_end'), ('@type', 'double'), ('#text', str(simulation.lambda_end*1e9))]), 
         OrderedDict([('@name', 'lambda_points'), ('@type', 'double'), ('#text', str(simulation.resolution))])])])), 
@@ -234,8 +235,9 @@ for ID in IDs:
     device.set_params(PCells_params, ID)
     simulation.set_params(PCells_params, ID)
 
-    # target output XML file
-    sfile = sfilename(device,simulation)
+    # target output file
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    sfile = os.path.join(dir_path,sfilename(device,simulation))
     if (os.path.exists(sfile)):
         print('already exists, skipping: %s' % sfile)
     else:
