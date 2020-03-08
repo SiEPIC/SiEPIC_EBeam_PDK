@@ -112,8 +112,8 @@ class simulation():
         # make sure range is large enouh to capture all Bragg coupling conditions (both self-Bragg and contra-coupling)
         self.lambda_start = 1500e-9
         self.lambda_end = 1600e-9
-        self.resolution = 501
-#        self.resolution = 51
+#        self.resolution = 501
+        self.resolution = 51
         
         self.deviceTemp = 300
         self.chipTemp = 300
@@ -123,6 +123,16 @@ class simulation():
         self.central_lambda = 1550e-9
 
 
+    def set_params(self, PCells_params, ID):
+        
+        # find the component 'ID' in the PCells_params dict
+        for PCell_params in PCells_params:
+            if PCell_params['Name'] == 'contra_directional_coupler' and PCell_params['ID'] == ID:
+                self.accuracy = bool(int(PCell_params['accuracy']))
+                if bool(int(PCell_params['accuracy'])):
+                    self.resolution = 601
+                else:
+                    self.resolution = 51
 
 
 
@@ -173,10 +183,15 @@ def update_xml (device, simulation, sfile):
 
 def sfilename(device,simulation):
     return 'w1=%d,w2=%d,dW1=%d,dW2=%d,gap=%d,p=%d,N=%d,s=%d,a=%.2f,l1=%d,l2=%d,ln=%d.dat' % (
+#    return 'w1=%d,w2=%d,dW1=%d,dW2=%d,gap=%d,p=%d,N=%d,s=%d,a=%.2f,l1=%d,l2=%d,ln=%d,sim=%s.dat' % (
         round(device.w1*1e9,10), round(device.w2*1e9,10), round(device.dW1*1e9,10), round(device.dW2*1e9,10), 
         round(device.gap*1e9,10), round(device.period*1e9,10), device.N, device.sinusoidal, 
-        device.apodization, round(simulation.lambda_start*1e9,10), round(simulation.lambda_end*1e9,10), simulation.resolution, 
+        device.apodization, round(simulation.lambda_start*1e9,10), round(simulation.lambda_end*1e9,10), 
+        simulation.resolution
+#        simulation.resolution, 
+#        simulation.accuracy
         )    
+
 
 #%% load parameters from XML files
 # can pass an XML file with these parameters, as an argument to python on the command line
@@ -217,6 +232,7 @@ print('Performing %s CDC simulations.' % len(IDs))
 for ID in IDs:
     # load parameters from XML
     device.set_params(PCells_params, ID)
+    simulation.set_params(PCells_params, ID)
 
     # target output XML file
     sfile = sfilename(device,simulation)

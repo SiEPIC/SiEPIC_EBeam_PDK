@@ -156,7 +156,7 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = False, progress
         profile = np.ones(N_seg)
 
             
-    lenghtLambda=Lambda.size
+    lengthLambda=Lambda.size
     
     kappa_12max= max(kappa_apod)
     
@@ -184,14 +184,16 @@ def contraDC_model(contraDC, simulation_setup, waveguides,plot = False, progress
     
     if progress:
         # A List of Items
-        progressbar_width = lenghtLambda
+        progressbar_width = lengthLambda
         # Initial call to print 0% progress
         printProgressBar(0, progressbar_width, prefix = 'Progress:', suffix = 'Complete', length = 50)
             
-    for ii in range(lenghtLambda):
+    for ii in range(lengthLambda):
         if progress:
             #Update Bar
             printProgressBar(ii + 1, progressbar_width, prefix = 'Progress:', suffix = 'Complete', length = 50)
+
+        print('Progress: %s / %s' %(ii+1, lengthLambda) ) 
 
         randomChirp = randomChirpFrac
         chirpWL = chirpDev + randomChirp
