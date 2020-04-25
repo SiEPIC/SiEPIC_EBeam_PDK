@@ -127,6 +127,8 @@ class Waveguide(pya.PCellDeclarationHelper):
     self.param("layers", self.TypeList, "Layers", default = ['Waveguide'])
     self.param("widths", self.TypeList, "Widths", default =  [0.5])
     self.param("offsets", self.TypeList, "Offsets", default = [0])
+    self.param("CML", self.TypeString, "Compact Model Library (CML)", default = 'EBeam'),
+    self.param("model", self.TypeString, "CML Model name", default = 'ebeam_wg_integral_1550') 
     
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -262,11 +264,12 @@ class Waveguide(pya.PCellDeclarationHelper):
       pt3=pts[0] + Point(-wg_width,0)
       
     t = Trans(angle, False, pts[0]) 
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t, 0.1/dbu, -1)
+  
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/%s' % self.CML, t, 0.1/dbu, -1)
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     t = Trans(angle, False, pt2)
-    text = Text ('Component=ebeam_wg_integral_1550', t, 0.1/dbu, -1)
+    text = Text ('Component=%s' % self.model, t, 0.1/dbu, -1)
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     t = Trans(angle, False, pt3)
