@@ -613,6 +613,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     x = 0
     t = Trans(Trans.R0, x,0)
@@ -737,6 +738,7 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     x = 0
     t = Trans(Trans.R0, x,0)
@@ -1052,6 +1054,7 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
@@ -1168,6 +1171,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     path = Path([Point(0,0),Point(length,0)],w2+w1*2)
@@ -1269,6 +1273,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     # Compact model information
     t = Trans(Trans.R0,0, 0)
@@ -1386,6 +1391,7 @@ class ebeam_dc_te1550(pya.PCellDeclarationHelper):
     text = Text ("pin3", Trans(Trans.R0, x_bottom+Lc/2, y_bottom))
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     # Pins on the top waveguide side:
     pin = Path([Point(-x_bottom+PIN_LENGTH/2-Lc/2, y_top), Point(-x_bottom-PIN_LENGTH/2-Lc/2, y_top)], w)
@@ -1399,6 +1405,7 @@ class ebeam_dc_te1550(pya.PCellDeclarationHelper):
     text = Text ("pin4", Trans(Trans.R0, x_bottom+Lc/2, y_top))
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     # Merge all the waveguide shapes, to avoid any small gaps
     layer_temp = self.layout.layer(LayerInfo(913, 0))
@@ -1676,6 +1683,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     text = Text ("pin3", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
     
     t = Trans(Trans.R0, length, vertical_offset)
     layout_taper(self.cell, LayerSiN, t,  w2, w2, sbend_length/2)
@@ -1688,6 +1696,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     text = Text ("pin4", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
+    shape.text_halign = 2
 
     # Compact model information
     t = Trans(Trans.R0, 10, 0)
