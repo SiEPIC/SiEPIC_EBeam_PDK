@@ -1516,8 +1516,9 @@ class SWG_assisted_Strip_WG(pya.PCellDeclarationHelper):
 
     # Strip waveguide:
     w_strip = self.strip_wg_width / dbu
-    box1 = Box(0, -w_strip/2, length, w_strip/2)
-    shapes(LayerSiN).insert(box1)
+    if w_strip &gt; 0:
+        box1 = Box(0, -w_strip/2, length, w_strip/2)
+        shapes(LayerSiN).insert(box1)
 
     # Pins on the waveguide:
     from SiEPIC._globals import PIN_LENGTH as pin_length
