@@ -227,11 +227,11 @@ class Waveguide(pya.PCellDeclarationHelper):
     LayerPinRecN = self.layout.layer(TECHNOLOGY['PinRec'])
     
     t1 = Trans(angle_vector(pts[0]-pts[1])/90, False, pts[0])
-    self.cell.shapes(LayerPinRecN).insert(Path([Point(-50, 0), Point(50, 0)], self.width/dbu).transformed(t1))
+    self.cell.shapes(LayerPinRecN).insert(Path([Point(-50, 0), Point(50, 0)], wg_width).transformed(t1))
     self.cell.shapes(LayerPinRecN).insert(Text("pin1", t1, 0.3/dbu, -1))
     
     t = Trans(angle_vector(pts[-1]-pts[-2])/90, False, pts[-1])
-    self.cell.shapes(LayerPinRecN).insert(Path([Point(-50, 0), Point(50, 0)], self.width/dbu).transformed(t))
+    self.cell.shapes(LayerPinRecN).insert(Path([Point(-50, 0), Point(50, 0)], wg_width).transformed(t))
     self.cell.shapes(LayerPinRecN).insert(Text("pin2", t, 0.3/dbu, -1))
 
     LayerDevRecN = self.layout.layer(TECHNOLOGY['DevRec'])
