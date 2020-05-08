@@ -26,10 +26,13 @@ report("DRC")
 LayerSi=input(1,0)
 DevRec=input(68,0)
 LayerFP=input(99)
+LayerM1=input(11,0)
+LayerM2=input(12,0)
+LayerN=input(20,0)
+LayerNpp=input(24,0)
 
-# minimum feature size of 60nm
+# minimum feature size of 60nm of silicon
 LayerSi.width(0.06, angle_limit(80)).output("Si_width","Si minimum feature size violation; min 60 nm")
-
 LayerSi.space(0.06).output("Si_space","Si minimum space violation; min 60 nm")
 
 # Check device overlaps
@@ -39,19 +42,14 @@ output(overlaps, "Devices","Devices cannot be overlapping")
 # make sure the devices are within the floor plan layer region;
 LayerSi.outside(LayerFP).output("Boundary","devices are out of boundary")
 
-
-
 # Metal rules based on the metalization process provided by Applied Nanotools.
 # Based contact optical lithography
-
 # Metal heater, M1
-LayerM1=input(11,0)
 LayerM1.width(3.0).output("M1_width","M1 minimum feature size violation; min 3 micron")
-LayerM1.space(10.0).output("M1_space","M1 minimum space violation; min 10 micron")
+LayerM1.space(3.0).output("M1_space","M1 minimum space violation; min 3 micron")
 
 # Metal routing/contact, M2
-LayerM2=input(12,0)
-LayerM2.width(4.0).output("M2_width","M2 minimum feature size violation; min 4 micron")
+LayerM2.width(5.0).output("M2_width","M2 minimum feature size violation; min 5 micron")
 LayerM2.space(10.0).output("M2_space","M2 minimum space violation; min 10 micron")
 LayerM2.overlap(LayerM1,3.0).output("M2_M1_overlap","M2 minimum overlap with M1 violation; min 3 micron")
 
@@ -59,6 +57,17 @@ LayerM2.overlap(LayerM1,3.0).output("M2_M1_overlap","M2 minimum overlap with M1 
 LayerMLOpen=input(13,0)
 LayerMLOpen.width(10.0).output("MLOpen_width","MLOpen minimum feature size violation; min 10 micron")
 LayerMLOpen.space(10.0).output("MLOpen_space","MLOpen minimum space violation; min 10 micron")
+
+# Doping rules based on the experimental process
+# minimum feature size of 3 µm
+LayerNpp.width(3.0, angle_limit(80)).output("Npp_width","Doping minimum feature size violation; min 3 µm")
+LayerNpp.space(5.0).output("Npp_space","Doping minimum space violation; min 5 µm")
+
+# minimum separation:
+LayerNpp.separation(LayerSi, 4.0).output("Npp_Si_separation","Npp-Si minimum separation violation; min 4 µm")
+
+# minimum overlap:
+LayerM2.overlap(LayerNpp, 7.0).output("M_Npp_overlap","Metal2-Npp minimum overlap violation; min 7 µm")
 
 </text>
 </klayout-macro>
