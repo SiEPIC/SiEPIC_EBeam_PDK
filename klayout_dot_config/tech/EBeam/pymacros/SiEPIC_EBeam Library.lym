@@ -1488,7 +1488,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     return False
     
   def produce_impl(self):
-    from SiEPIC.utils.layout import layout_waveguide_sbend, layout_taper
+    from siepic_tools.utils.layout import layout_waveguide_sbend, layout_taper
   
     # fetch the parameters
     dbu = self.layout.dbu
