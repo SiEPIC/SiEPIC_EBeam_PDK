@@ -158,5 +158,26 @@
 	    <width>0.5</width>
 	    <offset>0.0</offset>
 	  </component>
+	  <component>
+	    <layer>Si - 90 nm rib</layer>
+	    <width>3</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+	<waveguide>
+	  <name>Rib (90 nm slab) TE 1310 nm, w=350 nm</name>
+	  <CML>EBeam</CML>
+	  <model>ebeam_wg_rib_1550</model>
+      <radius>15.0</radius>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.35</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Si - 90 nm rib</layer>
+	    <width>3</width>
+	    <offset>0.0</offset>
+	  </component>
 	</waveguide>
 </waveguides>

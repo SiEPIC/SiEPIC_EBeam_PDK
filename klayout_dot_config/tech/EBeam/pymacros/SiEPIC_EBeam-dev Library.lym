@@ -41,6 +41,8 @@ This Python file implements a library called "SiEPIC-EBeam-dev"
     strip_to_slot, strip_to_slot() )
     spiral, spiral())
     Waveguide_SBend, Waveguide_SBend())
+    ebeam_irph_mrr: in-resonator photoconductive heater, in a ring resonator
+    ebeam_irph_wg: in-resonator photoconductive heater, in a straight waveguide
 
 
 NOTE: after changing the code, the macro needs to be rerun to install the new
@@ -5052,6 +5054,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("siriblayer", self.TypeLayer, "Si rib Layer", default = TECHNOLOGY['Si - 90 nm rib'])
     self.param("r", self.TypeDouble, "Radius", default = 15)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.156)
@@ -5078,7 +5081,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "ebeam_dc_halfring_arc(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+    return "ebeam_irph_mrr(R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
 
   def can_create_from_shape_impl(self):
     return False
@@ -5096,6 +5099,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     shapes = self.cell.shapes
     
     LayerSiN = ly.layer(self.silayer)
+    LayerSiRibN = ly.layer(self.siriblayer)
     LayerNN = ly.layer(self.nlayer)
     LayerNPPN = ly.layer(self.npplayer)
     LayerVCN = ly.layer(self.vclayer)
@@ -5143,7 +5147,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu      
 
-    pin = Path([Point(xbottom+PIN_LENGTH, ytop-w/2), Point(xbottom-PIN_LENGTH, ytop-w/2)], w)
+    pin = Path([Point(xbottom-PIN_LENGTH, ytop-w/2), Point(xbottom+PIN_LENGTH, ytop-w/2)], w)
     shapes(LayerPinRecN).insert(pin)
     text = Text ("pin2", Trans(Trans.R0, xbottom, ytop-w/2))
     shape = shapes(LayerPinRecN).insert(text)
@@ -5157,7 +5161,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu      
     
-    pin = Path([Point(ybottom+w/2, xbottom+PIN_LENGTH), Point(ybottom+w/2,xbottom-PIN_LENGTH)], w)
+    pin = Path([Point(ybottom+w/2, xbottom-PIN_LENGTH), Point(ybottom+w/2,xbottom+PIN_LENGTH)], w)
     shapes(LayerPinRecN).insert(pin)
     text = Text ("pin4", Trans(Trans.R0,  ybottom+w/2,xbottom))
     shape = shapes(LayerPinRecN).insert(text)
@@ -5194,6 +5198,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     #outer donut
     shapes(LayerMN).insert(arc_wg_xy(x, y,  4/dbu +  r + npp_w/2 , m_aw , theta_start, theta_stop))     
 
+
     #devrec layer
     xtop = -2/3*r
     ytop = -1*(r+g+w/2)
@@ -5204,6 +5209,9 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     #wg1 = Box(ytop, xtop , ybottom, xbottom)
     shapes(LayerDevRecN).insert(pya.Polygon(dev_array)) 
     #shapes(LayerNPPN).insert(pya.Polygon(arc_pts)) 
+
+    # Si rib layer
+    shapes(LayerSiRibN).insert(pya.Polygon(dev_array))
     
     t = Trans(Trans.R0, 0,0)
     text = Text ('Component=ebeam_irph_mrr', t)
@@ -5213,6 +5221,141 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     print("Done drawing the layout for - ebeam_IRPH_MRR: %.3f-%g" % ( self.r, self.g))
     
 
+class ebeam_irph_wg(pya.PCellDeclarationHelper):
+  """
+  The PCell declaration for the IRPH straight waveguide.
+  
+  Authors: Jaspreet Jhoja, Lukas Chrostowski
+  """
+
+  def __init__(self):
+
+    # Important: initialize the super class
+    super(ebeam_irph_wg, self).__init__()
+    TECHNOLOGY = get_technology_by_name('EBeam')
+
+    # declare the parameters
+    self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
+    self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 32)
+    self.param("length", self.TypeDouble, "Waveguide length", default = 100)
+    self.param("n_w", self.TypeDouble, "N Width", default = 30)
+    self.param("npp_w", self.TypeDouble, "N++ Width", default = 10)
+    self.param("npp_dw", self.TypeDouble, "N++ Offset", default = 2)
+    self.param("vc_dw", self.TypeDouble, "VC Offset", default = 5)
+    self.param("vc_w", self.TypeDouble, "VC Width", default = 5)
+    self.param("m_dw", self.TypeDouble, "Metal Offset", default = 4)
+    self.param("m_w", self.TypeDouble, "Metal Width", default = 11)
+        
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("siriblayer", self.TypeLayer, "Si rib Layer", default = TECHNOLOGY['Si - 90 nm rib'])
+    self.param("nlayer", self.TypeLayer, "N Layer", default = TECHNOLOGY['Si N'])
+    self.param("npplayer", self.TypeLayer, "N++ Layer", default = TECHNOLOGY['Si N++'])
+    self.param("vclayer", self.TypeLayer, "VC Layer", default = TECHNOLOGY['VC'])
+    self.param("mlayer", self.TypeLayer, "Metal Layer", default = TECHNOLOGY['12_M2'])
+    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
+    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+
+  def display_text_impl(self):
+    # Provide a descriptive text for the cell
+    return "ebeam_irph_wg" # (R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
+
+  def can_create_from_shape_impl(self):
+    return False
+    
+  def produce_impl(self):
+    # This is the main part of the implementation: create the layout
+
+    from math import pi, cos, sin
+    from SiEPIC.utils import arc_wg, arc_wg_xy
+    from SiEPIC._globals import PIN_LENGTH
+
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+    
+    LayerSiN = ly.layer(self.silayer)
+    LayerSiRibN = ly.layer(self.siriblayer)
+    LayerNN = ly.layer(self.nlayer)
+    LayerNPPN = ly.layer(self.npplayer)
+    LayerVCN = ly.layer(self.vclayer)
+    LayerMN = ly.layer(self.mlayer)
+    LayerPinRecN = ly.layer(self.pinrec)
+    LayerDevRecN = ly.layer(self.devrec)
+    TextLayerN = ly.layer(self.textl)
+
+    w = int(round(self.w/dbu))
+    w_rib = int(round(self.w_rib/dbu))
+    length = int(round(self.length/dbu))
+    n_w = int(round(self.n_w/dbu))
+    npp_w=int(round(self.npp_w/dbu))
+    npp_dw=int(round(self.npp_dw/dbu))
+    vc_w = int(round(self.vc_w/dbu))
+    vc_dw = int(round(self.vc_dw/dbu))
+    m_dw = int(round(self.m_dw/dbu))
+    m_w = int(round(self.m_w/dbu))
+    
+    #draw the waveguide
+    xtop = 0
+    ytop = -1*(w/2)
+    xbottom = length
+    ybottom = 1*(w/2)
+    wg1 = Box(0, -w/2, length, w/2)
+    shapes(LayerSiN).insert(wg1)
+
+    # Pins on the bottom waveguide side:    
+    pin = Path([Point(xtop+PIN_LENGTH, 0), Point(xtop-PIN_LENGTH, 0)], w)
+    shapes(LayerPinRecN).insert(pin)
+    text = Text ("pin1", Trans(Trans.R0, xtop, 0))
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu      
+
+    pin = Path([Point(xbottom-PIN_LENGTH, 0), Point(xbottom+PIN_LENGTH, 0)], w)
+    shapes(LayerPinRecN).insert(pin)
+    text = Text ("pin2", Trans(Trans.R0, xbottom, 0))
+    shape = shapes(LayerPinRecN).insert(text)
+    shape.text_size = 0.4/dbu      
+  
+    #draw N
+    b = Box(0, -n_w/2, length, n_w/2)
+    shapes(LayerNN).insert(b)
+    
+    #draw NPP
+    b = Box(0, npp_dw, length, npp_dw+npp_w)
+    shapes(LayerNPPN).insert(b)
+    b = Box(0, -npp_dw, length, -npp_dw-npp_w)
+    shapes(LayerNPPN).insert(b)
+
+    #draw via
+    b = Box(0, vc_dw, length, vc_dw+vc_w)
+    shapes(LayerVCN).insert(b)
+    b = Box(0, -vc_dw, length, -vc_dw-vc_w)
+    shapes(LayerVCN).insert(b)
+    
+    #draw metal
+    b = Box(0, m_dw, length, m_dw+m_w)
+    shapes(LayerMN).insert(b)
+    b = Box(0, -m_dw, length, -m_dw-m_w)
+    shapes(LayerMN).insert(b)
+
+    w_devrec = 2 * max(m_dw+m_w, vc_dw+vc_w, npp_dw+npp_w, w_rib/2)
+
+    #devrec layer
+    b = Box(0, w_devrec/2+w, length, -w_devrec/2-w)
+    shapes(LayerDevRecN).insert(b)
+
+    # Si rib layer
+    b = Box(0, w_rib/2, length, -w_rib/2)
+    shapes(LayerSiRibN).insert(b)
+    
+    t = Trans(Trans.R0, 0,0)
+    text = Text ('Component=ebeam_irph_wg', t)
+    shape = shapes(LayerDevRecN).insert(text)
+    # shape.text_size = self.r*0.07/dbu
+    
+#    print("Done drawing the layout for - ebeam_irph_wg: %.3f-%g" % ( self.r, self.g))
+    
 
 class SWG_bentWG(pya.PCellDeclarationHelper):
 
@@ -6261,7 +6404,8 @@ class SiEPIC_EBeam_dev(Library):
     self.layout().register_pcell("ebeam_dc", ebeam_dc())
     self.layout().register_pcell("DirectionalCoupler_SeriesRings", DirectionalCoupler_SeriesRings())
     self.layout().register_pcell("ebeam_dc_halfring_arc", ebeam_dc_halfring_arc())
-    self.layout().register_pcell("IRPH_MRR", ebeam_irph_mrr())
+    self.layout().register_pcell("ebeam_irph_mrr", ebeam_irph_mrr())
+    self.layout().register_pcell("ebeam_irph_wg", ebeam_irph_wg())
     self.layout().register_pcell("DoubleBus_Ring", DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring", TestStruct_DoubleBus_Ring())
     self.layout().register_pcell("TestStruct_DoubleBus_Ring2", TestStruct_DoubleBus_Ring2())
