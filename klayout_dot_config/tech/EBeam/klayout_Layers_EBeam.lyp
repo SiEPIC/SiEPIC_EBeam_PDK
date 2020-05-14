@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-properties>
- <properties>
+
+<properties>
+  <frame-color/>
+  <fill-color/>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern/>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>Waveguides (silicon)</name>
+  <source>*/*@*</source>
+  
+  <group-members>
   <frame-color>#ff80a8</frame-color>
   <fill-color>#ff80a8</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -15,8 +33,9 @@
   <name>Si</name>
   <source>1/0@1</source>
   <width>2.0</width>
- </properties>
- <properties>
+  </group-members>
+  
+  <group-members>
   <frame-color>#ff0000</frame-color>
   <fill-color>#ff0000</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -30,7 +49,45 @@
   <animation>0</animation>
   <name>31_Si_p6nm</name>
   <source>31/0@1</source>
+  </group-members>
+  
+  <group-members>
+  <frame-color>#80a8ff</frame-color>
+  <fill-color>#80a8ff</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I9</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>true</transparent>
+  <width>2</width>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>Si - 90 nm rib</name>
+  <source>2/0@1</source>
+  </group-members>
+  
+  <group-members>
+  <frame-color>#cc80a8</frame-color>
+  <fill-color>#cc80a8</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I7</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>true</transparent>
+  <width/>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>Si_Litho193nm</name>
+  <source>1/69@1</source>
+  <width>2.0</width>
+  </group-members>
+  
  </properties>
+ 
  <properties>
   <frame-color>#0000ff</frame-color>
   <fill-color>#0000ff</fill-color>
@@ -46,21 +103,39 @@
   <name>Text</name>
   <source>10/0@1</source>
  </properties>
-  <properties>
-    <animation>0</animation>
-    <marked>false</marked>
-    <source>20/0@1</source>
-    <name>Si N</name>
-    <visible>true</visible>
-    <dither-pattern>I6</dither-pattern>
-    <frame-color>#000000</frame-color>
-    <fill-color>#7000FF</fill-color>
-    <frame-brightness>0</frame-brightness>
-    <transparent>false</transparent>
-    <width>0.0</width>
-    <fill-brightness>0</fill-brightness>
-  </properties>
+ 
  <properties>
+  <frame-color/>
+  <fill-color/>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern/>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>Doping/Epitaxial growth</name>
+  <source>*/*@*</source>
+  
+  <group-members>
+	<animation>0</animation>
+	<marked>false</marked>
+	<source>20/0@1</source>
+	<name>Si N</name>
+	<visible>true</visible>
+	<dither-pattern>I6</dither-pattern>
+	<frame-color>#000000</frame-color>
+	<fill-color>#7000FF</fill-color>
+	<frame-brightness>0</frame-brightness>
+	<transparent>false</transparent>
+	<width>0.0</width>
+	<fill-brightness>0</fill-brightness>
+  </group-members>
+ <group-members>
   <frame-color>#0000ff</frame-color>
   <fill-color>#0000ff</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -76,23 +151,27 @@
   <animation>0</animation>
   <name>Si N++</name>
   <source>24/0@1</source>
+ </group-members>
  </properties>
+
  <properties>
-  <frame-color>#ff00ff</frame-color>
-  <fill-color>#ff00ff</fill-color>
+  <frame-color/>
+  <fill-color/>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
-  <dither-pattern>I5</dither-pattern>
+  <dither-pattern/>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
-  <width>1</width>
+  <width/>
   <marked>false</marked>
+  <xfill>false</xfill>
   <animation>0</animation>
-  <name>SEM</name>
-  <source>200/0@1</source>
- </properties>
- <properties>
+  <name>Metal</name>
+  <source>*/*@*</source>
+  
+ <group-members>
   <frame-color>#805000</frame-color>
   <fill-color>#805000</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -106,8 +185,9 @@
   <animation>0</animation>
   <name>M1</name>
   <source>11/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ 
+ <group-members>
   <frame-color>#008000</frame-color>
   <fill-color>#008000</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -121,8 +201,9 @@
   <animation>0</animation>
   <name>12_M2</name>
   <source>12/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ 
+ <group-members>
   <frame-color>#008000</frame-color>
   <fill-color>#008000</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -136,8 +217,9 @@
   <animation>0</animation>
   <name>13_MLopen</name>
   <source>13/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ 
+ <group-members>
   <frame-color>#8086ff</frame-color>
   <fill-color>#8086ff</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -153,8 +235,9 @@
   <animation>0</animation>
   <name>VC</name>
   <source>40/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ 
+ <group-members>
   <frame-color>#80a8ff</frame-color>
   <fill-color>#80a8ff</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -170,8 +253,9 @@
   <animation>0</animation>
   <name>M1</name>
   <source>41/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ 
+ <group-members>
   <frame-color>#0080ff</frame-color>
   <fill-color>#0080ff</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -187,7 +271,25 @@
   <animation>0</animation>
   <name>M Heater</name>
   <source>47/0@1</source>
+  </group-members>
  </properties>
+ 
+ <properties>
+  <frame-color>#ffae00</frame-color>
+  <fill-color>#ffae00</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I5</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>1</width>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>Oxide open (to BOX)</name>
+  <source>6/0@1</source>
+ </properties>
+ 
  <properties>
   <frame-color>#8000ff</frame-color>
   <fill-color>#8000ff</fill-color>
@@ -203,7 +305,41 @@
   <name>FloorPlan</name>
   <source>99/0@1</source>
  </properties>
+ 
  <properties>
+  <frame-color>#ff00ff</frame-color>
+  <fill-color>#ff00ff</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I5</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>1</width>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>SEM</name>
+  <source>200/0@1</source>
+ </properties>
+ 
+ <properties>
+  <frame-color/>
+  <fill-color/>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern/>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width/>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>SiEPIC</name>
+  <source>*/*@*</source>
+  
+ <group-members>
   <frame-color>#004080</frame-color>
   <fill-color>#004080</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -217,8 +353,8 @@
   <animation>0</animation>
   <name>DevRec</name>
   <source>68/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ <group-members>
   <frame-color>#004080</frame-color>
   <fill-color>#004080</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -232,8 +368,25 @@
   <animation>0</animation>
   <name>PinRec</name>
   <source>1/10@1</source>
- </properties>
- <properties>
+ </group-members>
+
+ <group-members>
+  <frame-color>#004080</frame-color>
+  <fill-color>#004080</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I11</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>2</width>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>PinRecM</name>
+  <source>1/11@1</source>
+ </group-members>
+  
+ <group-members>
   <frame-color>#004080</frame-color>
   <fill-color>#004080</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -247,8 +400,9 @@
   <animation>0</animation>
   <name>FbrTgt</name>
   <source>81/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ 
+ <group-members>
   <frame-color>#805000</frame-color>
   <fill-color>#000080</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -262,8 +416,9 @@
   <animation>0</animation>
   <name>Errors</name>
   <source>999/0@1</source>
- </properties>
- <properties>
+ </group-members>
+ 
+ <group-members>
   <frame-color>#800057</frame-color>
   <fill-color>#800057</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -277,6 +432,7 @@
   <animation>0</animation>
   <name>Lumerical</name>
   <source>733/0@1</source>
+ </group-members>
  </properties>
  <properties>
   <frame-color/>

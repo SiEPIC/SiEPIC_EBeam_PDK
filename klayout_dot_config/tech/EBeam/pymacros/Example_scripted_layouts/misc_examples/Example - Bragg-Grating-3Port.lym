@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Bragg gratings</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.exlayout.begin</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>  # SiEPIC-Tools scripted layout benchmark
+  #
+  # Create a complete layout for parameter sweeping contra-directional couplers
+  # usage:
+  #  - the SiEPIC EBeam Library
+  # Modify parameters in layout_parameters() function to create a parameter sweep on selected contra-DC parameter.
+  # 
+  # Script will generate an array of the devices with the selected parameters, and generate GCs for testing with automated measurement labels
+  # and finally generate interleaved waveguide routes between GCs and devices for compact routing
+  #
+  # Author:       Mustafa Hammood 
+  #                   Mustafa@ece.ubc.ca
+  # September 2018
+  # 
+  # Edited:   Stephen Lin
+  #
+  # September 2018
+  # Uncomment line 263 to enable path_to_waveguide, or just do it on your own.
+  
+  
+# Import KLayout-Python API
+from pya import *
+
+
+# linspace function without using numpy, because why not?
+def linspace_without_numpy(low, up, length):
+    step = ((up-low) * 1.0 / length)
+    return [low+i*step for i in range(length)]
+    
+# define layout parameters in the class below
+# ALL distance parameters are in microns unless specified otherwise
+class parameters():
+  # parameter to sweep  
+  # number of devices (i.e. length of this array) MUST BE EVEN as this is interleaved routing configuration!
+  Num_sweep = 18
+
+  # contraDC device parameters (refer to PCell definition)
+  N =  linspace_without_numpy(300,300,Num_sweep)
+  period = linspace_without_numpy(.318,.318,Num_sweep)
+  w = linspace_without_numpy(.5,.5,Num_sweep)
+  dW = linspace_without_numpy(.050,.220,Num_sweep)
+  sine = 1
+  a = linspace_without_numpy(2.7,2.7,Num_sweep)
+  
+  # routing and device placement parameters
+
+  x_offset = 70              # spacing between grating couplers columns
+  wg_bend_radius = 5    # waveguide routes bend radius
+  bezier = 1                   # Use adiabatic bezier bends (if 1)
+  bezier_N = 0.2            # Bezier bend parameter
+  device_spacing = 15   # spacing between devices
+  wg_width = .5          # waveguide routes width
+  GC_pitch = 127         # spacing between grating couplers array (for a single device)
+  wg_pitch = 5            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
+  
+  route_down = -3*(N[-1]*dW[-1])-GC_pitch-wg_bend_radius#-150-wg_bend_radius   # FIXIT gonna define in a sec
+  route_up = 3*(N[-1]*dW[-1])+GC_pitch+wg_bend_radius#150+wg_bend_radius        # FIXIT gonna define in a sec
+
+  
+######################################################################################  
+
+    
+# TOP Function: Instatiate the layout functions
+def BraggGrating_array():
+
+  # Configure parameter sweep  polarization (unused so far)
+  pol = 'te'
+  
+  # grab layout parameters
+  params = parameters()
+    
+  print('Number of parameters to sweep: '+str(params.Num_sweep))
+
+  # Import functions from SiEPIC-Tools, and get technology details
+  from SiEPIC.utils import select_paths, get_layout_variables
+  TECHNOLOGY, lv, ly, cell = get_layout_variables()
+  dbu = ly.dbu
+  from SiEPIC.extend import to_itype
+  
+  # clean all cells within the present cell
+  ly.prune_subcells(cell.cell_index(), 100)
+  
+  # Layer mapping:
+  LayerSiN = ly.layer(TECHNOLOGY['Si'])
+  #fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
+  TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+  
+  # Create a sub-cell for our contraDC layout
+  top_cell = cell
+  cell = cell.layout().create_cell("Bragg_GCarray")
+
+  t = Trans(Trans.R0, 0, 0)
+    
+  # place the cell in the top cell
+  top_cell.insert(CellInstArray(cell.cell_index(), t))
+  
+  # Grating couplers, Ports 1, 2, 3, 4 (top-down):
+  GC_imported = ly.create_cell("ebeam_gc_%s1550" % pol, "EBeam").cell_index()
+  gc_length = 41
+  GC_pitch = 127
+  
+  # Instatiate GC array sufficient enough for the number of devices to be swept
+  #x = params.x_offset
+  t = Trans(Trans.R0, 0, 0)
+  cell.insert(CellInstArray(GC_imported, t, DPoint(0,GC_pitch).to_itype(dbu), DPoint(-params.x_offset,0).to_itype(dbu), 3, params.Num_sweep))
+   
+  create_deviceArray()
+  
+
+# Instatiate the array of devices to sweep with their respective GC-device waveguide routes
+def create_deviceArray():
+  from SiEPIC.utils import select_paths, get_layout_variables
+  from SiEPIC.scripts import path_to_waveguide
+  from SiEPIC.extend import to_itype
+  TECHNOLOGY, lv, ly, cell = get_layout_variables()
+  LayerSiN = ly.layer(TECHNOLOGY['Si'])
+  TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+  
+  params = parameters()
+   # Instatiate the devices array
+  # Loop through the parameter sweep
+  route_y =  params.route_up+params.GC_pitch;
+  for i in range(params.Num_sweep):
+      initial_x = params.x_offset*(params.Num_sweep-2-i)/2
+      device_x = params.x_offset + (i)*(params.device_spacing)
+      device_y = 0
+      device_y_top = params.N[i]*params.period[i]+params.period[i]/2
+
+      #Bragg
+      create_BraggGrating(x_pos = params.device_spacing*i + params.x_offset, y_pos = 0, N = int(params.N[i]), 
+      period = params.period[i], w = params.w[i], dW = params.dW[i], sine = params.sine, 
+      a = params.a[i], wg_width = params.wg_width)
+      
+      #BDC
+      pcell = ly.create_cell("ebeam_bdc_te1550", "EBeam")
+      t = Trans(Trans.R90, params.device_spacing/dbu*i + params.x_offset/dbu+(4.7/2/dbu), params.route_up/dbu-params.wg_bend_radius/dbu)
+      cell.insert(CellInstArray(pcell.cell_index(),t))
+      
+      #Terminator
+      pcell = ly.create_cell("ebeam_terminator_te1550", "EBeam")
+      t = Trans(Trans.R90, params.device_spacing/dbu*i + params.x_offset/dbu+(4.7/dbu), params.route_up/dbu-40.45/dbu)
+      cell.insert(CellInstArray(pcell.cell_index(),t))
+      
+      #pcell = ly.create_cell("ime_taper_te1550", "EBeam-dev")
+      #pcell = ly.create_cell("ime_taper_te1550", "EBeam-dev", {"wg_length":20,"wg1_width":500,"wg2_width":120,"terminator":True} )
+      #t = Trans(Trans.R270, params.device_spacing/dbu*i + params.x_offset/dbu+(4.7/dbu), params.route_up/dbu-40.45/dbu)
+      #cell.insert(CellInstArray(pcell.cell_index(),t))
+      #self.param("wg_length", self.TypeInt, "Length (microns)", default=20)
+      #  self.param("wg1_width", self.TypeInt, "Initial width (nm)", default=500)
+      #  self.param("wg2_width", self.TypeInt, "Final width (nm)", default=3000)
+      #  self.param("terminator", self.TypeBoolean, "Terminator", default=False)
+        
+        
+      #WG to Bragg
+      Point1 = DPoint((i)*(params.device_spacing)+params.x_offset,params.route_up-(70.45/2)-6)#BDC height, 5 because asymmetrical
+      Point2 = DPoint((i)*(params.device_spacing)+params.x_offset,device_y_top) 
+      dpath = DPath([Point1,Point2],params.wg_width)
+      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+      
+      # Label for automated measurements, laser on Port 3, detectors on Port 2
+      t = Trans(Trans.R0, to_itype(0-i*params.x_offset,dbu),to_itype(params.GC_pitch,dbu) )
+      text = Text ("opt_in_TE_1550_device_Bragg%sN%speriod%sw%.3fdw%sa" % (params.N[i],params.period[i],params.w[i],params.dW[i],params.a[i]),t)
+      shape = cell.shapes(TextLayerN).insert(text)
+      shape.text_size = 1.5/dbu
+      
+      # GC2 to device
+      #route_y2 = params.route_up+params.GC_pitch+params.wg_pitch+params.wg_pitch*(i)
+      route_y = route_y+params.wg_pitch
+      Point1 = DPoint(-(i)*(params.x_offset),params.GC_pitch)
+      Point2 = DPoint(-(i)*(params.x_offset)+params.wg_pitch*2+params.wg_bend_radius,params.GC_pitch)
+      Point3 = DPoint(-(i)*(params.x_offset)+params.wg_pitch*2+params.wg_bend_radius,route_y)
+      Point4 = DPoint(device_x,route_y)
+      Point5 = DPoint(device_x,params.route_up+35) #length of coupler        
+      dpath = DPath([Point1,Point2,Point3,Point4,Point5],params.wg_width)
+      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+      
+      # Routing
+      # GC3 to device - downward routing
+      #route_y3 = params.route_up+params.GC_pitch+params.wg_pitch*(i+1)
+      route_y = route_y+params.wg_pitch
+      Point1 = DPoint(-(i)*(params.x_offset),params.GC_pitch*2)
+      Point2 = DPoint(-(i)*(params.x_offset)+params.wg_pitch+params.wg_bend_radius,params.GC_pitch*2)
+      Point3 = DPoint(-(i)*(params.x_offset)+params.wg_pitch+params.wg_bend_radius,route_y)
+      Point4 = DPoint(device_x+4.7,route_y)
+      Point5 = DPoint(device_x+4.7,params.route_up+35) #length of coupler        
+      dpath = DPath([Point1,Point2,Point3,Point4,Point5],params.wg_width)
+      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+       
+      # GC1 to device - downward routing
+      route_y1 = params.route_down+params.GC_pitch-params.wg_pitch*(i)#params.route_down-params.wg_pitch*i*2
+      Point1 = DPoint(-(i)*(params.x_offset),0)
+      Point2 = DPoint(-(i)*(params.x_offset)+params.wg_pitch+params.wg_bend_radius,0)
+      Point3 = DPoint(-(i)*(params.x_offset)+params.wg_pitch+params.wg_bend_radius,route_y1)
+      Point4 = DPoint(device_x,route_y1)
+      Point5 = DPoint(device_x,device_y)
+      dpath = DPath([Point1,Point2,Point3,Point4,Point5],params.wg_width)
+      cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+      
+  # Convert the paths to waveguides (very time consuming!)
+  #path_to_waveguide(cell = cell, verbose=True, params = {'width': params.wg_width, 'adiabatic': params.bezier, 'radius': params.wg_bend_radius, 'bezier': params.bezier_N, 'wgs': [{'width': params.wg_width, 'layer': 'Si', 'offset': 0.0}]})
+  
+# Instatiate a complete contraDC PCell with s-bends, tapers, and waveguide routes
+def create_BraggGrating(x_pos = 0, y_pos = 0, N = 1000, period = .318, w = .5, dW = .048, sine = 0, a = 0, wg_width = 0.5):
+  
+  from SiEPIC.utils import select_paths, get_layout_variables
+  TECHNOLOGY, lv, ly, cell = get_layout_variables()
+  
+    
+  # BraggGrating PCell
+  pcell = ly.create_cell("Apodized Bragg Grating", "EBeam-dev", { "number_of_periods": N, "grating_period": period, "corrugation_width": dW , "sinusoidal": sine, "wg_width": w,"index": a} )
+  t = Trans(Trans.R90, x_pos/dbu, y_pos/dbu)
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+
+  # S-Bend PCells (top and bottom)
+  #pcell = ly.create_cell("Waveguide_SBend", "EBeam", { "length": sbend_L, "height": sbend_H, "wg_width": w, "radius": sbend_R} )
+  #t = Trans(Trans.R90, (x_pos+sbend_H)/dbu, (y_pos-sbend_L)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+  #t = Trans(Trans.R270.M45, (x_pos)/dbu, (y_pos+N*period+period/2)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+  
+  # Waveguide straight PCells (top and bottom
+  #pcell = ly.create_cell("Waveguide_Straight", "EBeam", { "wg_length": sbend_L/dbu, "wg_width": w2/dbu} )
+  #t = Trans(Trans.R90, (x_pos-w1/2-g-w2/2)/dbu, (y_pos-sbend_L/2)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+  #t = Trans(Trans.R270.M45, (x_pos-w1/2-g-w2/2)/dbu, (y_pos+N*period+period/2+sbend_L/2)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+  
+  # Waveguide taper PCells (top and bottom, left)
+  #pcell = ly.create_cell("ebeam_taper_te1550", "EBeam", { "wg_length": taper_L, "wg_width1": wg_width, "wg_width2": w2} )
+  #t = Trans(Trans.R90, (x_pos-w1/2-g-w2/2)/dbu, (y_pos-2*sbend_L)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+  #t = Trans(Trans.R270, (x_pos-w1/2-g-w2/2)/dbu, (y_pos+N*period+period/2+2*sbend_L)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+
+  # Waveguide taper PCells (top and bottom, right)
+  #pcell = ly.create_cell("ebeam_taper_te1550", "EBeam", { "wg_length": taper_L, "wg_width1": wg_width, "wg_width2": w} )
+  #t = Trans(Trans.R90, (x_pos+sbend_H)/dbu, (y_pos-2*sbend_L)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+  #t = Trans(Trans.R270, (x_pos+sbend_H)/dbu, (y_pos+N*period+period/2+2*sbend_L)/dbu)
+  #cell.insert(CellInstArray(pcell.cell_index(),t))
+  
+BraggGrating_array()
+
+# All done!</text>
+</klayout-macro>

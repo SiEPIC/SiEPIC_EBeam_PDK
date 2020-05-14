@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lumerical_lookup_table version="1.0" name="index_table">
+ 	<association>
+     <design>
+         <value name="apodization_index" type="double">1</value>
+         <value name="corrugation_width1" type="double">4e-08</value>
+         <value name="corrugation_width2" type="double">2e-08</value>
+         <value name="gap" type="double">1.5e-07</value>
+         <value name="grating_period" type="double">3.18e-07</value>
+         <value name="lambda_end" type="double">1600</value>
+         <value name="lambda_points" type="double">501</value>
+         <value name="lambda_start" type="double">1500</value>
+         <value name="number_of_periods" type="double">1000</value>
+         <value name="sinusoidal" type="double">0</value>
+         <value name="wg1_width" type="double">5.6e-07</value>
+         <value name="wg2_width" type="double">4.4e-07</value>
+     </design>
+     <extracted>
+         <value name="sparam" type="string">ssstest.dat</value>
+     </extracted>
+</association>
+</lumerical_lookup_table>
