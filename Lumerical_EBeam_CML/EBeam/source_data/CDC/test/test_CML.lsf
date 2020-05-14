@@ -1,0 +1,53 @@
+
+?filename = "test_CDC_2.xml";
+
+
+if (1) {
+
+    table = "index_table";
+
+    design = cell(12);
+    extracted = cell(1);
+
+    #design (input parameters)
+    design{1} = struct;
+    design{1}.name = "wg1_width";
+    design{1}.value = 5.6e-07;
+    design{2} = struct;
+    design{2}.name = "wg2_width";
+    design{2}.value = 4.4e-07;
+    design{3} = struct;
+    design{3}.name = "corrugation_width1";
+    design{3}.value = 4e-08;
+    design{4} = struct;
+    design{4}.name = "corrugation_width2";
+    design{4}.value = 2e-08;
+    design{5} = struct;
+    design{5}.name = "gap";
+    design{5}.value = 1.5e-07;
+    design{6} = struct;
+    design{6}.name = "grating_period";
+    design{6}.value = 3.18e-07;
+    design{7} = struct;
+    design{7}.name = "number_of_periods";
+    design{7}.value = 1000;
+    design{8} = struct;
+    design{8}.name = "sinusoidal";
+    design{8}.value = 0;
+    design{9} = struct;
+    design{9}.name = "apodization_index";
+    design{9}.value = 1;
+    design{10} = struct;
+    design{10}.name = "lambda_start";
+    design{10}.value = 1500;
+    design{11} = struct;
+    design{11}.name = "lambda_end";
+    design{11}.value = 1600;
+    design{12} = struct;
+    design{12}.name = "lambda_points";
+    design{12}.value = 501;
+
+    M = lookupreadnportsparameter(filename, table, design, "sparam");
+
+    
+}

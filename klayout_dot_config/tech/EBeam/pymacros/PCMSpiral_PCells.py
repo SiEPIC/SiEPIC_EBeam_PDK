@@ -13,8 +13,7 @@ j = cmath.sqrt(-1)
 sign = lambda x: math.copysign(1,x) #define the sign function
 alpha = 1 #related to the spirals radius growth, can only guess and test so far
 
-r = 25.0 #radius of the Sbend spiral
-gap = 8.0 #gap between wgs
+r = 15.0 #radius of the Sbend spiral
 angle_stepsize = 0.0001 #0.00001 required for less than 1 nm error
 
 # Create aliases for KLayout Python API methods:
@@ -35,7 +34,7 @@ def frange(start,stop,step):
       yield x #returns value as generator, speeding up stuff
       x+=step
         
-def angle_from_corrugation(r, length, grating_length):
+def angle_from_corrugation(r, length, grating_length, gap=8):
     #Calculates the thetas at which the desired grating lengths are achieved. Outputs to an array    
     angle = 0
     current_length = 0
@@ -62,7 +61,7 @@ def angle_from_corrugation(r, length, grating_length):
         current_total_length +=current_length
         current_length=0
         
-def spiral_gen(r,angle_array,w,cwidth,grating_length):
+def spiral_gen(r,angle_array,w,cwidth,grating_length, gap=8):
     #This generates the spirals coordinates from the given angle arrays. Given there is a cwidth
     
     for i in frange(0,len(angle_array)-1,1):
@@ -135,7 +134,7 @@ def sort_coord(bool_order,xinc,yinc,xdec,ydec):
             bool_order = not bool_order
     return x_array,y_array            
        
-def finish_spiral(r,finalangle,w,dx,dy):
+def finish_spiral(r,finalangle,w,dx,dy, gap=8):
     #This finishes the spiral to the 0 or 180 position with a uniform waveguide, also makes it easier to match via pins
     #The radius of the individual walls, basically draws 2 lines for each wall of the waveguide and appends hte points
     r_Winc = r+w
@@ -202,7 +201,7 @@ def finish_spiral(r,finalangle,w,dx,dy):
     
     return x_inc,y_inc,x_dec,y_dec#,endx,isEven
     
-def spiral_gen_NoCenter(r,angle_array,w,cwidth,grating_length):
+def spiral_gen_NoCenter(r,angle_array,w,cwidth,grating_length, gap=8):
     #This generates the spirals coordinates from the given angle arrays. Given there is a cwidth
     #for i in frange(0,len(angle_array)-1,1):
     i = 0
@@ -248,7 +247,7 @@ def spiral_gen_NoCenter(r,angle_array,w,cwidth,grating_length):
       
     return xc1,yc1,xc2,yc2,i
     
-def spiral_gen_NoCenter_Gratings(r,angle_array,w,cwidth,grating_length,lasti):
+def spiral_gen_NoCenter_Gratings(r,angle_array,w,cwidth,grating_length,lasti, gap=8):
     #This generates the spirals coordinates from the given angle arrays. Given there is a cwidth
     
     for i in frange(lasti,len(angle_array)-1,1):
@@ -299,7 +298,7 @@ def spiral_gen_NoCenter_Gratings(r,angle_array,w,cwidth,grating_length,lasti):
       else:
         yield xcoor_Winc1,ycoor_Winc1,xcoor_Winc3,ycoor_Winc3,dx,dy  
         
-def angle_from_corrugation_NoCenter(r, length, grating_length):
+def angle_from_corrugation_NoCenter(r, length, grating_length, gap=8):
     #Calculates the thetas at which the desired grating lengths are achieved. Outputs to an array    
     angle = 0
     current_length = 0
@@ -332,7 +331,7 @@ def angle_from_corrugation_NoCenter(r, length, grating_length):
           current_total_length +=current_length
         current_length=0
 
-def CDC_gen(r,angle_array,w,w2,cwidth,cwidth2,grating_length,wgap,direction):
+def CDC_gen(r,angle_array,w,w2,cwidth,cwidth2,grating_length,wgap,direction, gap=8):
     #This generates the spirals coordinates from the given angle arrays. Given there is a cwidth
     #iangle_array = [i*-1 for i in angle_array]
     #angle_array = angle_array[::-1]
@@ -402,7 +401,7 @@ def CDC_gen(r,angle_array,w,w2,cwidth,cwidth2,grating_length,wgap,direction):
       else:
         yield xcoor_Winc1,ycoor_Winc1,xcoor_Winc3,ycoor_Winc3,dx,dy,w2xcoor_Winc1,w2ycoor_Winc1,w2xcoor_Winc3,w2ycoor_Winc3
 
-def finish_CDC(r,finalangle,w,dx,dy,cwidth,wgap,direction):
+def finish_CDC(r,finalangle,w,dx,dy,cwidth,wgap,direction, gap=8):
     #This finishes the spiral to the 0 or 180 position with a uniform waveguide, also makes it easier to match via pins
     #The radius of the individual walls, basically draws 2 lines for each wall of the waveguide and appends hte points
     r_Winc = r+w+direction*(cwidth+wgap+w)
@@ -1552,13 +1551,14 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("w", self.TypeDouble, "Waveguide Width [nm]", default = 400)
     self.param("DeviceLength", self.TypeDouble, "Device Path Length [mm]", default = 0.5)
+    self.param("wg_spacing", self.TypeDouble, "Waveguide spacing [microns]", default = 8)     
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "SpiralBraggGratingSlab"
+    return "`aveguide"
 
   def can_create_from_shape_impl(self):
     return False   
@@ -1568,6 +1568,7 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
     
     ly = self.layout
     shapes = self.cell.shapes
+    wg_spacing = self.wg_spacing
 
     LayerSi = self.silayer
     LayerSiN = ly.layer(LayerSi)
@@ -1583,7 +1584,7 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
     grating_length = 1000/2.0*10**-3
     #Step1 Find the Angles of each grating#######    
     angle_array=[]
-    for theta in angle_from_corrugation(r,length,grating_length):
+    for theta in angle_from_corrugation(r,length,grating_length,gap=wg_spacing):
         angle_array.append(theta)
     ####################
 
@@ -1598,7 +1599,7 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
     left2_yS = []
     
     #Calculate the Spiral Coordinates
-    for coord in spiral_gen(r,angle_array,w,0,grating_length):
+    for coord in spiral_gen(r,angle_array,w,0,grating_length,gap=wg_spacing):
     #for coord in spiral_gen_legacy(r,angle_array,sw):
         left_xS.append(coord[0])
         left_yS.append(coord[1])
@@ -1613,7 +1614,7 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
     right2_yS = [i*-1 for i in left2_yS]
     #Obtain a sorted list of the coordinates of one wall.
      
-    result = finish_spiral(r,angle_array[-1],w,dx,dy)
+    result = finish_spiral(r,angle_array[-1],w,dx,dy,gap=wg_spacing)
     left_xS.extend(result[0])
     left_yS.extend(result[1])
     left2_xS.extend(result[2])
@@ -1684,224 +1685,4 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
           
     print("Done drawing the layout for - SpiralWaveguide")
 
-
-
-class spiral(PCellDeclarationHelper):
-  """
-  Input: 
-  """
-
-  def __init__(self):
-
-    # Important: initialize the super class
-    super(spiral, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
-
-    # declare the parameters
-    self.param("length", self.TypeDouble, "Target Waveguide length", default = 10.0)     
-    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5)     
-    self.param("min_radius", self.TypeDouble, "Minimum radius (microns)", default = 5)     
-    self.param("wg_spacing", self.TypeDouble, "Waveguide spacing (microns)", default = 1)     
-    self.param("spiral_ports", self.TypeInt, "Ports on the same side? 0/1", default = 0)
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-
-  def display_text_impl(self):
-    # Provide a descriptive text for the cell
-    return "spiral_%s-%.3f-%.3f-%.3f" % \
-    (self.length, self.wg_width, self.min_radius, self.wg_spacing)
-  
-  def coerce_parameters_impl(self):
-    pass
-
-  def can_create_from_shape(self, layout, shape, layer):
-    return False
-    
-  def produce_impl(self):
-  
-    # fetch the parameters
-    dbu = self.layout.dbu
-    ly = self.layout
-    shapes = self.cell.shapes
-
-    LayerSi = self.layer
-    LayerSiN = ly.layer(LayerSi)
-    #LayerSiSPN = ly.layer(LayerSiSP)
-    LayerPinRecN = ly.layer(self.pinrec)
-    LayerDevRecN = ly.layer(self.devrec)
-    LayerTextN = ly.layer(get_technology()['Text'])
-
-    # draw spiral
-    from math import pi, cos, sin, log, sqrt
-    
-    # Archimedes spiral
-    # r = b + a * theta
-    b = self.min_radius
-    spacing = self.wg_spacing+self.wg_width;
-    a = 2*spacing/(2*pi)
-
-
-    # area, length, turn tracking for spiral
-    area = 0
-    spiral_length = 0
-    turn = -1
-
-    from SiEPIC.utils import points_per_circle, arc_wg_xy
-
-    while spiral_length < self.length:
-      turn +=1
-
-      # Spiral #1
-      pts = []
-      # local radius:
-      r = 2*b + a * turn * 2 * pi - self.wg_width/2
-      # number of points per circle:
-      npoints = int(points_per_circle(r))
-      # increment, in radians, for each point:
-      da = 2 * pi / npoints  
-      # draw the inside edge of spiral
-      for i in range(0, npoints+1):
-        t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
-        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
-      # draw the outside edge of spiral
-      r = 2*b + a * turn * 2 * pi + self.wg_width/2
-      npoints = int(points_per_circle(r))
-      da = 2 * pi / npoints  
-      for i in range(npoints, -1, -1):
-        t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
-        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
-      polygon = Polygon(pts)
-      area += polygon.area()
-      shapes(LayerSiN).insert(polygon)
-
-      # Spiral #2
-      pts = []
-      # local radius:
-      r = 2*b + a * turn * 2 * pi - self.wg_width/2 - spacing
-      # number of points per circle:
-      npoints = int(points_per_circle(r))
-      # increment, in radians, for each point:
-      da = 2 * pi / npoints  
-      # draw the inside edge of spiral
-      for i in range(0, npoints+1):
-        t = i*da + pi
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
-        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
-      # draw the outside edge of spiral
-      r = 2*b + a * turn * 2 * pi + self.wg_width/2  - spacing
-      npoints = int(points_per_circle(r))
-      da = 2 * pi / npoints  
-      for i in range(npoints, -1, -1):
-        t = i*da + pi
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
-        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
-      polygon = Polygon(pts)
-      area += polygon.area()
-      shapes(LayerSiN).insert(polygon)
-
-      # waveguide length:
-      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
-
-    if self.spiral_ports:
-      # Spiral #1 extra 1/2 arm
-      turn = turn + 1
-      pts = []
-      # local radius:
-      r = 2*b + a * turn * 2 * pi - self.wg_width/2
-      # number of points per circle:
-      npoints = int(points_per_circle(r))
-      # increment, in radians, for each point:
-      da = pi / npoints  
-      # draw the inside edge of spiral
-      for i in range(0, npoints+1):
-        t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
-        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
-      # draw the outside edge of spiral
-      r = 2*b + a * turn * 2 * pi + self.wg_width/2
-      npoints = int(points_per_circle(r))
-      da = pi / npoints  
-      for i in range(npoints, -1, -1):
-        t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
-        pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
-      polygon = Polygon(pts)
-      area += polygon.area()
-      shapes(LayerSiN).insert(polygon)
-      turn = turn - 1
-      # waveguide length:
-      spiral_length = area / self.wg_width * dbu*dbu + 2 * pi * self.min_radius
-
-    # Centre S-shape connecting waveguide        
-    #layout_arc_wg_dbu(self.cell, LayerSiN, -b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180)
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180))
-    #layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180))
-    print("spiral length: %s microns" % spiral_length) 
-
-    # Pins on the waveguide:
-    from SiEPIC._globals import PIN_LENGTH as pin_length
-    
-    x = -(2*b + a * (turn+1) * 2 * pi)/dbu
-    w = self.wg_width / dbu
-    t = Trans(Trans.R0, x,0)
-    pin = Path([Point(0,-pin_length/2), Point(0,pin_length/2)], w)
-    pin_t = pin.transformed(t)
-    shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin2", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    if self.spiral_ports:
-      x = -(2*b + a * (turn+1.5) * 2 * pi)/dbu
-    else:
-      x = (2*b + a * (turn+1) * 2 * pi)/dbu
-    t = Trans(Trans.R0, x,0)
-    pin = Path([Point(0,-pin_length/2), Point(0,pin_length/2)], w)
-    pin_t = pin.transformed(t)
-    shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin1", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    # Compact model information
-    t = Trans(Trans.R0, -abs(x), 0)
-    text = Text ('Length=%.3fu' % spiral_length, t)
-    shape = shapes(LayerTextN).insert(text)
-    shape.text_size = abs(x)/8
-    t = Trans(Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam_v1.2', t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
-    t = Trans(Trans.R0, 0, w*2)
-    text = Text ('Component=ebeam_wg_strip_1550', t)
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
-    t = Trans(Trans.R0, 0, -w*2)
-    text = Text \
-      ('Spice_param:wg_length=%.3fu wg_width=%.3fu min_radius=%.3fu wg_spacing=%.3fu' %\
-      (spiral_length, self.wg_width, (self.min_radius), self.wg_spacing), t )
-    shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
-
-    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    x = abs(x)
-    npoints = int(points_per_circle(x) /10 )
-    da = 2 * pi / npoints # increment, in radians
-    r=x + 2 * self.wg_width/dbu
-    pts = []
-    for i in range(0, npoints+1):
-      pts.append(Point.from_dpoint(DPoint(r*cos(i*da), r*sin(i*da))))
-    shapes(LayerDevRecN).insert(Polygon(pts))
-
-    print("spiral done.")
 
