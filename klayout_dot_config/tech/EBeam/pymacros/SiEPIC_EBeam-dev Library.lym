@@ -1216,6 +1216,8 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
   """
   Input: length, period_strip, period_swg, wg_width_strip, wg_width_swg, duty_strip, duty_swg
   continuously (linearly) variable period, width, duty along the length
+  
+  Updated by Lukas Chrostowski, Leanne Dias, 2020/05
   """
 
   def __init__(self):
@@ -1226,12 +1228,13 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
-    self.param("taper_fraction", self.TypeDouble, "Strip taper length fraction (0 to 1)", default = 0.9)     
+    self.param("taper_fraction", self.TypeDouble, "Strip taper length fraction (0 to 1)", default = 1)     
     self.param("period_strip", self.TypeDouble, "SWG Period at strip end (microns)", default = 0.200)     
     self.param("period_swg", self.TypeDouble, "SWG Period at SWG end (microns)", default = 0.200)     
-    self.param("wg_width_strip", self.TypeDouble, "Waveguide width at strip end (microns)", default = 0.5)     
-    self.param("wg_width_swg", self.TypeDouble, "Waveguide width at SWG end (microns)", default = 0.4)     
-    self.param("wg_width_taper", self.TypeDouble, "Waveguide width at strip nanotaper end (microns)", default = 0.06)     
+    self.param("wg_width_strip", self.TypeDouble, "Strip Waveguide width at the taper end (microns)", default = 0.5)     
+#    self.param("wg_width_swg_taperend", self.TypeDouble, "Waveguide width at SWG taper end (microns)", default = 0.4)     
+    self.param("wg_width_swg", self.TypeDouble, "SWG Waveguide at end (microns)", default = 0.5)     
+    self.param("wg_width_taper", self.TypeDouble, "Nanotaper width at taper end (microns)", default = 0.06)     
     self.param("duty_strip", self.TypeDouble, "SWG duty cycle at strip end (0 to 1)", default = 0.500)     
     self.param("duty_swg", self.TypeDouble, "SWG duty cycle at SWG end (0 to 1)", default = 0.700)     
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
@@ -1250,8 +1253,8 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     return False
     
   def produce_impl(self):
-  
-    # fetch the parameters
+
+    # Layout and layers:
     dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
@@ -1262,36 +1265,53 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
+  
+    # fetch the PCell parameters, and calculate a few things
+    from SiEPIC.extend import to_itype
+    wg_width_swg = to_itype(self.wg_width_swg,dbu)
+    wg_width_strip = to_itype(self.wg_width_strip,dbu)
+    length = to_itype(self.length, dbu)
+    w1 = to_itype(self.wg_width_taper,dbu)
+    w2 = to_itype(self.wg_width_strip,dbu)
+
     # Determine the period such that the waveguide length is as desired.  Slight adjustment to period
     N_boxes = int(round(self.length / (self.period_swg+self.period_strip)*2.0)-0.5)
     grating_period = self.length / (N_boxes) / dbu
     print("N boxes: %s, grating_period: %s" % (N_boxes, grating_period) )
+
+    # taper length, minus last SWG block
+    # taper_length = int(round(self.taper_fraction * self.length / dbu))
+    taper_length = (N_boxes-1) * grating_period
+
+    # Find out what is the delta width required between 
+    # a) the SWG end and b) the SWG with nanotaper
+    # Done by simulating the neff versus SWG waveguide width, with an without a 60 nm
+    w = wg_width_swg
+    dw = -3.3736e-5*w*w + 0.0618752*w  + 3.88577
+    wg_width_swg_taperend = wg_width_swg - dw
+
     
-    # Draw the Bragg grating:
+    # Draw the SWG waveguide:
     
     x = - self.period_swg * self.duty_swg / 2 / dbu
     for i in range(0,N_boxes):
       local_duty = 1.0 * (N_boxes - i) / N_boxes * self.duty_swg + 1.0*i / N_boxes * self.duty_strip 
-      local_period = (1.0*(N_boxes - i) / N_boxes * self.period_swg + 1.0*i / N_boxes * self.period_strip )/dbu
-      local_wg_width = (1.0*(N_boxes - i) / N_boxes * self.wg_width_swg + 1.0*i / N_boxes * self.wg_width_strip  ) /dbu
+      local_period = to_itype((1.0*(N_boxes - i) / N_boxes * self.period_swg + 1.0*i / N_boxes * self.period_strip ),dbu)
+      local_wg_width = (1.0*(N_boxes - i) / N_boxes * wg_width_swg_taperend + 1.0*i / N_boxes * wg_width_strip  )
       if (i==0) | (i==N_boxes):
         print("local_duty: %s, local_period: %s, local_wg_width: %s" % (local_duty, local_period, local_wg_width) )     
       local_box_width = int(round(local_period*local_duty))
 #      x = int(round((i * local_period - local_box_width/2)))
-      box1 = Box(x, -local_wg_width/2, x + local_box_width, local_wg_width/2)
       if i != 0:
-        shapes(LayerSiN).insert(box1)
+        box1 = Box(x, -local_wg_width/2, x + local_box_width, local_wg_width/2)
+      else:
+      # Last SWG, that is a bit larger than the one connected to the taper  
+        box1 = Box(x, -wg_width_swg/2, x + local_box_width, wg_width_swg/2)
+      shapes(LayerSiN).insert(box1)
       x = x + int(round((local_period)))
-  #    i = i + 1
-  #    x = int(round((i * grating_period)))
-  #    box1 = Box(x, -half_w, x + box_width, half_w)
-  #    shapes(LayerSiN).insert(box1)
-    length = self.length / dbu
+      
 
-    # Triangle
-    taper_length = int(round(self.taper_fraction * self.length / dbu))
-    w1 = int(round(self.wg_width_taper/dbu))
-    w2 = int(round(self.wg_width_strip/dbu))
+    # Taper
     pts = [Point(length-taper_length,-w1/2), Point(length-taper_length,w1/2), Point(length,w2/2), Point(length,-w2/2)]
     shapes(LayerSiN).insert(Polygon(pts))
 
@@ -1300,7 +1320,6 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     
     from SiEPIC._globals import PIN_LENGTH as pin_length
     
-#    pin_length = self.period_swg * self.duty_swg / dbu
     w = self.wg_width_swg / dbu
     t = Trans(Trans.R0, 0,0)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
