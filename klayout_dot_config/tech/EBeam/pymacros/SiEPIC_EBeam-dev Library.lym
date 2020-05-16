@@ -6743,7 +6743,7 @@ class SiEPIC_EBeam_dev(Library):
     dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/development")
     search_str = '*' + '.gds'
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter(filenames, search_str):
+        for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
             file1=os.path.join(root, filename)
             print(" - reading %s" % file1 )
             self.layout().read(file1)
