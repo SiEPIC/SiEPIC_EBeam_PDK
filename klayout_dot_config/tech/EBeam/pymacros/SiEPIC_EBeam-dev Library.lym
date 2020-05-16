@@ -6500,7 +6500,7 @@ class ebeam_taper_strip_rib(pya.PCellDeclarationHelper):
 class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
 
   # N-doped heater phase shifter in a rib waveguide
-  # design by Guowu Zhang &lt;guowu.zhang@mail.mcgill.ca&gt;
+  # design by Guowu Zhang <guowu.zhang@mail.mcgill.ca>
   # based on Ref: R. Priti, Efficiency Improvement of an O-band SOI-MZI Thermo-optic Matrix Switch
   # Predicted performance:
   # resistance and power consumption using 
@@ -6508,7 +6508,6 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
   # The estimated Resistance is ~ 140 Ω. The corresponding power consumption for π phase shift is ~ 44 mW. 
   # Simulation also shows that width of NPP region has influence on efficiency. 
   # As an comparison, if NPP is 1 um, the power consumption for π phase shift is ~ 23 mW.
-
 
   def __init__(self):
 
@@ -6518,18 +6517,25 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    # self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = TECHNOLOGY['31_Si_p6nm'])
     self.param("io_wg_type", self.TypeBoolean, "I/O waveguide type, 0 - strip; 1 - rib", default = 0)
+    #self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = TECHNOLOGY['31_Si_p6nm'])   
     self.param("input_rib_width", self.TypeDouble, "Input Rib Width (um)", default = 0.35)
     self.param("input_slab_width", self.TypeDouble, "Input Slab Width (um)", default = 2)
-    self.param("in_taper_length", self.TypeDouble, "Input Taper Length (um)", default = 15)    
+    self.param("in_taper_length", self.TypeDouble, "Input Taper Length (um)", default = 15)
+    #self.param("waveguide width", self.TypeDouble, "Waveguide Width (um)", default = 0.5)
+    
     self.param("length", self.TypeDouble, "Phase Shifter Length (um)", default = 150)
     self.param("width", self.TypeDouble, "Phase Shifter Width (um)", default = 0.5)
-#    self.param("ps_slab_width", self.TypeDouble, "Phase Shifter Slab Width (um)", default = 8)
-# Just cover the whole device, using other parameters.
-    self.param("npp_distance", self.TypeDouble, "Npp Edge to Si Distance (um)", default = 2.0)
-    self.param("npp_width", self.TypeDouble, "Npp Width (um)", default = 2.0)
-    self.param("segments", self.TypeInt, "Phase Shifter Segments", default = 5)     
-    self.param("metal_width", self.TypeDouble, "Metal Width (um)", default = 10)
+    self.param("ps_slab_width", self.TypeDouble, "Phase Shifter Slab Width (um)", default = 18)
+    self.param("npp_width", self.TypeDouble, "Npp Width (um)", default = 2)
+    #self.param("slab_width", self.TypeDouble, "Via to Center Distance (um)", default = 10)
+    self.param("npp_distance", self.TypeDouble, "Npp Edge to Center Distance (um)", default = 1.25)
+    self.param("segments", self.TypeInt, "Phase Shifter Segments", default = 5)  
+    self.param("floded_number", self.TypeInt, "Fold number (Odd times)", default = 3)   
+    #self.param("deltaW", self.TypeDouble, "Corrugation Width (um)", default = 0.04)
+    
+    #self.param("gamma", self.TypeDouble, "N (number of corrugations)", default = 135)
     self.param("slayer", self.TypeLayer, "Slab Layer", default = TECHNOLOGY['Si - 90 nm rib'])
     self.param("nlayer", self.TypeLayer, "N Layer", default = TECHNOLOGY['Si N'])
     self.param("npplayer", self.TypeLayer, "N++ Layer", default = TECHNOLOGY['Si N++'])
@@ -6585,26 +6591,51 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     TextLayerN = ly.layer(self.textl)
     
     from SiEPIC.extend import to_itype
-    w = to_itype(self.width,dbu)
-    l = to_itype(self.length,dbu)
-#    ps_sl_w = to_itype(self.ps_slab_width, dbu)
-    npp_d = to_itype(self.npp_distance, dbu)
-    sw = npp_d * 2
-    metal_width = to_itype(self.metal_width, dbu)
-    npp_width = to_itype(self.npp_width, dbu)
+    
+    ## define parameters for phase shifter
+    
+    ## define waveguide related parameters
+    w = to_itype(self.width,dbu)   #pahse shifter width, default 0.5 um
+    l = to_itype(self.length,dbu)  #pahse shifter length, default 150 um
+    ps_sl_w = to_itype(self.ps_slab_width, dbu)  #overall pahse shifter 90nm slab width
+    npp_d = to_itype(self.npp_distance, dbu)    #npp to center waveguide distance
+    sw = npp_d * 2    #twice of npp_d that is defined above
+    in_rib = to_itype(self.input_rib_width,dbu)   #the slab width of the input/ouotput waveguide to the phase shifter
+    in_taper = to_itype(self.in_taper_length,dbu) #the input waveguide to phase shifter dimension transfer taper length, default 15
+    edge_slab_width = to_itype(4,dbu) #width of the 90 nm slab that is outside of all the floding waveguide, default 2 * 2um
+    radius = to_itype(5,dbu) # U shape path routing radius
+    npp_width = to_itype(self.npp_width,dbu)   #npp width, default 5 um
+    
+    ## define floding parameters
+    NNN = round((self.floded_number - 1)/2) # floding waveguide number on one side
+    floding_w1 = w   # one of the floding waveguide width
+    floding_w2 = to_itype(self.width - 0.1,dbu) # the other one of the floding waveguide width
+    floding_gap = to_itype(2,dbu)  # the gap between two floding waveguide
+    routing_step = to_itype(10,dbu) # define how large the U shape should be, default 20
+    
+    ## define node related parameters
+    NPP_node_size = to_itype(6,dbu)  # square NPP size, for VC purpose
+    pin_text_size = to_itype(0.4,dbu)  # pin text size
+    
+    metal_routing_distance_to_node = to_itype(30,dbu) 
+    metal_routing_width = to_itype(10,dbu) 
+    vc_to_npp_exclusion = to_itype(0.4,dbu) # VC boundary to NPP boundary distance
 
-    ps_sl_w = w+2*npp_d+2*metal_width
-    
+
+    ## define strip to slab transfer taper parameters
+    N = 100; # Number of points for the input/output slab taper
+    order = 3; # input/output slab taper curve 
+
     wg1 = pya.Box(-l/2,-w/2,l/2,w/2)
-    slab = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
-    npp1 = pya.Box(-l/2,npp_d+w/2,l/2, npp_d+w/2+npp_width)
-    npp2 = pya.Box(-l/2,-npp_d-w/2,l/2, -(npp_d+w/2+npp_width))
+    wg2 = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
+    wg3 = pya.Box(-l/2,npp_d,l/2, npp_d + npp_width)
+    wg4 = pya.Box(-l/2,-npp_d,l/2, -npp_d - npp_width)
     self.cell.shapes(LayerSiN).insert(wg1)
-    self.cell.shapes(LayerSlab).insert(slab)
-    self.cell.shapes(LayerNPPN).insert(npp1)
-    self.cell.shapes(LayerNPPN).insert(npp2)
+
+    self.cell.shapes(LayerNPPN).insert(wg3)
+    self.cell.shapes(LayerNPPN).insert(wg4)
     
-    in_rib = to_itype(self.input_rib_width,dbu)
+
     if self.io_wg_type:
       in_slab = to_itype(self.input_slab_width,dbu)
     else:
@@ -6612,94 +6643,391 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
       
       
 
-    in_taper = to_itype(self.in_taper_length,dbu)
+
+    if NNN == 0:
+      self.cell.shapes(LayerSlab).insert(wg2)
+      # add input strip taper
+      pts = [Point(-l/2 - in_taper, -in_rib/2), Point( -l/2, -w/2), Point(-l/2, w/2), Point(-l/2 - in_taper, in_rib/2)]
+      #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+      self.cell.shapes(LayerSiN).insert(Polygon(pts))
+  
+      # add input slab taper
+      pts = [];
+  
+      for i in range(0,N + 1):
+        pts.append(Point(-l/2 - in_taper + in_taper/N * i, in_slab/2 + ((sw/2 + NPP_node_size - in_slab)/(N**order))*(i**order)))
+        
+      for i in range(0,N + 1):
+        pts.append(Point(-l/2 - in_taper + in_taper/N * (N - i), - in_slab/2 - ((sw/2 + NPP_node_size - in_slab)/(N**order))*((N-i)**order)))
+     
+  
+      self.cell.shapes(LayerSlab).insert(Polygon(pts))
+      #pts = [Point(-l/2 - in_taper, -in_slab/2), Point( -l/2, -(sw/4 + 10/dbu)), Point(-l/2, sw/4 + 10/dbu), Point(-l/2 - in_taper, in_slab/2)]
+      #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+      #self.cell.shapes(LayerSlab).insert(Polygon(pts))
+  
+      # add output strip taper
+      pts = [Point(l/2 + in_taper, -in_rib/2), Point( l/2, -w/2), Point(l/2, w/2), Point(l/2 + in_taper, in_rib/2)]
+      #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+      self.cell.shapes(LayerSiN).insert(Polygon(pts))
+  
+      pts = [];
+  
+      for i in range(0,N + 1):
+        pts.append(Point(l/2 + in_taper - in_taper/N * i, in_slab/2 + ((sw/2 + NPP_node_size - in_slab)/(N**order))*(i**order)))
+        
+      for i in range(0,N + 1):
+        pts.append(Point(l/2 + in_taper/N * i, - in_slab/2 - ((sw/2 + NPP_node_size - in_slab)/(N**order))*((N-i)**order)))
+        
+        
+      self.cell.shapes(LayerSlab).insert(Polygon(pts))
+  
+  
+  
+      from SiEPIC._globals import PIN_LENGTH as pin_length
+  
+      # Pin on the left side:
+      p1 = [Point(- l/2 - in_taper + pin_length/2,0), Point(- l/2 - in_taper - pin_length/2,0)]
+      p1c = Point(- l/2 - in_taper,0)
+      self.set_p1 = p1c
+      self.p1 = p1c
+      pin = Path(p1, in_rib)
+      self.cell.shapes(LayerPinRecN).insert(pin)
+      t = Trans(Trans.R0, - l/2 - in_taper, 0)
+      text = Text ("pin1", t)
+      shape = self.cell.shapes(LayerPinRecN).insert(text)
+      shape.text_size = pin_text_size
+  
+      # Pin on the right side:
+      p2 = [Point(l/2 + in_taper - pin_length/2,0), Point(l/2 + in_taper + pin_length/2,0)]
+      p2c = Point(l/2 + in_taper, 0)
+      self.set_p2 = p2c
+      self.p2 = p2c
+      pin = Path(p2, in_rib)
+      self.cell.shapes(LayerPinRecN).insert(pin)
+      t = Trans(Trans.R0, l/2 + in_taper, 0)
+      text = Text ("pin2", t)
+      shape = self.cell.shapes(LayerPinRecN).insert(text)
+      shape.text_size = pin_text_size
+  
+  
+  
+
+
     
-    # add input strip taper
-    pts = [Point(-l/2 - in_taper, -in_rib/2), Point( -l/2, -w/2), Point(-l/2, w/2), Point(-l/2 - in_taper, in_rib/2)]
-    #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
-    self.cell.shapes(LayerSiN).insert(Polygon(pts))
+    if NNN > 0:
+      #print('zgw')
+      ps_sl_w = NPP_node_size*2 + npp_d * 4 + (floding_w1 + floding_w2 + floding_gap * 2) * NNN + edge_slab_width
+      wg2 = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
+      self.cell.shapes(LayerSlab).insert(wg2)
 
-    # add input slab taper
-    pts = [];
-    N = 100;
-    order = 3;
-    for i in range(0,N + 1):
-      pts.append(Point(-l/2 - in_taper + in_taper/N * i, in_slab/2 + ((sw/2 + 10/dbu - in_slab)/(N**order))*(i**order)))
+
+
+      pts = [Point(-l/2 - in_taper, -floding_w1/2), Point( -l/2, -floding_w1/2), Point(-l/2, floding_w1/2), Point(-l/2 - in_taper, floding_w1/2)]
+      #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+      self.cell.shapes(LayerSiN).insert(Polygon(pts))
+  
+      # add input slab taper
+      pts = [];
+  
+      for i in range(0,N + 1):
+        pts.append(Point(-l/2 - in_taper + in_taper/N * i, floding_w1/2 + ((sw/2 + NPP_node_size - floding_w1)/(N**order))*(i**order)))
+        
+      for i in range(0,N + 1):
+        pts.append(Point(-l/2 - in_taper + in_taper/N * (N - i), - floding_w1/2 - ((sw/2 + NPP_node_size - floding_w1)/(N**order))*((N-i)**order)))
+     
+  
+      self.cell.shapes(LayerSlab).insert(Polygon(pts))
+      #pts = [Point(-l/2 - in_taper, -in_slab/2), Point( -l/2, -(sw/4 + 10/dbu)), Point(-l/2, sw/4 + 10/dbu), Point(-l/2 - in_taper, in_slab/2)]
+      #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+      #self.cell.shapes(LayerSlab).insert(Polygon(pts))
+  
+      # add output strip taper
+      pts = [Point(l/2 + in_taper, -floding_w1/2), Point( l/2, -floding_w1/2), Point(l/2, floding_w1/2), Point(l/2 + in_taper, floding_w1/2)]
+      #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+      self.cell.shapes(LayerSiN).insert(Polygon(pts))
+  
+      pts = [];
+  
+      for i in range(0,N + 1):
+        pts.append(Point(l/2 + in_taper - in_taper/N * i, floding_w1/2 + ((sw/2 + NPP_node_size - floding_w1)/(N**order))*(i**order)))
+        
+      for i in range(0,N + 1):
+        pts.append(Point(l/2 + in_taper/N * i, - floding_w1/2 - ((sw/2 + NPP_node_size - floding_w1)/(N**order))*((N-i)**order)))
+        
+        
+      self.cell.shapes(LayerSlab).insert(Polygon(pts))
+
+
+
+      for i in range(0, NNN):
+        y_corodinate = NPP_node_size + npp_d*2
+        y_move = i * (floding_w1 + floding_w2 + floding_gap * 2)/2 +  y_corodinate
+        #t = Trans(Trans.R0, 0, i * y_corodinate)
+        if i%2:
+          floding_w = floding_w2
+        else:
+          floding_w = floding_w1
+                  
+        wg1 = pya.Box(-l/2,-floding_w/2 + y_move,l/2,floding_w/2 + y_move)
+        self.cell.shapes(LayerSiN).insert(wg1)      
+        wg1 = pya.Box(-l/2,-floding_w/2 - y_move,l/2,floding_w/2 - y_move)        
+        self.cell.shapes(LayerSiN).insert(wg1)
+        
+        
+        # add upper left input taper
+        pts = [Point(-l/2 - in_taper, -floding_w1/2 + y_move), Point( -l/2, -floding_w/2 + y_move), Point(-l/2, floding_w/2 + y_move), Point(-l/2 - in_taper, floding_w1/2 + y_move)]
+        #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+        self.cell.shapes(LayerSiN).insert(Polygon(pts))        
+        
+        pts = [];
+        for ii in range(0,N + 1):
+          pts.append(Point(-l/2 - in_taper + in_taper/N * ii, floding_w1/2 + ((2/dbu - floding_w1)/(N**order))*(ii**order)+y_move))
+          
+        for ii in range(0,N + 1):
+          pts.append(Point(-l/2 - in_taper + in_taper/N * (N - ii), - floding_w1/2 - ((2/dbu - floding_w1)/(N**order))*((N-ii)**order)+y_move))
+       
+
+        self.cell.shapes(LayerSlab).insert(Polygon(pts))      
+        
+        
+        wg1 = pya.Box(-l/2,-floding_w/2 + y_move,l/2,floding_w/2 + y_move)
+        self.cell.shapes(LayerSiN).insert(wg1)      
+        wg1 = pya.Box(-l/2,-floding_w/2 - y_move,l/2,floding_w/2 - y_move)        
+        self.cell.shapes(LayerSiN).insert(wg1)
+        
+        # add below left taper   
+        if (i!=NNN-1):   
+          y_move = - y_move
+          pts = [Point(-l/2 - in_taper, -floding_w1/2 + y_move), Point( -l/2, -floding_w/2 + y_move), Point(-l/2, floding_w/2 + y_move), Point(-l/2 - in_taper, floding_w1/2 + y_move)]
+          #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+          self.cell.shapes(LayerSiN).insert(Polygon(pts))        
+          
+          pts = [];
+          for ii in range(0,N + 1):
+            pts.append(Point(-l/2 - in_taper + in_taper/N * ii, floding_w1/2 + ((2/dbu - floding_w1)/(N**order))*(ii**order)+
+            y_move))
+            
+          for ii in range(0,N + 1):
+            pts.append(Point(-l/2 - in_taper + in_taper/N * (N - ii), - floding_w1/2 - ((2/dbu - floding_w1)/(N**order))*((N-ii)**order)+
+            y_move))
+         
+  
+          self.cell.shapes(LayerSlab).insert(Polygon(pts))     
+        
+        
+        # add upper right taper
+          y_move = - y_move 
+          pts = [Point(l/2 + in_taper, -floding_w1/2 + y_move), Point( l/2, -floding_w/2 + y_move), Point(l/2, floding_w/2 + y_move), Point(l/2 + in_taper, floding_w1/2 + y_move)]
+          #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+          self.cell.shapes(LayerSiN).insert(Polygon(pts))
       
-    for i in range(0,N + 1):
-      pts.append(Point(-l/2 - in_taper + in_taper/N * (N - i), - in_slab/2 - ((sw/2 + 10/dbu - in_slab)/(N**order))*((N-i)**order)))
-   
-
-    self.cell.shapes(LayerSlab).insert(Polygon(pts))
-    #pts = [Point(-l/2 - in_taper, -in_slab/2), Point( -l/2, -(sw/4 + 10/dbu)), Point(-l/2, sw/4 + 10/dbu), Point(-l/2 - in_taper, in_slab/2)]
-    #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
-    #self.cell.shapes(LayerSlab).insert(Polygon(pts))
-
-    # add output strip taper
-    pts = [Point(l/2 + in_taper, -in_rib/2), Point( l/2, -w/2), Point(l/2, w/2), Point(l/2 + in_taper, in_rib/2)]
-    #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
-    self.cell.shapes(LayerSiN).insert(Polygon(pts))
-
-    pts = [];
-    N = 100;
-    order = 3;
-    for i in range(0,N + 1):
-      pts.append(Point(l/2 + in_taper - in_taper/N * i, in_slab/2 + ((sw/2 + 10/dbu - in_slab)/(N**order))*(i**order)))
+          pts = [];
+          for ii in range(0,N + 1):
+            pts.append(Point(l/2 + in_taper - in_taper/N * ii, floding_w1/2 + ((2/dbu - floding_w1)/(N**order))*(ii**order) + y_move))
+            
+          for ii in range(0,N + 1):
+            pts.append(Point(l/2 + in_taper/N * ii, - floding_w1/2 - ((2/dbu - floding_w1)/(N**order))*((N-ii)**order) + y_move))
+            
+            
+          self.cell.shapes(LayerSlab).insert(Polygon(pts)) 
+        else:
+          y_move = -y_move
+              # add input strip taper
+          pts = [Point(-l/2 - in_taper, -in_rib/2 + y_move), Point( -l/2, -floding_w1/2 + y_move), 
+          Point(-l/2, floding_w1/2 + y_move), Point(-l/2 - in_taper, in_rib/2 + y_move)]
+          #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+          self.cell.shapes(LayerSiN).insert(Polygon(pts))
       
-    for i in range(0,N + 1):
-      pts.append(Point(l/2 + in_taper/N * i, - in_slab/2 - ((sw/2 + 10/dbu - in_slab)/(N**order))*((N-i)**order)))
+          # add input slab taper
+          pts = [];
+      
+          for i in range(0,N + 1):
+            pts.append(Point(-l/2 - in_taper + in_taper/N * i, in_slab/2 + ((edge_slab_width - in_slab)/(N**order))*(i**order) + y_move))
+            
+          for i in range(0,N + 1):
+            pts.append(Point(-l/2 - in_taper + in_taper/N * (N - i), - in_slab/2 - ((edge_slab_width - in_slab)/(N**order))*((N-i)**order) + y_move))
+         
+      
+          self.cell.shapes(LayerSlab).insert(Polygon(pts))
+          #pts = [Point(-l/2 - in_taper, -in_slab/2), Point( -l/2, -(sw/4 + 10/dbu)), Point(-l/2, sw/4 + 10/dbu), Point(-l/2 - in_taper, in_slab/2)]
+          #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+          #self.cell.shapes(LayerSlab).insert(Polygon(pts))
+      
+          # add output strip taper
+          y_move = - y_move
+          pts = [Point(l/2 + in_taper, -in_rib/2 + y_move), Point( l/2, -floding_w1/2 + y_move), Point(l/2, floding_w1/2 + y_move), Point(l/2 + in_taper, in_rib/2 + y_move)]
+          #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+          self.cell.shapes(LayerSiN).insert(Polygon(pts))
+      
+          pts = [];
+      
+          for i in range(0,N + 1):
+            pts.append(Point(l/2 + in_taper - in_taper/N * i, in_slab/2 + ((edge_slab_width - in_slab)/(N**order))*(i**order) + y_move))
+            
+          for i in range(0,N + 1):
+            pts.append(Point(l/2 + in_taper/N * i, - in_slab/2 - ((edge_slab_width - in_slab)/(N**order))*((N-i)**order) + y_move))
+            
+            
+          self.cell.shapes(LayerSlab).insert(Polygon(pts))
       
       
-    self.cell.shapes(LayerSlab).insert(Polygon(pts))
+      
+          from SiEPIC._globals import PIN_LENGTH as pin_length
+      
+          # Pin on the left side:
+          p1 = [Point(- l/2 - in_taper + pin_length/2,- y_move), Point(- l/2 - in_taper - pin_length/2,- y_move)]
+          p1c = Point(- l/2 - in_taper,- y_move)
+          self.set_p1 = p1c
+          self.p1 = p1c
+          pin = Path(p1, in_rib)
+          self.cell.shapes(LayerPinRecN).insert(pin)
+          t = Trans(Trans.R0, - l/2 - in_taper, - y_move)
+          text = Text ("pin1", t)
+          shape = self.cell.shapes(LayerPinRecN).insert(text)
+          shape.text_size = pin_text_size
+      
+          # Pin on the right side:
+          p2 = [Point(l/2 + in_taper - pin_length/2,y_move), Point(l/2 + in_taper + pin_length/2,y_move)]
+          p2c = Point(l/2 + in_taper, y_move)
+          self.set_p2 = p2c
+          self.p2 = p2c
+          pin = Path(p2, in_rib)
+          self.cell.shapes(LayerPinRecN).insert(pin)
+          t = Trans(Trans.R0, l/2 + in_taper, y_move)
+          text = Text ("pin2", t)
+          shape = self.cell.shapes(LayerPinRecN).insert(text)
+          shape.text_size = pin_text_size  
 
 
 
-    from SiEPIC._globals import PIN_LENGTH as pin_length
 
-    # Pin on the left side:
-    p1 = [Point(- l/2 - in_taper + pin_length/2,0), Point(- l/2 - in_taper - pin_length/2,0)]
-    p1c = Point(- l/2 - in_taper,0)
-    self.set_p1 = p1c
-    self.p1 = p1c
-    pin = Path(p1, in_rib)
-    self.cell.shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, - l/2 - in_taper, 0)
-    text = Text ("pin1", t)
-    shape = self.cell.shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-    # Pin on the right side:
-    p2 = [Point(l/2 + in_taper - pin_length/2,0), Point(l/2 + in_taper + pin_length/2,0)]
-    p2c = Point(l/2 + in_taper, 0)
-    self.set_p2 = p2c
-    self.p2 = p2c
-    pin = Path(p2, in_rib)
-    self.cell.shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, l/2 + in_taper, 0)
-    text = Text ("pin2", t)
-    shape = self.cell.shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
-
-
+        # add below right taper   
+        y_move = - y_move 
+        pts = [Point(l/2 + in_taper, -floding_w1/2 + y_move), Point( l/2, -floding_w/2 + y_move), Point(l/2, floding_w/2 + y_move), Point(l/2 + in_taper, floding_w1/2 + y_move)]
+        #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
+        self.cell.shapes(LayerSiN).insert(Polygon(pts))
+    
+        pts = [];
+        for ii in range(0,N + 1):
+          pts.append(Point(l/2 + in_taper - in_taper/N * ii, floding_w1/2 + ((2/dbu - floding_w1)/(N**order))*(ii**order) + y_move))
+          
+        for ii in range(0,N + 1):
+          pts.append(Point(l/2 + in_taper/N * ii, - floding_w1/2 - ((2/dbu - floding_w1)/(N**order))*((N-ii)**order) + y_move))
+          
+          
+        self.cell.shapes(LayerSlab).insert(Polygon(pts))   
     # add metal contact
+    for i in range(-NNN, NNN):
+        y_corodinate = NPP_node_size + npp_d * 2
+        if i<0:
+          y_origin = (i + 1) * (floding_w1 + floding_w2 + floding_gap * 2)/2 -  y_corodinate
+        if i==0:
+          y_origin = 0   
+        if i>0:
+          y_origin = (i - 1) * (floding_w1 + floding_w2 + floding_gap * 2)/2 +  y_corodinate      
+        
+        
+        if (i+1)<0:
+          y_end = (i + 2) * (floding_w1 + floding_w2 + floding_gap * 2)/2 -  y_corodinate
+        if (i+1)==0:
+          y_end = 0   
+        if (i+1)>0:
+          y_end = i * (floding_w1 + floding_w2 + floding_gap * 2)/2 +  y_corodinate   
+        
+        if (i+NNN)%2:
+           u_path = Path([Point(-l/2 - in_taper, y_origin), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i + 1), y_origin), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i + 1), y_origin + routing_step * 2), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i), y_origin + routing_step * 2), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i), y_end), 
+           Point(-l/2 - in_taper, y_end)], floding_w1)
+           
+           
+           u_path = Path([Point(-l/2 - in_taper, y_origin), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i + 1) + radius, y_origin)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
+           -l/2 - in_taper - routing_step * (NNN - i + 1) + radius, y_origin + radius, radius, floding_w1, 180, 270))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(-l/2 - in_taper - routing_step * (NNN - i + 1), y_origin + radius), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i + 1), y_origin + routing_step * 2 - radius)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
+           -l/2 - in_taper - routing_step * (NNN - i + 1) + radius, y_origin + routing_step * 2 - radius, radius, floding_w1, 90, 180))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(-l/2 - in_taper - routing_step * (NNN - i + 1) + radius, y_origin + routing_step * 2), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i) - radius, y_origin + routing_step * 2)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
+           -l/2 - in_taper - routing_step * (NNN - i) - radius, y_origin + routing_step * 2 - radius, radius, floding_w1, 0, 90))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(-l/2 - in_taper - routing_step * (NNN - i), y_origin + routing_step * 2 - radius), 
+           Point(-l/2 - in_taper - routing_step * (NNN - i), y_end + radius)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
+           -l/2 - in_taper - routing_step * (NNN - i) + radius, y_end + radius, radius, floding_w1, 180, 270))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(-l/2 - in_taper - routing_step * (NNN - i) + radius, y_end), 
+           Point(-l/2 - in_taper, y_end)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(u_path)
+        else:           
+           u_path = Path([Point(l/2 + in_taper, y_origin), 
+           Point(l/2 + in_taper + routing_step * (NNN - i + 1) - radius, y_origin)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(l/2 + in_taper + routing_step * (NNN - i + 1) - radius, y_origin + radius, radius, floding_w1, 270, 360))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(l/2 + in_taper + routing_step * (NNN - i + 1), y_origin + radius), 
+           Point(l/2 + in_taper + routing_step * (NNN - i + 1), y_origin + routing_step * 2 - radius)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
+           l/2 + in_taper + routing_step * (NNN - i + 1) - radius, y_origin + routing_step * 2 - radius, radius, floding_w1, 0, 90))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(l/2 + in_taper + routing_step * (NNN - i + 1) - radius, y_origin + routing_step * 2), 
+           Point(l/2 + in_taper + routing_step * (NNN - i) + radius, y_origin + routing_step * 2)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
+           l/2 + in_taper + routing_step * (NNN - i) + radius, y_origin + routing_step * 2 - radius, radius, floding_w1, 90, 180))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(l/2 + in_taper + routing_step * (NNN - i), y_origin + routing_step * 2 - radius), 
+           Point(l/2 + in_taper + routing_step * (NNN - i), y_end + radius)], floding_w1) 
+           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
+           l/2 + in_taper + routing_step * (NNN - i) - radius, y_end + radius, radius, floding_w1, 270, 360))
+           self.cell.shapes(LayerSiN).insert(u_path)
+           
+           
+           u_path = Path([Point(l/2 + in_taper + routing_step * (NNN - i) - radius, y_end), 
+           Point(l/2 + in_taper, y_end)], floding_w1) 
+
+           self.cell.shapes(LayerSiN).insert(u_path)
+           #select(u_path)
+
+
+
     for i in range(0, self.segments + 1):
         
-        ps_sl_w
-        wg_temp_upper = pya.Box((l - 10/dbu)/self.segments *  i - l/2, sw/2,(l - metal_width)/self.segments *  i - l/2 + metal_width, sw/2 + 10/dbu)
+        wg_temp_upper = pya.Box((l - NPP_node_size)/self.segments *  i - l/2, sw/2,(l - NPP_node_size)/self.segments *  i - l/2 + NPP_node_size, sw/2 + NPP_node_size)
         #self.cell.shapes(LayerNN).insert(wg_temp_upper)
         self.cell.shapes(LayerNPPN).insert(wg_temp_upper)
         self.cell.shapes(LayerNN).insert(wg_temp_upper)
-        vc_temp_upper = pya.Box((l - 10/dbu)/self.segments *  i - l/2 + 0.4/dbu, sw/2 + 0.4/dbu,(l - 10/dbu)/self.segments *  i - l/2 + metal_width - 0.4/dbu, sw/2 + metal_width - 0.4/dbu)
+        vc_temp_upper = pya.Box((l - NPP_node_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, sw/2 + vc_to_npp_exclusion,(l - NPP_node_size)/self.segments *  i - l/2 + NPP_node_size - vc_to_npp_exclusion, sw/2 + NPP_node_size - vc_to_npp_exclusion)
         self.cell.shapes(LayerVCN).insert(vc_temp_upper)
         
-        wg_temp_lower = pya.Box((l - 10/dbu)/self.segments *  i - l/2, -sw/2,(l - metal_width)/self.segments *  i - l/2 + 10/dbu, -sw/2 - metal_width)
+        wg_temp_lower = pya.Box((l - NPP_node_size)/self.segments *  i - l/2, -sw/2,(l - NPP_node_size)/self.segments *  i - l/2 + NPP_node_size, -sw/2 - NPP_node_size)
         #self.cell.shapes(LayerNN).insert(wg_temp_lower)
         self.cell.shapes(LayerNPPN).insert(wg_temp_lower)
         self.cell.shapes(LayerNN).insert(wg_temp_lower)
-        vc_temp_lower = pya.Box((l - 10/dbu)/self.segments *  i - l/2 + 0.4/dbu, -sw/2 - 0.4/dbu,(l - metal_width)/self.segments *  i - l/2 + metal_width - 0.4/dbu, -sw/2 - metal_width + 0.4/dbu)
+        vc_temp_lower = pya.Box((l - NPP_node_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, -sw/2 - vc_to_npp_exclusion,(l - NPP_node_size)/self.segments *  i - l/2 + NPP_node_size - vc_to_npp_exclusion, -sw/2 - NPP_node_size + vc_to_npp_exclusion)
         self.cell.shapes(LayerVCN).insert(vc_temp_lower)
 
-        metal_temp = pya.Box((l - 10/dbu)/self.segments *  i - l/2, -sw/2 - metal_width - 20/dbu * (i%2),(l - metal_width)/self.segments *  i - l/2 + metal_width, sw/2 + metal_width + 20/dbu * ((i+1)%2))
+        metal_temp = pya.Box((l - NPP_node_size)/self.segments *  i - l/2, -sw/2 - NPP_node_size - metal_routing_distance_to_node * (i%2),(l - NPP_node_size)/self.segments *  i - l/2 + NPP_node_size, sw/2 + NPP_node_size + metal_routing_distance_to_node * ((i+1)%2))
         self.cell.shapes(LayerMN).insert(metal_temp)
         
         
@@ -6707,14 +7035,26 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
         #self.cell.shapes(LayerNN).insert(wg_temp)
   
   
+    #metal_routing = pya.Box(-l/2 - 20/dbu, - 15/dbu,l/2, - 25/dbu)
+    #self.cell.shapes(LayerMN).insert(metal_routing)
+    #metal_routing = pya.Box(-l/2,  15/dbu,l/2,  25/dbu)
+    #self.cell.shapes(LayerMN).insert(metal_routing)
     
-    metal_routing = Path([Point(l/2, - sw/2 - 30/dbu), Point(-l/2, - sw/2 - 30/dbu)], metal_width)
-    self.cell.shapes(LayerMN).insert(metal_routing)
-    metal_routing = Path([Point(l/2, sw/2 + 30/dbu), Point(-l/2, sw/2 + 30/dbu)], metal_width)
-    self.cell.shapes(LayerMN).insert(metal_routing)
     
-    # Create the device recognition layer
-    dev = Box(-l/2-in_taper, -sw/2 - 30/dbu-metal_width, l/2+in_taper, sw/2 + 30/dbu+metal_width)
+    metal_routing = Path([Point(-l/2, -sw/2 - metal_routing_distance_to_node - NPP_node_size), 
+    Point(l/2, -sw/2 - metal_routing_distance_to_node - NPP_node_size)], metal_routing_width)
+    self.cell.shapes(LayerMN).insert(metal_routing)
+    metal_routing = Path([Point(-l/2, sw/2 + metal_routing_distance_to_node + NPP_node_size), 
+    Point(l/2, sw/2 + metal_routing_distance_to_node + NPP_node_size)], metal_routing_width)
+    self.cell.shapes(LayerMN).insert(metal_routing)
+
+    if NNN > 0:
+      dev = Box(-l/2-in_taper - routing_step * 2 * NNN, -sw/2 - metal_routing_distance_to_node - NPP_node_size - metal_routing_width,
+      l/2 + in_taper + routing_step * (2 * NNN + 1), sw/2 + metal_routing_distance_to_node + NPP_node_size + metal_routing_width)
+    else:
+      dev = Box(-l/2-in_taper, -sw/2 - metal_routing_distance_to_node - NPP_node_size - metal_routing_width,
+      l/2 + in_taper, sw/2 + metal_routing_distance_to_node + NPP_node_size + metal_routing_width)
+    
     self.cell.shapes(LayerDevRecN).insert(dev)
 
     
