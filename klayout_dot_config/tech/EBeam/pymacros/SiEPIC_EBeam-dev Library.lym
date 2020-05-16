@@ -6524,8 +6524,10 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     self.param("in_taper_length", self.TypeDouble, "Input Taper Length (um)", default = 15)    
     self.param("length", self.TypeDouble, "Phase Shifter Length (um)", default = 150)
     self.param("width", self.TypeDouble, "Phase Shifter Width (um)", default = 0.5)
-    self.param("ps_slab_width", self.TypeDouble, "Phase Shifter Slab Width (um)", default = 8)
-    self.param("npp_distance", self.TypeDouble, "Npp Edge to Center Distance (um)", default = 2.5)
+#    self.param("ps_slab_width", self.TypeDouble, "Phase Shifter Slab Width (um)", default = 8)
+# Just cover the whole device, using other parameters.
+    self.param("npp_distance", self.TypeDouble, "Npp Edge to Si Distance (um)", default = 2.0)
+    self.param("npp_width", self.TypeDouble, "Npp Width (um)", default = 2.0)
     self.param("segments", self.TypeInt, "Phase Shifter Segments", default = 5)     
     self.param("metal_width", self.TypeDouble, "Metal Width (um)", default = 10)
     self.param("slayer", self.TypeLayer, "Slab Layer", default = TECHNOLOGY['Si - 90 nm rib'])
@@ -6585,20 +6587,22 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     from SiEPIC.extend import to_itype
     w = to_itype(self.width,dbu)
     l = to_itype(self.length,dbu)
-    ps_sl_w = to_itype(self.ps_slab_width, dbu)
+#    ps_sl_w = to_itype(self.ps_slab_width, dbu)
     npp_d = to_itype(self.npp_distance, dbu)
     sw = npp_d * 2
+    metal_width = to_itype(self.metal_width, dbu)
+    npp_width = to_itype(self.npp_width, dbu)
 
-
+    ps_sl_w = w+2*npp_d+2*metal_width
     
     wg1 = pya.Box(-l/2,-w/2,l/2,w/2)
-    wg2 = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
-    wg3 = pya.Box(-l/2,npp_d,l/2, ps_sl_w/2)
-    wg4 = pya.Box(-l/2,-npp_d,l/2, -ps_sl_w/2)
+    slab = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
+    npp1 = pya.Box(-l/2,npp_d+w/2,l/2, npp_d+w/2+npp_width)
+    npp2 = pya.Box(-l/2,-npp_d-w/2,l/2, -(npp_d+w/2+npp_width))
     self.cell.shapes(LayerSiN).insert(wg1)
-    self.cell.shapes(LayerSlab).insert(wg2)
-    self.cell.shapes(LayerNPPN).insert(wg3)
-    self.cell.shapes(LayerNPPN).insert(wg4)
+    self.cell.shapes(LayerSlab).insert(slab)
+    self.cell.shapes(LayerNPPN).insert(npp1)
+    self.cell.shapes(LayerNPPN).insert(npp2)
     
     in_rib = to_itype(self.input_rib_width,dbu)
     if self.io_wg_type:
@@ -6677,10 +6681,10 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
 
-    metal_width = to_itype(self.metal_width, dbu)
     # add metal contact
     for i in range(0, self.segments + 1):
         
+        ps_sl_w
         wg_temp_upper = pya.Box((l - 10/dbu)/self.segments *  i - l/2, sw/2,(l - metal_width)/self.segments *  i - l/2 + metal_width, sw/2 + 10/dbu)
         #self.cell.shapes(LayerNN).insert(wg_temp_upper)
         self.cell.shapes(LayerNPPN).insert(wg_temp_upper)
