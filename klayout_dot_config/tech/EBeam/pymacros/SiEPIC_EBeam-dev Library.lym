@@ -6500,12 +6500,12 @@ class ebeam_taper_strip_rib(pya.PCellDeclarationHelper):
 class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
 
   # N-doped heater phase shifter in a rib waveguide
-  # design by Guowu Zhang <guowu.zhang@mail.mcgill.ca>
+  # design by Guowu Zhang &lt;guowu.zhang@mail.mcgill.ca&gt;
   # based on Ref: R. Priti, Efficiency Improvement of an O-band SOI-MZI Thermo-optic Matrix Switch
   # Predicted performance:
   # resistance and power consumption using 
   # 5 um NPP doping width, Length 150 um, rib width, 0.5 um and NPP to Silicon distance 1 um, the phase shifter are segmented to 4 parts
-  # The estimated Resistance is ~ 140 Ω. The corresponding power consumption for π phase shift is ~ 44 mW. 
+  # The estimated Resistance is ~ 140 ohm. The corresponding power consumption for pi phase shift is ~ 44 mW. 
   # Simulation also shows that width of NPP region has influence on efficiency. 
   # As an comparison, if NPP is 1 um, the power consumption for π phase shift is ~ 23 mW.
 
@@ -6715,7 +6715,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
 
 
     
-    if NNN > 0:
+    if NNN &gt; 0:
       #print('zgw')
       ps_sl_w = NPP_node_size*2 + npp_d * 4 + (floding_w1 + floding_w2 + floding_gap * 2) * NNN + edge_slab_width
       wg2 = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
@@ -6920,7 +6920,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     # add metal contact
     for i in range(-NNN, NNN):
         y_corodinate = NPP_node_size + npp_d * 2
-        if i<0:
+        if i&lt;0:
           y_origin = (i + 1) * (floding_w1 + floding_w2 + floding_gap * 2)/2 -  y_corodinate
         if i==0:
           y_origin = 0   
@@ -6928,11 +6928,11 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
           y_origin = (i - 1) * (floding_w1 + floding_w2 + floding_gap * 2)/2 +  y_corodinate      
         
         
-        if (i+1)<0:
+        if (i+1)&lt;0:
           y_end = (i + 2) * (floding_w1 + floding_w2 + floding_gap * 2)/2 -  y_corodinate
         if (i+1)==0:
           y_end = 0   
-        if (i+1)>0:
+        if (i+1)&gt;0:
           y_end = i * (floding_w1 + floding_w2 + floding_gap * 2)/2 +  y_corodinate   
         
         if (i+NNN)%2:
