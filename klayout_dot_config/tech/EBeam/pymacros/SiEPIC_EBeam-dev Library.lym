@@ -7042,31 +7042,32 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
         if (i+folding_n)%2:
           # Waveguides on the left side
           if y_origin + routing_step * 2 - y_end &lt; 2*radius_um:
-            y_routing = routing_step*2
+            y_routing = max(routing_step*2,y_end-y_origin) 
           else:
             y_routing = y_end+routing_step*2
-          pts = [Point(-l/2 - in_taper, y_origin), 
+          path = Path([Point(-l/2 - in_taper, y_origin), 
             Point(-l/2 - in_taper - routing_step * (1.5*folding_n - 1.5*i + 1.5), y_origin),
             Point(-l/2 - in_taper - routing_step * (1.5*folding_n - 1.5*i + 1.5), y_routing), 
             Point(-l/2 - in_taper - routing_step * (1.5*folding_n - 1.5*i - 0.5), y_routing), 
             Point(-l/2 - in_taper - routing_step * (1.5*folding_n - 1.5*i - 0.5), y_end), 
-            Point(-l/2 - in_taper, y_end)
-            ]
+            Point(-l/2 - in_taper, y_end)],0)
            
         else:  
           # Waveguides on the right side
           if y_origin - y_end + routing_step * 2 &lt; 2*radius_um:
-            y_routing = -routing_step*2
+            y_routing = -max(routing_step*2, y_end-y_origin)
           else:
             y_routing = y_origin-routing_step*2
-          pts = [Point(l/2 + in_taper, y_origin), 
+          path = Path([Point(l/2 + in_taper, y_origin), 
             Point(l/2 + in_taper + routing_step * (1.5*folding_n + 1.5*i+1), y_origin), 
             Point(l/2 + in_taper + routing_step * (1.5*folding_n + 1.5*i+1), y_routing), 
             Point(l/2 + in_taper + routing_step * (1.5*folding_n + 1.5*i+3), y_routing), 
             Point(l/2 + in_taper + routing_step * (1.5*folding_n + 1.5*i+3), y_end), 
-            Point(l/2 + in_taper, y_end)]
+            Point(l/2 + in_taper, y_end)], 0)
 
         # Draw the waveguide geometry, new in SiEPIC-Tools v0.3.64
+        path.unique_points()
+        pts = path.get_points()
         waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'],  [w*dbu], [0], pts, radius_um, adiab, bezier)
            
 
