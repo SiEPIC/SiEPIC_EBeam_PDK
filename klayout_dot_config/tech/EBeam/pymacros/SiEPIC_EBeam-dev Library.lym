@@ -6563,8 +6563,10 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     from math import pi, cos, sin
     from SiEPIC.utils import arc_wg, arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH
-    from SiEPIC.utils import get_technology, get_technology_by_name
+    from SiEPIC.utils.layout import layout_waveguide2
+
     # fetch the parameters
+    TECHNOLOGY = get_technology_by_name('EBeam')
     dbu = self.layout.dbu
     ly = self.layout
         
@@ -6594,12 +6596,13 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     radius = to_itype(5,dbu) # U shape path routing radius
     npp_width = to_itype(self.npp_width,dbu)   #npp width, default 5 um
     
-    ## define folding parameters
+    ## define waveguide folding parameters
     folding_n = round((self.fold_number - 1)/2) # folding waveguide number on one side
     folding_w1 = w   # one of the folding waveguide width
     folding_w2 = to_itype(self.width - 0.1,dbu) # the other one of the folding waveguide width
     folding_gap = to_itype(2,dbu)  # the gap between two folding waveguide
-    routing_step = to_itype(10,dbu) # define how large the U shape should be, default 20
+    radius, adiab, bezier = 5, 1, 0.2
+    routing_step = 2*to_itype(radius,dbu) # define how large the U shape should be, default 20
     
     ## define node related parameters
     contact_size = to_itype(self.vc_w,dbu)  # square NPP size, for VC purpose
@@ -6608,6 +6611,8 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     metal_routing_distance_to_node = to_itype(30,dbu)  # *** calculate from PCell parameters ***
     metal_routing_width = to_itype(self.m_w, dbu) # width of metal
     vc_to_npp_exclusion = to_itype(0,dbu) # VC boundary to NPP boundary distance
+
+    
 
     ## define strip to slab transfer taper parameters
     N = 100; # Number of points for the input/output slab taper
@@ -6885,8 +6890,9 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
           
         self.cell.shapes(LayerSlab).insert(Polygon(pts))   
         
-    # add metal contact
+    # add metal contact and folded waveguides
     for i in range(-folding_n, folding_n):
+#    for i in range(-1,folding_n):
         y_coordinate = contact_size + sw
         if i&lt;0:
           y_origin = (i + 1) * (folding_w1 + folding_w2 + folding_gap * 2)/2 -  y_coordinate
@@ -6903,80 +6909,31 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
         if (i+1)&gt;0:
           y_end = i * (folding_w1 + folding_w2 + folding_gap * 2)/2 +  y_coordinate   
         
+        # Calculate the Folded waveguide vertices
         if (i+folding_n)%2:
-           u_path = Path([Point(-l/2 - in_taper, y_origin), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i + 1), y_origin), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i + 1), y_origin + routing_step * 2), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i), y_origin + routing_step * 2), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i), y_end), 
-           Point(-l/2 - in_taper, y_end)], folding_w1)
+          if y_origin + routing_step * 2 - y_end &lt; 2*radius:
+            routing_step1 = routing_step
+          else:
+            routing_step1 = y_end+routing_step
+          pts = [Point(-l/2 - in_taper, y_origin), 
+            Point(-l/2 - in_taper - routing_step * (folding_n - i + 1), y_origin),
+            Point(-l/2 - in_taper - routing_step * (folding_n - i + 1), routing_step1), 
+            Point(-l/2 - in_taper - routing_step * (folding_n - i), routing_step1), 
+            Point(-l/2 - in_taper - routing_step * (folding_n - i), y_end), 
+            Point(-l/2 - in_taper, y_end)
+            ]
            
-           
-           u_path = Path([Point(-l/2 - in_taper, y_origin), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i + 1) + radius, y_origin)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
-           -l/2 - in_taper - routing_step * (folding_n - i + 1) + radius, y_origin + radius, radius, folding_w1, 180, 270))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(-l/2 - in_taper - routing_step * (folding_n - i + 1), y_origin + radius), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i + 1), y_origin + routing_step * 2 - radius)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
-           -l/2 - in_taper - routing_step * (folding_n - i + 1) + radius, y_origin + routing_step * 2 - radius, radius, folding_w1, 90, 180))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(-l/2 - in_taper - routing_step * (folding_n - i + 1) + radius, y_origin + routing_step * 2), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i) - radius, y_origin + routing_step * 2)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
-           -l/2 - in_taper - routing_step * (folding_n - i) - radius, y_origin + routing_step * 2 - radius, radius, folding_w1, 0, 90))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(-l/2 - in_taper - routing_step * (folding_n - i), y_origin + routing_step * 2 - radius), 
-           Point(-l/2 - in_taper - routing_step * (folding_n - i), y_end + radius)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
-           -l/2 - in_taper - routing_step * (folding_n - i) + radius, y_end + radius, radius, folding_w1, 180, 270))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(-l/2 - in_taper - routing_step * (folding_n - i) + radius, y_end), 
-           Point(-l/2 - in_taper, y_end)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(u_path)
-        else:           
-           u_path = Path([Point(l/2 + in_taper, y_origin), 
-           Point(l/2 + in_taper + routing_step * (folding_n - i + 1) - radius, y_origin)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(l/2 + in_taper + routing_step * (folding_n - i + 1) - radius, y_origin + radius, radius, folding_w1, 270, 360))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(l/2 + in_taper + routing_step * (folding_n - i + 1), y_origin + radius), 
-           Point(l/2 + in_taper + routing_step * (folding_n - i + 1), y_origin + routing_step * 2 - radius)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
-           l/2 + in_taper + routing_step * (folding_n - i + 1) - radius, y_origin + routing_step * 2 - radius, radius, folding_w1, 0, 90))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(l/2 + in_taper + routing_step * (folding_n - i + 1) - radius, y_origin + routing_step * 2), 
-           Point(l/2 + in_taper + routing_step * (folding_n - i) + radius, y_origin + routing_step * 2)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
-           l/2 + in_taper + routing_step * (folding_n - i) + radius, y_origin + routing_step * 2 - radius, radius, folding_w1, 90, 180))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(l/2 + in_taper + routing_step * (folding_n - i), y_origin + routing_step * 2 - radius), 
-           Point(l/2 + in_taper + routing_step * (folding_n - i), y_end + radius)], folding_w1) 
-           self.cell.shapes(LayerSiN).insert(arc_wg_xy(
-           l/2 + in_taper + routing_step * (folding_n - i) - radius, y_end + radius, radius, folding_w1, 270, 360))
-           self.cell.shapes(LayerSiN).insert(u_path)
-           
-           
-           u_path = Path([Point(l/2 + in_taper + routing_step * (folding_n - i) - radius, y_end), 
-           Point(l/2 + in_taper, y_end)], folding_w1) 
+        else:  
+          pts = [Point(l/2 + in_taper, y_origin), 
+            Point(l/2 + in_taper + routing_step * (folding_n - i + 1), y_origin), 
+            Point(l/2 + in_taper + routing_step * (folding_n - i + 1), y_origin + routing_step * 2), 
+            Point(l/2 + in_taper + routing_step * (folding_n - i), y_origin + routing_step * 2), 
+            Point(l/2 + in_taper + routing_step * (folding_n - i), y_end), 
+            Point(l/2 + in_taper, y_end)]
 
-           self.cell.shapes(LayerSiN).insert(u_path)
-           #select(u_path)
-
+        # Draw the waveguide geometry
+        waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], folding_w1*dbu, [folding_w1*dbu], [0], pts, radius, adiab, bezier)
+           
 
 
     for i in range(0, self.segments + 1):
