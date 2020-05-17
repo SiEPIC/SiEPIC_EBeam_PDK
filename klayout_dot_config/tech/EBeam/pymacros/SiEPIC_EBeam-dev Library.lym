@@ -6738,6 +6738,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("io_wg_type", self.TypeBoolean, "I/O waveguide type, 0 - strip; 1 - rib", default = 0)
+    self.param("fold_number", self.TypeInt, "Number of folds (3, 5, 7, ...)", default = 5)   
     self.param("input_rib_width", self.TypeDouble, "Input Rib Width (um)", default = 0.35)
     self.param("input_slab_width", self.TypeDouble, "Input Slab Width (um)", default = 2)
     self.param("in_taper_length", self.TypeDouble, "Input Taper Length (um)", default = 15)    
@@ -6747,7 +6748,8 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
     self.param("npp_width", self.TypeDouble, "Npp Width (um)", default = 2)
     self.param("npp_distance", self.TypeDouble, "Npp Edge to Si Edge (um)", default = 2)
     self.param("segments", self.TypeInt, "Phase Shifter Segments", default = 5)  
-    self.param("fold_number", self.TypeInt, "Number of folds (3, 5, 7, ...)", default = 5)   
+    self.param("overlay", self.TypeDouble, "Overlay accuracy (optical litho) (um)", default = 1)
+    self.param("overlay_ebl", self.TypeDouble, "Overlay accuracy (EBL) (um)", default = 0.05)
 #    self.param("vc_dw", self.TypeDouble, "VC Offset", default = 5)
     self.param("vc_w", self.TypeDouble, "Contact via width", default = 5)
 #    self.param("m_dw", self.TypeDouble, "Metal Offset", default = 4)
@@ -6802,8 +6804,8 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
     TextLayerN = ly.layer(self.textl)
      
     ## define parameters for phase shifter
-    
-    overlay_ebl = 0.1/dbu
+    overlay = to_itype(self.overlay,dbu)
+    overlay_ebl = to_itype(self.overlay_ebl,dbu)
     
     ## define waveguide related parameters
     radius_um, adiab, bezier = 5, 1, 0.2
