@@ -6816,7 +6816,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
     npp_width = to_itype(self.npp_width,dbu)   #npp width, default 5 um
     
     ## define waveguide folding parameters
-    folding_n = round((self.fold_number - 1)/2) # folding waveguide number on one side
+    folding_n = int(round((self.fold_number - 1)/2)) # folding waveguide number on one side
     folding_w1 = w+50   # one of the folding waveguide width
     folding_w2 = w-50 # the other one of the folding waveguide width
     folding_gap = to_itype(2,dbu)  # the gap between two folding waveguide
@@ -7131,7 +7131,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
 class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
 
   # N-doped heater phase shifter in a rib waveguide
-  # design by Guowu Zhang <guowu.zhang@mail.mcgill.ca>
+  # design by Guowu Zhang &amp;lt;guowu.zhang@mail.mcgill.ca&amp;gt;
   # and Lukas Chrostowski
   # based on Ref: R. Priti, "Efficiency Improvement of an O-band SOI-MZI Thermo-optic Matrix Switch"
   # and folding based on
@@ -7152,7 +7152,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     self.param("input_slab_width", self.TypeDouble, "Input Slab Width (um)", default = 2)
     self.param("in_taper_length", self.TypeDouble, "Input Taper Length (um)", default = 15)    
     self.param("length", self.TypeDouble, "Phase Shifter Length (um)", default = 150)
-    self.param("width", self.TypeDouble, "Waveguide Width (um)", default = 0.5)
+    self.param("width", self.TypeDouble, "Waveguide Width (um)", default = 0.35)
     self.param("gap", self.TypeDouble, "Waveguide gap (um)", default = 2)
     
 #    self.param("ps_slab_width", self.TypeDouble, "Phase Shifter Slab Width (um)", default = 18)
@@ -7232,7 +7232,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     npp_width = to_itype(self.npp_width,dbu)   #npp width, default 5 um
     
     ## define waveguide folding parameters
-    folding_n = round((self.fold_number - 1)/2) # folding waveguide number on one side
+    folding_n = int(round((self.fold_number - 1)/2)) # folding waveguide number on one side
     folding_w1 = w+50   # one of the folding waveguide width
     folding_w2 = w-50 # the other one of the folding waveguide width
     folding_gap = to_itype(self.gap,dbu)  # the gap between two folding waveguide
@@ -7266,7 +7266,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     else:
       in_slab = in_rib
   
-    if folding_n > 0:
+    if folding_n &gt; 0:
       pts = [Point(-l/2 - in_taper, -w/2), Point( -l/2, -w/2), Point(-l/2, w/2), Point(-l/2 - in_taper, w/2)] # fix waveguide width mismatch for left center input taper
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
   
@@ -7402,7 +7402,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
           else:
               waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [w*dbu], [0], pts, radius_um, adiab, bezier)
       
-          # Pin & Waveguide on the right side:
+          # Pin &amp; Waveguide on the right side:
           wg_end = l/2 + in_taper+routing_step*folding_n*3+w
           p2 = [Point(wg_end - PIN_LENGTH/2,y_move), Point(wg_end + PIN_LENGTH/2,y_move)]
           p2c = Point(wg_end, y_move)
@@ -7437,24 +7437,24 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
       # add metal contact and folded waveguides
       for i in range(-folding_n, folding_n):
         y_coordinate = folding_gap + w# move up/down the position according to vc_to_npp_exclusion
-        if i<0:
+        if i&lt;0:
           y_origin = (i + 1) * (folding_w1 + folding_w2 + folding_gap * 2)/2 -  y_coordinate
         if i==0:
           y_origin = 0   
-        if i>0:
+        if i&gt;0:
           y_origin = (i - 1) * (folding_w1 + folding_w2 + folding_gap * 2)/2 +  y_coordinate      
         
-        if (i+1)<0:
+        if (i+1)&lt;0:
           y_end = (i + 2) * (folding_w1 + folding_w2 + folding_gap * 2)/2 -  y_coordinate
         if (i+1)==0:
           y_end = 0   
-        if (i+1)>0:
+        if (i+1)&gt;0:
           y_end = i * (folding_w1 + folding_w2 + folding_gap * 2)/2 +  y_coordinate   
         
         # Calculate the Folded waveguide vertices
         if (i+folding_n)%2:
           # Waveguides on the left side
-          if y_origin + routing_step * 2 - y_end < 2*radius_um:
+          if y_origin + routing_step * 2 - y_end &lt; 2*radius_um:
             y_routing = routing_step*2
           else:
             y_routing = y_end+routing_step*2
@@ -7468,7 +7468,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
            
         else:  
           # Waveguides on the right side
-          if y_origin - y_end + routing_step * 2 < 2*radius_um:
+          if y_origin - y_end + routing_step * 2 &lt; 2*radius_um:
             y_routing = -routing_step*2
           else:
             y_routing = y_origin-routing_step*2
@@ -7518,7 +7518,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
         
 
         
-        if (self.include_oxide_open & (i < self.segments)):
+        if (self.include_oxide_open &amp; (i &lt; self.segments)):
             oxide_open_temp = pya.Box((l - contact_size)/self.segments *  i - l/2 + contact_size + 2 * vc_to_npp_exclusion + oxide_open_to_silicon_gap, npp_d+w/2 + npp_width + y_increase + edge_slab_width/2 + oxide_open_to_silicon_gap,
             (l - contact_size)/self.segments *  (i+1) - l/2 - oxide_open_to_silicon_gap - 2 * vc_to_npp_exclusion, npp_d+w/2 + npp_width + y_increase + edge_slab_width/2 + oxide_open_to_silicon_gap + oxide_open_width)
 
@@ -7546,10 +7546,11 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     Point(l/2, sw/2 + contact_size + metal_routing_distance_to_node + 2 * vc_to_npp_exclusion + y_increase)], metal_routing_width)
     self.cell.shapes(LayerMN).insert(metal_routing)
 
-    if folding_n > 0:
+    if folding_n &gt; 0:
       dev = Box(wg_start, -sw/2 - contact_size - metal_routing_distance_to_node - 2 * vc_to_npp_exclusion - y_increase - metal_routing_width,
       wg_end, sw/2 + contact_size + metal_routing_distance_to_node + 2 * vc_to_npp_exclusion + y_increase + metal_routing_width)    
       self.cell.shapes(LayerDevRecN).insert(dev)    
+          
           
 class SiEPIC_EBeam_dev(Library):
   """
