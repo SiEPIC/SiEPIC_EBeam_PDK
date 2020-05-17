@@ -6638,13 +6638,10 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
   
       # add input slab taper
       pts = [];
-  
       for i in range(0,N + 1):
         pts.append(Point(-l/2 - in_taper + in_taper/N * i, (in_slab-overlay_ebl)/2 + ((sw/2  - (in_slab-overlay_ebl))/(N**order))*(i**order)))
       for i in range(0,N + 1):
         pts.append(Point(-l/2 - in_taper + in_taper/N * (N - i), - (in_slab-overlay_ebl)/2 - ((sw/2  - (in_slab-overlay_ebl))/(N**order))*((N-i)**order)))
-     
-  
       self.cell.shapes(LayerSlab).insert(Polygon(pts))
   
       # add output strip taper
@@ -6655,9 +6652,9 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
       # cubic taper
       pts = [];
       for i in range(0,N + 1):
-        pts.append(Point(l/2 + in_taper - in_taper/N * i, (in_slab-overlay_ebl)/2 + ((sw/2 + contact_size - (in_slab-overlay_ebl))/(N**order))*(i**order)))
+        pts.append(Point(l/2 + in_taper - in_taper/N * i, (in_slab-overlay_ebl)/2 + ((sw/2  - (in_slab-overlay_ebl))/(N**order))*(i**order)))
       for i in range(0,N + 1):
-        pts.append(Point(l/2 + in_taper/N * i, - (in_slab-overlay_ebl)/2 - ((sw/2 + contact_size - (in_slab-overlay_ebl))/(N**order))*((N-i)**order)))
+        pts.append(Point(l/2 + in_taper/N * i, - (in_slab-overlay_ebl)/2 - ((sw/2  - (in_slab-overlay_ebl))/(N**order))*((N-i)**order)))
       self.cell.shapes(LayerSlab).insert(Polygon(pts))
   
       from SiEPIC._globals import PIN_LENGTH as pin_length
