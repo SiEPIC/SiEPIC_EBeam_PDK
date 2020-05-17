@@ -6525,10 +6525,13 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     self.param("length", self.TypeDouble, "Phase Shifter Length (um)", default = 150)
     self.param("width", self.TypeDouble, "Waveguide Width (um)", default = 0.5)
     self.param("npp_width", self.TypeDouble, "Npp Width (um)", default = 2)
-    self.param("npp_distance", self.TypeDouble, "Npp Edge to Si Edge (um)", default = 2)
+    self.param("npp_distance", self.TypeDouble, "Npp Edge to Si Waveguide (um)", default = 2)
     self.param("segments", self.TypeInt, "Phase Shifter Segments", default = 5)  
 #    self.param("vc_dw", self.TypeDouble, "VC Offset", default = 5)
     self.param("vc_w", self.TypeDouble, "Contact via width", default = 5)
+    self.param("vc_si_distance", self.TypeDouble, "VC Edge to Si Waveguide (um)", default = 3)
+    self.param("overlay", self.TypeDouble, "Overlay accuracy (optical litho) (um)", default = 1)
+    self.param("overlay_ebl", self.TypeDouble, "Overlay accuracy (EBL) (um)", default = 0.05)
 #    self.param("m_dw", self.TypeDouble, "Metal Offset", default = 4)
     self.param("m_w", self.TypeDouble, "Metal Width", default = 10)
     self.param("slayer", self.TypeLayer, "Slab Layer", default = TECHNOLOGY['Si - 90 nm rib'])
@@ -6583,8 +6586,8 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     ## define parameters for phase shifter
     
     # mask overlay accuracy
-    overlay = 1/dbu
-    overlay_ebl = 0.1/dbu
+    overlay = to_itype(self.overlay,dbu)
+    overlay_ebl = to_itype(self.overlay_ebl,dbu)
     
     ## define waveguide related parameters
     radius, adiab, bezier = 5/dbu, 1, 0.2
@@ -6605,6 +6608,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     metal_routing_width = to_itype(self.m_w, dbu) # width of metal
     ps_sl_w = sw + npp_width*2+2*overlay  # define overall phase shifter 90nm slab width
     metal_routing_distance_to_node = metal_routing_width+ps_sl_w/2
+    vc_si_distance = to_itype(self.vc_si_distance, dbu)
     vc_to_npp_exclusion = to_itype(0,dbu) # VC boundary to NPP boundary distance
 
     ## define strip to slab transfer taper parameters
@@ -6648,15 +6652,12 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
       #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
   
+      # cubic taper
       pts = [];
-  
       for i in range(0,N + 1):
         pts.append(Point(l/2 + in_taper - in_taper/N * i, (in_slab-overlay_ebl)/2 + ((sw/2 + contact_size - (in_slab-overlay_ebl))/(N**order))*(i**order)))
-        
       for i in range(0,N + 1):
         pts.append(Point(l/2 + in_taper/N * i, - (in_slab-overlay_ebl)/2 - ((sw/2 + contact_size - (in_slab-overlay_ebl))/(N**order))*((N-i)**order)))
-        
-        
       self.cell.shapes(LayerSlab).insert(Polygon(pts))
   
       from SiEPIC._globals import PIN_LENGTH as pin_length
@@ -6688,25 +6689,21 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
 
     for i in range(0, self.segments + 1):
         
-        wg_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2-overlay, sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size+overlay, sw/2 + contact_size+overlay)
-        self.cell.shapes(LayerSlab).insert(wg_temp_upper)
-        wg_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2, sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size, sw/2 + contact_size)
-        #self.cell.shapes(LayerNN).insert(wg_temp_upper)
-        self.cell.shapes(LayerNPPN).insert(wg_temp_upper)
-#        self.cell.shapes(LayerNN).insert(wg_temp_upper)
-        vc_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, sw/2 + vc_to_npp_exclusion,(l - contact_size)/self.segments *  i - l/2 + contact_size - vc_to_npp_exclusion, sw/2 + contact_size - vc_to_npp_exclusion)
+        vc_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, w/2 + vc_si_distance,(l - contact_size)/self.segments *  i - l/2 + contact_size - vc_to_npp_exclusion, w/2 + vc_si_distance + contact_size)
         self.cell.shapes(LayerVCN).insert(vc_temp_upper)
+        wg_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2 - overlay, sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size + overlay, w/2 + vc_si_distance + contact_size + overlay)
+        self.cell.shapes(LayerNPPN).insert(wg_temp_upper)
+        wg_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2-2*overlay, sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size+2*overlay, w/2 + vc_si_distance + contact_size+2*overlay)
+        self.cell.shapes(LayerSlab).insert(wg_temp_upper)
         
-        wg_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2-overlay, -sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size+overlay, -sw/2 - contact_size-overlay)
-        self.cell.shapes(LayerSlab).insert(wg_temp_lower)
-        wg_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2, -sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size, -sw/2 - contact_size)
-        #self.cell.shapes(LayerNN).insert(wg_temp_lower)
-        self.cell.shapes(LayerNPPN).insert(wg_temp_lower)
-#        self.cell.shapes(LayerNN).insert(wg_temp_lower)
-        vc_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, -sw/2 - vc_to_npp_exclusion,(l - contact_size)/self.segments *  i - l/2 + contact_size - vc_to_npp_exclusion, -sw/2 - contact_size + vc_to_npp_exclusion)
+        vc_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, -w/2 - vc_si_distance,(l - contact_size)/self.segments *  i - l/2 + contact_size - vc_to_npp_exclusion, -w/2 - vc_si_distance - contact_size)
         self.cell.shapes(LayerVCN).insert(vc_temp_lower)
+        wg_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2 - overlay , -sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size+ overlay, -(w/2 + vc_si_distance + contact_size + overlay))
+        self.cell.shapes(LayerNPPN).insert(wg_temp_lower)
+        wg_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2-2*overlay, -sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size+2*overlay, -(w/2 + vc_si_distance + contact_size+2*overlay))
+        self.cell.shapes(LayerSlab).insert(wg_temp_lower)
 
-        metal_temp = pya.Box((l - contact_size)/self.segments *  i - l/2, -sw/2 - contact_size - metal_routing_distance_to_node * (i%2),(l - contact_size)/self.segments *  i - l/2 + contact_size, sw/2 + contact_size + metal_routing_distance_to_node * ((i+1)%2))
+        metal_temp    = pya.Box((l - contact_size)/self.segments *  i - l/2 - overlay, -(w/2 + vc_si_distance + contact_size+1*overlay) - metal_routing_distance_to_node * (i%2),(l - contact_size)/self.segments *  i - l/2 + contact_size + overlay, w/2 + vc_si_distance + contact_size+1*overlay + metal_routing_distance_to_node * ((i+1)%2))
         self.cell.shapes(LayerMN).insert(metal_temp)
         
             
