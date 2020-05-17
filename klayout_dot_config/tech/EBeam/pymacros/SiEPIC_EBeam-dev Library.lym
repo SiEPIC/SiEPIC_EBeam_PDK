@@ -6828,7 +6828,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
     
     metal_routing_distance_to_node = to_itype(30,dbu)  # *** calculate from PCell parameters ***
     metal_routing_width = to_itype(self.m_w, dbu) # width of metal
-    vc_to_npp_exclusion = to_itype(0,dbu) # VC boundary to NPP boundary distance
+    vc_to_npp_exclusion = to_itype(self.overlay,dbu) # VC boundary to NPP boundary distance
 
     ps_sl_w = sw+2*contact_size+folding_n*2*(w+folding_gap+overlay_ebl)  # overall pahse shifter 90nm slab width
     
@@ -6856,7 +6856,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
       wg2 = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
       self.cell.shapes(LayerSlab).insert(wg2)
 
-      pts = [Point(-l/2 - in_taper, -folding_w1/2), Point( -l/2, -folding_w1/2), Point(-l/2, w/2), Point(-l/2 - in_taper, w/2)]
+      pts = [Point(-l/2 - in_taper, -w/2), Point( -l/2, -w/2), Point(-l/2, w/2), Point(-l/2 - in_taper, w/2)] # fix waveguide width mismatch for left center input taper
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
   
       # add input slab taper
@@ -6881,7 +6881,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSlab).insert(Polygon(pts))
 
       for i in range(0, folding_n):
-        y_coordinate = contact_size + sw
+        y_coordinate = contact_size + sw + 2 * vc_to_npp_exclusion # move up/down the position according to vc_to_npp_exclusion
         y_move = i * (folding_w1 + folding_w2 + folding_gap * 2)/2 +  y_coordinate
         if i%2:
           folding_w = folding_w2
@@ -7023,7 +7023,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
         
       # add metal contact and folded waveguides
       for i in range(-folding_n, folding_n):
-        y_coordinate = contact_size + sw
+        y_coordinate = contact_size + sw + 2 * vc_to_npp_exclusion # move up/down the position according to vc_to_npp_exclusion
         if i&lt;0:
           y_origin = (i + 1) * (folding_w1 + folding_w2 + folding_gap * 2)/2 -  y_coordinate
         if i==0:
@@ -7073,21 +7073,27 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
 
     for i in range(0, self.segments + 1):
         
-        wg_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2, sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size, sw/2 + contact_size)
+        wg_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2 - vc_to_npp_exclusion, sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size + vc_to_npp_exclusion, sw/2 + contact_size + 2 * vc_to_npp_exclusion)
         #self.cell.shapes(LayerNN).insert(wg_temp_upper)
         self.cell.shapes(LayerNPPN).insert(wg_temp_upper)
 #        self.cell.shapes(LayerNN).insert(wg_temp_upper)
-        vc_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, sw/2 + vc_to_npp_exclusion,(l - contact_size)/self.segments *  i - l/2 + contact_size - vc_to_npp_exclusion, sw/2 + contact_size - vc_to_npp_exclusion)
+        wg_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2 - 2 * vc_to_npp_exclusion, sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size + 2 * vc_to_npp_exclusion, sw/2 + contact_size + 3 * vc_to_npp_exclusion)
+        self.cell.shapes(LayerSlab).insert(wg_temp_upper)
+        
+        vc_temp_upper = pya.Box((l - contact_size)/self.segments *  i - l/2, sw/2 + vc_to_npp_exclusion,(l - contact_size)/self.segments *  i - l/2 + contact_size, sw/2 + contact_size + vc_to_npp_exclusion)
         self.cell.shapes(LayerVCN).insert(vc_temp_upper)
         
-        wg_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2, -sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size, -sw/2 - contact_size)
+        wg_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2 - vc_to_npp_exclusion, -sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size + vc_to_npp_exclusion, -sw/2 - contact_size - 2 * vc_to_npp_exclusion)
         #self.cell.shapes(LayerNN).insert(wg_temp_lower)
         self.cell.shapes(LayerNPPN).insert(wg_temp_lower)
+        wg_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2 - 2 * vc_to_npp_exclusion, -sw/2,(l - contact_size)/self.segments *  i - l/2 + contact_size + 2 * vc_to_npp_exclusion, -sw/2 - contact_size - 3 * vc_to_npp_exclusion)
+        self.cell.shapes(LayerSlab).insert(wg_temp_lower)
+
 #        self.cell.shapes(LayerNN).insert(wg_temp_lower)
-        vc_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2 + vc_to_npp_exclusion, -sw/2 - vc_to_npp_exclusion,(l - contact_size)/self.segments *  i - l/2 + contact_size - vc_to_npp_exclusion, -sw/2 - contact_size + vc_to_npp_exclusion)
+        vc_temp_lower = pya.Box((l - contact_size)/self.segments *  i - l/2, -sw/2 - vc_to_npp_exclusion,(l - contact_size)/self.segments *  i - l/2 + contact_size, -sw/2 - contact_size - vc_to_npp_exclusion)
         self.cell.shapes(LayerVCN).insert(vc_temp_lower)
 
-        metal_temp = pya.Box((l - contact_size)/self.segments *  i - l/2, -sw/2 - contact_size - metal_routing_distance_to_node * (i%2),(l - contact_size)/self.segments *  i - l/2 + contact_size, sw/2 + contact_size + metal_routing_distance_to_node * ((i+1)%2))
+        metal_temp = pya.Box((l - contact_size)/self.segments *  i - l/2 - vc_to_npp_exclusion, -sw/2 - contact_size - metal_routing_distance_to_node * (i%2) - 2 * vc_to_npp_exclusion,(l - contact_size)/self.segments *  i - l/2 + contact_size + vc_to_npp_exclusion, sw/2 + contact_size + metal_routing_distance_to_node * ((i+1)%2) + 2 * vc_to_npp_exclusion)
         self.cell.shapes(LayerMN).insert(metal_temp)
         
             
