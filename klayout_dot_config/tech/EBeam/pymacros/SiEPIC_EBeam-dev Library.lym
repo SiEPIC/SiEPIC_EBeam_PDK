@@ -6832,16 +6832,20 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
 
     ps_sl_w = sw+2*contact_size+folding_n*2*(w+folding_gap+overlay_ebl)  # overall pahse shifter 90nm slab width
     
+    # measure the total length of the waveguides
+    total_waveguide_length = 0
 
     ## define strip to slab transfer taper parameters
     N = 100; # Number of points for the input/output slab taper
     order = 3; # input/output slab taper curve 
 
-    wg1 = pya.Box(-l/2,-w/2,l/2,w/2)
+    pts = [Point(-l/2,0), Point(l/2, 0)]
+    total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [w*dbu], [0], pts, radius_um, adiab, bezier)
+
     wg2 = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
     wg3 = pya.Box(-l/2,npp_d+w/2,l/2, npp_d+w/2 + npp_width)
     wg4 = pya.Box(-l/2,-npp_d-w/2,l/2, -npp_d-w/2 - npp_width)
-    self.cell.shapes(LayerSiN).insert(wg1)
+
 
     self.cell.shapes(LayerNPPN).insert(wg3)
     self.cell.shapes(LayerNPPN).insert(wg4)
@@ -6871,6 +6875,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
       pts = [Point(l/2 + in_taper, -w/2), Point( l/2, -w/2), Point(l/2, w/2), Point(l/2 + in_taper, w/2)]
       #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
+      total_waveguide_length += in_taper*dbu
   
       # add input slab taper
       pts = [];
@@ -6889,15 +6894,18 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           folding_w = folding_w1
                  
         # waveguide in the heated region 
-        wg1 = pya.Box(-l/2,-folding_w/2 + y_move,l/2,folding_w/2 + y_move)
-        self.cell.shapes(LayerSiN).insert(wg1)      
-        wg1 = pya.Box(-l/2,-folding_w/2 - y_move,l/2,folding_w/2 - y_move)        
-        self.cell.shapes(LayerSiN).insert(wg1)
+        pts = [Point(-l/2,y_move), Point(l/2, y_move)]
+        total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [folding_w*dbu], [0], pts, radius_um, adiab, bezier)
+        pts = [Point(-l/2,- y_move), Point(l/2,- y_move)]
+        total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [folding_w*dbu], [0], pts, radius_um, adiab, bezier)
+
+
         
         # add upper left input taper
         pts = [Point(-l/2 - in_taper, -w/2 + y_move), Point( -l/2, -folding_w/2 + y_move), Point(-l/2, folding_w/2 + y_move), Point(-l/2 - in_taper, w/2 + y_move)]
         #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
         self.cell.shapes(LayerSiN).insert(Polygon(pts))        
+        total_waveguide_length += in_taper*dbu
         
         # slab cubic taper
         pts = [];
@@ -6914,6 +6922,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           pts = [Point(-l/2 - in_taper, -w/2 + y_move), Point( -l/2, -folding_w/2 + y_move), Point(-l/2, folding_w/2 + y_move), Point(-l/2 - in_taper, w/2 + y_move)]
           #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
           self.cell.shapes(LayerSiN).insert(Polygon(pts))        
+          total_waveguide_length += in_taper*dbu
           
           # slab cubic taper
           pts = [];
@@ -6930,6 +6939,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           pts = [Point(l/2 + in_taper, -w/2 + y_move), Point( l/2, -folding_w/2 + y_move), Point(l/2, folding_w/2 + y_move), Point(l/2 + in_taper, w/2 + y_move)]
           #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
           self.cell.shapes(LayerSiN).insert(Polygon(pts))
+          total_waveguide_length += in_taper*dbu
       
           # slab cubic taper
           pts = [];
@@ -6946,6 +6956,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           Point(-l/2, folding_w/2 + y_move), Point(-l/2 - in_taper, w/2 + y_move)]
           #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
           self.cell.shapes(LayerSiN).insert(Polygon(pts))
+          total_waveguide_length += in_taper*dbu
       
           # add input slab taper
           pts = [];
@@ -6960,6 +6971,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           pts = [Point(l/2 + in_taper, -w/2 + y_move), Point( l/2, -folding_w/2 + y_move), Point(l/2, folding_w/2 + y_move), Point(l/2 + in_taper, w/2 + y_move)]
           #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
           self.cell.shapes(LayerSiN).insert(Polygon(pts))
+          total_waveguide_length += in_taper*dbu
       
           # add input slab taper
           pts = [];
@@ -7005,15 +7017,16 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           pts = [Point(l/2 + in_taper, y_move), 
             Point(wg_end, y_move)]
           if self.io_wg_type:
-              waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si', 'Si - 90 nm rib'], [w*dbu, in_slab*dbu], [0,0], pts, radius_um, adiab, bezier)
+              total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si', 'Si - 90 nm rib'], [w*dbu, in_slab*dbu], [0,0], pts, radius_um, adiab, bezier)
           else:
-              waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [w*dbu], [0], pts, radius_um, adiab, bezier)
+              total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [w*dbu], [0], pts, radius_um, adiab, bezier)
 
         # add below right taper   
         y_move = - y_move 
         pts = [Point(l/2 + in_taper, -w/2 + y_move), Point( l/2, -folding_w/2 + y_move), Point(l/2, folding_w/2 + y_move), Point(l/2 + in_taper, w/2 + y_move)]
         #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
         self.cell.shapes(LayerSiN).insert(Polygon(pts))
+        total_waveguide_length += in_taper*dbu
         pts = [];
         for ii in range(0,N + 1):
           pts.append(Point(l/2 + in_taper - in_taper/N * ii, (w-overlay_ebl)/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(ii**order) + y_move))
@@ -7068,7 +7081,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
         # Draw the waveguide geometry, new in SiEPIC-Tools v0.3.64
         path.unique_points()
         pts = path.get_points()
-        waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'],  [w*dbu], [0], pts, radius_um, adiab, bezier)
+        total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'],  [w*dbu], [0], pts, radius_um, adiab, bezier)
            
 
 
@@ -7109,6 +7122,11 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
       dev = Box(wg_start, -sw/2 - metal_routing_distance_to_node - contact_size - metal_routing_width,
       wg_end, sw/2 + metal_routing_distance_to_node + contact_size + metal_routing_width)    
       self.cell.shapes(LayerDevRecN).insert(dev)
+
+    t = Trans(0, False, Point(0,0)) 
+    text = Text ( \
+      'Waveguide Length=%.3fu' %(total_waveguide_length), t, 3*w, -1)
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
 
     
           
