@@ -184,8 +184,8 @@ class Waveguide(pya.PCellDeclarationHelper):
     path.unique_points()
     pts = path.get_points()
     
-    # Draw the waveguide geometry
-    waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, self.layers, self.width, self.widths, self.offsets, pts, self.radius, self.adiab, self.bezier)
+    # Draw the waveguide geometry, new in SiEPIC-Tools v0.3.64
+    waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, self.layers, self.widths, self.offsets, pts, self.radius, self.adiab, self.bezier)
 
     pts = path.get_points()
     LayerPinRecN = self.layout.layer(TECHNOLOGY['PinRec'])
@@ -209,47 +209,46 @@ class Waveguide(pya.PCellDeclarationHelper):
     if angle_vec == 0: # horizontal
       halign = 2 # right
       angle=0
-      pt2=pts[0] + Point(0, wg_width)
-      pt3=pts[0] + Point(0, -wg_width)
-      pt4=pts[0] + Point(0, -2*wg_width)
+      pt2=pts[0] + Point(0, 0.2*wg_width)
+      pt3=pts[0] + Point(0, -0.2*wg_width)
+      pt4=pts[0] + Point(0, -0.5*wg_width)
     if angle_vec == 2: # horizontal
       halign = 0 # left
       angle = 0
-      pt2=pts[0] + Point(0, wg_width)
-      pt3=pts[0] + Point(0, -wg_width)
-      pt4=pts[0] + Point(0, -2*wg_width)
+      pt2=pts[0] + Point(0, 0.2*wg_width)
+      pt3=pts[0] + Point(0, -0.2*wg_width)
+      pt4=pts[0] + Point(0, -0.5*wg_width)
     if angle_vec == 1: # vertical
       halign = 2 # right
       angle = 1
-      pt2=pts[0] + Point(wg_width,0)
-      pt3=pts[0] + Point(-wg_width,0)
-      pt4=pts[0] + Point(-2*wg_width,0)
+      pt2=pts[0] + Point(0.2*wg_width,0)
+      pt3=pts[0] + Point(-0.2*wg_width,0)
+      pt4=pts[0] + Point(-0.5*wg_width,0)
     if angle_vec == -1: # vertical
       halign = 0 # left
       angle = 1
-      pt2=pts[0] + Point(wg_width,0)
-      pt3=pts[0] + Point(-wg_width,0)
-      pt4=pts[0] + Point(-2*wg_width,0)
+      pt2=pts[0] + Point(0.2*wg_width,0)
+      pt3=pts[0] + Point(-0.2*wg_width,0)
+      pt4=pts[0] + Point(-0.5*wg_width,0)
       
-    t = Trans(angle, False, pts[0]) 
-  
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/%s' % self.CML, t, 0.1/dbu, -1)
+    t = Trans(angle, False, pt3) 
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/%s' % self.CML, t, 0.1*wg_width, -1)
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     t = Trans(angle, False, pt2)
-    text = Text ('Component=%s' % self.model, t, 0.1/dbu, -1)
+    text = Text ('Component=%s' % self.model, t, 0.1*wg_width, -1)
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
-    t = Trans(angle, False, pt3)
+    t = Trans(angle, False, pts[0])
     pts_txt = str([ [round(p.to_dtype(dbu).x,3), round(p.to_dtype(dbu).y,3)] for p in pts ]).replace(', ',',')
     text = Text ( \
       'Spice_param:wg_length=%.3fu wg_width=%.3fu points="%s" radius=%s' %\
-        (waveguide_length, self.width, pts_txt,self.radius ), t, 0.1/dbu, -1  )
+        (waveguide_length, self.width, pts_txt,self.radius ), t, 0.1*wg_width, -1  )
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     t = Trans(angle, False, pt4)
     text = Text ( \
-      'Length=%.3fu' %(waveguide_length), t, 0.5/dbu, -1  )
+      'Length=%.3fu' %(waveguide_length), t, 0.5*wg_width, -1  )
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
 
