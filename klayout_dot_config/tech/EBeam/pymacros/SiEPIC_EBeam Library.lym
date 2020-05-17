@@ -165,7 +165,8 @@ class Waveguide(pya.PCellDeclarationHelper):
         
   def produce_impl(self):
 
-    from SiEPIC.utils import arc_xy, arc_bezier, angle_vector, angle_b_vectors, inner_angle_b_vectors, translate_from_normal
+    from SiEPIC.utils.layout import layout_waveguide2
+    from SiEPIC.utils import  angle_vector
     from math import cos, sin, pi, sqrt
     import pya
     from SiEPIC.extend import to_itype
@@ -181,47 +182,10 @@ class Waveguide(pya.PCellDeclarationHelper):
     if not (len(self.layers)==len(self.widths) and len(self.layers)==len(self.offsets) and len(self.offsets)==len(self.widths)):
       raise Exception("There must be an equal number of layers, widths and offsets")
     path.unique_points()
-    turn=0
-    for lr in range(0, len(self.layers)):
-      layer = self.layout.layer(TECHNOLOGY[self.layers[lr]])
-      
-      width = to_itype(self.widths[lr],dbu)
-      offset = to_itype(self.offsets[lr],dbu)
-
-      pts = path.get_points()
-      wg_pts = [pts[0]]
-      for i in range(1,len(pts)-1):
-        turn = ((angle_b_vectors(pts[i]-pts[i-1],pts[i+1]-pts[i])+90)%360-90)/90
-        dis1 = pts[i].distance(pts[i-1])
-        dis2 = pts[i].distance(pts[i+1])
-        angle = angle_vector(pts[i]-pts[i-1])/90
-        pt_radius = to_itype(self.radius,dbu)
-        # determine the radius, based on how much space is available
-        if len(pts)==3:
-          pt_radius = min (dis1, dis2, pt_radius)
-        else:
-          if i==1:
-            if dis1 &lt;= pt_radius:
-              pt_radius = dis1
-          elif dis1 &lt; 2*pt_radius:
-            pt_radius = dis1/2
-          if i==len(pts)-2:
-            if dis2 &lt;= pt_radius:
-              pt_radius = dis2
-          elif dis2 &lt; 2*pt_radius:
-            pt_radius = dis2/2
-        # waveguide bends:
-        if(self.adiab):
-          wg_pts += Path(arc_bezier(pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]), self.bezier, DevRec='DevRec' in self.layers[lr]), 0).transformed(Trans(angle, turn &lt; 0, pts[i])).get_points()
-        else:
-          wg_pts += Path(arc_xy(-pt_radius, pt_radius, pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]),DevRec='DevRec' in self.layers[lr]), 0).transformed(Trans(angle, turn &lt; 0, pts[i])).get_points()
-      wg_pts += [pts[-1]]
-      wg_pts = pya.Path(wg_pts, 0).unique_points().get_points()
-      wg_polygon = Polygon(translate_from_normal(wg_pts, width/2 + (offset if turn &gt; 0 else - offset))+translate_from_normal(wg_pts, -width/2 + (offset if turn &gt; 0 else - offset))[::-1])
-      self.cell.shapes(layer).insert(wg_polygon)
-      
-      if self.layout.layer(TECHNOLOGY['Waveguide']) == layer:
-        waveguide_length = wg_polygon.area() / self.width * dbu**2
+    pts = path.get_points()
+    
+    # Draw the waveguide geometry
+    waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, self.layers, self.width, self.widths, self.offsets, pts, self.radius, self.adiab, self.bezier)
 
     pts = path.get_points()
     LayerPinRecN = self.layout.layer(TECHNOLOGY['PinRec'])
