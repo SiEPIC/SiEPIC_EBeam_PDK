@@ -7260,7 +7260,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     order = 3; # input/output slab taper curve 
 
     pts = [Point(-l/2,0), Point(l/2, 0)]
-    total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [w*dbu], [0], pts, radius_um, adiab, bezier)
+    total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [folding_w2*dbu], [0], pts, radius_um, adiab, bezier)
 
     
     if self.io_wg_type:
@@ -7272,7 +7272,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
       ps_sl_w = contact_size*2 + sw * 2 + (folding_w1 + folding_w2 + folding_gap * 2) * folding_n + edge_slab_width
 
 
-      pts = [Point(-l/2 - in_taper, -w/2), Point( -l/2, -w/2), Point(-l/2, w/2), Point(-l/2 - in_taper, w/2)] # fix waveguide width mismatch for left center input taper
+      pts = [Point(-l/2 - in_taper, -w/2), Point( -l/2, -folding_w2/2), Point(-l/2, folding_w2/2), Point(-l/2 - in_taper, w/2)] # fix waveguide width mismatch for left center input taper
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
   
       # add input slab taper
@@ -7284,7 +7284,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSlab).insert(Polygon(pts))
   
       # add output strip taper
-      pts = [Point(l/2 + in_taper, -w/2), Point( l/2, -w/2), Point(l/2, w/2), Point(l/2 + in_taper, w/2)]
+      pts = [Point(l/2 + in_taper, -w/2), Point( l/2, -folding_w2/2), Point(l/2, folding_w2/2), Point(l/2 + in_taper, w/2)]
       #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
       total_waveguide_length += in_taper*dbu
