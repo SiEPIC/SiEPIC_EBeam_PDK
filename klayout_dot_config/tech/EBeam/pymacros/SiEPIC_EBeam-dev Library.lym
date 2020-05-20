@@ -5133,21 +5133,21 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     LayerDevRecN = ly.layer(self.devrec)
     TextLayerN = ly.layer(self.textl)
     
-    w = int(round(self.w/dbu))
-    r = int(round(self.r/dbu))
-    g = int(round(self.g/dbu))
+    w = to_itype(self.w,dbu)
+    r = to_itype(self.r,dbu)
+    g = to_itype(self.g,dbu)
     
-    n_w = int(round(self.n_w/dbu))
+    n_w = to_itype(self.n_w,dbu)
     npp_si = to_itype(self.npp_si, dbu)
-    npp_w=int(round(self.npp_w/dbu))
+    npp_w=to_itype(self.npp_w,dbu)
     theta_start = self.n_theta_start
     theta_stop = self.n_theta_stop
+
+    vc_cw = to_itype(self.vc_cw,dbu)
+    vc_aw = to_itype(self.vc_aw,dbu)
     
-    vc_cw = int(round(self.vc_cw/dbu))
-    vc_aw = int(round(self.vc_aw/dbu))    
-    
-    m_cw = int(round(self.m_cw/dbu))
-    m_aw = int(round(self.m_aw/dbu))   
+    m_cw = to_itype(self.m_cw,dbu)
+    m_aw = to_itype(self.m_aw,dbu)
     x = 0
     y = 0
     
@@ -5228,17 +5228,17 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     xbottom = 4/3*r
     ybottom = ytop
     dev_array = [
-        DPoint(ytop + 3*w,xbottom+npp_w),
-        DPoint(ytop + 3*w,xbottom),
-        DPoint(ytop - 2*w,xbottom),
-        DPoint(ytop - 2*w,xtop),
-        DPoint(ytop + 3*w,xtop),
-        DPoint(xtop,ybottom+3*w),
-        DPoint(xtop,ybottom-w),
-        DPoint(xbottom,ybottom-w),
-        DPoint(xbottom,ybottom+3*w),
-        DPoint(xbottom+npp_w,ybottom+3*w),
-        DPoint(xbottom+npp_w,xbottom+npp_w) ]
+        Point(ytop + 4*w,xbottom+npp_w),
+        Point(ytop + 4*w,xbottom),
+        Point(ytop - 3*w,xbottom),
+        Point(ytop - 3*w,xtop),
+        Point(ytop + 4*w,xtop),
+        Point(xtop,ybottom+4*w),
+        Point(xtop,ybottom-3*w),
+        Point(xbottom,ybottom-3*w),
+        Point(xbottom,ybottom+4*w),
+        Point(xbottom+npp_w,ybottom+4*w),
+        Point(xbottom+npp_w,xbottom+npp_w) ]
     shapes(LayerDevRecN).insert(pya.Polygon(dev_array)) 
 
     # Si rib layer
