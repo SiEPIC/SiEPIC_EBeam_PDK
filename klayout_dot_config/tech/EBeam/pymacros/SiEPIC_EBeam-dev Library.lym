@@ -5255,15 +5255,17 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
-    self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 32)
+    self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 22)
     self.param("length", self.TypeDouble, "Waveguide length", default = 100)
-    self.param("n_w", self.TypeDouble, "N Width", default = 30)
-    self.param("npp_w", self.TypeDouble, "N++ Width", default = 10)
-    self.param("npp_dw", self.TypeDouble, "N++ Offset", default = 2)
-    self.param("vc_dw", self.TypeDouble, "VC Offset", default = 5)
+    self.param("n_w", self.TypeDouble, "N Width", default = 22)
+    self.param("npp_w", self.TypeDouble, "N++ Width (um)", default = 8)
+    self.param("npp_dw", self.TypeDouble, "N++ Edge to Si Edge (um)", default = 2)
+    self.param("vc_dw", self.TypeDouble, "VC Edge to Si Edge (um)", default = 4)
     self.param("vc_w", self.TypeDouble, "VC Width", default = 5)
-    self.param("m_dw", self.TypeDouble, "Metal Offset", default = 4)
-    self.param("m_w", self.TypeDouble, "Metal Width", default = 11)
+    self.param("m_dw", self.TypeDouble, "Metal edge to center (um)", default = 4)
+    self.param("m_w", self.TypeDouble, "Metal Width", default = 10)
+    self.param("overlay", self.TypeDouble, "Overlay accuracy (optical litho) (um)", default = 1)
+    self.param("overlay_ebl", self.TypeDouble, "Overlay accuracy (EBL) (um)", default = 0.05)
         
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("siriblayer", self.TypeLayer, "Si rib Layer", default = TECHNOLOGY['Si - 90 nm rib'])
@@ -5275,6 +5277,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
+    
   def display_text_impl(self):
     # Provide a descriptive text for the cell
     return "ebeam_irph_wg" # (R=" + ('%.3f' % self.r) + ",g=" + ('%g' % (1000*self.g)) + ")"
@@ -5288,6 +5291,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     from math import pi, cos, sin
     from SiEPIC.utils import arc_wg, arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH
+    from SiEPIC.extend import to_itype
 
     # fetch the parameters
     dbu = self.layout.dbu
@@ -5304,16 +5308,17 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     LayerDevRecN = ly.layer(self.devrec)
     TextLayerN = ly.layer(self.textl)
 
-    w = int(round(self.w/dbu))
-    w_rib = int(round(self.w_rib/dbu))
-    length = int(round(self.length/dbu))
-    n_w = int(round(self.n_w/dbu))
-    npp_w=int(round(self.npp_w/dbu))
-    npp_dw=int(round(self.npp_dw/dbu))
-    vc_w = int(round(self.vc_w/dbu))
-    vc_dw = int(round(self.vc_dw/dbu))
-    m_dw = int(round(self.m_dw/dbu))
-    m_w = int(round(self.m_w/dbu))
+    w = to_itype(self.w,dbu)
+    w_rib = to_itype(self.w_rib,dbu)
+    length = to_itype(self.length,dbu)
+    n_w = to_itype(self.n_w,dbu)
+    npp_w=to_itype(self.npp_w,dbu)
+    npp_dw=to_itype(self.npp_dw,dbu)
+    vc_w = to_itype(self.vc_w,dbu)
+    vc_dw = to_itype(self.vc_dw,dbu)
+    m_dw = to_itype(self.m_dw,dbu)
+    m_w = to_itype(self.m_w,dbu)
+    overlay = to_itype(self.overlay, dbu)
     
     #draw the waveguide
     xtop = 0
@@ -5341,15 +5346,15 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     shapes(LayerNN).insert(b)
     
     #draw NPP
-    b = Box(0, npp_dw, length, npp_dw+npp_w)
+    b = Box(0, npp_dw+w/2, length, npp_dw+w/2+npp_w)
     shapes(LayerNPPN).insert(b)
-    b = Box(0, -npp_dw, length, -npp_dw-npp_w)
+    b = Box(0, -npp_dw-w/2, length, -npp_dw-w/2-npp_w)
     shapes(LayerNPPN).insert(b)
 
     #draw via
-    b = Box(0, vc_dw, length, vc_dw+vc_w)
+    b = Box(overlay, vc_dw+w/2, length-overlay, vc_dw+w/2+vc_w)
     shapes(LayerVCN).insert(b)
-    b = Box(0, -vc_dw, length, -vc_dw-vc_w)
+    b = Box(overlay, -vc_dw-w/2, length-overlay, -vc_dw-w/2-vc_w)
     shapes(LayerVCN).insert(b)
     
     #draw metal
@@ -5358,7 +5363,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     b = Box(0, -m_dw, length, -m_dw-m_w)
     shapes(LayerMN).insert(b)
 
-    w_devrec = 2 * max(m_dw+m_w, vc_dw+vc_w, npp_dw+npp_w, w_rib/2)
+    w_devrec = 2 * max(m_dw+m_w, vc_dw+w/2+vc_w, npp_dw+w/2+npp_w, w_rib/2)
 
     #devrec layer
     b = Box(0, w_devrec/2+w, length, -w_devrec/2-w)
