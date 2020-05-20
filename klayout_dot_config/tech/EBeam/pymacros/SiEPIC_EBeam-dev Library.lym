@@ -1227,6 +1227,7 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
+    self.param("wavelength", self.TypeDouble, "Wavelength", default = 1310)     
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
     self.param("taper_fraction", self.TypeDouble, "Strip taper length fraction (0 to 1)", default = 1)     
     self.param("period_strip", self.TypeDouble, "SWG Period at strip end (microns)", default = 0.200)     
@@ -1287,7 +1288,10 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     # a) the SWG end and b) the SWG with nanotaper
     # Done by simulating the neff versus SWG waveguide width, with an without a 60 nm
     w = wg_width_swg
-    dw = -3.3736e-5*w*w + 0.0618752*w  + 3.88577
+    if wavelength == 1310:
+        dw = -3.3736e-5*w*w + 0.0618752*w  + 3.88577
+    else:
+        dw = 0
     wg_width_swg_taperend = wg_width_swg - dw
 
     
@@ -7146,7 +7150,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("io_wg_type", self.TypeBoolean, "I/O waveguide type, 0 - strip; 1 - rib", default = 0)
-    self.param("include_oxide_open", self.TypeBoolean, "Iclude oxide open, 0 - no; 1 - yes", default = 0)
+    self.param("include_oxide_open", self.TypeBoolean, "Include thermal isolation etch, 0 - no; 1 - yes", default = 0)
     self.param("fold_number", self.TypeInt, "Number of folds (3, 5, 7, ...)", default = 5)   
     self.param("input_rib_width", self.TypeDouble, "Input Rib Width (um)", default = 0.35)
     self.param("input_slab_width", self.TypeDouble, "Input Slab Width (um)", default = 2)
@@ -7170,7 +7174,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     self.param("npplayer", self.TypeLayer, "N++ Layer", default = TECHNOLOGY['Si N++'])
     self.param("vclayer", self.TypeLayer, "VC Layer", default = TECHNOLOGY['VC'])
     self.param("mlayer", self.TypeLayer, "Metal Layer", default = TECHNOLOGY['12_M2'])
-    self.param("oolayer", self.TypeLayer, "Oxide Open Layer", default = TECHNOLOGY['Oxide open (to BOX)'])
+    self.param("oolayer", self.TypeLayer, "Thermal Isolation Layer", default = TECHNOLOGY['Oxide open (to BOX)'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
