@@ -1288,7 +1288,7 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     # a) the SWG end and b) the SWG with nanotaper
     # Done by simulating the neff versus SWG waveguide width, with an without a 60 nm
     w = wg_width_swg
-    if wavelength == 1310:
+    if self.wavelength == 1310:
         dw = -3.3736e-5*w*w + 0.0618752*w  + 3.88577
     else:
         dw = 0
