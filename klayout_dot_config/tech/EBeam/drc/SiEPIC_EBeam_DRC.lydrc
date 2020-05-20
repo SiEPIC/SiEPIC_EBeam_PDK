@@ -95,5 +95,10 @@ LayerM2.overlap(LayerVC, 5.0).output("M2_VC_overlap","Metal2-VC minimum overlap 
 LayerN.overlap(LayerNpp, 3.0).output("N_Npp_overlap","N-Npp minimum overlap violation; min 3 µm")
 LayerVC.overlap(LayerNpp, 5.0).output("VC_Npp_overlap","VC-Npp minimum overlap violation; min 5 µm")
 
+# minimum inclusion rules:
+LayerM2.enclosing(LayerVC, 1.0).output("M2_VC_enclosure","M2-VC minimum enclosure violation; min 1 µm")
+LayerSi_rib.enclosing(LayerVC, 1.0).output("Si_rib_VC_enclosure","Si_rib-VC minimum enclosure violation; min 1 µm")
+
+
 </text>
 </klayout-macro>
