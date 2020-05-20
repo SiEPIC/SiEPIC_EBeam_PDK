@@ -5260,9 +5260,9 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     self.param("n_w", self.TypeDouble, "N Width", default = 22)
     self.param("npp_w", self.TypeDouble, "N++ Width (um)", default = 8)
     self.param("npp_dw", self.TypeDouble, "N++ Edge to Si Edge (um)", default = 2)
-    self.param("vc_dw", self.TypeDouble, "VC Edge to Si Edge (um)", default = 4)
+    self.param("vc_dw", self.TypeDouble, "VC Edge to Si Edge (um)", default = 5)
     self.param("vc_w", self.TypeDouble, "VC Width", default = 5)
-    self.param("m_dw", self.TypeDouble, "Metal edge to center (um)", default = 4)
+    self.param("m_dw", self.TypeDouble, "Metal edge to Si Edge (um)", default = 4)
     self.param("m_w", self.TypeDouble, "Metal Width", default = 10)
     self.param("overlay", self.TypeDouble, "Overlay accuracy (optical litho) (um)", default = 1)
     self.param("overlay_ebl", self.TypeDouble, "Overlay accuracy (EBL) (um)", default = 0.05)
@@ -5358,12 +5358,12 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     shapes(LayerVCN).insert(b)
     
     #draw metal
-    b = Box(0, m_dw, length, m_dw+m_w)
+    b = Box(0, m_dw+w/2, length, m_dw+w/2+m_w)
     shapes(LayerMN).insert(b)
-    b = Box(0, -m_dw, length, -m_dw-m_w)
+    b = Box(0, -m_dw-w/2, length, -m_dw-w/2-m_w)
     shapes(LayerMN).insert(b)
 
-    w_devrec = 2 * max(m_dw+m_w, vc_dw+w/2+vc_w, npp_dw+w/2+npp_w, w_rib/2)
+    w_devrec = 2 * max(m_dw+m_w+w/2, vc_dw+w/2+vc_w, npp_dw+w/2+npp_w, w_rib/2)
 
     #devrec layer
     b = Box(0, w_devrec/2+w, length, -w_devrec/2-w)
