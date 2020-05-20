@@ -5086,6 +5086,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     self.param("n_theta_start", self.TypeDouble, "Start Theta", default = -25)
     self.param("n_theta_stop", self.TypeDouble, "Stop Theta", default = 115)
     
+    self.param("npp_si", self.TypeDouble, "N++ to Si edge", default = 2.0)
     self.param("npp_w", self.TypeDouble, "N++ Donut Width", default = 13.5)
     
     self.param("vc_cw", self.TypeDouble, "VC Center radius", default = 5.75)
@@ -5115,6 +5116,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     from math import pi, cos, sin
     from SiEPIC.utils import arc_wg, arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH
+    from SiEPIC.extend import to_itype, to_dtype
 
     # fetch the parameters
     dbu = self.layout.dbu
@@ -5136,6 +5138,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     g = int(round(self.g/dbu))
     
     n_w = int(round(self.n_w/dbu))
+    npp_si = to_itype(self.npp_si, dbu)
     npp_w=int(round(self.npp_w/dbu))
     theta_start = self.n_theta_start
     theta_stop = self.n_theta_stop
@@ -5176,7 +5179,6 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu      
   
-
     # Pins on the left waveguide side:    
     pin = Path([Point(ytop-w/2, xtop+PIN_LENGTH), Point(ytop-w/2,xtop-PIN_LENGTH)], w)
     shapes(LayerPinRecN).insert(pin)
@@ -5197,12 +5199,11 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     
     #draw NPP
     #center
-    arc_pts = arc_xy(x, y, npp_w - 1/dbu,  0, 360)
+    arc_pts = arc_xy(x, y, r-npp_si-w/2,  0, 360)
     arc_pts.append(pya.Point.from_dpoint(pya.DPoint(0,0))) #adding center point for polygon    
     shapes(LayerNPPN).insert(pya.Polygon(arc_pts)) 
     #outer donut
-    shapes(LayerNPPN).insert(arc_wg_xy(x, y,  2.5/dbu +  r + npp_w/2, npp_w , theta_start, theta_stop))     
-
+    shapes(LayerNPPN).insert(arc_wg_xy(x, y,  r+w/2+npp_si+npp_w/2 , npp_w , theta_start, theta_stop))     
 
     #draw via
      #center
@@ -5221,17 +5222,24 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     #outer donut
     shapes(LayerMN).insert(arc_wg_xy(x, y,  4/dbu +  r + npp_w/2 , m_aw , theta_start, theta_stop))     
 
-
     #devrec layer
     xtop = -2/3*r
     ytop = -1*(r+g+w/2)
     xbottom = 4/3*r
-    ybottom = ytop-w
-    dev_array = [pya.Point.from_dpoint(pya.DPoint(ytop + 4*w,xbottom+npp_w)),pya.Point.from_dpoint(pya.DPoint(ytop +4*w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xbottom)),pya.Point.from_dpoint(pya.DPoint(ytop - 2*w,xtop)),pya.Point.from_dpoint(pya.DPoint(ytop + 3*w,xtop)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom+4*w)),pya.Point.from_dpoint(pya.DPoint(xtop,ybottom-w)),pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom-w)), pya.Point.from_dpoint(pya.DPoint(xbottom,ybottom+4*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,ybottom+4*w)),pya.Point.from_dpoint(pya.DPoint(xbottom+npp_w,xbottom+npp_w)) ]
-    #left waveguide
-    #wg1 = Box(ytop, xtop , ybottom, xbottom)
+    ybottom = ytop
+    dev_array = [
+        DPoint(ytop + 3*w,xbottom+npp_w),
+        DPoint(ytop + 3*w,xbottom),
+        DPoint(ytop - 2*w,xbottom),
+        DPoint(ytop - 2*w,xtop),
+        DPoint(ytop + 3*w,xtop),
+        DPoint(xtop,ybottom+3*w),
+        DPoint(xtop,ybottom-w),
+        DPoint(xbottom,ybottom-w),
+        DPoint(xbottom,ybottom+3*w),
+        DPoint(xbottom+npp_w,ybottom+3*w),
+        DPoint(xbottom+npp_w,xbottom+npp_w) ]
     shapes(LayerDevRecN).insert(pya.Polygon(dev_array)) 
-    #shapes(LayerNPPN).insert(pya.Polygon(arc_pts)) 
 
     # Si rib layer
     shapes(LayerSiRibN).insert(pya.Polygon(dev_array))
