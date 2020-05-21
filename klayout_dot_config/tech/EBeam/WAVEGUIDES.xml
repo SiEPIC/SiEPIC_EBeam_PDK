@@ -6,6 +6,7 @@
 	  <model>ebeam_wg_integral_1550</model>
 	  <bezier>0.20</bezier>
       <radius>5.0</radius>
+      <width>0.5</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.5</width>
@@ -22,6 +23,7 @@
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_integral_1310</model>
       <radius>5.0</radius>
+      <width>0.41</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.41</width>
@@ -34,6 +36,7 @@
 	  <model>ebeam_wg_integral_1310</model>
 	  <bezier>0.20</bezier>
       <radius>5.0</radius>
+      <width>0.35</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.35</width>
@@ -45,6 +48,7 @@
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_integral_1550</model>
       <radius>15.0</radius>
+      <width>0.5</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.5</width>
@@ -61,6 +65,7 @@
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_integral_1550</model>
       <radius>10.0</radius>
+      <width>0.45</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.45</width>
@@ -78,6 +83,7 @@
 	  <model>ebeam_wg_integral_1550</model>
 	  <bezier>0.20</bezier>
       <radius>300.0</radius>
+      <width>2.0</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>2.0</width>
@@ -90,6 +96,7 @@
 	  <model>ebeam_wg_integral_1550</model>
 	  <bezier>0.20</bezier>
       <radius>500.0</radius>
+      <width>3.0</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>3.0</width>
@@ -101,6 +108,7 @@
 	  <CML>EBeam_beta</CML>
 	  <model>ebeam_wg_eskid_1550</model>
       <radius>3.0</radius>
+      <width>1.31</width>
 	  <bezier>0.20</bezier>
 	  <component>
 	    <layer>Si</layer>
@@ -153,6 +161,7 @@
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_rib_1550</model>
       <radius>15.0</radius>
+      <width>0.5</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.5</width>
@@ -169,6 +178,7 @@
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_rib_1550</model>
       <radius>15.0</radius>
+      <width>0.35</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.35</width>
