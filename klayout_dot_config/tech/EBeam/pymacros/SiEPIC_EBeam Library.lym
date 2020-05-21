@@ -165,7 +165,8 @@ class Waveguide(pya.PCellDeclarationHelper):
         
   def produce_impl(self):
 
-    from SiEPIC.utils import arc_xy, arc_bezier, angle_vector, angle_b_vectors, inner_angle_b_vectors, translate_from_normal
+    from SiEPIC.utils.layout import layout_waveguide2
+    from SiEPIC.utils import  angle_vector
     from math import cos, sin, pi, sqrt
     import pya
     from SiEPIC.extend import to_itype
@@ -181,47 +182,10 @@ class Waveguide(pya.PCellDeclarationHelper):
     if not (len(self.layers)==len(self.widths) and len(self.layers)==len(self.offsets) and len(self.offsets)==len(self.widths)):
       raise Exception("There must be an equal number of layers, widths and offsets")
     path.unique_points()
-    turn=0
-    for lr in range(0, len(self.layers)):
-      layer = self.layout.layer(TECHNOLOGY[self.layers[lr]])
-      
-      width = to_itype(self.widths[lr],dbu)
-      offset = to_itype(self.offsets[lr],dbu)
-
-      pts = path.get_points()
-      wg_pts = [pts[0]]
-      for i in range(1,len(pts)-1):
-        turn = ((angle_b_vectors(pts[i]-pts[i-1],pts[i+1]-pts[i])+90)%360-90)/90
-        dis1 = pts[i].distance(pts[i-1])
-        dis2 = pts[i].distance(pts[i+1])
-        angle = angle_vector(pts[i]-pts[i-1])/90
-        pt_radius = to_itype(self.radius,dbu)
-        # determine the radius, based on how much space is available
-        if len(pts)==3:
-          pt_radius = min (dis1, dis2, pt_radius)
-        else:
-          if i==1:
-            if dis1 &lt;= pt_radius:
-              pt_radius = dis1
-          elif dis1 &lt; 2*pt_radius:
-            pt_radius = dis1/2
-          if i==len(pts)-2:
-            if dis2 &lt;= pt_radius:
-              pt_radius = dis2
-          elif dis2 &lt; 2*pt_radius:
-            pt_radius = dis2/2
-        # waveguide bends:
-        if(self.adiab):
-          wg_pts += Path(arc_bezier(pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]), self.bezier, DevRec='DevRec' in self.layers[lr]), 0).transformed(Trans(angle, turn &lt; 0, pts[i])).get_points()
-        else:
-          wg_pts += Path(arc_xy(-pt_radius, pt_radius, pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]),DevRec='DevRec' in self.layers[lr]), 0).transformed(Trans(angle, turn &lt; 0, pts[i])).get_points()
-      wg_pts += [pts[-1]]
-      wg_pts = pya.Path(wg_pts, 0).unique_points().get_points()
-      wg_polygon = Polygon(translate_from_normal(wg_pts, width/2 + (offset if turn &gt; 0 else - offset))+translate_from_normal(wg_pts, -width/2 + (offset if turn &gt; 0 else - offset))[::-1])
-      self.cell.shapes(layer).insert(wg_polygon)
-      
-      if self.layout.layer(TECHNOLOGY['Waveguide']) == layer:
-        waveguide_length = wg_polygon.area() / self.width * dbu**2
+    pts = path.get_points()
+    
+    # Draw the waveguide geometry, new in SiEPIC-Tools v0.3.64
+    waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, self.layers, self.widths, self.offsets, pts, self.radius, self.adiab, self.bezier)
 
     pts = path.get_points()
     LayerPinRecN = self.layout.layer(TECHNOLOGY['PinRec'])
@@ -245,47 +209,46 @@ class Waveguide(pya.PCellDeclarationHelper):
     if angle_vec == 0: # horizontal
       halign = 2 # right
       angle=0
-      pt2=pts[0] + Point(0, wg_width)
-      pt3=pts[0] + Point(0, -wg_width)
-      pt4=pts[0] + Point(0, -2*wg_width)
+      pt2=pts[0] + Point(0, 0.2*wg_width)
+      pt3=pts[0] + Point(0, -0.2*wg_width)
+      pt4=pts[0] + Point(0, -0.5*wg_width)
     if angle_vec == 2: # horizontal
       halign = 0 # left
       angle = 0
-      pt2=pts[0] + Point(0, wg_width)
-      pt3=pts[0] + Point(0, -wg_width)
-      pt4=pts[0] + Point(0, -2*wg_width)
+      pt2=pts[0] + Point(0, 0.2*wg_width)
+      pt3=pts[0] + Point(0, -0.2*wg_width)
+      pt4=pts[0] + Point(0, -0.5*wg_width)
     if angle_vec == 1: # vertical
       halign = 2 # right
       angle = 1
-      pt2=pts[0] + Point(wg_width,0)
-      pt3=pts[0] + Point(-wg_width,0)
-      pt4=pts[0] + Point(-2*wg_width,0)
+      pt2=pts[0] + Point(0.2*wg_width,0)
+      pt3=pts[0] + Point(-0.2*wg_width,0)
+      pt4=pts[0] + Point(-0.5*wg_width,0)
     if angle_vec == -1: # vertical
       halign = 0 # left
       angle = 1
-      pt2=pts[0] + Point(wg_width,0)
-      pt3=pts[0] + Point(-wg_width,0)
-      pt4=pts[0] + Point(-2*wg_width,0)
+      pt2=pts[0] + Point(0.2*wg_width,0)
+      pt3=pts[0] + Point(-0.2*wg_width,0)
+      pt4=pts[0] + Point(-0.5*wg_width,0)
       
-    t = Trans(angle, False, pts[0]) 
-  
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/%s' % self.CML, t, 0.1/dbu, -1)
+    t = Trans(angle, False, pt3) 
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/%s' % self.CML, t, 0.1*wg_width, -1)
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     t = Trans(angle, False, pt2)
-    text = Text ('Component=%s' % self.model, t, 0.1/dbu, -1)
+    text = Text ('Component=%s' % self.model, t, 0.1*wg_width, -1)
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
-    t = Trans(angle, False, pt3)
+    t = Trans(angle, False, pts[0])
     pts_txt = str([ [round(p.to_dtype(dbu).x,3), round(p.to_dtype(dbu).y,3)] for p in pts ]).replace(', ',',')
     text = Text ( \
       'Spice_param:wg_length=%.3fu wg_width=%.3fu points="%s" radius=%s' %\
-        (waveguide_length, self.width, pts_txt,self.radius ), t, 0.1/dbu, -1  )
+        (waveguide_length, self.width, pts_txt,self.radius ), t, 0.1*wg_width, -1  )
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
     t = Trans(angle, False, pt4)
     text = Text ( \
-      'Length=%.3fu' %(waveguide_length), t, 0.5/dbu, -1  )
+      'Length=%.3fu' %(waveguide_length), t, 0.5*wg_width, -1  )
     text.halign=halign
     shape = self.cell.shapes(LayerDevRecN).insert(text)
 
@@ -1746,7 +1709,7 @@ class SiEPIC_EBeam(Library):
 # windows only allows for a fixed width, short description 
     self.description = ""
 # OSX does a resizing:
-    self.description = "Components with models"
+    self.description = "v0.3.28, Components with models"
 
   
     # Import all the GDS files from the tech folder "gds"
@@ -1754,7 +1717,7 @@ class SiEPIC_EBeam(Library):
     dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/mature")
     search_str = '*' + '.gds'
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter(filenames, search_str):
+        for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
             file1=os.path.join(root, filename)
             print(" - reading %s" % file1 )
             self.layout().read(file1)
