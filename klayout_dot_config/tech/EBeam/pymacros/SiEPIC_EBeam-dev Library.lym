@@ -1217,7 +1217,7 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
   Input: length, period_strip, period_swg, wg_width_strip, wg_width_swg, duty_strip, duty_swg
   continuously (linearly) variable period, width, duty along the length
   
-  Updated by Lukas Chrostowski, Leanne Dias, 2020/05
+  Updated by Lukas Chrostowski, Leanne Dias, Connor Mosquera 2020/05
   """
 
   def __init__(self):
@@ -1227,7 +1227,8 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("wavelength", self.TypeDouble, "Wavelength", default = 1310)     
+    self.param("wavelength", self.TypeDouble, "Wavelength", default = 1310)
+    self.param("fishbone", self.TypeBoolean, "Fishbone", default = False)     
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
     self.param("taper_fraction", self.TypeDouble, "Strip taper length fraction (0 to 1)", default = 1)     
     self.param("period_strip", self.TypeDouble, "SWG Period at strip end (microns)", default = 0.200)     
@@ -1288,7 +1289,9 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
     # a) the SWG end and b) the SWG with nanotaper
     # Done by simulating the neff versus SWG waveguide width, with an without a 60 nm
     w = wg_width_swg
-    if self.wavelength == 1310:
+    if self.fishbone:
+        dw = 0
+    elif self.wavelength == 1310:
         dw = -3.3736e-5*w*w + 0.0618752*w  + 3.88577
     else:
         dw = 0
@@ -1316,6 +1319,8 @@ class SWG_to_strip_waveguide(pya.PCellDeclarationHelper):
       
 
     # Taper
+    if self.fishbone:
+        taper_length = length
     pts = [Point(length-taper_length,-w1/2), Point(length-taper_length,w1/2), Point(length,w2/2), Point(length,-w2/2)]
     shapes(LayerSiN).insert(Polygon(pts))
 
