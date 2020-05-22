@@ -5272,7 +5272,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
-    self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 22)
+    self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 24)
     self.param("length", self.TypeDouble, "Waveguide length", default = 100)
     self.param("n_w", self.TypeDouble, "N Width", default = 22)
     self.param("npp_w", self.TypeDouble, "N++ Width (um)", default = 8)
@@ -5346,13 +5346,13 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     shapes(LayerSiN).insert(wg1)
 
     # Pins on the bottom waveguide side:    
-    pin = Path([Point(xtop+PIN_LENGTH, 0), Point(xtop-PIN_LENGTH, 0)], w)
+    pin = Path([Point(xtop+PIN_LENGTH/2, 0), Point(xtop-PIN_LENGTH/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
     text = Text ("pin1", Trans(Trans.R0, xtop, 0))
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu      
 
-    pin = Path([Point(xbottom-PIN_LENGTH, 0), Point(xbottom+PIN_LENGTH, 0)], w)
+    pin = Path([Point(xbottom-PIN_LENGTH/2, 0), Point(xbottom+PIN_LENGTH/2, 0)], w)
     shapes(LayerPinRecN).insert(pin)
     text = Text ("pin2", Trans(Trans.R0, xbottom, 0))
     shape = shapes(LayerPinRecN).insert(text)
