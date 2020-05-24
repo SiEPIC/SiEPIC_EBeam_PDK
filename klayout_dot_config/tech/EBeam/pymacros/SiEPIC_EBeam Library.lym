@@ -127,7 +127,7 @@ class Waveguide(pya.PCellDeclarationHelper):
     self.param("layers", self.TypeList, "Layers", default = ['Waveguide'])
     self.param("widths", self.TypeList, "Widths", default =  [0.5])
     self.param("offsets", self.TypeList, "Offsets", default = [0])
-    self.param("CML", self.TypeString, "Compact Model Library (CML)", default = 'EBeam'),
+    self.param("CML", self.TypeString, "Compact Model Library (CML)", default = 'EBeam')
     self.param("model", self.TypeString, "CML Model name", default = 'ebeam_wg_integral_1550') 
     
   def display_text_impl(self):
@@ -1746,6 +1746,9 @@ class SiEPIC_EBeam(Library):
     if int(Application.instance().version().split('.')[1]) &gt; 24:
       # KLayout v0.25 introduced technology variable:
       self.technology=tech_name
+
+    self.layout().add_meta_info(LayoutMetaInfo("path",os.path.realpath(__file__)))
+
  
 # Instantiate and register the library
 SiEPIC_EBeam()

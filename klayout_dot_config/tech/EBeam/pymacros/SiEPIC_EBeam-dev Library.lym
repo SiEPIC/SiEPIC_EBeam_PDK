@@ -5255,7 +5255,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
-    self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 22)
+    self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 24)
     self.param("length", self.TypeDouble, "Waveguide length", default = 100)
     self.param("n_w", self.TypeDouble, "N Width", default = 22)
     self.param("npp_w", self.TypeDouble, "N++ Width (um)", default = 8)
@@ -7701,6 +7701,8 @@ class SiEPIC_EBeam_dev(Library):
     if int(Application.instance().version().split('.')[1]) &gt; 24:
       # KLayout v0.25 introduced technology variable:
       self.technology=tech_name
+
+    self.layout().add_meta_info(LayoutMetaInfo("path",os.path.realpath(__file__)))
 
 # Setup path to load .py files in present folder:
 import os, inspect, sys
