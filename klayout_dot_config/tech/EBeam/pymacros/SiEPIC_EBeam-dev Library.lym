@@ -5275,7 +5275,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     self.param("w_rib", self.TypeDouble, "Waveguide Rib Width", default = 24)
     self.param("length", self.TypeDouble, "Waveguide length", default = 100)
     self.param("n_w", self.TypeDouble, "N Width", default = 22)
-    self.param("npp_w", self.TypeDouble, "N++ Width (um)", default = 8)
+    self.param("npp_w", self.TypeDouble, "N++ Width (um)", default = 10)
     self.param("npp_dw", self.TypeDouble, "N++ Edge to Si Edge (um)", default = 2)
     self.param("vc_dw", self.TypeDouble, "VC Edge to Si Edge (um)", default = 5)
     self.param("vc_w", self.TypeDouble, "VC Width", default = 5)
@@ -6541,7 +6541,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("io_wg_type", self.TypeBoolean, "I/O waveguide type, 0 - strip; 1 - rib", default = 0)
-    self.param("input_rib_width", self.TypeDouble, "Input Rib Width (um)", default = 0.35)
+    self.param("input_rib_width", self.TypeDouble, "Input Rib Width (um)", default = 0.5)
     self.param("input_slab_width", self.TypeDouble, "Input Slab Width (um)", default = 2)
     self.param("in_taper_length", self.TypeDouble, "Input Taper Length (um)", default = 15)    
     self.param("length", self.TypeDouble, "Phase Shifter Length (um)", default = 150)
