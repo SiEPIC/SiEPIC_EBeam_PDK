@@ -90,11 +90,12 @@ def dbl_bus_ring_res():
     cell.insert(CellInstArray(GC_imported, t, DPoint(0,GC_pitch).to_itype(dbu), Point(0,0), 4, 1))
   
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
-    t = Trans(Trans.R0, to_itype(x,dbu), to_itype(GC_pitch*2,dbu))
+    t = Trans(Trans.R90, to_itype(x,dbu), to_itype(GC_pitch*2,dbu))
     text = Text ("opt_in_%s_1550_device_RingDouble%sr%sg%s" % (pol.upper(), pol.upper(),r,int(round(g*1000))), t)
+    text.halign = 1
     shape = cell.shapes(TextLayerN).insert(text)
-    shape.text_size = 1.5/dbu
-  
+    shape.text_size = 3/dbu
+      
     # Ring resonator PCell
     pcell = ly.create_cell("ebeam_dc_halfring_straight", "EBeam", { "r": r, "w": wg_width, "g": g, "bustype": 0 } )
     print ("Cell: pcell: #%s" % pcell.cell_index())
