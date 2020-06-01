@@ -5086,6 +5086,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     self.param("r", self.TypeDouble, "Radius", default = 15)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.156)
+    self.param("io_wg_type", self.TypeBoolean, "I/O waveguide type, 0 - strip; 1 - rib", default = 0)
     
     self.param("n_w", self.TypeDouble, "N Width", default = 31)
     self.param("n_theta_start", self.TypeDouble, "Start Theta", default = -25)
@@ -5099,6 +5100,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
 
     self.param("m_cw", self.TypeDouble, "Metal Center radius", default = 10)
     self.param("m_aw", self.TypeDouble, "Metal Arc Width", default = 11)
+    self.param("overlay_ebl", self.TypeDouble, "Overlay accuracy (EBL) (um)", default = 0.05)
         
     self.param("nlayer", self.TypeLayer, "N Layer", default = TECHNOLOGY['Si N'])
     self.param("npplayer", self.TypeLayer, "N++ Layer", default = TECHNOLOGY['Si N++'])
@@ -5150,6 +5152,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
 
     vc_cw = to_itype(self.vc_cw,dbu)
     vc_aw = to_itype(self.vc_aw,dbu)
+    overlay_ebl = to_itype(self.overlay_ebl,dbu)
     
     m_cw = to_itype(self.m_cw,dbu)
     m_aw = to_itype(self.m_aw,dbu)
@@ -5229,23 +5232,56 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
 
     #devrec layer
     xtop = -2/3*r
-    ytop = -1*(r+g+w/2)
+    ytop = -1*(r+g+w)
     xbottom = 4/3*r
     ybottom = ytop
     dev_array = [
-        Point(ytop + 4*w,xbottom+npp_w),
-        Point(ytop + 4*w,xbottom),
-        Point(ytop - 3*w,xbottom),
-        Point(ytop - 3*w,xtop),
-        Point(ytop + 4*w,xtop),
-        Point(xtop,ybottom+4*w),
+        Point(ytop + 3.5*w,xbottom+npp_w),
+        Point(ytop + 3.5*w,xbottom),
+        Point(ytop - 3.5*w,xbottom),
+        Point(ytop - 3.5*w,xtop),
+        Point(ytop + 3.5*w,xtop),
+        Point(xtop,ybottom+3.5*w),
         Point(xtop,ybottom-3*w),
-        Point(xbottom,ybottom-3*w),
-        Point(xbottom,ybottom+4*w),
-        Point(xbottom+npp_w,ybottom+4*w),
+        Point(xbottom,ybottom-3.5*w),
+        Point(xbottom,ybottom+3.5*w),
+        Point(xbottom+npp_w,ybottom+3.5*w),
         Point(xbottom+npp_w,xbottom+npp_w) ]
+
     shapes(LayerDevRecN).insert(pya.Polygon(dev_array)) 
 
+    if self.io_wg_type == 0: # strip converter
+      taper_long = to_itype(10, dbu)
+      taper_short = to_itype(3, dbu)
+      dev_array = [
+        Point(ytop + 3.5*w,xbottom+npp_w),
+        Point(ytop + 3.5*w,xbottom-taper_long),
+        Point(ytop + 2.5*w,xbottom-taper_long),
+        Point(ytop + w/2-overlay_ebl*2,xbottom),
+        Point(ytop - w/2+overlay_ebl*2,xbottom),
+        Point(ytop - 2.5*w,xbottom-taper_long),
+        Point(ytop - 3.5*w,xbottom-taper_long),
+        Point(ytop - 3.5*w,xtop+taper_short),
+        Point(ytop - 1.5*w,xtop+taper_short),
+        Point(ytop - w/2+overlay_ebl*2,xtop),
+        Point(ytop + w/2-overlay_ebl*2,xtop),
+        Point(ytop + 1.5*w,xtop+taper_short),
+        Point(ytop + 3.5*w,xtop+taper_short),
+        Point((ytop + 3.5*w + xtop)/2,(xtop+ybottom+3.5*w)/2),
+        Point(xtop+taper_short,ybottom+3.5*w),
+        Point(xtop+taper_short,ybottom+1.5*w),
+        Point(xtop,ybottom+w/2-overlay_ebl*2),
+        Point(xtop,ybottom-w/2+overlay_ebl*2),
+        Point(xtop+taper_short,ybottom-1.5*w),
+        Point(xtop+taper_short,ybottom-3.5*w),
+        Point(xbottom-taper_long,ybottom-3.5*w),
+        Point(xbottom-taper_long,ybottom-2.5*w),
+        Point(xbottom,ybottom-w/2+overlay_ebl*2),
+        Point(xbottom,ybottom+w/2-overlay_ebl*2),
+        Point(xbottom-taper_long,ybottom+2.5*w),
+        Point(xbottom-taper_long,ybottom+3.5*w),
+        Point(xbottom+npp_w,ybottom+3.5*w),
+        Point(xbottom+npp_w,xbottom+npp_w) ]
     # Si rib layer
     shapes(LayerSiRibN).insert(pya.Polygon(dev_array))
     
@@ -5283,6 +5319,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     self.param("m_w", self.TypeDouble, "Metal Width", default = 10)
     self.param("overlay", self.TypeDouble, "Overlay accuracy (optical litho) (um)", default = 1)
     self.param("overlay_ebl", self.TypeDouble, "Overlay accuracy (EBL) (um)", default = 0.05)
+    self.param("io_wg_type", self.TypeBoolean, "I/O waveguide type, 0 - strip; 1 - rib", default = 0)
         
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("siriblayer", self.TypeLayer, "Si rib Layer", default = TECHNOLOGY['Si - 90 nm rib'])
@@ -5336,14 +5373,41 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     m_dw = to_itype(self.m_dw,dbu)
     m_w = to_itype(self.m_w,dbu)
     overlay = to_itype(self.overlay, dbu)
+    overlay_ebl = to_itype(self.overlay_ebl, dbu)
     
+    
+    if self.io_wg_type == 0:
+      ## define strip to slab transfer taper parameters
+      N = 100; # Number of points for the input/output slab taper
+      order = 3; # input/output slab taper curve 
+      in_taper = to_itype(5,dbu); # length of taper
+      taper_w = to_itype(2,dbu)
+      # add input slab taper
+      pts = [];
+      for i in range(0,N + 1):
+        pts.append(Point(- in_taper + in_taper/N * i, (w-overlay_ebl*2)/2 + ((taper_w - (w-overlay_ebl*2))/(N**order))*(i**order)))
+      for i in range(0,N + 1):
+        pts.append(Point(-in_taper + in_taper/N * (N - i), - (w-overlay_ebl*2)/2 - ((taper_w - (w-overlay_ebl*2))/(N**order))*((N-i)**order)))
+      self.cell.shapes(LayerSiRibN).insert(Polygon(pts))
+      # add output slab taper
+      pts = [];
+      for i in range(0,N + 1):
+        pts.append(Point(length+ in_taper - in_taper/N * i, (w-overlay_ebl*2)/2 + ((taper_w - (w-overlay_ebl*2))/(N**order))*(i**order)))
+      for i in range(0,N + 1):
+        pts.append(Point(length+in_taper - in_taper/N * (N - i), - (w-overlay_ebl*2)/2 - ((taper_w - (w-overlay_ebl*2))/(N**order))*((N-i)**order)))
+      self.cell.shapes(LayerSiRibN).insert(Polygon(pts))
+    else:
+      in_taper = 0; # length of taper
+      taper_w = 0; # width of taper
+
     #draw the waveguide
-    xtop = 0
+    xtop = 0 - in_taper
     ytop = -1*(w/2)
-    xbottom = length
+    xbottom = length + in_taper
     ybottom = 1*(w/2)
-    wg1 = Box(0, -w/2, length, w/2)
+    wg1 = Box(xtop, -w/2, xbottom, w/2)
     shapes(LayerSiN).insert(wg1)
+
 
     # Pins on the bottom waveguide side:    
     pin = Path([Point(xtop+PIN_LENGTH/2, 0), Point(xtop-PIN_LENGTH/2, 0)], w)
@@ -5380,11 +5444,24 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     b = Box(0, -m_dw-w/2, length, -m_dw-w/2-m_w)
     shapes(LayerMN).insert(b)
 
-    w_devrec = 2 * max(m_dw+m_w+w/2, vc_dw+w/2+vc_w, npp_dw+w/2+npp_w, w_rib/2)
 
     #devrec layer
-    b = Box(0, w_devrec/2+w, length, -w_devrec/2-w)
-    shapes(LayerDevRecN).insert(b)
+    w_devrec = 2 * max(m_dw+m_w+w/2, vc_dw+w/2+vc_w, npp_dw+w/2+npp_w, w_rib/2)
+    pts = [];
+    pts = [ Point(0, -w_devrec/2-w), 
+            Point(0, -taper_w), 
+            Point(0-in_taper, -taper_w), 
+            Point(0-in_taper, +taper_w), 
+            Point(0, +taper_w), 
+            Point(0, w_devrec/2+w), 
+            Point(length, w_devrec/2+w), 
+            Point(length, +taper_w), 
+            Point(length+in_taper, +taper_w), 
+            Point(length+in_taper, -taper_w), 
+            Point(length, -taper_w), 
+            Point(length, -w_devrec/2-w) ]            
+    self.cell.shapes(LayerDevRecN).insert(Polygon(pts))
+
 
     # Si rib layer
     b = Box(0, w_rib/2, length, -w_rib/2)
@@ -6504,7 +6581,7 @@ class ebeam_taper_strip_rib(pya.PCellDeclarationHelper):
     p2c = Point(length, 0)
     self.set_p2 = p2c
     self.p2 = p2c
-    pin = Path(p2, w2)
+    pin = Path(p2, w3)
     shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, length, 0)
     text = Text ("pin2", t)
@@ -6661,9 +6738,9 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
       # add input slab taper
       pts = [];
       for i in range(0,N + 1):
-        pts.append(Point(-l/2 - in_taper + in_taper/N * i, (in_slab-overlay_ebl)/2 + ((sw/2  - (in_slab-overlay_ebl))/(N**order))*(i**order)))
+        pts.append(Point(-l/2 - in_taper + in_taper/N * i, (in_slab-overlay_ebl*2)/2 + ((sw/2  - (in_slab-overlay_ebl*2))/(N**order))*(i**order)))
       for i in range(0,N + 1):
-        pts.append(Point(-l/2 - in_taper + in_taper/N * (N - i), - (in_slab-overlay_ebl)/2 - ((sw/2  - (in_slab-overlay_ebl))/(N**order))*((N-i)**order)))
+        pts.append(Point(-l/2 - in_taper + in_taper/N * (N - i), - (in_slab-overlay_ebl*2)/2 - ((sw/2  - (in_slab-overlay_ebl*2))/(N**order))*((N-i)**order)))
       self.cell.shapes(LayerSlab).insert(Polygon(pts))
   
       # add output strip taper
@@ -6674,9 +6751,9 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
       # cubic taper
       pts = [];
       for i in range(0,N + 1):
-        pts.append(Point(l/2 + in_taper - in_taper/N * i, (in_slab-overlay_ebl)/2 + ((sw/2  - (in_slab-overlay_ebl))/(N**order))*(i**order)))
+        pts.append(Point(l/2 + in_taper - in_taper/N * i, (in_slab-overlay_ebl*2)/2 + ((sw/2  - (in_slab-overlay_ebl*2))/(N**order))*(i**order)))
       for i in range(0,N + 1):
-        pts.append(Point(l/2 + in_taper/N * i, - (in_slab-overlay_ebl)/2 - ((sw/2  - (in_slab-overlay_ebl))/(N**order))*((N-i)**order)))
+        pts.append(Point(l/2 + in_taper/N * i, - (in_slab-overlay_ebl*2)/2 - ((sw/2  - (in_slab-overlay_ebl*2))/(N**order))*((N-i)**order)))
       self.cell.shapes(LayerSlab).insert(Polygon(pts))
   
       from SiEPIC._globals import PIN_LENGTH as pin_length
