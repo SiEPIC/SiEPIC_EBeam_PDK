@@ -500,20 +500,20 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(dev)
 
     # Compact model information
-    t = Trans(Trans.R0, r/4, 0)
+    t = Trans(Trans.R0, -r, 0)
     text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam", t)
     shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = self.r*0.017/dbu
-    t = Trans(Trans.R0, r/4, r/4)
+    shape.text_size = self.r*0.03/dbu
+
+    t = Trans(Trans.R0, -r, r/4)
     text = Text ('Component=ebeam_dc_halfring_straight', t)
     shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = self.r*0.017/dbu
-    t = Trans(Trans.R0, r/4, r/2)
+    shape.text_size = self.r*0.03/dbu
 
-    text = Text ('Spice_param:wg_width=%.3fu gap=%.3fu radius=%.3fu Lc=%.3fu orthogonal_identifier=%s'% (self.w,self.g,self.r,self.Lc, self.orthogonal_identifier), t)
-
+    t = Trans(Trans.R0, -r, r/2)
+    text = Text ('Spice_param:wg_width=%.3g gap=%.3g radius=%.3g Lc=%.3g orthogonal_identifier=%s'% (self.w*1e-6,self.g*1e-6,self.r*1e-6,self.Lc*1e-6, self.orthogonal_identifier), t)
     shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = self.r*0.017/dbu
+    shape.text_size = self.r*0.03/dbu
 
     print("Done drawing the layout for - ebeam_dc_halfring_straight: %.3f-%g" % ( self.r, self.g) )
 
