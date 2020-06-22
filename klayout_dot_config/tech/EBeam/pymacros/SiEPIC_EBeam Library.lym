@@ -102,6 +102,10 @@ with:
  self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [Point(0, 0)]).transformed(t))
 
 
+Lukas Chrostowski 2020/06/21
+ - Waveguide update, cellName
+
+
 """
 import math
 from SiEPIC.utils import get_technology, get_technology_by_name
@@ -129,10 +133,11 @@ class Waveguide(pya.PCellDeclarationHelper):
     self.param("offsets", self.TypeList, "Offsets", default = [0])
     self.param("CML", self.TypeString, "Compact Model Library (CML)", default = 'EBeam')
     self.param("model", self.TypeString, "CML Model name", default = 'ebeam_wg_integral_1550') 
+    self.cellName="Waveguide"
     
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "Waveguide_%s" % self.path
+    return "%s_%s" % (self.cellName, self.path)
   
   def coerce_parameters_impl(self):
     from SiEPIC.extend import to_itype
@@ -204,33 +209,32 @@ class Waveguide(pya.PCellDeclarationHelper):
     angle_vec = angle_vector(pts[0]-pts[1])/90
     halign = 0 # left
     angle=0
-    pt2=pts[0]
-    pt3=pts[0]
     if angle_vec == 0: # horizontal
       halign = 2 # right
       angle=0
-      pt2=pts[0] + Point(0, 0.2*wg_width)
-      pt3=pts[0] + Point(0, -0.2*wg_width)
-      pt4=pts[0] + Point(0, -0.5*wg_width)
+      dpt = Point(0, 0.2*wg_width)
     if angle_vec == 2: # horizontal
       halign = 0 # left
       angle = 0
-      pt2=pts[0] + Point(0, 0.2*wg_width)
-      pt3=pts[0] + Point(0, -0.2*wg_width)
-      pt4=pts[0] + Point(0, -0.5*wg_width)
+      dpt=Point(0, 0.2*wg_width)
     if angle_vec == 1: # vertical
       halign = 2 # right
       angle = 1
-      pt2=pts[0] + Point(0.2*wg_width,0)
-      pt3=pts[0] + Point(-0.2*wg_width,0)
-      pt4=pts[0] + Point(-0.5*wg_width,0)
+      dpt=Point(0.2*wg_width,0)
     if angle_vec == -1: # vertical
       halign = 0 # left
       angle = 1
-      pt2=pts[0] + Point(0.2*wg_width,0)
-      pt3=pts[0] + Point(-0.2*wg_width,0)
-      pt4=pts[0] + Point(-0.5*wg_width,0)
+      dpt=Point(0.2*wg_width,0)
+    pt2=pts[0] + dpt
+    pt3=pts[0] - dpt
+    pt4=pts[0] - 2*dpt
+    pt5=pts[0] + 2*dpt
       
+
+    t = Trans(angle, False, pt5)
+    text = Text ('cellName=%s' % self.cellName, t, 0.1*wg_width, -1)
+    text.halign=halign
+    shape = self.cell.shapes(LayerDevRecN).insert(text)
     t = Trans(angle, False, pt3) 
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/%s' % self.CML, t, 0.1*wg_width, -1)
     text.halign=halign
