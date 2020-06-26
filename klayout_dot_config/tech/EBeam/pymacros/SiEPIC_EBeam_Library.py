@@ -1,20 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<klayout-macro>
- <description/>
- <version/>
- <category>pymacros</category>
- <prolog/>
- <epilog/>
- <doc/>
- <autorun>true</autorun>
- <autorun-early>false</autorun-early>
- <shortcut/>
- <show-in-menu>false</show-in-menu>
- <group-name/>
- <menu-path/>
- <interpreter>python</interpreter>
- <dsl-interpreter-name/>
- <text># Python script
+# Python script
 
 """
 This file is part of the SiEPIC_EBeam_PDK
@@ -35,7 +19,7 @@ implementation. The macro is also set to "auto run" to install the PCell
 when KLayout is run.
 
 Crash warning:
- https://www.klayout.de/forum/comments.php?DiscussionID=734&amp;page=1#Item_13
+ https://www.klayout.de/forum/comments.php?DiscussionID=734&page=1#Item_13
  This library has nested PCells. Running this macro with a layout open may
  cause it to crash. Close the layout first before running.
 
@@ -81,7 +65,7 @@ Lukas Chrostowski           2016/11/06
 
 Lukas Chrostowski           2017/02/14
  - renaming "SiEPIC" PCells library to "SiEPIC-EBeam PCells", update for Waveguide_Route
- - code simplifications: Box -&gt; Box
+ - code simplifications: Box -> Box
 
 Lukas Chrostowski           2017/03/08
  - S-Bend - 
@@ -94,7 +78,7 @@ Lukas Chrostowski 2017/12/16
 
 Lukas Chrostowski 2020/02/22
  - contra directional coupler; moved from Dev library; now has a compact model generator
-  
+
 todo:
 replace:     
  layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
@@ -109,22 +93,63 @@ Mustafa Hammood 2020/06/26
  - major refactoring and splitting of individual classes into sub files
 
 """
-
 import math
 from SiEPIC.utils import get_technology, get_technology_by_name
 
 # Import KLayout Python API methods:
 # Box, Point, Polygon, Text, Trans, LayerInfo, etc
+import pya
 from pya import *
-import os, sys
+import pcells_EBeam
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+class SiEPIC_EBeam(Library):
+  """
+  The library where we will put the PCells and GDS into 
+  """
 
-sys.path.append(dir_path)
+  def __init__(self):
+  
+    tech_name = 'EBeam'
+    library = tech_name
 
-from SiEPIC_EBeam_Library import *
+    print("Initializing '%s' Library." % library)
 
+    # Set the description
+# windows only allows for a fixed width, short description 
+    self.description = ""
+# OSX does a resizing:
+    self.description = "v0.3.3, Components with models"
+
+  
+    # Import all the GDS files from the tech folder "gds"
+    import os, fnmatch
+    dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/mature")
+    search_str = '*' + '.gds'
+    for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+        for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
+            file1=os.path.join(root, filename)
+            print(" - reading %s" % file1 )
+            self.layout().read(file1)
+    
+       
+    # Create the PCell declarations
+    for attr, value in pcells_EBeam.__dict__.items():
+      try:
+        if value.__module__.split('.')[0] == 'pcells_EBeam' and attr != 'cls':
+          print('Registered pcell: '+attr)
+          self.layout().register_pcell(attr, value())
+      except:
+        pass
+
+    # Register us the library with the technology name
+    # If a library with that name already existed, it will be replaced then.
+    self.register(library)
+
+    if int(Application.instance().version().split('.')[1]) > 24:
+      # KLayout v0.25 introduced technology variable:
+      self.technology=tech_name
+
+    self.layout().add_meta_info(LayoutMetaInfo("path",os.path.realpath(__file__)))
+ 
+# Instantiate and register the library
 SiEPIC_EBeam()
-
-</text>
-</klayout-macro>
