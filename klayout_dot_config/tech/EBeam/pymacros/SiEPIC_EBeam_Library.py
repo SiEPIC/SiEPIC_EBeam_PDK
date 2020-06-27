@@ -1,5 +1,3 @@
-# Python script
-
 """
 This file is part of the SiEPIC_EBeam_PDK
 by Lukas Chrostowski (c) 2015-2017
