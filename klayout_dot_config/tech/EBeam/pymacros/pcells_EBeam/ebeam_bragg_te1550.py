@@ -134,8 +134,8 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/9, 0)
     text = Text \
-      ('Spice_param:number_of_periods=%s grating_period=%.3fu corrugation_width=%.3fu misalignment=%.3fu sinusoidal=%s' %\
-      (self.number_of_periods, self.grating_period, self.corrugation_width, self.misalignment, int(self.sinusoidal)), t )
+      ('Spice_param:number_of_periods=%s grating_period=%.3g corrugation_width=%.3g misalignment=%.3g sinusoidal=%s' %\
+      (self.number_of_periods, self.grating_period*1e-6, self.corrugation_width*1e-6, self.misalignment*1e-6, int(self.sinusoidal)), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 

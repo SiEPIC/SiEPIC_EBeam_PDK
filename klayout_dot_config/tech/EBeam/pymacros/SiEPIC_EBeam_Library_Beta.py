@@ -571,6 +571,7 @@ class SiEPIC_EBeam_dev(Library):
       self.technology=tech_name
 
     self.layout().add_meta_info(LayoutMetaInfo("path",os.path.realpath(__file__)))
+    self.layout().add_meta_info(LayoutMetaInfo("technology",tech_name))
 
 # Setup path to load .py files in present folder:
 import os, inspect, sys
