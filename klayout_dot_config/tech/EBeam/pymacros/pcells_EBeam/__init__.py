@@ -1,6 +1,10 @@
 import os, sys
 from pathlib import Path
-import SiEPIC, siepic_tools
+import SiEPIC
+try: 
+  siepic_tools
+except:
+  pass
 
 op_tag = "" #operation tag which defines whether we are loading library in script or GUI env
 
