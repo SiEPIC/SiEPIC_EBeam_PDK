@@ -148,6 +148,7 @@ class SiEPIC_EBeam(Library):
       self.technology=tech_name
 
     self.layout().add_meta_info(LayoutMetaInfo("path",os.path.realpath(__file__)))
+    self.layout().add_meta_info(LayoutMetaInfo("technology",tech_name))
  
 # Instantiate and register the library
 SiEPIC_EBeam()
