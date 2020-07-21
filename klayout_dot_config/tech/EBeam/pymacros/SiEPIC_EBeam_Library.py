@@ -132,12 +132,13 @@ class SiEPIC_EBeam(Library):
        
     # Create the PCell declarations
     for attr, value in pcells_EBeam.__dict__.items():
-      try:
-        if value.__module__.split('.')[0] == 'pcells_EBeam' and attr != 'cls':
-          print('Registered pcell: '+attr)
-          self.layout().register_pcell(attr, value())
-      except:
-        pass
+        if '__module__' in dir(value):
+            try:
+                if value.__module__.split('.')[0] == 'pcells_EBeam' and attr != 'cls':
+                    print('Registered pcell: '+attr)
+                    self.layout().register_pcell(attr, value())
+            except:
+                pass
 
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
