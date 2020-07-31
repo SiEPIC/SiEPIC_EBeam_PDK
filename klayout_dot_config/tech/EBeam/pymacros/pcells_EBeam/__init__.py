@@ -22,7 +22,7 @@ except:
   import klayout.db as pya
   from zeropdk import Tech
   op_tag = "script" 
-  lyp_filepath = Path(str(Path(os.path.dirname(os.path.realpath(__file__))).parent) + r"/klayout_Layers_GSiP.lyp")
+  lyp_filepath = Path(str(Path(os.path.dirname(os.path.realpath(__file__))).parent) + r"/EBeam.lyp")
   print(lyp_filepath)
 
 from pya import Box, Point, Polygon, Text, Trans, LayerInfo, \
