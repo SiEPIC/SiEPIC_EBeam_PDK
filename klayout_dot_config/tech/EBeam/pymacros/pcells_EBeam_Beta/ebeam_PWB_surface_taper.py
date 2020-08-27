@@ -40,7 +40,7 @@ class photonic_wirebond_surface_taper(pya.PCellDeclarationHelper):
   def produce(self, layout, layeres, parameters, cell):
     # This is the main part of the implementation: create the layout
 
-    self._layers = layers
+    
     self.cell = cell
     self._param_values = parameters
     self.layout = layout
