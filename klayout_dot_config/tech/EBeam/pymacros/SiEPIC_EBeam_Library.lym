@@ -35,7 +35,7 @@ implementation. The macro is also set to "auto run" to install the PCell
 when KLayout is run.
 
 Crash warning:
- https://www.klayout.de/forum/comments.php?DiscussionID=734&amp;page=1#Item_13
+ https://www.klayout.de/forum/discussion/734
  This library has nested PCells. Running this macro with a layout open may
  cause it to crash. Close the layout first before running.
 

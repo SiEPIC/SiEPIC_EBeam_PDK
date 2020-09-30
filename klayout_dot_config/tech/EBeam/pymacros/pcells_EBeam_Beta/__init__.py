@@ -2,7 +2,7 @@ import os, sys
 from pathlib import Path
 import SiEPIC
 try: 
-  siepic_tools
+  import siepic_tools
 except:
   pass
 
