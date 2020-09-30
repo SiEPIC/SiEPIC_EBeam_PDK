@@ -506,13 +506,14 @@ class SiEPIC_EBeam_dev(Library):
     
     # Create the PCell declarations
     for attr, value in pcells_EBeam_Beta.__dict__.items():
-      try:
-        if value.__module__.split('.')[0] == 'pcells_EBeam_Beta' and attr != 'cls':
-          print('Registered pcell: '+attr)
-          self.layout().register_pcell(attr, value())
-      except:
-        pass
-    
+        if '__module__' in dir(value):
+            try:
+                if value.__module__.split('.')[0] == 'pcells_EBeam_Beta' and attr != 'cls':
+                    print('Registered pcell: '+attr)
+                    self.layout().register_pcell(attr, value())
+            except:
+                pass
+
     # only need to reload if we are debugging, and are making changes to the code
     if sys.version_info[0] == 3:
         if sys.version_info[1] < 4:
