@@ -1,6 +1,10 @@
 import os, sys
 from pathlib import Path
-import SiEPIC, siepic_tools
+import SiEPIC
+try: 
+  siepic_tools
+except:
+  pass
 
 # import xml before lumapi (SiEPIC.lumerical), otherwise XML doesn't work:
 from xml.etree import cElementTree
