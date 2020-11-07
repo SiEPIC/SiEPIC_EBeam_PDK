@@ -17,19 +17,24 @@
  <text>'''
 Example simple script to create an MZI
 Lukas Chrostowski, 2020
-using SiEPIC-Tools functions introduced in ~ v0.3.69, specifically connect_pins_with_waveguide
+using SiEPIC-Tools functions introduced in ~ v0.3.70, 
+specifically connect_pins_with_waveguide and connect_cell
 
 usage:
  - create a blank layout using the technology "EBeam"
  - run this script
 '''
 
+if SiEPIC.__version__ &lt; '0.3.70':
+  pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.70 or greater.", pya.MessageBox.Ok)
+
+    
 
 from SiEPIC import scripts  
 from SiEPIC.utils import get_layout_variables
 TECHNOLOGY, lv, ly, cell = get_layout_variables()
 
-from SiEPIC.scripts import connect_pins_with_waveguide
+from SiEPIC.scripts import connect_pins_with_waveguide, connect_cell
 waveguide_type='Strip TE 1550 nm, w=500 nm'
 
   
@@ -40,7 +45,7 @@ ly.prune_subcells(top_cell.cell_index(), 10)
 cell_ebeam_gc = ly.create_cell('ebeam_gc_te1550', 'EBeam')
 cell_ebeam_y = ly.create_cell('ebeam_y_1550', 'EBeam')
 
-# grating couplers:
+# grating couplers, place at absolute positions
 t = pya.Trans.from_s('r0 0,0')
 instGC1 = cell.insert(pya.CellInstArray(cell_ebeam_gc.cell_index(), t))
 t = pya.Trans.from_s('r0 0,127000')
@@ -51,17 +56,21 @@ text = pya.Text ("opt_in_TE_1550_device_MZI_script", t)
 shape = cell.shapes(ly.layer(TECHNOLOGY['Text'])).insert(text)
 shape.text_size = 3*ly.dbu
 
-# y branches:
+# Y branches:
+# Version 1: place it at an absolute position:
 t = pya.Trans.from_s('r0 20000,0')
 instY1 = cell.insert(pya.CellInstArray(cell_ebeam_y.cell_index(), t))
-t = pya.Trans.from_s('r0 20000,100000')
-instY2 = cell.insert(pya.CellInstArray(cell_ebeam_y.cell_index(), t))
+
+# Version 2: attach it to an existing component, then move relative
+instY2 = connect_cell(instGC2, 'opt1', cell_ebeam_y, 'opt1')
+instY2.transform(Trans(20000,-10000))
 
 # Waveguides:
 connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
-connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_A=[25,90])
+connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type='Strip TE 1550 nm, w=2000 nm',turtle_B=[25,-90])
+connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
 
 </text>
 </klayout-macro>
