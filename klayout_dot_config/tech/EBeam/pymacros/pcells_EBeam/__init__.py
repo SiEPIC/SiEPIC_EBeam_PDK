@@ -1,5 +1,4 @@
 import os, sys
-from pathlib import Path
 import SiEPIC
 try: 
   import siepic_tools
@@ -22,7 +21,7 @@ except:
   import klayout.db as pya
   from zeropdk import Tech
   op_tag = "script" 
-  lyp_filepath = Path(str(Path(os.path.dirname(os.path.realpath(__file__))).parent) + r"/EBeam.lyp")
+  lyp_filepath = os.path(str(os.path(os.path.dirname(os.path.realpath(__file__))).parent) + r"/EBeam.lyp")
   print(lyp_filepath)
 
 from pya import Box, Point, Polygon, Text, Trans, LayerInfo, \
