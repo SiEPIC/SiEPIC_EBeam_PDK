@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Double-bus ring resonator layout</description>
+ <description>Test structures: Double-bus ring resonators</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
