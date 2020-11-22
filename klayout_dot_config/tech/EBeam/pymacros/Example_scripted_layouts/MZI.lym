@@ -60,8 +60,7 @@ instGC2 = cell.insert(pya.CellInstArray(cell_ebeam_gc.cell_index(), t))
 
 # automated test label
 text = pya.Text ("opt_in_TE_1550_device_MZI_script", t)
-shape = cell.shapes(ly.layer(TECHNOLOGY['Text'])).insert(text)
-shape.text_size = 3/ly.dbu
+cell.shapes(ly.layer(TECHNOLOGY['Text'])).insert(text).text_size = 5/dbu
 
 # Y branches:
 # Version 1: place it at an absolute position:
