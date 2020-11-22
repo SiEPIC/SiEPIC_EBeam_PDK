@@ -15,8 +15,15 @@
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>'''
-Example simple script to create an MZI
-Lukas Chrostowski, 2020
+--- Simple MZI ---
+
+by Lukas Chrostowski, 2020
+
+Example simple script to
+1) create an MZI
+2) take a picture (PNG file)
+3) export to OASIS for submission to fabrication
+
 using SiEPIC-Tools functions introduced in ~ v0.3.70, 
 specifically connect_pins_with_waveguide and connect_cell
 
@@ -28,16 +35,16 @@ usage:
 if SiEPIC.__version__ &lt; '0.3.70':
   pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.70 or greater.", pya.MessageBox.Ok)
 
-    
-
 from SiEPIC import scripts  
 from SiEPIC.utils import get_layout_variables
 TECHNOLOGY, lv, ly, cell = get_layout_variables()
 
+if TECHNOLOGY['technology_name'] not in 'EBeam':
+    raise Exception ('This example needs to be executed in a layout with Technology = EBeam')
+
 from SiEPIC.scripts import connect_pins_with_waveguide, connect_cell
 waveguide_type='Strip TE 1550 nm, w=500 nm'
 
-  
 # delete all cells within the present cell
 top_cell = ly.top_cells()[0]
 ly.prune_subcells(top_cell.cell_index(), 10)
@@ -54,7 +61,7 @@ instGC2 = cell.insert(pya.CellInstArray(cell_ebeam_gc.cell_index(), t))
 # automated test label
 text = pya.Text ("opt_in_TE_1550_device_MZI_script", t)
 shape = cell.shapes(ly.layer(TECHNOLOGY['Text'])).insert(text)
-shape.text_size = 3*ly.dbu
+shape.text_size = 3/ly.dbu
 
 # Y branches:
 # Version 1: place it at an absolute position:
@@ -71,7 +78,6 @@ connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=wave
 connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
 #connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type='Strip TE 1550 nm, w=2000 nm',turtle_B=[25,-90])
 connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
-
 
 # Zoom out
 lv.clear_object_selection()
@@ -91,7 +97,5 @@ save_options.oasis_compression_level=10
 file_out = os.path.join(os.path.dirname(os.path.realpath(__file__)), "mzi.%s" % save_options.format[0:3])
 print("saving output %s: %s" % (save_options.format, file_out) )
 ly.write(file_out,save_options)
-
-
 </text>
 </klayout-macro>
