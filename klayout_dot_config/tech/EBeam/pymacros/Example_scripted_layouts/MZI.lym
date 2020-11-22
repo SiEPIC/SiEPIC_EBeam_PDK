@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Simple MZI script, by Lukas Chrostowski</description>
+ <description>Simple MZI</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -11,7 +11,7 @@
  <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>siepic_menu.exlayout.end</menu-path>
+ <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>'''
@@ -69,7 +69,7 @@ instY2.transform(Trans(20000,-10000))
 connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
-connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type='Strip TE 1550 nm, w=2000 nm',turtle_B=[25,-90])
+#connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type='Strip TE 1550 nm, w=2000 nm',turtle_B=[25,-90])
 connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
 
 </text>
