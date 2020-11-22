@@ -14,7 +14,14 @@
  <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text># Import KLayout-Python API
+ <text>'''
+Scripted layout for ring resonators using SiEPIC-Tools
+in the SiEPIC-EBeam-PDK "EBeam" technology
+
+by Lukas Chrostowski, 2020
+
+'''
+
 from pya import *
 
 # Example layout function
@@ -48,6 +55,9 @@ def dbl_bus_ring_res():
   dbu = ly.dbu
   from SiEPIC.extend import to_itype
   from SiEPIC.scripts import path_to_waveguide
+
+  if TECHNOLOGY['technology_name'] not in 'EBeam':
+    raise Exception ('This example needs to be executed in a layout with Technology = EBeam')
   
   # clean all cells within the present cell
   ly.prune_subcells(cell.cell_index(), 10)
@@ -144,7 +154,24 @@ def dbl_bus_ring_res():
   lv.zoom_fit()
   lv.max_hier()
 
-#  lv.save_screenshot('/tmp/a.png')
+  # Zoom out
+  lv.clear_object_selection()
+  lv.zoom_fit()
+  lv.max_hier()
+
+  # Save a screenshot of the layout:
+  dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Test_structures_ring_resonators.png")
+  lv.save_screenshot(dir_path)
+
+  # Save the layout, without PCell info, for fabrication
+  save_options = pya.SaveLayoutOptions()
+  save_options.write_context_info=False  # remove $$$CONTEXT_INFO$$$
+  save_options.format='GDS' # standard format
+  save_options.format='OASIS' # smaller file size
+  save_options.oasis_compression_level=10
+  file_out = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Test_structures_ring_resonators.%s" % save_options.format[0:3])
+  print("saving output %s: %s" % (save_options.format, file_out) )
+  ly.write(file_out,save_options)
 
   print (" done layout.")
   
