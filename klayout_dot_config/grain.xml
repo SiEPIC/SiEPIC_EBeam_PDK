@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <salt-grain>
  <name>siepic_ebeam_pdk</name>
- <version>0.3.29</version>
- <api-version>0.25</api-version>
+ <version>0.3.30</version>
+ <api-version>0.26</api-version>
  <title>SiEPIC EBeam PDK</title>
  <doc>A Process Design Kit for Silicon Photonics fabricated using Electron Beam Lithography</doc>
  <doc-url>https://github.com/lukasc-ubc/SiEPIC_EBeam_PDK/blob/master/README.md</doc-url>
@@ -14,6 +14,6 @@
  <depends>
   <name>siepic_tools</name>
   <url/>
-  <version>0.3.63</version>
+  <version>0.3.70</version>
  </depends>
 </salt-grain>

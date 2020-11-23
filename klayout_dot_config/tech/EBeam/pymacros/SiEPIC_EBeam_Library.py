@@ -116,7 +116,7 @@ class SiEPIC_EBeam(Library):
 # windows only allows for a fixed width, short description 
     self.description = ""
 # OSX does a resizing:
-    self.description = "v0.3.3, Components with models"
+    self.description = "v0.3.30, Components with models"
 
   
     # Import all the GDS files from the tech folder "gds"

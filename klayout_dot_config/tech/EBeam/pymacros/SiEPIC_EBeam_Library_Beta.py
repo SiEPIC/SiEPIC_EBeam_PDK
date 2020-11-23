@@ -490,7 +490,7 @@ class SiEPIC_EBeam_dev(Library):
 
     # Set the description
 # windows only allows for a fixed width, short description 
-    self.description = "v0.3.3, Beta components"
+    self.description = "v0.3.30, Beta components"
 # OSX does a resizing:
 #    self.description = "Beta layouts only"
 
