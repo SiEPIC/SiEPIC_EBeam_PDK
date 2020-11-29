@@ -104,7 +104,7 @@ import pcells_EBeam
 import sys
 if int(sys.version[0]) > 2:
   from importlib import reload
-pcells_EBeam = reload(pcells_EBeam)
+# pcells_EBeam = reload(pcells_EBeam)
 
 class SiEPIC_EBeam(Library):
   """
@@ -145,7 +145,7 @@ class SiEPIC_EBeam(Library):
                     self.layout().register_pcell(attr, value())
             except:
                 pass
-
+    print(' done with pcells')
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
     self.register(library)
@@ -158,4 +158,4 @@ class SiEPIC_EBeam(Library):
     self.layout().add_meta_info(LayoutMetaInfo("technology",tech_name))
  
 # Instantiate and register the library
-SiEPIC_EBeam()
+# SiEPIC_EBeam()
