@@ -581,4 +581,4 @@ if not path in sys.path:
   sys.path.append(path)
 
 # Instantiate and register the library
-SiEPIC_EBeam_dev()
+# SiEPIC_EBeam_dev()
