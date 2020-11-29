@@ -52,12 +52,12 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     r = self.radius / dbu
     h = self.height / dbu
    
-    waveguide_length = layout_waveguide_sbend(self.cell, LayerSiN, pya.Trans(Trans.R0, 0,0), w, r, h, length) * dbu
+    waveguide_length = layout_waveguide_sbend(self.cell, LayerSiN, pya.Trans(Trans.R0, 0,0), w, r, h, length)
     
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
     # Pins on the waveguide:
-    x = self.length / dbu
+    x = waveguide_length
     t = Trans(Trans.R0, x,h)
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], w)
     pin_t = pin.transformed(t)
@@ -89,7 +89,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     t = Trans(Trans.R0, 0, -w*2)
     text = Text \
       ('Spice_param:wg_length=%.3fu wg_width=%.3fu' %\
-      (waveguide_length, self.wg_width), t )
+      (waveguide_length*dbu, self.wg_width), t )
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
 #    t = Trans(Trans.R0, 0, -w*3)
@@ -98,6 +98,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
 #    shape.text_size = 0.1/dbu
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    box1 = Box(0, min(-w*3,h-w*3), length, max(w*3,h+w*3))
+    box1 = Box(0, min(-w*3,h-w*3), waveguide_length, max(w*3,h+w*3))
     shapes(LayerDevRecN).insert(box1)
     
+#    print('2020/11/28 update')
