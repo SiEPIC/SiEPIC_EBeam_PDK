@@ -100,6 +100,12 @@ import pya
 from pya import *
 import pcells_EBeam
 
+
+import sys
+if int(sys.version[0]) > 2:
+  from importlib import reload
+pcells_EBeam = reload(pcells_EBeam)
+
 class SiEPIC_EBeam(Library):
   """
   The library where we will put the PCells and GDS into 

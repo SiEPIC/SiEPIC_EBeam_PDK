@@ -122,6 +122,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 sys.path.append(dir_path)
 
+import SiEPIC_EBeam_Library
+SiEPIC_EBeam_Library = reload(SiEPIC_EBeam_Library)
+
 from SiEPIC_EBeam_Library import *
 
 SiEPIC_EBeam()
