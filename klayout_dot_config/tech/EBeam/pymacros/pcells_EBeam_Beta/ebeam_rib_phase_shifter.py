@@ -11,7 +11,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
   # 5 um NPP doping width, Length 150 um, rib width, 0.5 um and NPP to Silicon distance 1 um, the phase shifter are segmented to 4 parts
   # The estimated Resistance is ~ 140 ohm. The corresponding power consumption for pi phase shift is ~ 44 mW. 
   # Simulation also shows that width of NPP region has influence on efficiency. 
-  # As an comparison, if NPP is 1 um, the power consumption for π phase shift is ~ 23 mW.
+  # As an comparison, if NPP is 1 um, the power consumption for pi phase shift is ~ 23 mW.
 
   def __init__(self):
 
