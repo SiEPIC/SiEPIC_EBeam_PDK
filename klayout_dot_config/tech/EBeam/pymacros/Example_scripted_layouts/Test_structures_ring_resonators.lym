@@ -54,6 +54,9 @@ def dbl_bus_ring_res():
   if TECHNOLOGY['technology_name'] not in 'EBeam':
     raise Exception ('This example needs to be executed in a layout with Technology = EBeam')
 
+  if SiEPIC.__version__ &lt; '0.3.71':
+    pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.71 or greater.", pya.MessageBox.Ok)
+
   # Import functions from SiEPIC-Tools
   from SiEPIC.extend import to_itype
   from SiEPIC.scripts import connect_cell, connect_pins_with_waveguide
