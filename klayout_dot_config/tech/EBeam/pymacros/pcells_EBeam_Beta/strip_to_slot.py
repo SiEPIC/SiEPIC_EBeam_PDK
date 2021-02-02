@@ -50,11 +50,8 @@ class strip_to_slot(pya.PCellDeclarationHelper):
 
     
     w = int(round(self.w/dbu))
-    w = 0.5/dbu
     r = int(round(self.r/dbu))
-    r = 10/dbu
     g = int(round(self.g/dbu))
-    g = 0.1/dbu
     Lc = int(round(self.Lc/dbu))
 
     # draw the half-circle
