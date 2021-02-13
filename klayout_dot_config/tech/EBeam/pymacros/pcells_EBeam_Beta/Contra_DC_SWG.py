@@ -1,4 +1,7 @@
 from . import *
+from pya import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 
 class Contra_DC_SWG(pya.PCellDeclarationHelper):
   """
@@ -25,7 +28,6 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-#    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -67,10 +69,8 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
     half_w1 = w1/2
     w2 = self.wg2_width / dbu
     half_w2 = w2/2
-    deltaW1_max = to_itype(self.corrugation_width1,dbu)
-    deltaW2_max = to_itype(self.corrugation_width2,dbu)
-
-
+    deltaW1_max = to_itype(self.corrugation_width1/2,dbu)
+    deltaW2_max = to_itype(self.corrugation_width2/2,dbu)
           
     for i in range(0,N_boxes+1):
 
@@ -79,7 +79,7 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
       deltaW1 = deltaW1_max*profileFunction
       deltaW2 = deltaW2_max*profileFunction
       
-      vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/dbu))+int(round(self.wg1_width/2/dbu))#+(-int(round(deltaW1))+int(round(deltaW2)))/2
+      vertical_offset = self.wg2_width/2/dbu+self.gap/dbu+self.wg1_width/2/dbu
       t = Trans(Trans.R0, 0,vertical_offset)
       
       if i%2 == True:
@@ -92,10 +92,11 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
         
       else:
         x = int(round((i * grating_period - box_width/2)))
-        box1_b = Box(x, -half_w1, x + box_width, half_w1)
+        
+        box1_b = Box(x, -half_w1+deltaW1, x + box_width, half_w1+deltaW1)
         shapes(LayerSiN).insert(box1_b)
         
-        box2_b = Box(x+grating_period, -half_w2, x +grating_period+ box_width, half_w2).transformed(t)
+        box2_b = Box(x+grating_period, -half_w2+deltaW2, x +grating_period+ box_width, half_w2+deltaW2).transformed(t)
         shapes(LayerSiN).insert(box2_b)
       
     # missing periods due to misalignments
@@ -108,7 +109,7 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),-deltaW1/2)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),0)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -117,7 +118,7 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),vertical_offset-deltaW2/2)
+    t = Trans(Trans.R0, to_itype(-box_width/2,dbu*1000),vertical_offset)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -126,7 +127,7 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
     
     w = to_itype(self.wg2_width,dbu)
-    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),vertical_offset-deltaW2/2)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),vertical_offset)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
@@ -135,7 +136,7 @@ class Contra_DC_SWG(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     w = to_itype(self.wg1_width,dbu)
-    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),-deltaW1/2)
+    t = Trans(Trans.R0, to_itype(x+grating_period+box_width,dbu*1000),0)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
