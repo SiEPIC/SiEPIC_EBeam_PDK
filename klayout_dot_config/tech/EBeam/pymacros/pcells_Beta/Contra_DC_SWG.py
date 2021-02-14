@@ -1,5 +1,5 @@
-import pya
 from pya import *
+import pya
 from SiEPIC.utils import get_technology_by_name
 
 class Contra_DC_SWG(pya.PCellDeclarationHelper):
