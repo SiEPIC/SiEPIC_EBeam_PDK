@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Export design for fabrication</description>
+ <description>Export design for EBeam fabrication</description>
  <version/>
  <category>pymacros</category>
  <prolog/>

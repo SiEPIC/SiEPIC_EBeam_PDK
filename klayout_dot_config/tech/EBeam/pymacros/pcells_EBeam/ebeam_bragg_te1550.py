@@ -14,6 +14,7 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
     self.param("grating_period", self.TypeDouble, "Grating period (microns)", default = 0.317)     
+    self.param("fill_factor", self.TypeDouble, "Grating fill factor", default = 0.5)     
     self.param("corrugation_width", self.TypeDouble, "Corrugration width (microns)", default = 0.05)     
     self.param("misalignment", self.TypeDouble, "Grating misalignment (microns)", default = 0.0)     
     self.param("sinusoidal", self.TypeBoolean, "Grating Type (Rectangular=False, Sinusoidal=True)", default = False)     
