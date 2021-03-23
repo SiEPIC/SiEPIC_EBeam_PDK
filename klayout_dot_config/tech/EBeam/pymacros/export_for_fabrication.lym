@@ -43,6 +43,11 @@ def export_for_fabrication():
     file_out = os.path.join(os.path.dirname(layout_filename), os.path.splitext(os.path.basename(layout_filename))[0]+'_%s.'%extra+save_options.format[0:3].lower())
     print("saving output %s: %s" % (save_options.format, file_out) )
 
+    if SiEPIC.__version__ &lt; '0.3.73':
+        pya.MessageBox.warning("Errors", "Please upgrade to SiEPIC-Tools version 0.3.73 or greater.", pya.MessageBox.Ok)
+    else:
+        ly.cell_character_replacement(forbidden_cell_characters = '=', replacement_cell_character = '_')
+
     try:
         ly.write(file_out,save_options)
     except:
