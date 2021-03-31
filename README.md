@@ -1,7 +1,7 @@
 ```diff
 ::ATTENTION::
--  Due to changes in ANT's EBL process, the coupling angles for *ebeam_gc_te1550* component have changed. 
--  There is no change in the coupling angles (-31 deg) when fabricating it with UW's EBL process. 
+-  Due to the changes in ANT's EBL process, the coupling angles for *ebeam_gc_te1550* and *ebeam_gc_tm1550* components may have been impacted. 
+-  There is no change in the coupling angles when fabricating the components with UW's EBL process. 
 ```
 
 # SiEPIC_EBeam_PDK
