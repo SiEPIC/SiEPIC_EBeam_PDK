@@ -1,3 +1,7 @@
+| :exclamation: The coupling angle has changed for *ebeam_gc_te1550* component when fabricated with ANT EBL process due to process changes. There is no change in the coupling angle (-31 deg) when fabricating it with UW EBL process.     |
+|-----------------------------------------|
+
+
 # SiEPIC_EBeam_PDK
 
 - <a href="www.siepic.ubc.ca">SiEPIC</a> EBeam PDK, Library - for silicon photonics layout, design, verification and circuit simulation
