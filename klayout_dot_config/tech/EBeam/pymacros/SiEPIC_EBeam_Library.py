@@ -98,6 +98,10 @@ from SiEPIC.utils import get_technology, get_technology_by_name
 # Box, Point, Polygon, Text, Trans, LayerInfo, etc
 import pya
 from pya import *
+
+if 'pcells_EBeam' in locals():
+    del pcells_EBeam
+    print('- reloading pcells_EBeam')
 import pcells_EBeam
 
 
@@ -122,7 +126,13 @@ class SiEPIC_EBeam(Library):
 # windows only allows for a fixed width, short description 
     self.description = ""
 # OSX does a resizing:
-    self.description = "v0.3.30, Components with models"
+    self.description = "v0.3.31, Components with models"
+
+
+    if 'pcells_EBeam' in locals():
+        del pcells_EBeam
+        print('- reloading pcells_EBeam')
+    import pcells_EBeam
 
   
     # Import all the GDS files from the tech folder "gds"
