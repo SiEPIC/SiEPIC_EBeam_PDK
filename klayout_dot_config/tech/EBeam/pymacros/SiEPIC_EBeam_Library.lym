@@ -20,7 +20,8 @@
 This file is part of the SiEPIC_EBeam_PDK
 by Lukas Chrostowski (c) 2015-2017
 
-This Python file implements a library called "SiEPIC_EBeam", consisting of mature components that have Layouts and Compact Models for circuit simulations:
+This Python file implements a library called "SiEPIC_EBeam", consisting of mature components that 
+have Layouts and Compact Models for circuit simulations:
  - Fixed GDS cell components: imported from SiEPIC-EBeam.gds
  - PCells:
     - ebeam_dc_halfring_straight
@@ -99,7 +100,8 @@ todo:
 replace:     
  layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
 with:
- self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [Point(0, 0)]).transformed(t))
+ self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + 
+ [Point(0, 0)]).transformed(t))
 
 
 Lukas Chrostowski 2020/06/21
@@ -153,7 +155,7 @@ class SiEPIC_EBeam_Library(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.31, Components with models"
+    self.description = "v0.3.32, Components with models"
 
                 
     # Import all the GDS files from the tech folder
