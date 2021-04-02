@@ -1,11 +1,12 @@
 from . import *
+import pya
 
-class SWG_Ring(pya.PCellDeclarationHelper):
+class SWG_bentWG(pya.PCellDeclarationHelper):
 
     def __init__(self):
 
       # Important: initialize the super class
-      super(SWG_Ring, self).__init__()
+      super(SWG_bentWG, self).__init__()
       TECHNOLOGY = get_technology_by_name('EBeam')
 
       # declare the parameters
@@ -24,7 +25,7 @@ class SWG_Ring(pya.PCellDeclarationHelper):
 
     def display_text_impl(self):
       # Provide a descriptive text for the cell
-      return "SWG_Ring_%.3f" % \
+      return "SWG_bentWG_%.3f" % \
       (self.pitch)
 
     def coerce_parameters_impl(self):

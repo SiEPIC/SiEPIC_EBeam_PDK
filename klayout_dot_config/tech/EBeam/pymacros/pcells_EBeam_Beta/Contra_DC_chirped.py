@@ -1,6 +1,6 @@
 from . import *
 
-class Contra_DC_Chirped(pya.PCellDeclarationHelper):
+class Contra_DC_chirped(pya.PCellDeclarationHelper):
   """
   Author:   Mustafa Hammood 
             Mustafa@siepic.com
@@ -9,7 +9,7 @@ class Contra_DC_Chirped(pya.PCellDeclarationHelper):
   def __init__(self):
 
     # Important: initialize the super class
-    super(Contra_DC_Chirped, self).__init__()
+    super(Contra_DC_chirped, self).__init__()
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters

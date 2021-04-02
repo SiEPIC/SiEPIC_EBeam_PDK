@@ -15,6 +15,7 @@ from SiEPIC.utils import get_technology, get_technology_by_name
 # Import KLayout Python API methods:
 # Box, Point, Polygon, Text, Trans, LayerInfo, etc
 from pya import *
+import pya
 
 #import numpy as np
 MODULE_NUMPY = False
@@ -68,12 +69,3 @@ def pin(w,pin_text, trans, LayerPinRecN, dbu, cell):
   shape.text_size = w*0.8
 
   print("Done drawing the layout for - pin" )
-
-# import all pcells in the directory
-for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and f != '__init__.py']:
-  mod = __import__('.'.join([__name__, py]), fromlist=[py])
-  classes = [getattr(mod, x) for x in dir(mod) if isinstance(getattr(mod, x), type)]
-  for cls in classes:
-      setattr(sys.modules[__name__], cls.__name__, cls)
-
-      

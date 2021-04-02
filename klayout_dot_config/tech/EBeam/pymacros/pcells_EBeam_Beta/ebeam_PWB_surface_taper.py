@@ -1,6 +1,6 @@
 from . import *
 
-class photonic_wirebond_surface_taper(pya.PCellDeclarationHelper):
+class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the photonic wirebond surface taper
   Author: Becky Lin
@@ -11,7 +11,7 @@ class photonic_wirebond_surface_taper(pya.PCellDeclarationHelper):
   def __init__(self):
     
     # Important: initialize the super class
-    super(photonic_wirebond_surface_taper, self).__init__()
+    super(ebeam_PWB_surface_taper, self).__init__()
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
