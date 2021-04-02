@@ -473,8 +473,14 @@ class Waveguide_Route(pya.PCellDeclarationHelper):
         print("straight wg end-section inst:  %s, %s, [%s]; " % (angle, wg_length, p3) )
 
 '''
-import pcells_EBeam_Beta
+
 from pya import *
+
+
+if 'pcells_EBeam_Beta' in locals():
+    del pcells_EBeam_Beta
+import pcells_EBeam_Beta
+
 
 class SiEPIC_EBeam_dev(Library):
   """

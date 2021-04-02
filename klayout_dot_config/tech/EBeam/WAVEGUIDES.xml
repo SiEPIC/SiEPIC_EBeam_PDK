@@ -1,29 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <waveguides>
 	<waveguide>
-	  <name>Slot TE 1550 nm, w=500 nm, gap=100nm</name>
-	  <CML>EBeam</CML>
-	  <model>NONE</model>
-	  <bezier>0.20</bezier>
-      <radius>50.0</radius>
-      <width>0.5</width>
-	  <component>
-	    <layer>Si</layer>
-	    <width>0.2</width>
-	    <offset>-0.15</offset>
-	  </component>
-	  <component>
-	    <layer>Si</layer>
-	    <width>0.2</width>
-	    <offset>0.15</offset>
-	  </component>
-	  <component>
-	    <layer>DevRec</layer>
-	    <width>1.5</width>
-	    <offset>0.0</offset>
-	  </component>
-	</waveguide>
-	<waveguide>
 	  <name>Strip TE 1550 nm, w=500 nm</name>
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_integral_1550</model>
@@ -123,6 +100,29 @@
 	  <component>
 	    <layer>Si</layer>
 	    <width>3.0</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
+	<waveguide>
+	  <name>Slot TE 1550 nm, w=500 nm, gap=100nm</name>
+	  <CML>EBeam</CML>
+	  <model>NONE</model>
+	  <bezier>0.20</bezier>
+      <radius>50.0</radius>
+      <width>0.5</width>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.2</width>
+	    <offset>-0.15</offset>
+	  </component>
+	  <component>
+	    <layer>Si</layer>
+	    <width>0.2</width>
+	    <offset>0.15</offset>
+	  </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>

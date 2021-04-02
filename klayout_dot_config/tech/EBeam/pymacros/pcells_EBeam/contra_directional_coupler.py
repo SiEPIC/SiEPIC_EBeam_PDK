@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 def make_pin(cell, name, center, w, pin_length, layer, vertical = 0):
   if vertical == 0:
