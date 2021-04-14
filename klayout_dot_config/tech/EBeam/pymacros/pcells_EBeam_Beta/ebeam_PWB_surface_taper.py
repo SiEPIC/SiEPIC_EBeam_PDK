@@ -1,10 +1,13 @@
 from . import *
+import math
 
 class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the photonic wirebond surface taper
   Author: Becky Lin
   V1: July 30, 2020
+  V2: Sept 8, 2020
+  V3: Dec 4, 2020
   blin@ece.ubc.ca
   """
 
@@ -14,14 +17,15 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     super(ebeam_PWB_surface_taper, self).__init__()
     TECHNOLOGY = get_technology_by_name('EBeam')
 
-    # declare the parameters
-    self.param("Wtip", self.TypeDouble, "Width of tip (microns)", default = 0.18)
+    self.param("Wtip", self.TypeDouble, "Width of tip (microns)", default = 0.13)
     self.param("Wwaveguide", self.TypeDouble, "width of waveguide (microns)", default = 0.5)
     self.param("edge_offset", self.TypeDouble, "tip to edge gap (microns, recommend min 30um)", default = 30)
     self.param("taper_length", self.TypeDouble, "length of taper (microns, min 45um; max 100um)", default = 65)
     self.param("OxOp_angle", self.TypeInt, "Oxide open interface angle (int)", default = 8)
     self.param("show_deepTrench", self.TypeBoolean, "Show deep trench layer? !Min DT and OxOp is 5um", default = True)
     self.param("ZEP_Process", self.TypeBoolean, "Fabrication using UBC ZEP process", default = False)
+    self.param("ZEP_Trench", self.TypeDouble, "Trench width for ZEP process", default = 10)
+    self.param("Grouse_Run", self.TypeBoolean, "Fabrication using ANT Grouse Run", default = False)
 
     # declare the layers
     self.param("silayer", self.TypeLayer, "Si Layer", default=[TECHNOLOGY['Waveguide']])
@@ -31,16 +35,16 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     self.param("textl", self.TypeLayer, "Text Layer", default=TECHNOLOGY['Text'])
     self.param("fibertarget", self.TypeLayer, "Fiber Target Layer", default=TECHNOLOGY['FbrTgt'])
     self.param("ZEP_invert", self.TypeLayer, "31 Si for ZEP inverse", default=LayerInfo(31,0))
-    #self.param("deeptrench", self.TypeLayer, "DeepTrench Layer", default=TECHNOLOGY['DT (160/0@1)'])
+    self.param("Grouse_Si_Keepout", self.TypeLayer, "Grouse Si Keep-out Layer", default=LayerInfo(63,0))
 
 
   def can_create_from_shape_impl(self):
     return False
 
-  def produce(self, layout, layeres, parameters, cell):
+  def produce(self, layout, layers, parameters, cell):
     # This is the main part of the implementation: create the layout
 
-    
+    #
     self.cell = cell
     self._param_values = parameters
     self.layout = layout
@@ -63,6 +67,7 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     LayerTEXTN = ly.layer(self.textl)
     LayerFbrTgtN = ly.layer(self.fibertarget)
     Layer31SiN = ly.layer(self.ZEP_invert)
+    Layer63N = ly.layer(self.Grouse_Si_Keepout)
 
     w1 = self.Wtip/dbu
     w2 = self.Wwaveguide/dbu
@@ -72,6 +77,7 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     notile = 15
     y_oxop = 20
     l = self.taper_length   
+    wT = self.ZEP_Trench
 
     #draw deeptrench layer (to indicate edge)
     pts6 = [Point(0, excl/dbu), Point(-100/dbu,excl/dbu), Point(-100/dbu,-excl/dbu),Point(0,-excl/dbu)]
@@ -97,6 +103,8 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
 
     #draw the taper
     pts = [Point(offset/dbu,w1/2),Point((l+offset)/dbu,w2/2),Point((l+offset)/dbu,-w2/2),Point(offset/dbu,-w1/2)]
+    #pts = [Point(offset/dbu,-0.001/dbu),Point((offset-20)/dbu,-0.001/dbu),Point((offset-20)/dbu,0.001/dbu),Point(offset/dbu,0.001/dbu),Point(offset/dbu,w1/2),Point((l+offset)/dbu,w2/2),Point((l+offset)/dbu,-w2/2),Point(offset/dbu,-w1/2)]  
+
     
     #place the taper
     shapes(LayerSiN).insert(Polygon(pts))
@@ -150,14 +158,28 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
 
     #draw ZEP process, expanded taper trench used during layer inverting
     #path1 = Path([Point(offset,w2/2),Point((l+offset),w2/2),Point((l+offset),-w2/2),Point(offset,-w2/2)],1)
-    pts8 = [Point(offset/dbu,w2/2),Point((l+offset)/dbu,w2/2),Point((l+offset)/dbu,-w2/2),Point(offset/dbu,-w2/2)]
+    #pts8 = [Point(offset/dbu,w2/2),Point((l+offset)/dbu,w2/2),Point((l+offset)/dbu,-w2/2),Point(offset/dbu,-w2/2)]
 
-    if self.ZEP_Process == True:
-      shapes(Layer31SiN).insert(Polygon(pts8))
+    #if self.ZEP_Process == True:
+      #shapes(Layer31SiN).insert(Polygon(pts8))
       #x = (offset + l)/dbu
       #t = Trans(Trans.R0, x, 0)
       #path1_t = pin.transformed(t)
       #shapes(LayerSiN).insert(path1_t)
+
+    ZEPTrench_pts = [Point((offset+65)/dbu,-wT/dbu),Point((offset-25)/dbu,-wT/dbu),Point((offset-25)/dbu,wT/dbu),Point((offset+65)/dbu,wT/dbu)]
+    if self.ZEP_Process == True:
+        #place the extended Si Keepout at the tip of taper
+        shapes(Layer63N).insert(Polygon(ZEPTrench_pts))
+
+    #GROUSE SI KEEPOUT ##############################################################
+
+    #draw the extended Si Keepout at the tip of taper
+    grouseRun_pts = [Point(offset/dbu,-2.175/dbu),Point((offset-25)/dbu,-2.175/dbu),Point((offset-25)/dbu,2.175/dbu),Point(offset/dbu,2.175/dbu)]
+    if self.Grouse_Run == True:
+
+        #place the extended Si Keepout at the tip of taper
+        shapes(Layer63N).insert(Polygon(grouseRun_pts))
 
     #################################################################################
 
