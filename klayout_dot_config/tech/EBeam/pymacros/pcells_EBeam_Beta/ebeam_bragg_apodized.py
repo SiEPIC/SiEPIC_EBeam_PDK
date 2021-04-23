@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class ebeam_bragg_apodized(pya.PCellDeclarationHelper):
   """

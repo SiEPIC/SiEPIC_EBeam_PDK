@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
   """

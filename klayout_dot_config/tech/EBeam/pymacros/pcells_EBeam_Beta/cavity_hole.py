@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class cavity_hole(pya.PCellDeclarationHelper):
   """
