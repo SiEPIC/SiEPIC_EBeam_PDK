@@ -176,7 +176,7 @@ class SiEPIC_EBeam_Library_Beta(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.32, Beta components"
+    self.description = "v0.3.33, Beta components"
 
                 
     # Import all the GDS files from the tech folder
