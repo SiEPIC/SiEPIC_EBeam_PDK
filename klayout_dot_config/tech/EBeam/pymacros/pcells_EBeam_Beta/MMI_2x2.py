@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class MMI_2x2(pya.PCellDeclarationHelper):
   """

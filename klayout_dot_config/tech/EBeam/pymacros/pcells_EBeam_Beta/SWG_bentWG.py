@@ -1,5 +1,6 @@
 from . import *
 import pya
+from pya import *
 
 class SWG_bentWG(pya.PCellDeclarationHelper):
 

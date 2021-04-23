@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class ebeam_taper_strip_rib(pya.PCellDeclarationHelper):
   """

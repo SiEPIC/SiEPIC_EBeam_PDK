@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class Contra_DC_Bent(pya.PCellDeclarationHelper):
   """

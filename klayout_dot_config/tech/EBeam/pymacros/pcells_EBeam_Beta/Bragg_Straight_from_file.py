@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class Bragg_Straight_from_file(pya.PCellDeclarationHelper):
   """

@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
   """

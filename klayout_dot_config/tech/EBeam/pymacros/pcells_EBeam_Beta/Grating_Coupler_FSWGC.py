@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class Grating_Coupler_FSWGC(pya.PCellDeclarationHelper):
   """

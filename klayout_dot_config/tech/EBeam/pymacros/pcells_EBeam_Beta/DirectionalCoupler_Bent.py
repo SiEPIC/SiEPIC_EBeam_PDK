@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class DirectionalCoupler_Bent(pya.PCellDeclarationHelper):
   """

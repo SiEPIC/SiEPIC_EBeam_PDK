@@ -1,4 +1,5 @@
 from . import *
+from pya import *
 
 class Bezier_Bend(pya.PCellDeclarationHelper):
   """

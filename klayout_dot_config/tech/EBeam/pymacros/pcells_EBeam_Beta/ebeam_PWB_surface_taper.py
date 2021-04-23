@@ -1,5 +1,6 @@
 from . import *
 import math
+from pya import *
 
 class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
   """
