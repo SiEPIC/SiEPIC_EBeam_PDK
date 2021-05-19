@@ -155,7 +155,7 @@ class SiEPIC_EBeam_Library(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.33, Components with models"
+    self.description = "v0.3.34, Components with models"
 
                 
     # Import all the GDS files from the tech folder
