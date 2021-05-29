@@ -123,6 +123,7 @@ from pya import *
 from SiEPIC.utils import get_technology_by_name
 import os
 from pathlib import Path
+import sys
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 if dir_path not in sys.path:
