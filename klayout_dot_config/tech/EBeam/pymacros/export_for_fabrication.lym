@@ -47,6 +47,7 @@ def export_for_fabrication():
         pya.MessageBox.warning("Errors", "Please upgrade to SiEPIC-Tools version 0.3.73 or greater.", pya.MessageBox.Ok)
     else:
         ly.cell_character_replacement(forbidden_cell_characters = '=', replacement_cell_character = '_')
+        ly.cell_character_replacement(forbidden_cell_characters = ',', replacement_cell_character = '_')
 
     try:
         ly.write(file_out,save_options)
