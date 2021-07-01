@@ -1,0 +1,3 @@
+All .gds files were simulated and created by Zhi Wang -Zlab @WashU
+
+Please include .gds files in "Optimized" folder in the first priority. If there is more space, include .gds files in "Parameter Sweep" folder.
