@@ -122,7 +122,7 @@ import pya
 from pya import *
 from SiEPIC.utils import get_technology_by_name
 import os
-from pathlib import Path
+import pathlib
 import sys
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -130,7 +130,7 @@ if dir_path not in sys.path:
     sys.path.append(dir_path)
 
 files = [f for f in os.listdir(os.path.join(os.path.dirname(
-    os.path.realpath(__file__)),'pcells_EBeam')) if '.py' in Path(f).suffixes  and '__init__' not in f]
+    os.path.realpath(__file__)),'pcells_EBeam')) if '.py' in pathlib.Path(f).suffixes  and '__init__' not in f]
 import pcells_EBeam ### folder name ###
 import importlib
 importlib.invalidate_caches()
@@ -156,7 +156,7 @@ class SiEPIC_EBeam_Library(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.35, Components with models"
+    self.description = "v0.3.36, Components with models"
 
                 
     # Import all the GDS files from the tech folder

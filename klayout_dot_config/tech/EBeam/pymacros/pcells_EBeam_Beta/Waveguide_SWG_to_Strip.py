@@ -158,6 +158,5 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
     
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     points = [pya.Point(0,0), pya.Point(length, 0)]
-    path = pya.Path(points,w)
-    path = pya.Path(points,w*3)
+    path = pya.Path(points,w*5)
     shapes(LayerDevRecN).insert(path.simple_polygon())
