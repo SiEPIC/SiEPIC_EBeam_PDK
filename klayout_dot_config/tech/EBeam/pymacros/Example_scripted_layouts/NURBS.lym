@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>'''
+KLayout native support for Spline curves
+    https://www.klayout.de/doc-qt5/code/class_Utils.html#method15
+Non-uniform rational B-spline (NURBS): 
+    https://en.wikipedia.org/wiki/Non-uniform_rational_B-spline
+Thank you to Matthias for implementing our community's request!
+    https://github.com/KLayout/klayout/issues/193
+
+by Lukas Chrostowski, 2021
+'''
+
+
+import pya
+import numpy as np
+
+
+#############################################################################################
+# Example 0 - KLayout test code: https://github.com/KLayout/klayout/blob/master/src/db/unit_tests/dbUtilsTests.cc
+#############################################################################################
+
+spline_control_points = [ 
+    DPoint(-1, 0), 
+    DPoint(-1, 1),
+    DPoint(0, 1) ]
+
+spline_weights = [ 1, np.sqrt(0.5), 1 ]
+
+spline_degree = 2
+
+spline_knots = [ 0,0,0, 1,1,1 ]
+
+spline_relative_accuracy = 0.01
+spline_absolute_accuracy = 0.01
+
+spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, # spline_weights, 
+    spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
+
+#[print(p) for p in spline_dpoints]
+
+
+#############################################################################################
+# Example 1 - Spline Bend
+#  use KLayout spline function for the path, and
+#  use SiEPIC-Tools function translate_from_normal to make a Polygon with correct width
+#############################################################################################
+
+# Import functions from SiEPIC-Tools, and get technology details
+from SiEPIC.utils import get_layout_variables
+TECHNOLOGY, lv, ly, cell = get_layout_variables()
+dbu = ly.dbu
+if TECHNOLOGY['technology_name'] not in 'EBeam':
+    raise Exception ('This example needs to be executed in a layout with Technology = EBeam')
+
+if SiEPIC.__version__ &lt; '0.3.71':
+    pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.71 or greater.", pya.MessageBox.Ok)
+
+# Import functions from SiEPIC-Tools
+from SiEPIC.extend import to_itype
+from SiEPIC.utils import translate_from_normal
+
+# Layer mapping:
+LayerSiN = ly.layer(TECHNOLOGY['Si'])
+fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
+TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+
+w_wg = 500 # waveguide width 
+r = 5000 # radius
+
+spline_control_points = [ 
+    Point(-r, 0), 
+    Point(-r, r),
+    Point(0, r) ]
+
+spline_weights = [ 1, np.sqrt(0.5), 1 ]  # exact circle using NURBS
+spline_weights = [ 1, 1.5, 1 ]  # Bezier curve with parameter 0.2 (for TE 1550 Si strip 5 micron)
+
+spline_degree = 2
+
+spline_knots = [ 0,0,0, 1,1,1 ]
+
+
+spline_relative_accuracy = 1e-6  # won't be achieved
+spline_absolute_accuracy = 1  # we want 1 nm absolute accuracy
+
+spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, spline_weights, 
+    spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
+#[print(p) for p in spline_dpoints]
+
+# Converting a Path to a Polygon doesn't work well; leave the end non-flush
+# cell.shapes(fpLayerN).insert(pya.Path(spline_dpoints, w_wg).polygon())
+
+wg_polygon = pya.Polygon(translate_from_normal(spline_dpoints, w_wg/2)+
+            translate_from_normal(spline_dpoints, -w_wg/2)[::-1])
+# print('%s' % wg_polygon)    
+cell.shapes(LayerSiN).insert(wg_polygon)
+
+# compare to the SiEPIC-Tools waveguide implementation:
+from SiEPIC.utils.layout import layout_waveguide2
+# [w.to_dtype(dbu) for w in spline_control_points]
+layout_waveguide2(TECHNOLOGY, ly, cell, ['Text'], [w_wg*dbu], [0], spline_control_points, r*dbu, True, 0.2)
+
+#############################################################################################
+# benchmarking
+#############################################################################################
+'''
+import time
+
+number = int(1e3)
+
+# method 3
+from SiEPIC.utils.layout import layout_waveguide2
+t = time.time()
+for i in range(number):
+    layout_waveguide2(TECHNOLOGY, ly, cell, ['Text'], [w_wg*dbu], [0], spline_control_points, r*dbu, True, 0.2)
+elapsed3 = time.time() - t
+
+# method 1
+t = time.time()
+for i in range(number):
+    spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, spline_weights, 
+        spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
+    cell.shapes(fpLayerN).insert(pya.Path(spline_dpoints, w_wg).polygon())
+elapsed1 = time.time() - t
+
+# method 2
+t = time.time()
+for i in range(number):
+    spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, spline_weights, 
+        spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
+    wg_polygon = pya.Polygon(translate_from_normal(spline_dpoints, w_wg/2)+
+            translate_from_normal(spline_dpoints, -w_wg/2)[::-1])    
+    cell.shapes(LayerSiN).insert(wg_polygon)
+elapsed2 = time.time() - t
+
+
+print ('- time for: KLayout spline, path.polygon(): %s' % elapsed1 ) 
+print ('- time for: KLayout spline, SiEPIC-Tools translate_from_normal: %s' % elapsed2 ) 
+print ('- time for: SiEPIC-Tools layout_waveguide2: %s' % elapsed3 ) 
+print ('KLayout native Spline could improve waveguide generation speed by %s times' % (int(elapsed3/elapsed1))) 
+
+# KLayout native Spline could improve waveguide generation speed by 27 times
+
+
+'''
+
+
+#############################################################################################
+# Example 2 - Spline Taper
+#############################################################################################
+
+w_wg = 500 # waveguide width 
+w_tip = 80 # taper tip width
+q = -50  # middle control point in the middle of the taper, deviation from a linear taper
+h = 0.5 # location of middle control, fraction
+L = 2000 # length of the taper
+
+spline_control_points = [ 
+    Point(0,w_wg/2), 
+    Point(L*h,(w_wg+w_tip)/4+2*q), # control point at middle of taper
+    Point(L, w_tip/2) ]
+spline_control_points2 = [ 
+    Point(0,-w_wg/2), 
+    Point(L*h,-(w_wg+w_tip)/4-2*q), # control point at middle of taper
+    Point(L, -w_tip/2) ]
+
+spline_weights = [ 1, 1, 1 ]
+
+spline_degree = 2
+
+spline_knots = [ 0,0,0, 1,1,1 ]
+
+spline_relative_accuracy = 1e-6
+spline_absolute_accuracy = 1
+
+spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, # spline_weights, 
+    spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
+[print(p) for p in spline_dpoints]
+
+spline_dpoints2 = pya.Utils.spline_interpolation (spline_control_points2, # spline_weights, 
+    spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)[::-1]
+[print(p) for p in spline_dpoints2]
+
+polygon = pya.Polygon(spline_dpoints+spline_dpoints2)
+cell.shapes(fpLayerN).insert(polygon)
+</text>
+</klayout-macro>
