@@ -118,7 +118,7 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
     
     from SiEPIC._globals import PIN_LENGTH as pin_length
     
-    w = self.wg_width_swg / dbu
+    w = to_itype(self.wg_width_swg, dbu)
     t = Trans(Trans.R0, 0,0)
     pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
@@ -127,7 +127,7 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    w = max ( self.wg_width_strip, self.wg_width_taper) / dbu
+    w = to_itype(max ( self.wg_width_strip, self.wg_width_taper), dbu)
     t = Trans(Trans.R0, length,0)
     pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
