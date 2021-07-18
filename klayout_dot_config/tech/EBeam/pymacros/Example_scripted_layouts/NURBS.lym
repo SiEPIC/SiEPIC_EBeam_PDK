@@ -166,7 +166,7 @@ print ('KLayout native Spline could improve waveguide generation speed by %s tim
 
 w_wg = 500 # waveguide width 
 w_tip = 80 # taper tip width
-q = -50  # middle control point in the middle of the taper, deviation from a linear taper
+q = -52.5  # middle control point in the middle of the taper, deviation from a linear taper
 h = 0.5 # location of middle control, fraction
 L = 2000 # length of the taper
 
@@ -179,7 +179,27 @@ spline_control_points2 = [
     Point(L*h,-(w_wg+w_tip)/4-2*q), # control point at middle of taper
     Point(L, -w_tip/2) ]
 
-spline_weights = [ 1, 1, 1 ]
+weight = -.25  #  reasonable range of -2 to +2
+if weight &gt; 0: 
+    spline_control_points = [ 
+        Point(0,w_wg/2), 
+        Point(L/2, w_tip/2),
+        Point(L, w_tip/2) ]
+    spline_control_points2 = [ 
+        Point(0,-w_wg/2), 
+        Point(L/2, -w_tip/2),
+        Point(L, -w_tip/2) ]
+else:
+    spline_control_points = [ 
+        Point(0,w_wg/2), 
+        Point(L/2, w_wg/2),
+        Point(L, w_tip/2) ]
+    spline_control_points2 = [ 
+        Point(0,-w_wg/2), 
+        Point(L/2, -w_wg/2),
+        Point(L, -w_tip/2) ]
+
+spline_weights = [ 1, abs(weight), 1 ]
 
 spline_degree = 2
 
@@ -188,11 +208,11 @@ spline_knots = [ 0,0,0, 1,1,1 ]
 spline_relative_accuracy = 1e-6
 spline_absolute_accuracy = 1
 
-spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, # spline_weights, 
+spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, spline_weights, 
     spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
 [print(p) for p in spline_dpoints]
 
-spline_dpoints2 = pya.Utils.spline_interpolation (spline_control_points2, # spline_weights, 
+spline_dpoints2 = pya.Utils.spline_interpolation (spline_control_points2, spline_weights, 
     spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)[::-1]
 [print(p) for p in spline_dpoints2]
 
