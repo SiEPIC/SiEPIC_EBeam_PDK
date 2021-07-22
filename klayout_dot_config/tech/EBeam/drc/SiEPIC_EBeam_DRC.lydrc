@@ -17,17 +17,19 @@
  <text># Basic DRC deck for SiEPIC_EBeam_PDK
 # Lukas Chrostowski, 2016
 # Mustafa Hammood, 2020 update
+# Lukas Chrostowski, 2021 update
 
 # Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
 # http://klayout.de/doc/manual/drc_basic.html
 
-report("DRC")
+report("SiEPIC-EBeam-PDK DRC")
 
 # Layers:
 LayerSi=input(1,0)
 LayerSip6nm=input(31,0)
 LayerSi_rib=input(2,0)
 DevRec=input(68,0)
+PinRec=input(1,10)
 LayerFP=input(99)
 LayerM1=input(11,0)
 LayerM2=input(12,0)
@@ -105,6 +107,13 @@ LayerVC.overlap(LayerNpp, 5.0-tol).output("VC_Npp_overlap","VC-Npp minimum overl
 LayerM2.enclosing(LayerVC, 1.0-tol).output("M2_VC_enclosure","M2-VC minimum enclosure violation; min 1 µm")
 LayerSi_rib.enclosing(LayerVC, 1.0-tol).output("Si_rib_VC_enclosure","Si_rib-VC minimum enclosure violation; min 1 µm")
 
+
+# Waveguide checks:
+# disconnects, mismatched
+
+
+PinRec.not_inside(LayerSi) # .and(PinRec.not_inside(another_material))
+    .output( "SiEPIC-1a" , "Warning: Possible waveguide mismatch or waveguide disconnect: PinRec must enclose only one waveguide material." )
 
 </text>
 </klayout-macro>
