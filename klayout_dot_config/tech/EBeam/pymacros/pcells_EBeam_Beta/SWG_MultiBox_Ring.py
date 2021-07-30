@@ -1,12 +1,12 @@
 from . import *
 from pya import *
 
-class MultiBox_Ring(pya.PCellDeclarationHelper):
+class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
 
     def __init__(self):
 
       # Important: initialize the super class
-      super(MultiBox_Ring, self).__init__()
+      super(SWG_MultiBox_Ring, self).__init__()
       TECHNOLOGY = get_technology_by_name('EBeam')
 
       # declare the parameters
@@ -25,6 +25,7 @@ class MultiBox_Ring(pya.PCellDeclarationHelper):
       self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
       self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
   #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+      self.param("oxideopen", self.TypeLayer, "Oxide Open Layer", default = TECHNOLOGY['Oxide open (to BOX)'])
 
     def display_text_impl(self):
       # Provide a descriptive text for the cell
@@ -81,6 +82,12 @@ class MultiBox_Ring(pya.PCellDeclarationHelper):
       #Calculate number of segments
       s1 = pitch*ff #silicon
       s2 = pitch-s1 #gap
+
+      # draw oxide open 
+      shapes(ly.layer(self.oxideopen)).insert(
+        pya.Box(
+            DPoint(-to_itype(r+5,dbu),-to_itype(r+5,dbu)),
+            DPoint(to_itype(r+5,dbu),to_itype(r+5,dbu)) ) )
       
       # Draw the Multi-box Ring
       for i in range(0,int(row)): # draw different radius SWG rings
@@ -249,7 +256,7 @@ class MultiBox_Ring(pya.PCellDeclarationHelper):
       pin = Path([Point(0, -pin_length/2), Point(0, pin_length/2)], 500) #500 is width of std WG
       pin_t = pin.transformed(t)
       shapes(LayerPinRecN).insert(pin_t)
-      text = Text ("pin1", t)
+      text = Text ("opt1", t)
       shape = shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
       print(dev_up)
@@ -259,6 +266,6 @@ class MultiBox_Ring(pya.PCellDeclarationHelper):
       pin = Path([Point(0, pin_length/2), Point(0, -pin_length/2)], 500)
       pin_t = pin.transformed(t)
       shapes(LayerPinRecN).insert(pin_t)
-      text = Text ("pin2", t)
+      text = Text ("opt2", t)
       shape = shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu

@@ -76,7 +76,7 @@ class ebeam_taper(pya.PCellDeclarationHelper):
     pin = Path(p1, w1)
     shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, 0, 0)
-    text = Text ("pin1", t)
+    text = Text ("opt1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
@@ -88,7 +88,7 @@ class ebeam_taper(pya.PCellDeclarationHelper):
     pin = Path(p2, w2)
     shapes(LayerPinRecN).insert(pin)
     t = Trans(Trans.R0, length, 0)
-    text = Text ("pin2", t)
+    text = Text ("opt2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
     shape.text_halign = 2

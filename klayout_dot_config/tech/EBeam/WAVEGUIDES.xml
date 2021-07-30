@@ -29,6 +29,11 @@
 	    <width>0.41</width>
 	    <offset>0.0</offset>
 	  </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
 	</waveguide>
 	<waveguide>
 	  <name>Strip TE 1310 nm, w=350 nm</name>
@@ -40,6 +45,11 @@
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.35</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.35</width>
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>
@@ -100,6 +110,11 @@
 	  <component>
 	    <layer>Si</layer>
 	    <width>3.0</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>4.0</width>
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>
