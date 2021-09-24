@@ -15,7 +15,7 @@
 "<a href="http://mina.ubc.ca/ref_design-and-simulation-sili">Design and simulation of silicon photonic schematics and layouts</a>," Proc. SPIE 9891, Silicon Photonics and Photonic Integrated Circuits V, 989114 (May 13, 2016); doi:10.1117/12.2230376.
 
 ## Download and Installation instructions:
- - Details are provided in the Wiki page: <a href="https://github.com/lukasc-ubc/SiEPIC_EBeam_PDK/wiki/Installation-instructions">Installation instructions</a>. KLayout's package manager is used for both downloading and installing the package.
+ - Details are provided in the Wiki page: <a href="https://github.com/siepic/SiEPIC_EBeam_PDK/wiki/Installation-instructions">Installation instructions</a>. KLayout's package manager is used for both downloading and installing the package.
 
  
 ## Objectives:
