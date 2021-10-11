@@ -306,6 +306,22 @@
  </properties>
  
  <properties>
+  <frame-color>#ffaf80</frame-color>
+  <fill-color>#ffaf80</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I3</dither-pattern>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>1</width>
+  <marked>false</marked>
+  <animation>0</animation>
+  <name>PWB Si Keepout</name>
+  <source>160/0@1</source>
+ </properties>
+ 
+ <properties>
   <frame-color>#ff00ff</frame-color>
   <fill-color>#ff00ff</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -320,7 +336,7 @@
   <name>SEM</name>
   <source>200/0@1</source>
  </properties>
- 
+
  <properties>
   <frame-color/>
   <fill-color/>
