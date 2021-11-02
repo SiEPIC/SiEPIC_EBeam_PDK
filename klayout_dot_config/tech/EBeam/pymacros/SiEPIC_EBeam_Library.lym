@@ -156,12 +156,13 @@ class SiEPIC_EBeam_Library(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.36, Components with models"
+    self.description = "v0.3.37, Components with models"
 
                 
     # Import all the GDS files from the tech folder
     import os, fnmatch
     dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/mature"))
+    print('  library path: %s' % dir_path)
     search_str = '*' + '.oas'
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
         for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
@@ -184,14 +185,14 @@ class SiEPIC_EBeam_Library(Library):
                 
     print(' done with pcells')
     
-    # Register us the library with the technology name
-    # If a library with that name already existed, it will be replaced then.
-    self.register(library)
-
     self.technology=tech_name
 
     self.layout().add_meta_info(LayoutMetaInfo("path",os.path.realpath(__file__)))
     self.layout().add_meta_info(LayoutMetaInfo("technology",tech_name))
+
+    # Register us the library with the technology name
+    # If a library with that name already existed, it will be replaced then.
+    self.register(library)
  
 # Instantiate and register the library
 SiEPIC_EBeam_Library()
