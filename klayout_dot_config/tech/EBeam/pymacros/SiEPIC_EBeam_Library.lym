@@ -152,11 +152,16 @@ class SiEPIC_EBeam_Library(Library):
   
     tech_name = 'EBeam'
     library = tech_name
+    self.technology=tech_name
 
     print("Initializing '%s' Library." % library)
 
     # Set the description
     self.description = "v0.3.37, Components with models"
+
+    # Save the path, used for loading WAVEGUIDES.XML
+    import os
+    self.path = os.path.dirname(os.path.realpath(__file__))
 
                 
     # Import all the GDS files from the tech folder
@@ -185,11 +190,6 @@ class SiEPIC_EBeam_Library(Library):
                 
     print(' done with pcells')
     
-    self.technology=tech_name
-
-    self.layout().add_meta_info(LayoutMetaInfo("path",os.path.realpath(__file__)))
-    self.layout().add_meta_info(LayoutMetaInfo("technology",tech_name))
-
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
     self.register(library)
