@@ -32,6 +32,8 @@ usage:
  - run this script
 '''
 
+dbu = 0.001
+
 if SiEPIC.__version__ &lt; '0.3.70':
   pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.70 or greater.", pya.MessageBox.Ok)
 
