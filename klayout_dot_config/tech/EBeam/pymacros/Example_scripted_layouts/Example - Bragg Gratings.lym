@@ -9,7 +9,7 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>false</show-in-menu>
+ <show-in-menu>true</show-in-menu>
  <group-name/>
  <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
@@ -34,6 +34,7 @@ from pya import *
 from SiEPIC.extend import to_itype
 from SiEPIC.utils import select_paths, get_layout_variables
 
+dbu=0.001
   
 # linspace function without using numpy, because why not?
 def linspace(a, b, n):
