@@ -65,7 +65,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     x = -r
     y = r
     
-    points = arc_bezier(r, 270, 360, bezier)
+    points = arc_bezier(r, 0, 360, bezier)
     a = pya.Path(points, w).simple_polygon()
     d= [each for each in a.each_point()]
     pt_idx = int(len(d)/2)

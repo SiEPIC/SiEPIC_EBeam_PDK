@@ -34,7 +34,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     self.param("nlayer", self.TypeLayer, "N Layer", default = TECHNOLOGY['Si N'])
     self.param("npplayer", self.TypeLayer, "N++ Layer", default = TECHNOLOGY['Si N++'])
     self.param("vclayer", self.TypeLayer, "VC Layer", default = TECHNOLOGY['VC'])
-    self.param("mlayer", self.TypeLayer, "Metal Layer", default = TECHNOLOGY['12_M2'])
+    self.param("mlayer", self.TypeLayer, "Metal Layer", default = TECHNOLOGY['M2_router'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
