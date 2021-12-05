@@ -16,7 +16,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     
     self.param("height", self.TypeDouble, "Waveguide offset height", default = 2)     
     self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5)     
-    self.param("radius", self.TypeDouble, "Waveguide bend radius (microns)", default = 5)     
+#    self.param("radius", self.TypeDouble, "Waveguide bend radius (microns)", default = 5)     
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
