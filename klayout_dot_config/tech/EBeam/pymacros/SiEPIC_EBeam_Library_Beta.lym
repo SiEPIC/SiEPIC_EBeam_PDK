@@ -187,18 +187,33 @@ class SiEPIC_EBeam_Library_Beta(Library):
     # Import all the GDS files from the tech folder
     import os, fnmatch
     dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/development"))
-    search_str = '*' + '.oas'
-    for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
-            file1=os.path.join(root, filename)
-            print(" - reading %s" % file1 )
-            self.layout().read(file1)
-    search_str = '*' + '.gds'
-    for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
-            file1=os.path.join(root, filename)
-            print(" - reading %s" % file1 )
-            self.layout().read(file1)
+    try:
+        search_str = '*' + '.oas'
+        for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+            for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
+                file1=os.path.join(root, filename)
+                print(" - reading %s" % file1 )
+                self.layout().read(file1)
+        search_str = '*' + '.gds'
+        for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+            for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
+                file1=os.path.join(root, filename)
+                print(" - reading %s" % file1 )
+                self.layout().read(file1)
+    except:
+        # Linux: requires exact case match to read layout file
+        search_str = '*' + '.oas'
+        for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+            for filename in fnmatch.filter([f for f in filenames], search_str):
+                file1=os.path.join(root, filename)
+                print(" - reading %s" % file1 )
+                self.layout().read(file1)
+        search_str = '*' + '.gds'
+        for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+            for filename in fnmatch.filter([f for f in filenames], search_str):
+                file1=os.path.join(root, filename)
+                print(" - reading %s" % file1 )
+                self.layout().read(file1)
         
     # Create the PCell declarations
     for m in pcells_:
