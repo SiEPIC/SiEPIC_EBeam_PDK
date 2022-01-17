@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Contra-directional couplers sweep layout</description>
+ <description>Contra-directional couplers sweep (EBeam)</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -10,7 +10,7 @@
  <autorun-early>false</autorun-early>
  <shortcut/>
  <show-in-menu>true</show-in-menu>
- <group-name/>
+ <group-name>Examples_EBeam</group-name>
  <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
@@ -33,6 +33,17 @@
   
 # Import KLayout-Python API
 from pya import *
+
+'''
+Create a new layout using the EBeam technology,
+with a top cell
+'''
+mw = pya.Application().instance().main_window()
+ly = mw.create_layout('EBeam', 1).layout()
+cell = ly.create_cell('top')
+lv = mw.current_view()
+lv.select_cell(cell.cell_index(), 0)
+dbu = ly.dbu
 
 
 # linspace function without using numpy, because why not?

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Double-bus ring resonator sweep (EBeam)</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>Examples_EBeam</group-name>
+ <menu-path>siepic_menu.exlayout.begin</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>'''
+Scripted layout for ring resonators using SiEPIC-Tools
+in the SiEPIC-EBeam-PDK "EBeam" technology
+
+by Lukas Chrostowski, 2020-2022
+
+'''
+
+from pya import *
+
+# Example layout function
+def dbl_bus_ring_res():
+
+    # Create a layout for testing a double-bus ring resonator.
+    # uses:
+    #  - the SiEPIC EBeam Library
+    # creates the layout in the presently selected cell
+    # deletes everything first
+    
+    # Configure parameter sweep  
+    pol = 'te'
+    if pol == 'te':
+        sweep_radius = [3, 3, 3, 3, 5, 10, 10, 30]
+        sweep_gap    = [0.1, 0.12, 0.05, 0.08, 0.05, 0.1, 0.15, 0.20]
+        x_offset = 67
+        wg_bend_radius = 5
+    else:
+        sweep_radius = [30, 30, 30, 30, 30, 30, 30, 30, 30]
+        sweep_gap    = [0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.60, 0.65]
+        x_offset = 67
+        wg_bend_radius = 15
+
+    wg_width = 0.5
+    
+    '''
+    Create a new layout using the EBeam technology,
+    with a top cell
+    '''
+    mw = pya.Application().instance().main_window()
+    ly = mw.create_layout('EBeam', 1).layout()
+    cell = ly.create_cell('top')
+    lv = mw.current_view()
+    lv.select_cell(cell.cell_index(), 0)
+    dbu = ly.dbu
+
+    if SiEPIC.__version__ &lt; '0.3.71':
+        pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.71 or greater.", pya.MessageBox.Ok)
+
+    # Import functions from SiEPIC-Tools
+    from SiEPIC.extend import to_itype
+    from SiEPIC.scripts import connect_cell, connect_pins_with_waveguide
+    
+    # Layer mapping:
+    LayerSiN = ly.layer(TECHNOLOGY['Si'])
+    fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
+    TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+    
+    # Draw the floor plan
+    cell.shapes(fpLayerN).insert(Box(0,0, 610/dbu, 405/dbu))
+    
+    # Create a sub-cell for our Ring resonator layout
+    top_cell = cell
+    cell = cell.layout().create_cell("RingResonator")
+    if pol == 'te':
+        t = Trans(Trans.R0, 40 / dbu, 12 / dbu)
+    else:
+        # rotate the layout since EBeam TM grating couplers have an angle that is negative
+        t = Trans(Trans.R180, 560 / dbu, 393 / dbu)
+
+    # place the cell in the top cell
+    top_cell.insert(CellInstArray(cell.cell_index(), t))
+    
+    # Import cell from the SiEPIC EBeam Library
+    cell_ebeam_gc = ly.create_cell("ebeam_gc_%s1550" % pol, "EBeam")
+    # get the length of the grating coupler from the cell
+    gc_length = cell_ebeam_gc.bbox().width()*dbu
+    # spacing of the fibre array to be used for testing
+    GC_pitch = 127
+
+    # Loop through the parameter sweep
+    for i in range(len(sweep_gap)):
+        
+        # place layout at location:
+        if i==0:
+            x=0
+        else:
+            # next device is placed at the right-most element + length of the grating coupler
+            x = inst_dc2.bbox().right*dbu + gc_length + 1
+        
+        # get the parameters
+        r = sweep_radius[i]
+        g = sweep_gap[i]
+        
+        # Grating couplers, Ports 0, 1, 2, 3 (from the bottom up)
+        instGCs = []
+        for i in range(0,4):
+            t = Trans(Trans.R0, to_itype(x,dbu), i*127/dbu)
+            instGCs.append( cell.insert(CellInstArray(cell_ebeam_gc.cell_index(), t)) )
+        
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
+        t = Trans(Trans.R90, to_itype(x,dbu), to_itype(GC_pitch*2,dbu))
+        text = Text ("opt_in_%s_1550_device_RingDouble%sr%sg%s" % (pol.upper(), pol.upper(),r,int(round(g*1000))), t)
+        text.halign = 1
+        cell.shapes(TextLayerN).insert(text).text_size = 5/dbu
+        
+        # Label for automated measurements, laser on Port 1, detectors on Ports 2, 3
+        t = Trans(Trans.R0, to_itype(x,dbu), to_itype(GC_pitch*3,dbu))
+        text = Text ("opt_in_%s_1550_device_RingDouble%sr%sg%sB" % (pol.upper(), pol.upper(),r,int(round(g*1000))), t)
+        text.halign = 1
+        cell.shapes(TextLayerN).insert(text).text_size = 5/dbu
+          
+        # Ring resonator from directional coupler PCells
+        cell_dc = ly.create_cell("ebeam_dc_halfring_straight", "EBeam", { "r": r, "w": wg_width, "g": g, "bustype": 0 } )
+        y_ring = GC_pitch*3/2
+        # first directional coupler
+        t1 = Trans(Trans.R270, to_itype(x+wg_bend_radius, dbu), to_itype(y_ring, dbu))
+        inst_dc1 = cell.insert(CellInstArray(cell_dc.cell_index(), t1))
+        # add 2nd directional coupler, snapped to the first one
+        inst_dc2 = connect_cell(inst_dc1, 'pin2', cell_dc, 'pin4')
+        
+        # Create paths for waveguides, with the type defined in WAVEGUIDES.xml in the PDK
+        waveguide_type='Strip TE 1550 nm, w=500 nm'
+        
+        # GC1 to bottom-left of ring pin3
+        connect_pins_with_waveguide(instGCs[1], 'opt1', inst_dc1, 'pin3', waveguide_type=waveguide_type)
+        
+        # GC2 to top-left of ring pin1
+        connect_pins_with_waveguide(instGCs[2], 'opt1', inst_dc1, 'pin1', waveguide_type=waveguide_type)
+        
+        # GC0 to top-right of ring
+        connect_pins_with_waveguide(instGCs[0], 'opt1', inst_dc2, 'pin1', waveguide_type=waveguide_type)
+        
+        # GC3 to bottom-right of ring
+        connect_pins_with_waveguide(instGCs[3], 'opt1', inst_dc2, 'pin3', waveguide_type=waveguide_type)
+        
+    # Zoom out
+    lv.clear_object_selection()
+    lv.zoom_fit()
+    lv.max_hier()
+    
+    # Save a screenshot of the layout:
+    dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Test_structures_ring_resonators.png")
+    lv.save_screenshot(dir_path)
+    
+    # Save the layout, without PCell info, for fabrication
+    save_options = pya.SaveLayoutOptions()
+    save_options.write_context_info=False  # remove $$$CONTEXT_INFO$$$
+    save_options.format='GDS' # standard format
+    save_options.format='OASIS' # smaller file size
+    save_options.oasis_compression_level=10
+    file_out = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Test_structures_ring_resonators.%s" % save_options.format[0:3])
+    print("saving output %s: %s" % (save_options.format, file_out) )
+    ly.write(file_out,save_options)
+
+dbl_bus_ring_res()
+</text>
+</klayout-macro>

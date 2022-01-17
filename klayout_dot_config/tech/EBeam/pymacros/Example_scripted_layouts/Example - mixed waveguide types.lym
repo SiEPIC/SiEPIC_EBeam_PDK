@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Mixed waveguide types</description>
+ <description>Mixed waveguide types (EBeam)</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -9,8 +9,8 @@
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <shortcut/>
- <show-in-menu>true</show-in-menu>
- <group-name/>
+ <show-in-menu>false</show-in-menu>
+ <group-name>Examples_EBeam</group-name>
  <menu-path>siepic_menu.exlayout.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
