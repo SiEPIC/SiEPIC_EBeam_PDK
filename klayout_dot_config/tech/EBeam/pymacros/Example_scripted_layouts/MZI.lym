@@ -20,44 +20,48 @@
 by Lukas Chrostowski, 2020
 
 Example simple script to
-1) create an MZI
-2) take a picture (PNG file)
-3) export to OASIS for submission to fabrication
+ - create a new layout with a top cell
+ - create an MZI
+ - take a picture (PNG file)
+ - export to OASIS for submission to fabrication
 
 using SiEPIC-Tools functions introduced in ~ v0.3.70, 
 specifically connect_pins_with_waveguide and connect_cell
 
 usage:
- - create a blank layout using the technology "EBeam"
  - run this script
 '''
-
-dbu = 0.001
 
 if SiEPIC.__version__ &lt; '0.3.70':
   pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.70 or greater.", pya.MessageBox.Ok)
 
-from SiEPIC import scripts  
-from SiEPIC.utils import get_layout_variables
-TECHNOLOGY, lv, ly, cell = get_layout_variables()
-
-if TECHNOLOGY['technology_name'] not in 'EBeam':
-    raise Exception ('This example needs to be executed in a layout with Technology = EBeam')
+'''
+Create a new layout using the EBeam technology,
+with a top cell
+'''
+mw = pya.Application().instance().main_window()
+ly = mw.create_layout('EBeam', 1).layout()
+cell = ly.create_cell('top')
+lv = mw.current_view()
+lv.select_cell(cell.cell_index(), 0)
+dbu = ly.dbu
 
 from SiEPIC.scripts import connect_pins_with_waveguide, connect_cell
 waveguide_type='Strip TE 1550 nm, w=500 nm'
 
-# delete all cells within the present cell
-top_cell = ly.top_cells()[0]
-ly.prune_subcells(top_cell.cell_index(), 10)
-
+# Load cells from library
 cell_ebeam_gc = ly.create_cell('ebeam_gc_te1550', 'EBeam')
 cell_ebeam_y = ly.create_cell('ebeam_y_1550', 'EBeam')
 
+# create a floor plan
+fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
+cell.shapes(fpLayerN).insert(Box(0,0, 610/dbu, 405/dbu))
+
 # grating couplers, place at absolute positions
-t = pya.Trans.from_s('r0 0,0')
+x,y = 35000, 15000
+t = pya.Trans.from_s('r0 %s,%s' % (x,y))
 instGC1 = cell.insert(pya.CellInstArray(cell_ebeam_gc.cell_index(), t))
-t = pya.Trans.from_s('r0 0,127000')
+t = pya.Trans.from_s('r0 %s,%s' % (x,y+127000))
 instGC2 = cell.insert(pya.CellInstArray(cell_ebeam_gc.cell_index(), t))
 
 # automated test label
@@ -66,7 +70,7 @@ cell.shapes(ly.layer(TECHNOLOGY['Text'])).insert(text).text_size = 5/dbu
 
 # Y branches:
 # Version 1: place it at an absolute position:
-t = pya.Trans.from_s('r0 20000,0')
+t = pya.Trans.from_s('r0 %s, %s' % (x+20000,y))
 instY1 = cell.insert(pya.CellInstArray(cell_ebeam_y.cell_index(), t))
 
 # Version 2: attach it to an existing component, then move relative
