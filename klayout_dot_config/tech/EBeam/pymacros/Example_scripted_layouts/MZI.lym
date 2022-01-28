@@ -39,19 +39,22 @@ if SiEPIC.__version__ &lt; '0.3.70':
 Create a new layout using the EBeam technology,
 with a top cell
 '''
+tech_name = 'EBeam'
 mw = pya.Application().instance().main_window()
-ly = mw.create_layout('EBeam', 1).layout()
+ly = mw.create_layout(tech_name, 1).layout()
 cell = ly.create_cell('top')
 lv = mw.current_view()
 lv.select_cell(cell.cell_index(), 0)
 dbu = ly.dbu
+from SiEPIC.utils import get_technology_by_name
+TECHNOLOGY = get_technology_by_name(tech_name)
 
 from SiEPIC.scripts import connect_pins_with_waveguide, connect_cell
 waveguide_type='Strip TE 1550 nm, w=500 nm'
 
 # Load cells from library
-cell_ebeam_gc = ly.create_cell('ebeam_gc_te1550', 'EBeam')
-cell_ebeam_y = ly.create_cell('ebeam_y_1550', 'EBeam')
+cell_ebeam_gc = ly.create_cell('ebeam_gc_te1550', tech_name)
+cell_ebeam_y = ly.create_cell('ebeam_y_1550', tech_name)
 
 # create a floor plan
 fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])

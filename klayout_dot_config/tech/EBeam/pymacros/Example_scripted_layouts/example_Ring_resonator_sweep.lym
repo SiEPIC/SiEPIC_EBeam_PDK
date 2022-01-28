@@ -52,12 +52,16 @@ def dbl_bus_ring_res():
     Create a new layout using the EBeam technology,
     with a top cell
     '''
+    tech_name = 'EBeam'
     mw = pya.Application().instance().main_window()
-    ly = mw.create_layout('EBeam', 1).layout()
+    ly = mw.create_layout(tech_name, 1).layout()
     cell = ly.create_cell('top')
     lv = mw.current_view()
     lv.select_cell(cell.cell_index(), 0)
     dbu = ly.dbu
+
+    from SiEPIC.utils import get_technology_by_name
+    TECHNOLOGY = get_technology_by_name(tech_name)
 
     if SiEPIC.__version__ &lt; '0.3.71':
         pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.3.71 or greater.", pya.MessageBox.Ok)
