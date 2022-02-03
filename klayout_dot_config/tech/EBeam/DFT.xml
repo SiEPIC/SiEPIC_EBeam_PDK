@@ -19,13 +19,27 @@
 		<wavelength-start>1500</wavelength-start>
 		<wavelength-stop>1600</wavelength-stop>
 		<wavelength-points>3000</wavelength-points>
-		<polarization>TE, TM</polarization>
+		<polarization>TE</polarization>
+	</tunable-laser>
+	<tunable-laser>
+		<wavelength>1550</wavelength>
+		<wavelength-start>1500</wavelength-start>
+		<wavelength-stop>1600</wavelength-stop>
+		<wavelength-points>3000</wavelength-points>
+		<polarization>TM</polarization>
 	</tunable-laser>
 	<tunable-laser>
 		<wavelength>1310</wavelength>
-		<wavelength-start>1240</wavelength-start>
+		<wavelength-start>1260</wavelength-start>
 		<wavelength-stop>1360</wavelength-stop>
 		<wavelength-points>3000</wavelength-points>
-		<polarization>TE, TM</polarization>
+		<polarization>TE</polarization>
+	</tunable-laser>
+	<tunable-laser>
+		<wavelength>1310</wavelength>
+		<wavelength-start>1260</wavelength-start>
+		<wavelength-stop>1360</wavelength-stop>
+		<wavelength-points>3000</wavelength-points>
+		<polarization>TM</polarization>
 	</tunable-laser>
 </design-for-test>
