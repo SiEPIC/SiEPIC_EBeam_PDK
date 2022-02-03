@@ -186,16 +186,17 @@ class SiEPIC_EBeam_Library_Beta(Library):
                 
     # Import all the GDS files from the tech folder
     import os, fnmatch
-    dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/development"))
-    search_str = '*' + '.oas'
+    dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/mature"))
+    print('  library path: %s' % dir_path)
+    search_str = '*.[Oo][Aa][Ss]' # OAS
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
+        for filename in fnmatch.filter(filenames, search_str):
             file1=os.path.join(root, filename)
             print(" - reading %s" % file1 )
             self.layout().read(file1)
-    search_str = '*' + '.gds'
+    search_str = '*.[Gg][Dd][Ss]' # GDS
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter([f.lower() for f in filenames], search_str):
+        for filename in fnmatch.filter(filenames, search_str):
             file1=os.path.join(root, filename)
             print(" - reading %s" % file1 )
             self.layout().read(file1)
