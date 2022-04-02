@@ -5,7 +5,7 @@
  <group/>
  <dbu>0.001</dbu>
  <base-path/>
- <original-base-path>C:\Users\Mustafa\KLayout\salt\siepic_ebeam_pdk\tech\EBeam</original-base-path>
+ <original-base-path>/Users/lukasc/Documents/GitHub/SiEPIC_EBeam_PDK/klayout_dot_config/tech/EBeam</original-base-path>
  <layer-properties_file>klayout_Layers_EBeam.lyp</layer-properties_file>
  <add-other-layers>true</add-other-layers>
  <reader-options>
@@ -72,21 +72,6 @@
    <separate-groups>false</separate-groups>
    <map-file/>
   </lefdef>
-  <mebes>
-   <invert>false</invert>
-   <subresolution>true</subresolution>
-   <produce-boundary>true</produce-boundary>
-   <num-stripes-per-cell>64</num-stripes-per-cell>
-   <num-shapes-per-cell>0</num-shapes-per-cell>
-   <data-layer>1</data-layer>
-   <data-datatype>0</data-datatype>
-   <data-name>DATA</data-name>
-   <boundary-layer>0</boundary-layer>
-   <boundary-datatype>0</boundary-datatype>
-   <boundary-name>BORDER</boundary-name>
-   <layer-map>layer_map()</layer-map>
-   <create-other-layers>true</create-other-layers>
-  </mebes>
   <dxf>
    <dbu>0.001</dbu>
    <unit>1</unit>
@@ -122,8 +107,8 @@
  <writer-options>
   <gds2>
    <write-timestamps>true</write-timestamps>
-   <write-cell-properties>false</write-cell-properties>
-   <write-file-properties>false</write-file-properties>
+   <write-cell-properties>true</write-cell-properties>
+   <write-file-properties>true</write-file-properties>
    <no-zero-length-paths>false</no-zero-length-paths>
    <multi-xy-records>false</multi-xy-records>
    <resolve-skew-arrays>false</resolve-skew-arrays>

@@ -228,4 +228,15 @@
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>
+  <waveguide>
+    <name>Si routing TE 1550 nm (compound waveguide)</name>
+    <compound_waveguide>
+      <singlemode>Strip TE 1550 nm, w=500 nm</singlemode>
+      <multimode>Multimode Strip TE 1550 nm, w=3000 nm</multimode>
+      <taper_library>EBeam</taper_library>
+      <taper_cell>taper_si_simm_1550</taper_cell>
+      <taper_pin_sm>opt1</taper_pin_sm>
+      <taper_pin_mm>opt2</taper_pin_mm>
+    </compound_waveguide>
+  </waveguide>
 </waveguides>
