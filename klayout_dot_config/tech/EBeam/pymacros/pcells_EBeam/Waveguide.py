@@ -21,8 +21,15 @@ class Waveguide(pya.PCellDeclarationHelper):
     
     from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
 
+    '''
+    # https://github.com/KLayout/klayout/issues/879
+    tech = self.layout.library().technology
+    if not tech:
+       tech = 'EBeam'
+    self.technology_name = tech
+    '''
     self.technology_name = 'EBeam'
-
+            
     # Load all strip waveguides
     self.waveguide_types = load_Waveguides_by_Tech(self.technology_name)   
         
@@ -57,6 +64,9 @@ class Waveguide(pya.PCellDeclarationHelper):
     self.path = self.shape.path
         
   def produce_impl(self):
+
+    # https://github.com/KLayout/klayout/issues/879
+    # tech = self.layout.library().technology
         
     # Make sure the technology name is associated with the layout
     #  PCells don't seem to know to whom they belong!
@@ -67,7 +77,7 @@ class Waveguide(pya.PCellDeclarationHelper):
     from SiEPIC.utils.layout import layout_waveguide4
     self.waveguide_length = layout_waveguide4(self.cell, self.path, self.waveguide_type)
 
-    print("AMF.%s: length %s um, complete" % (self.cellName, self.waveguide_length))
+    print("EBeam.%s: length %.3f um, complete" % (self.cellName, self.waveguide_length))
 
 '''
 import pya
