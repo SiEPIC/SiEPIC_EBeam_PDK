@@ -58,7 +58,7 @@ cell_ebeam_y = ly.create_cell('ebeam_y_1550', tech_name)
 
 # create a floor plan
 fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
-cell.shapes(fpLayerN).insert(Box(0,0, 610/dbu, 405/dbu))
+cell.shapes(fpLayerN).insert(Box(0,0, 605/dbu, 410/dbu))
 
 # grating couplers, place at absolute positions
 x,y = 35000, 15000
@@ -81,7 +81,7 @@ instY2 = connect_cell(instGC2, 'opt1', cell_ebeam_y, 'opt1')
 instY2.transform(Trans(20000,-10000))
 
 # Waveguides:
-connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=waveguide_type, verbose=True)
+
 connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
 #connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type='Strip TE 1550 nm, w=2000 nm',turtle_B=[25,-90])

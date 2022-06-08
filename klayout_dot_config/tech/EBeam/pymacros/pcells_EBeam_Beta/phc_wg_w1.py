@@ -138,7 +138,7 @@ class phc_wg_w1(pya.PCellDeclarationHelper):
             hole_t = hole_poly.transformed(hole_trans)
             hole.insert(hole_t) 
             
-    phc = Si_slab - hole
+    phc = Si_slab - hole  # Perform the boolean operation
     self.cell.shapes(LayerSiN).insert(phc)
     if etch_condition == 1:
       box_etch = pya.Box(-(length_slab_x/2-3000), -(length_slab_y/2-6000), length_slab_x/2-3000, length_slab_y/2-6000)

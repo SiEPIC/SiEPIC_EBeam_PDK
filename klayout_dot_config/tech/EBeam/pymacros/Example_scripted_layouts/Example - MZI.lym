@@ -86,7 +86,7 @@ TextLayer = pya.LayerInfo(10, 0)
 TextLayerN = cell.layout().layer(TextLayer)
 
 # Draw floor plan
-cell.shapes(fpLayerN).insert(pya.Box(0,0, 610*dbu, 405*dbu))
+cell.shapes(fpLayerN).insert(Box(0,0, 605/dbu, 410/dbu))
 
 #coordinates for GC
 GC_coord = [0,227]
