@@ -78,7 +78,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
-    from SiEPIC.utils import points_per_circle
+    from SiEPIC.utils import points_per_circle, layout_pgtext
     
     # Create the ring resonator:
     layout_Ring(self.cell, LayerSiN, self.r+self.w/2, self.r+self.g+self.w, self.r, self.w, points_per_circle(self.r))
