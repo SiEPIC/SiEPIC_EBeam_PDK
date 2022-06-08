@@ -42,18 +42,19 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     shapes = self.cell.shapes
 
     from SiEPIC.utils.layout import layout_waveguide_sbend, layout_waveguide_sbend_bezier
+    from SiEPIC.extend import to_itype
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
-    length = self.length / dbu
-    w = self.wg_width / dbu
-    h = self.height / dbu
+    length = to_itype(self.length,dbu)
+    w = to_itype(self.wg_width,dbu)
+    h = to_itype(self.height,dbu)
    
 #    waveguide_length = layout_waveguide_sbend(self.cell, LayerSiN, pya.Trans(Trans.R0, 0,0), w, r, h, length)
-    waveguide_length = layout_waveguide_sbend_bezier(self.cell, LayerSiN, pya.Trans(), w*dbu, w*dbu, h*dbu, length*dbu) / dbu
+    waveguide_length = to_itype(layout_waveguide_sbend_bezier(self.cell, LayerSiN, pya.Trans(), self.wg_width, self.wg_width, self.height,self.length), dbu)
     
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
@@ -65,7 +66,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    shape.text_size = to_itype(0.4,dbu)
     shape.text_halign = 2
 
     x = 0
@@ -75,24 +76,24 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    shape.text_size = to_itype(0.4,dbu)
 
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/EBeam', t)
     shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
+    shape.text_size = to_itype(0.1,dbu)
     t = Trans(Trans.R0, 0, w*2)
     text = Text ('Component=ebeam_wg_integral_1550', t)
     shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
+    shape.text_size = to_itype(0.1,dbu)
     t = Trans(Trans.R0, 0, -w*2)
     text = Text \
       ('Spice_param:wg_length=%.3fu wg_width=%.3fu' %\
       (waveguide_length*dbu, self.wg_width), t )
     shape = shapes(LayerDevRecN).insert(text)
-    shape.text_size = 0.1/dbu
+    shape.text_size = to_itype(0.1,dbu)
 #    t = Trans(Trans.R0, 0, -w*3)
 #    text = Text ('Extra length = %.4fu, Shortest length = %.4fu' % (straight_l*dbu, (length-2*straight_l)*dbu), t )
 #    shape = shapes(LayerDevRecN).insert(text)
