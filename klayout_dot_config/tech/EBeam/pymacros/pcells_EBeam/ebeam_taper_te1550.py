@@ -1,6 +1,8 @@
 from . import *
 from pya import *
 
+# TODO( pin definition needs to be done from bottom to top, not center defined due to error deviding 1 nm resolutions)  
+
 class ebeam_taper_te1550(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the strip waveguide taper.
@@ -41,7 +43,9 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     self._param_values = parameters
     self.layout = layout
     shapes = self.cell.shapes
-
+    
+    from SiEPIC.extend import to_itype
+    from math import ceil
 
     # cell: layout cell to place the layout
     # LayerSiN: which layer to use
@@ -57,11 +61,11 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
     
-    w1 = int(round(self.wg_width1/dbu))
-    w2 = int(round(self.wg_width2/dbu))
-    length = int(round(self.wg_length/dbu))
+    w1 = to_itype(self.wg_width1,dbu)
+    w2 = to_itype(self.wg_width2,dbu)
+    length = to_itype(self.wg_length,dbu)
 
-    pts = [Point(0,-w1/2), Point(0,w1/2), Point(length,w2/2), Point(length,-w2/2)]
+    pts = [Point(0,0), Point(0,w1), Point(length,w2), Point(length,0)]
     shapes(LayerSiN).insert(Polygon(pts))
 
     
@@ -69,8 +73,8 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
     
     # Pin on the left side:
-    p1 = [Point(pin_length/2,0), Point(-pin_length/2,0)]
-    p1c = Point(0,0)
+    p1 = [Point(pin_length/2,w1/2), Point(-pin_length/2,w1/2)]
+    p1c = Point(0,w1/2)
     self.set_p1 = p1c
     self.p1 = p1c
     pin = Path(p1, w1)
@@ -78,11 +82,11 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     t = Trans(Trans.R0, 0, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    shape.text_size = to_itype(0.4,dbu)
 
     # Pin on the right side:
-    p2 = [Point(length-pin_length/2,0), Point(length+pin_length/2,0)]
-    p2c = Point(length, 0)
+    p2 = [Point(length-pin_length/2,ceil(w2/2)), Point(length+pin_length/2,ceil(w2/2))]
+    p2c = Point(length, ceil(w2/2))
     self.set_p2 = p2c
     self.p2 = p2c
     pin = Path(p2, w2)
@@ -90,7 +94,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     t = Trans(Trans.R0, length, 0)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    shape.text_size =to_itype(0.4,dbu)
     shape.text_halign = 2
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
