@@ -426,8 +426,8 @@
   <marked>false</marked>
   <xfill>false</xfill>
   <animation>0</animation>
-  <name/>
-  <source>BlackBox 998/0@1</source>
+  <name>BlackBox</name>
+  <source>998/0@1</source>
  </group-members>
 
  </properties>
