@@ -412,7 +412,26 @@
   <name>Lumerical</name>
   <source>733/0@1</source>
  </group-members>
+ <group-members>
+  <frame-color>#004080</frame-color>
+  <fill-color>#004080</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I0</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>1</width>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>BlackBox</name>
+  <source>998/0@1</source>
+ </group-members>
+
  </properties>
+
  <properties>
   <frame-color/>
   <fill-color/>
