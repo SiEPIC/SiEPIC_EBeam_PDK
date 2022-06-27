@@ -7,6 +7,10 @@
 		<gc-pitch>127</gc-pitch>
 		<minimum-gc-pitch-between-separate-circuits>40</minimum-gc-pitch-between-separate-circuits>
 		<gc-orientation>
+			<GC_TE_1310_8degOxide_BB>0</GC_TE_1310_8degOxide_BB>
+			<GC_TE_1550_8degOxide_BB>0</GC_TE_1550_8degOxide_BB>
+			<GC_TM_1310_8degOxide_BB>0</GC_TM_1310_8degOxide_BB>
+			<GC_TM_1550_8degOxide_BB>0</GC_TM_1550_8degOxide_BB>
 			<ebeam_gc_te1550>0</ebeam_gc_te1550>
 			<ebeam_gc_tm1550>180</ebeam_gc_tm1550>
 		</gc-orientation>
