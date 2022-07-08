@@ -1,5 +1,11 @@
-from . import *
+"""
+Author:   Mustafa Hammood, 2021
+          Mustafa@siepic.com; mustafa.hammood@dreamphotonics.com; mustafa@ece.ubc.ca
+"""
+
+import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name
 
 def make_pin(cell, name, center, w, pin_length, layer, vertical = 0):
   if vertical == 0:
@@ -17,10 +23,6 @@ def make_pin(cell, name, center, w, pin_length, layer, vertical = 0):
   cell.shapes(layer).insert(pin)
   
 class contra_directional_coupler(pya.PCellDeclarationHelper):
-  """
-  Author:   Mustafa Hammood, 2018
-            Mustafa@siepic.com
-  """
 
   def __init__(self):
     # Important: initialize the super class
@@ -28,24 +30,26 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
+    self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 500)     
     self.param("grating_period", self.TypeDouble, "Grating period (microns)", default = 0.317)
     self.param("gap", self.TypeDouble, "Gap (microns)", default = 0.15)          
     self.param("corrugation_width1", self.TypeDouble, "Waveguide 1 Corrugration width (microns)", default = 0.03)
-    self.param("corrugation_width2", self.TypeDouble, "Waveguide 2 Corrugration width (microns)", default = 0.04)          
+    self.param("corrugation_width2", self.TypeDouble, "Waveguide 2 Corrugration width (microns)", default = 0.06)          
     self.param("AR", self.TypeBoolean, "Anti-Reflection Design", default =True)
     self.param("sinusoidal", self.TypeBoolean, "Grating Type (Rectangular=False, Sinusoidal=True)", default = False)     
     self.param("wg1_width", self.TypeDouble, "Waveguide 1 width", default = 0.45)
     self.param("wg2_width", self.TypeDouble, "Waveguide 2 width", default = 0.55)
-    self.param("sbend",self.TypeBoolean, "Include S-bends", default = 1)          
+    self.param("sbend",self.TypeBoolean, "Include S-bends", default = 1)
+    self.param("sbend_r", self.TypeDouble, "S-bend radius (microns)", default = 15)
+    self.param("sbend_length", self.TypeDouble, "S-bend length (microns)", default = 11)       
     self.param("apodization_index", self.TypeDouble, "Gaussian Apodization Index", default = 2.8)
     self.param("port_w", self.TypeDouble, "Port Waveguide width", default = 0.5)
     self.param("accuracy", self.TypeBoolean, "Simulation Accuracy (on = high, off = fast)", default = True)
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Waveguide Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("rib", self.TypeBoolean, "Use rib (ridge) waveguides?", default = False)
+    self.param("layer_rib", self.TypeLayer, "Rib Layer", default = TECHNOLOGY['Si - 90 nm rib'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-    
-#    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -72,8 +76,13 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
+    LayerRib = ly.layer(self.layer_rib)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
+
+
+    shapes_wg = pya.Region()
+    shapes_rib = pya.Region()
 
     from SiEPIC.extend import to_itype
     
@@ -113,16 +122,19 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
           
         pts1.append( Point(x + grating_period, y_offset_top) )
         pts3.append( Point(x + grating_period + misalignment, y_offset_top) )
-        shapes(LayerSiN).insert(Polygon(pts1))
-        shapes(LayerSiN).insert(Polygon(pts3))
+        
+        shapes_wg += Polygon(pts1)
+        shapes_wg += Polygon(pts3)
+
       length = x + grating_period + misalignment
       if misalignment > 0:
         # extra piece at the end:
         box2 = Box(x + grating_period, y_offset_top, length, y_offset_top + half_w)
-        shapes(LayerSiN).insert(box2)
         # extra piece at the beginning:
         box3 = Box(0, y_offset_top, misalignment, y_offset_top -half_w)
-        shapes(LayerSiN).insert(box3)
+
+        shapes_wg += box2
+        shapes_wg += box3
 
     else:
       for i in range(0,self.number_of_periods):
@@ -135,18 +147,19 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         box2 = Box(x + box_width, y_offset_top , x + grating_period, y_offset_top + to_itype(half_w-profile,dbu*1000))
         box3 = Box(x + misalignment, y_offset_top , x + box_width + misalignment, y_offset_top + to_itype(-half_w-profile,dbu*1000))
         box4 = Box(x + box_width + misalignment, y_offset_top , x + grating_period + misalignment, y_offset_top + to_itype(-half_w+profile,dbu*1000))
-        shapes(LayerSiN).insert(box1)
-        shapes(LayerSiN).insert(box2)
-        shapes(LayerSiN).insert(box3)
-        shapes(LayerSiN).insert(box4)
+        
+        shapes_wg += box1
+        shapes_wg += box2
+        shapes_wg += box3
+        shapes_wg += box4
       length = x + grating_period + misalignment
       if misalignment > 0:
         # extra piece at the end:
         box2 = Box(x + grating_period, y_offset_top , length,y_offset_top +  half_w)
-        shapes(LayerSiN).insert(box2)
+        shapes_wg += box2
         # extra piece at the beginning:
         box3 = Box(0,y_offset_top , misalignment, y_offset_top -half_w)
-        shapes(LayerSiN).insert(box3)
+        shapes_wg += box3
 
     vertical_offset = int(round(self.wg2_width/2/dbu))+int(round(self.gap/2/dbu))
     
@@ -181,16 +194,17 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
           pts3.append( Point(x + misalignment + x1,+half_w+y1 ) )
         pts1.append( Point(x + grating_period, 0) )
         pts3.append( Point(x + grating_period + misalignment, 0) )
-        shapes(LayerSiN).insert(Polygon(pts1).transformed(t))
-        shapes(LayerSiN).insert(Polygon(pts3).transformed(t))
+
+        shapes_wg += Polygon(pts1).transformed(t)
+        shapes_wg += Polygon(pts3).transformed(t)
       length = x + grating_period + misalignment
       if misalignment > 0:
         # extra piece at the end:
         box2 = Box(x + grating_period, 0, length, -half_w).transformed(t)
-        shapes(LayerSiN).insert(box2)
+        shapes_wg += box2
         # extra piece at the beginning:
         box3 = Box(0, 0, misalignment, half_w).transformed(t)
-        shapes(LayerSiN).insert(box3)
+        shapes_wg += box3
 
     else:
       for i in range(0,self.number_of_periods):
@@ -201,19 +215,21 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         box2 = Box(x + box_width, 0, x + grating_period, -half_w+profile).transformed(t)
         box3 = Box(x + misalignment, 0, x + box_width + misalignment, half_w+profile).transformed(t)
         box4 = Box(x + box_width + misalignment, 0, x + grating_period + misalignment, half_w-profile).transformed(t)
-        shapes(LayerSiN).insert(box1)
-        shapes(LayerSiN).insert(box2)
-        shapes(LayerSiN).insert(box3)
-        shapes(LayerSiN).insert(box4)
+
+        shapes_wg += box1
+        shapes_wg += box2
+        shapes_wg += box3
+        shapes_wg += box4
+
       length = x + grating_period + misalignment
       if misalignment > 0:
         # extra piece at the end:
         box2 = Box(x + grating_period, 0, length, -half_w).transformed(t)
-        shapes(LayerSiN).insert(box2)
+        shapes_wg += box2
         # extra piece at the beginning:
         box3 = Box(0, 0, misalignment, half_w).transformed(t)
-        shapes(LayerSiN).insert(box3)
-        
+        shapes_wg += box3
+
     # Create the pins on the waveguides, as short paths:
     from SiEPIC._globals import PIN_LENGTH as pin_length
 
@@ -222,39 +238,39 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     if self.sbend:
 
       port_w = to_itype(self.port_w,dbu)
-      sbend_r = 25000; sbend_length = 15000
-      sbend_offset= 2*port_w + port_w - (w1+w2)/2 - int(round(self.gap/dbu))
-      taper_length = 20*max(abs(w1-port_w), abs(w2-port_w))
+      sbend_r = to_itype(self.sbend_r,dbu); sbend_length = to_itype(self.sbend_length,dbu)
+      sbend_offset= 4*port_w + port_w - (w1+w2)/2 - int(round(self.gap/dbu))
+      taper_length = 50*max(abs(w1-port_w), abs(w2-port_w))
       
       t = Trans(Trans.R180, 0,y_offset_top)
-      layout_waveguide_sbend(self.cell, LayerSiN, t, w1, sbend_r, sbend_offset, sbend_length)
+      shapes_wg += layout_waveguide_sbend(self.cell, LayerSiN, t, w1, sbend_r, sbend_offset, sbend_length, insert = False)
       t = Trans(Trans.R0, -sbend_length-taper_length,y_offset_top-sbend_offset)
-      layout_taper(self.cell, LayerSiN, t,  port_w, w1, taper_length)
+      shapes_wg += layout_taper(self.cell, LayerSiN, t,  port_w, w1, taper_length, insert = False)
       x = -sbend_length-taper_length
       y = y_offset_top-sbend_offset
       make_pin(self.cell, "opt1", [x,y], port_w, pin_length, LayerPinRecN, vertical = 0)
       
       t = Trans(Trans.R180, 0,vertical_offset)
-      layout_taper(self.cell, LayerSiN, t,  w2, w2, sbend_length/2)
+      shapes_wg += layout_taper(self.cell, LayerSiN, t,  w2, w2, sbend_length/2, insert = False)
       t = Trans(Trans.R180, -sbend_length/2,vertical_offset)
-      layout_taper(self.cell, LayerSiN, t,  w2, port_w, taper_length+sbend_length/2)
+      shapes_wg += layout_taper(self.cell, LayerSiN, t,  w2, port_w, taper_length+sbend_length/2, insert = False)
       x = -taper_length-sbend_length
       y = vertical_offset
       make_pin(self.cell, "opt2", [x,y], port_w, pin_length, LayerPinRecN, vertical = 0)
 
       t = Trans(Trans.R0, length,y_offset_top )
-      layout_waveguide_sbend(self.cell, LayerSiN, t, w1, sbend_r, -sbend_offset, sbend_length)
+      shapes_wg += layout_waveguide_sbend(self.cell, LayerSiN, t, w1, sbend_r, -sbend_offset, sbend_length, insert = False)
       t = Trans(Trans.R0, length+sbend_length,y_offset_top-sbend_offset)
-      layout_taper(self.cell, LayerSiN, t, w1, port_w, taper_length)
+      shapes_wg += layout_taper(self.cell, LayerSiN, t, w1, port_w, taper_length, insert = False)
       x = length+sbend_length+taper_length
       y = y_offset_top-sbend_offset
       make_pin(self.cell, "opt3", [x,y], port_w, -pin_length, LayerPinRecN, vertical = 0)
 
       
       t = Trans(Trans.R0, length, vertical_offset)
-      layout_taper(self.cell, LayerSiN, t,  w2, w2, sbend_length/2)
+      shapes_wg += layout_taper(self.cell, LayerSiN, t,  w2, w2, sbend_length/2, insert = False)
       t = Trans(Trans.R0, length+sbend_length/2, vertical_offset)
-      layout_taper(self.cell, LayerSiN, t,  w2, port_w, taper_length+sbend_length/2)
+      shapes_wg += layout_taper(self.cell, LayerSiN, t,  w2, port_w, taper_length+sbend_length/2, insert = False)
       x = length+taper_length+sbend_length
       y = vertical_offset
       make_pin(self.cell, "opt4", [x,y], port_w, -pin_length, LayerPinRecN, vertical = 0)
@@ -274,7 +290,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
       x = length
       y = vertical_offset
       make_pin(self.cell, "opt4", [x,y], w2, -pin_length, LayerPinRecN, vertical = 0)
-
+    
     # Compact model information
     t = Trans(Trans.R0, 10, 0)
     text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
@@ -293,8 +309,21 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     if self.sbend:
-      box = pya.Box(pya.Point(-taper_length-sbend_length, vertical_offset+3/2*port_w),pya.Point(length+taper_length+sbend_length, y_offset_top-sbend_offset-3/2*port_w))
+      box = pya.Box(pya.Point(-taper_length-sbend_length, vertical_offset+3*port_w),pya.Point(length+taper_length+sbend_length, y_offset_top-sbend_offset-3*port_w))
     else:
-       box = pya.Box(pya.Point(0, vertical_offset+3/2*(w1+w2)/2),pya.Point(length, y_offset_top-3/2*(w1+w2)/2))     
+      box = pya.Box(pya.Point(0, vertical_offset+3*(w1+w2)/2),pya.Point(length, y_offset_top-3*(w1+w2)/2))     
+    DevRecBox = box
     shapes(LayerDevRecN).insert(box)
+
+    # Draw the waveguide layer
+    if self.rib == False:
+      shapes(LayerSiN).insert(shapes_wg)
+    else: # turn shape into a rib waveguide
+      region_devrec = Region(DevRecBox)
+      region_devrec2 = Region(DevRecBox).size(1500)
+      shapes_rib += shapes_wg
+      shapeRib = shapes_rib.size(1400) -shapes_wg - (region_devrec2-region_devrec)
+
+      shapes(LayerRib).insert(shapeRib)
+      shapes(LayerSiN).insert(shapes_wg)
     
