@@ -41,13 +41,13 @@ if '%errorlevel%' NEQ '0' (
 
 mkdir "%userprofile%"\KLayout\tech
 
-mklink /d "%userprofile%"\KLayout\tech\SiEPIC_Shuksan_PDK "%userprofile%"\Documents\GitHub\SiEPIC_EBEAM_PDK\klayout\siepic_ebeam_pdk\
+mklink /d "%userprofile%"\KLayout\tech\SiEPIC_EBeam_PDK "%userprofile%"\Documents\GitHub\SiEPIC_EBeam_PDK\klayout\siepic_ebeam_pdk\
 (call)
 
-mklink /d "%userprofile%"\AppData\Roaming\Custom\SiEPICfab_Shuksan_PDK "%userprofile%"\Documents\GitHub\SiEPICfab_Shuksan_PDK\lumerical_CML\SiEPICfab_Shuksan_PDK\
+mklink /d "%userprofile%"\AppData\Roaming\Custom\SiEPIC_EBeam_PDK "%userprofile%"\Documents\GitHub\SiEPIC_EBeam_PDK\lumerical_CML\siepic_ebeam_pdk\
 
 if %errorlevel% NEQ 0 (
-    mklink /d "%userprofile%"\AppData\Roaming\Lumerical\Custom\SiEPICfab_Shuksan_PDK "%userprofile%"\Documents\GitHub\SiEPICfab_Shuksan_PDK\lumerical_CML\SiEPICfab_Shuksan_PDK\
+    mklink /d "%userprofile%"\AppData\Roaming\Lumerical\Custom\SiEPIC_EBeam_PDK "%userprofile%"\Documents\GitHub\SiEPIC_EBeam_PDK\lumerical_CML\siepic_ebeam_pdk\
 )
 
 set /p Text= Hit Enter to continue...
