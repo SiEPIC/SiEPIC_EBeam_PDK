@@ -16,7 +16,7 @@ class MultiBox_BraggGrating(pya.PCellDeclarationHelper):
 
       # Important: initialize the super class
       super(MultiBox_BraggGrating, self).__init__()
-      TECHNOLOGY = get_technology_by_name('EBeam')
+      TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
       # declare the parameters
       self.param("pitch", self.TypeDouble, "Period of SWG [um]", default = 0.24)

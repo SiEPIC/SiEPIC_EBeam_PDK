@@ -11,7 +11,7 @@ class Contra_DC_SWG_Chirped(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Contra_DC_SWG_Chirped, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     

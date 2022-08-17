@@ -10,7 +10,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
@@ -65,7 +65,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     lib = Library.library_by_name("EBeam_Beta")
     if lib == None:
-      raise Exception("Unknown lib 'EBeam-dev'")
+      raise Exception("Unknown lib 'SiEPIC_EBeam_PDK-dev'")
 
     pcell_decl = lib.layout().pcell_declaration("DoubleBus_Ring");
     if pcell_decl == None:
@@ -96,7 +96,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     GC_name = "ebeam_gc_te1550"
     GC_imported = ly.cell(GC_name)
     if GC_imported == None:
-      GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
+      GC_imported = ly.create_cell(GC_name, "SiEPIC-SiEPIC_EBeam_PDK").cell_index()
     else:
       GC_imported = GC_imported.cell_index()  
     print( "Cell: GC_imported: #%s" % GC_imported )

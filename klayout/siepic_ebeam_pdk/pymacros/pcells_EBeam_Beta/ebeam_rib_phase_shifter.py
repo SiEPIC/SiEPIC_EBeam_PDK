@@ -18,7 +18,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_rib_phase_shifter, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
@@ -73,7 +73,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     from SiEPIC.extend import to_itype
 
     # fetch the parameters
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     dbu = self.layout.dbu
     ly = self.layout
         

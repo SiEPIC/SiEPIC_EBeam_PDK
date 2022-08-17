@@ -1,5 +1,6 @@
 #	SiEPIC EBeam PDK cross-section, based on ANT NanoSOI process
 #	https://www.appliednt.com/nanosoi/
+#   Jaspreet Jhoja      jaspreetj@ece.ubc.ca
 #	Mustafa Hammood		mustafa@siepic.com
 
 # input layers:
@@ -42,7 +43,7 @@ mask(mlopen).etch(0.3, :taper => etch_angle, :bias =>  0, :into => x_oxide)
 
 # output
 
-layers_file(File.join(File.expand_path(File.dirname(__FILE__)), "EBeam.lyp"))
+layers_file(File.join(File.expand_path(File.dirname(__FILE__)), "EBeam_xsection_layers.lyp"))
 output("300/0", x_oxide)
 output("300/0", bulk)
 output("301/0", x_si1)

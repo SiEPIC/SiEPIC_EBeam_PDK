@@ -171,7 +171,7 @@ class SiEPIC_EBeam_Library_Beta(Library):
 
   def __init__(self):
   
-    tech_name = 'EBeam'
+    tech_name = 'SiEPIC_EBeam_PDK'
     library = tech_name +'_Beta'
     self.technology=tech_name
 

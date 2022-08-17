@@ -14,7 +14,7 @@ class strip_to_slot(pya.PCellDeclarationHelper):
 
     def __init__(self):       
         super(strip_to_slot, self).__init__()
-        TECHNOLOGY = get_technology_by_name('EBeam')
+        TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
         # declare the parameters
         self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
         self.param("r", self.TypeDouble, "Radius", default = 15)

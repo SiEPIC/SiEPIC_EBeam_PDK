@@ -9,7 +9,7 @@ class spiral(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(spiral, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Target Waveguide length", default = 10.0)     

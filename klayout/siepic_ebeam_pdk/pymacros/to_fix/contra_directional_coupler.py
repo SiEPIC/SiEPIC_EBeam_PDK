@@ -6,7 +6,7 @@ Author:   Mustafa Hammood, 2021
 import pya
 from pya import *
 from SiEPIC.utils import get_technology_by_name
-from SiEPIC.utils.layout import make_pin, make_devrec_label
+from SiEPIC.utils.layout import make_pin#, make_devrec_label
 
 
 class contra_directional_coupler(pya.PCellDeclarationHelper):
@@ -14,7 +14,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     def __init__(self):
         # Important: initialize the super class
         super(contra_directional_coupler, self).__init__()
-        TECHNOLOGY = get_technology_by_name('EBeam')
+        TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
         # declare the parameters
         self.param("number_of_periods", self.TypeInt, "Number of grating periods", default=500)
@@ -307,8 +307,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             make_pin(self.cell, "opt4", [int(x), y], w2, LayerPinRecN, 0)
 
         # Compact model information. Create the devrec library labels
-        make_devrec_label(self.cell, "EBeam", "contra_directional_coupler",
-                          ly.layer(self.devrec))
+        #make_devrec_label(self.cell, "SiEPIC_EBeam_PDK", "contra_directional_coupler",  ly.layer(self.devrec))
 
         text = Text('Spice_param:number_of_periods=%s grating_period=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation_width1=%.3fu corrugation_width2=%.3fu gap=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s accuracy=%s' %
                     (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation_width1, self.corrugation_width2, self.gap, self.apodization_index, int(self.AR), int(self.sinusoidal), int(self.accuracy)), t)

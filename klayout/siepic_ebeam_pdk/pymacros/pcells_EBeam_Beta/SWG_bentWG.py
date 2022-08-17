@@ -8,7 +8,7 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
 
       # Important: initialize the super class
       super(SWG_bentWG, self).__init__()
-      TECHNOLOGY = get_technology_by_name('EBeam')
+      TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
       # declare the parameters
       self.param("pitch", self.TypeDouble, "Period [um]", default = 0.2)

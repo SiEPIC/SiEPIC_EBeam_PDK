@@ -5,7 +5,7 @@ class Bragg_encoder(pya.PCellDeclarationHelper):
   def __init__(self):
     #Important: initialize the super class
     super(Bragg_encoder,self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     
     #declare the paramters
     #parameters: binary code, start period, end period, corrugation width, length

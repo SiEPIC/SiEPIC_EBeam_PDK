@@ -10,7 +10,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring2, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
@@ -53,7 +53,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     g = self.g
     y_ring = 127*3/2+r
 
-    pcell = ly.create_cell("DoubleBus_Ring", "EBeam-dev", {"r": r, "w": wg_width, "g": g, "silayer": LayerSi, "devrec": self.devrec, "pinrec": self.pinrec })
+    pcell = ly.create_cell("DoubleBus_Ring", "SiEPIC_EBeam_PDK-dev", {"r": r, "w": wg_width, "g": g, "silayer": LayerSi, "devrec": self.devrec, "pinrec": self.pinrec })
     #print( "pcell: %s, %s" \ % (pcell.cell_index(), ly.cell_name(pcell.cell_index()) ) )
     t = Trans(Trans.R270, 10 / dbu, y_ring / dbu) 
     instance = cell.insert(CellInstArray(pcell.cell_index(), t))
@@ -64,7 +64,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
     GC_name = "ebeam_gc_te1550"
     GC_imported = ly.cell(GC_name)
     if GC_imported == None:
-      GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
+      GC_imported = ly.create_cell(GC_name, "SiEPIC-SiEPIC_EBeam_PDK").cell_index()
     else:
       GC_imported = GC_imported.cell_index()  
     print("Cell: GC_imported: #%s" % GC_imported )

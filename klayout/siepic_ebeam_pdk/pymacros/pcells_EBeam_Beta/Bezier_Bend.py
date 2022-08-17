@@ -18,7 +18,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Bezier_Bend, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("bezier_num", self.TypeDouble, "Bezier factor", default = 25)     

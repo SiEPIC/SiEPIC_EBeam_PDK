@@ -21,7 +21,7 @@ class phc_gc_hex(pya.PCellDeclarationHelper):
     self.param("y", self.TypeInt, "Number of holes in y direction", default = 50)   
     self.param("r", self.TypeDouble, "hole radius (microns)", default = 0.0735)
     self.param("vertices",  self.TypeInt, "Number of vertices in circle", default = 32)
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     self.param("positive",  self.TypeInt, "Positive", default = False)
     self.param("apodized",  self.TypeInt, "apodized", default = False)
     self.param("feature_size", self.TypeDouble, "minimum feature size (microns)", default = 0.06)  

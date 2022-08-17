@@ -10,7 +10,7 @@ class ebeam_taper(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_taper, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])

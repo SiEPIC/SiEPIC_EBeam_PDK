@@ -25,7 +25,7 @@ end
 
 include RBA
 
-fn = File.join(File.expand_path(File.dirname(__FILE__)), "EBeam_ANT.xs")
+fn = File.join(File.expand_path(File.dirname(__FILE__)), "EBeam_ANT_xsection.xs")
 print(fn)
 $xsection_processing_environment.run_script(fn)
 

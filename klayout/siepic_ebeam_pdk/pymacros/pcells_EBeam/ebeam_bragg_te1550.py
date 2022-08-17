@@ -10,7 +10,7 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_bragg_te1550, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
@@ -23,7 +23,7 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-#    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -128,7 +128,7 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/SiEPIC_EBeam_PDK', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)

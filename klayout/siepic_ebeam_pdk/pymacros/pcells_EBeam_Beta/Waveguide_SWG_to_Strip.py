@@ -13,7 +13,7 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_SWG_to_Strip, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("wavelength", self.TypeDouble, "Wavelength", default = 1310)

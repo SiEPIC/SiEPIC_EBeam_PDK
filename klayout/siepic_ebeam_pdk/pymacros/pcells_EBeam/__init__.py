@@ -21,6 +21,6 @@ except:
   import klayout.db as pya
   from zeropdk import Tech
   op_tag = "script" 
-  lyp_filepath = os.path(str(os.path(os.path.dirname(os.path.realpath(__file__))).parent) + r"/EBeam.lyp")
+  lyp_filepath = os.path(str(os.path(os.path.dirname(os.path.realpath(__file__))).parent) + r"/SiEPIC_EBeam_PDK.lyp")
   print(lyp_filepath)
 

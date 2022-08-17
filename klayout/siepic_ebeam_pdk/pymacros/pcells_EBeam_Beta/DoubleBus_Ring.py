@@ -44,7 +44,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(DoubleBus_Ring, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])

@@ -11,7 +11,7 @@ class Contra_DC_CouplerApodized(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Contra_DC_CouplerApodized, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 300)     
@@ -249,7 +249,7 @@ class Contra_DC_CouplerApodized(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, 0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/ebeam', t)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/SiEPIC_EBeam_PDK', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0, length/10, 0)

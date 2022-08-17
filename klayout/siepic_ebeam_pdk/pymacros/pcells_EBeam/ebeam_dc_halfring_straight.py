@@ -10,7 +10,7 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
   def __init__(self):
     # Important: initialize the super class
     super(ebeam_dc_halfring_straight, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
@@ -112,7 +112,7 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, -r, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/ebeam", t)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/SiEPIC_EBeam_PDK", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.03/dbu
 

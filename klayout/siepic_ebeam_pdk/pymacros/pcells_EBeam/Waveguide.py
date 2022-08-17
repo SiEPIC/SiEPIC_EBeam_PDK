@@ -25,10 +25,10 @@ class Waveguide(pya.PCellDeclarationHelper):
     # https://github.com/KLayout/klayout/issues/879
     tech = self.layout.library().technology
     if not tech:
-       tech = 'EBeam'
+       tech = 'SiEPIC_EBeam_PDK'
     self.technology_name = tech
     '''
-    self.technology_name = 'EBeam'
+    self.technology_name = 'SiEPIC_EBeam_PDK'
             
     # Load all strip waveguides
     self.waveguide_types = load_Waveguides_by_Tech(self.technology_name)   
@@ -77,7 +77,7 @@ class Waveguide(pya.PCellDeclarationHelper):
     from SiEPIC.utils.layout import layout_waveguide4
     self.waveguide_length = layout_waveguide4(self.cell, self.path, self.waveguide_type)
 
-    print("EBeam.%s: length %.3f um, complete" % (self.cellName, self.waveguide_length))
+    print("SiEPIC_EBeam_PDK.%s: length %.3f um, complete" % (self.cellName, self.waveguide_length))
 
 '''
 import pya
@@ -90,7 +90,7 @@ class Waveguide(pya.PCellDeclarationHelper):
     super(Waveguide, self).__init__()
     # declare the parameters
     from SiEPIC.utils import get_technology_by_name
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     self.param("path", self.TypeShape, "Path", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5))
     self.param("radius", self.TypeDouble, "Radius", default = 5)
     self.param("width", self.TypeDouble, "Width", default = 0.5)
@@ -99,7 +99,7 @@ class Waveguide(pya.PCellDeclarationHelper):
     self.param("layers", self.TypeList, "Layers", default = ['Waveguide'])
     self.param("widths", self.TypeList, "Widths", default =  [0.5])
     self.param("offsets", self.TypeList, "Offsets", default = [0])
-    self.param("CML", self.TypeString, "Compact Model Library (CML)", default = 'EBeam')
+    self.param("CML", self.TypeString, "Compact Model Library (CML)", default = 'SiEPIC_EBeam_PDK')
     self.param("model", self.TypeString, "CML Model name", default = 'ebeam_wg_integral_1550') 
     self.cellName="Waveguide"
     
@@ -109,10 +109,10 @@ class Waveguide(pya.PCellDeclarationHelper):
   
   def coerce_parameters_impl(self):
     from SiEPIC.extend import to_itype
-    print("EBeam.Waveguide coerce parameters")
+    print("SiEPIC_EBeam_PDK.Waveguide coerce parameters")
     
     if 0:
-        TECHNOLOGY = get_technology_by_name('EBeam')
+        TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
         dbu = self.layout.dbu
         wg_width = to_itype(self.width,dbu)
         for lr in range(0, len(self.layers)):
@@ -144,10 +144,10 @@ class Waveguide(pya.PCellDeclarationHelper):
     import pya
     from SiEPIC.extend import to_itype
     
-    # print("EBeam.Waveguide")
+    # print("SiEPIC_EBeam_PDK.Waveguide")
     
     from SiEPIC.utils import get_technology_by_name
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     
     dbu = self.layout.dbu
     wg_width = to_itype(self.width,dbu)

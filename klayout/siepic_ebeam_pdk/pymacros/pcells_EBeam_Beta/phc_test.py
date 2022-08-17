@@ -20,7 +20,7 @@ class phc_test(pya.PCellDeclarationHelper):
     self.param("r", self.TypeDouble, "hole radius (microns)", default = 0.179)
     self.param("n_sweep", self.TypeInt, "Different sizes of holes", default = 13)
     self.param("n_vertices", self.TypeInt, "Vertices of a hole", default = 32)                                
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])

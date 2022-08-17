@@ -10,7 +10,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Bend, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
@@ -104,7 +104,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, x+r/10, 0)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/EBeam", t)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/SiEPIC_EBeam_PDK", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r/100
     t = Trans(Trans.R0, x+r/10, r/4)

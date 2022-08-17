@@ -12,7 +12,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Straight, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("wg_length", self.TypeInt, "Waveguide Length", default = 10000)     
@@ -84,7 +84,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0,0, 0)
-    text = Text ('Lumerical_INTERCONNECT_library=Design kits/EBeam', t)
+    text = Text ('Lumerical_INTERCONNECT_library=Design kits/SiEPIC_EBeam_PDK', t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     t = Trans(Trans.R0,length/10, 0)

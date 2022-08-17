@@ -10,7 +10,7 @@ class Wireguide(pya.PCellDeclarationHelper):
     # Important: initialize the super class
     super(Wireguide, self).__init__()
     # declare the parameters
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     self.param("path", self.TypeShape, "Path", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5))
     self.radius = 0
     self.param("width", self.TypeDouble, "Width", default = 0.5)
@@ -42,9 +42,9 @@ class Wireguide(pya.PCellDeclarationHelper):
     import pya
     from SiEPIC.extend import to_itype
     
-    print("EBeam.Wireguide")
+    print("SiEPIC_EBeam_PDK.Wireguide")
     
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     
     dbu = self.layout.dbu
     wg_width = to_itype(self.width,dbu)

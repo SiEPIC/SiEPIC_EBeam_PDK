@@ -26,7 +26,7 @@ class phc_L3c(pya.PCellDeclarationHelper):
     self.param("S3x", self.TypeDouble, "S3x shift", default = 0.088)     
     self.param("S4x", self.TypeDouble, "S4x shift", default = 0.323)
     self.param("S5x", self.TypeDouble, "S5x shift", default = 0.173)
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])

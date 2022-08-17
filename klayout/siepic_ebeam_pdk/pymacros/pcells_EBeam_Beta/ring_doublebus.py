@@ -11,7 +11,7 @@ class ring_doublebus(pya.PCellDeclarationHelper):
   def __init__(self):
     # Important: initialize the super class
     super(ring_doublebus, self).__init__()
-    self.technology_name = 'EBeam'
+    self.technology_name = 'SiEPIC_EBeam_PDK'
     TECHNOLOGY = get_technology_by_name(self.technology_name)
     
     

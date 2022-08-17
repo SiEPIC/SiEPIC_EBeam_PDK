@@ -14,7 +14,7 @@ class ring_singlebus(pya.PCellDeclarationHelper):
 
     from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
 
-    self.technology_name = 'EBeam'
+    self.technology_name = 'SiEPIC_EBeam_PDK'
     TECHNOLOGY = get_technology_by_name(self.technology_name)
     
     # declare the parameters

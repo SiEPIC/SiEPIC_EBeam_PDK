@@ -16,7 +16,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Universal_GC, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters  
     self.param("wavelength", self.TypeDouble, "Design Wavelength (micron)", default = 1.55)  
@@ -54,7 +54,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
     dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)

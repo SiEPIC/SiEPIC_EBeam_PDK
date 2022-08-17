@@ -28,7 +28,7 @@ class phc_H0c_oxide(pya.PCellDeclarationHelper):
     self.param("S5x", self.TypeDouble, "S5x shift", default = 0.113)
     self.param("S1y", self.TypeDouble, "S1y shift", default = -0.016)
     self.param("S2y", self.TypeDouble, "S2y shift", default = 0.134)
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])

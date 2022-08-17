@@ -17,7 +17,7 @@ class ebeam_dc(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_dc, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 10.0)

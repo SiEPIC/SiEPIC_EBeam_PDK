@@ -16,7 +16,7 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     
     # Important: initialize the super class
     super(ebeam_PWB_surface_taper, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     self.param("Wtip", self.TypeDouble, "Width of tip (microns)", default = 0.13)
     self.param("Wwaveguide", self.TypeDouble, "width of waveguide (microns)", default = 0.5)
