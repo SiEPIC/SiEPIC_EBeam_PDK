@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <technology>
- <name>EBeam</name>
+ <name>SiEPIC_EBeam_PDK</name>
  <description/>
  <group/>
  <dbu>0.001</dbu>
  <base-path/>
- <original-base-path>/Users/lukasc/Documents/GitHub/SiEPIC_EBeam_PDK/klayout_dot_config/tech/EBeam</original-base-path>
- <layer-properties_file>klayout_Layers_EBeam.lyp</layer-properties_file>
+ <original-base-path>C:\Users\Mustafa\KLayout\tech\SiEPIC_EBeam_PDK</original-base-path>
+ <layer-properties_file>SiEPIC_EBeam_PDK.lyp</layer-properties_file>
  <add-other-layers>true</add-other-layers>
  <reader-options>
   <gds2>
@@ -114,7 +114,7 @@
    <resolve-skew-arrays>false</resolve-skew-arrays>
    <max-vertex-count>8000</max-vertex-count>
    <max-cellname-length>32000</max-cellname-length>
-   <libname>EBeam</libname>
+   <libname>SiEPIC_EBeam_PDK</libname>
   </gds2>
   <oasis>
    <compression-level>2</compression-level>
