@@ -498,7 +498,7 @@
   <marked>false</marked>
   <animation>0</animation>
   <name>SiN</name>
-  <source>1/2@1</source>
+  <source>1/0@1</source>
   <width>2.0</width>
   </properties>
   
@@ -533,7 +533,7 @@
   <marked>false</marked>
   <animation>0</animation>
   <name>M1_heater (TiW alloy)</name>
-  <source>11/2@1</source>
+  <source>11/0@1</source>
  </group-members>
  
  <group-members>
@@ -549,7 +549,7 @@
   <marked>false</marked>
   <animation>0</animation>
   <name>M2_router (TiW/Al Bilayer)</name>
-  <source>12/2@1</source>
+  <source>12/0@1</source>
  </group-members>
  
  <group-members>
@@ -565,7 +565,7 @@
   <marked>false</marked>
   <animation>0</animation>
   <name>M_Open (Oxide windows)</name>
-  <source>13/2@1</source>
+  <source>13/0@1</source>
  </group-members>
  </properties>
 
@@ -582,7 +582,7 @@
   <marked>false</marked>
   <animation>0</animation>
   <name>SEM</name>
-  <source>200/2@1</source>
+  <source>200/0@1</source>
  </properties>
 
   <properties>
@@ -600,7 +600,7 @@
   <xfill>false</xfill>
   <animation>0</animation>
   <name>Deep Trench</name>
-  <source>201/2@1</source>
+  <source>201/0@1</source>
  </properties>
 
   <properties>
@@ -618,7 +618,7 @@
   <xfill>false</xfill>
   <animation>0</animation>
   <name>Deep Trench exclusion</name>
-  <source>202/2@1</source>
+  <source>202/0@1</source>
  </properties>
 
 
