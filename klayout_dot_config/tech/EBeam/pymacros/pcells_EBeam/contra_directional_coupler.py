@@ -21,9 +21,9 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         self.param("grating_period", self.TypeDouble,
                    "Grating period (microns)", default=0.317)
         self.param("gap", self.TypeDouble, "Gap (microns)", default=0.15)
-        self.param("corrugation_width1", self.TypeDouble,
+        self.param("corrugation1_width", self.TypeDouble,
                    "Waveguide 1 Corrugration width (microns)", default=0.03)
-        self.param("corrugation_width2", self.TypeDouble,
+        self.param("corrugation2_width", self.TypeDouble,
                    "Waveguide 2 Corrugration width (microns)", default=0.06)
         self.param("AR", self.TypeBoolean, "Anti-Reflection Design", default=True)
         self.param("sinusoidal", self.TypeBoolean,
@@ -86,7 +86,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         w = to_itype(self.wg1_width, dbu)
         GaussianIndex = self.apodization_index
         half_w = w/2
-        half_corrugation_w = to_itype(self.corrugation_width1/2, dbu)
+        half_corrugation_w = to_itype(self.corrugation1_width/2, dbu)
 
         y_offset_top = -w/2 - to_itype(self.gap/2, dbu)
 
@@ -101,7 +101,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             for i in range(0, self.number_of_periods):
                 x = (round((i * self.grating_period)/dbu))
                 profileFunction = math.exp(-0.5*(2*GaussianIndex*(i-N/2)/(N))**2)
-                profile = int(round(self.corrugation_width1/2/dbu))*profileFunction
+                profile = int(round(self.corrugation1_width/2/dbu))*profileFunction
                 box1 = Box(x, y_offset_top, x + box_width, y_offset_top + half_w+profile)
                 pts1 = [Point(x, y_offset_top)]
                 pts3 = [Point(x + misalignment, y_offset_top)]
@@ -134,7 +134,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 x = int(round((i * self.grating_period)/dbu))
 
                 profileFunction = math.exp(-0.5*(2*GaussianIndex*(i-N/2)/(N))**2)
-                profile = int(round(self.corrugation_width1/2/dbu))*profileFunction
+                profile = int(round(self.corrugation1_width/2/dbu))*profileFunction
 
                 box1 = Box(x, y_offset_top, x + box_width, y_offset_top +
                            to_itype(half_w+profile, dbu*1000))
@@ -170,7 +170,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         grating_period = int(round(self.grating_period/dbu))
         w = to_itype(self.wg2_width, dbu)
         half_w = w/2
-        half_corrugation_w = int(round(self.corrugation_width2/2/dbu))
+        half_corrugation_w = int(round(self.corrugation2_width/2/dbu))
 
         N = self.number_of_periods
         if self.sinusoidal:
@@ -178,7 +178,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             for i in range(0, self.number_of_periods):
                 x = (round((i * self.grating_period)/dbu))
                 profileFunction = math.exp(-0.5*(2*GaussianIndex*(i-N/2)/(N))**2)
-                profile = int(round(self.corrugation_width2/2/dbu))*profileFunction
+                profile = int(round(self.corrugation2_width/2/dbu))*profileFunction
                 box1 = Box(x, 0, x + box_width, -half_w+profile).transformed(t)
                 pts1 = [Point(x, 0)]
                 pts3 = [Point(x + misalignment, 0)]
@@ -207,7 +207,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             for i in range(0, self.number_of_periods):
                 x = int(round((i * self.grating_period)/dbu))
                 profileFunction = math.exp(-0.5*(2*GaussianIndex*(i-N/2)/(N))**2)
-                profile = int(round(self.corrugation_width2/2/dbu))*profileFunction
+                profile = int(round(self.corrugation2_width/2/dbu))*profileFunction
                 box1 = Box(x, 0, x + box_width, -half_w-profile).transformed(t)
                 box2 = Box(x + box_width, 0, x + grating_period, -
                            half_w+profile).transformed(t)
@@ -310,8 +310,8 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         make_devrec_label(self.cell, "EBeam", "contra_directional_coupler",
                           ly.layer(self.devrec))
 
-        text = Text('Spice_param:number_of_periods=%s grating_period=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation_width1=%.3fu corrugation_width2=%.3fu gap=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s accuracy=%s' %
-                    (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation_width1, self.corrugation_width2, self.gap, self.apodization_index, int(self.AR), int(self.sinusoidal), int(self.accuracy)), t)
+        text = Text('Spice_param:number_of_periods=%s grating_period=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation1_width=%.3fu corrugation2_width=%.3fu gap=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s accuracy=%s' %
+                    (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation1_width, self.corrugation2_width, self.gap, self.apodization_index, int(self.AR), int(self.sinusoidal), int(self.accuracy)), t)
         shape = shapes(LayerDevRecN).insert(text)
         shape.text_size = 0.1/dbu
 
