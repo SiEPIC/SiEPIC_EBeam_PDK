@@ -45,7 +45,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     shapes = self.cell.shapes
     
     from SiEPIC.extend import to_itype
-    from math import ceil
+
 
     # cell: layout cell to place the layout
     # LayerSiN: which layer to use
@@ -79,26 +79,27 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     self.p1 = p1c
     pin = Path(p1, w1)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, 0, 0)
+    t = Trans(Trans.R0, 0, w1/2)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = to_itype(0.4,dbu)
 
     # Pin on the right side:
-    p2 = [Point(length-pin_length/2,ceil(w2/2)), Point(length+pin_length/2,ceil(w2/2))]
-    p2c = Point(length, ceil(w2/2))
+    p2 = [Point(length-pin_length/2,w2/2), Point(length+pin_length/2,w2/2)]
+    p2c = Point(length, w2/2)
     self.set_p2 = p2c
     self.p2 = p2c
     pin = Path(p2, w2)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, length, 0)
+    t = Trans(Trans.R0, length, w2/2)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size =to_itype(0.4,dbu)
     shape.text_halign = 2
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    path = Path([Point(0,0),Point(length,0)],w2+w1*2)
+    w_max = max([w1/2,w2/2])
+    path = Path([Point(0,w_max),Point(length,w_max)],w2+w1*2)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
 
