@@ -1,5 +1,5 @@
 """
-Author:   Mustafa Hammood, 2021
+Author:   Mustafa Hammood, 2022
           Mustafa@siepic.com; mustafa.hammood@dreamphotonics.com; mustafa@ece.ubc.ca
 """
 
@@ -42,6 +42,12 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         self.param("rib", self.TypeBoolean, "Use rib (ridge) waveguides?", default=False)
         self.param("layer_rib", self.TypeLayer, "Rib Layer",
                    default=TECHNOLOGY['Si - 90 nm rib'])
+        self.param("metal", self.TypeBoolean, "Use metal heaters?", default=False)
+        self.param("heater_width", self.TypeDouble, "Metal heater width", default=3)
+        self.param("metal_width", self.TypeDouble, "Metal contact width", default=5)
+        self.param("l_heater", self.TypeLayer, "Heater Layer", default=TECHNOLOGY['M1_heater'])
+        self.param("l_metal", self.TypeLayer, "Metal contact Layer", default=TECHNOLOGY['M2_router'])
+        self.param("pinrecm", self.TypeLayer, "PinRecM Layer (metal)", default=TECHNOLOGY['PinRecM'])
         self.param("pinrec", self.TypeLayer, "PinRec Layer", default=TECHNOLOGY['PinRec'])
         self.param("devrec", self.TypeLayer, "DevRec Layer", default=TECHNOLOGY['DevRec'])
 
@@ -293,7 +299,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         else:
             x = 0
             y = y_offset_top
-            make_pin(self.cell, "opt1", [x, y], w1, LayeOrPinRecN, 180)
+            make_pin(self.cell, "opt1", [x, y], w1, LayerPinRecN, 180)
 
             y = vertical_offset
             make_pin(self.cell, "opt2", [x, y], w2, LayerPinRecN, 180)
@@ -314,6 +320,30 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                     (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation1_width, self.corrugation2_width, self.gap, self.apodization_index, int(self.AR), int(self.sinusoidal), int(self.accuracy)), t)
         shape = shapes(LayerDevRecN).insert(text)
         shape.text_size = 0.1/dbu
+        
+        if self.metal:
+            # add heater element
+            heater_width = to_itype(self.heater_width, dbu)
+            box = pya.Box(pya.Point(0, heater_width/2),
+                          pya.Point(length, -heater_width/2))
+            shapes(ly.layer(self.l_heater)).insert(box)
+
+            # add metal contact element (left and right)
+            metal_width = to_itype(self.metal_width, dbu)
+            box = pya.Box(pya.Point(0, heater_width/2),
+                          pya.Point(metal_width, -heater_width/2))
+            shapes(ly.layer(self.l_metal)).insert(box)
+            box = pya.Box(pya.Point(length, heater_width/2),
+                          pya.Point(length-metal_width, -heater_width/2))
+            shapes(ly.layer(self.l_metal)).insert(box)
+
+            # add metal contact pins
+            x = metal_width/2 * dbu
+            y = -heater_width/2 * dbu
+            make_pin(self.cell, "elec1", [x, y], metal_width, ly.layer(self.pinrecm), 270)
+            x = (length-metal_width/2) * dbu
+            make_pin(self.cell, "elec2", [x, y], metal_width, ly.layer(self.pinrecm), 270)
+            
 
         # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
         if self.sbend:
