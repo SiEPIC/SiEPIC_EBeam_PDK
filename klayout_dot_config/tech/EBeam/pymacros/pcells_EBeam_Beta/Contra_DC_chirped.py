@@ -15,7 +15,7 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("number_of_periods", self.TypeInt, "Number of grating periods", default = 3000)     
-    self.param("grating_period_start", self.TypeDouble, "Start grating period (microns)", default = 0.312)
+    self.param("grating_period", self.TypeDouble, "Start grating period (microns)", default = 0.312)
     self.param("grating_period_end", self.TypeDouble, "Start grating period (microns)", default = 0.328)
     self.param("gap", self.TypeDouble, "Gap (microns)", default = 0.15)          
     self.param("corrugation_width1", self.TypeDouble, "Waveguide 1 Corrugration width (microns)", default = 0.03)
@@ -46,7 +46,7 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
   def display_text_impl(self):
     # Provide a descriptive text for the cell
     return "Contra_DC_chirped%.3f-%.3f" % \
-    (self.grating_period_start, self.grating_period_end)
+    (self.grating_period, self.grating_period_end)
   
   def coerce_parameters_impl(self):
     pass
@@ -74,10 +74,10 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
     
     # Draw the Bragg grating (bottom):
     # create chirped period array
-    grating_period_start = int(round(self.grating_period_start/dbu))
+    grating_period = int(round(self.grating_period/dbu))
     grating_period_end = int(round(self.grating_period_end/dbu))
     length = self.number_of_periods
-    step = ((grating_period_start-grating_period_end) * 1.0 / length)
+    step = ((grating_period-grating_period_end) * 1.0 / length)
     
     grating_period = []
     box_width = []
@@ -300,8 +300,8 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
     make_devrec_label(self.cell, "EBeam", "contra_directional_coupler_chirped",
                       ly.layer(self.devrec))
 
-    text = Text('Spice_param:number_of_periods=%s grating_period_start=%.3fu grating_period_end=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation_width2=%.3fu corrugation_width2=%.3fu gap=%.3fu index=%.3f AR=%s sinusoidal=%s' %
-                (self.number_of_periods, self.grating_period_start, self.grating_period_end, self.wg1_width, self.wg2_width, self.corrugation_width1, self.corrugation_width2, self.gap, self.index, int(self.AR), int(self.sinusoidal)), t)
+    text = Text('Spice_param:number_of_periods=%s grating_period=%.3fu grating_period_end=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation_width2=%.3fu corrugation_width2=%.3fu gap=%.3fu index=%.3f AR=%s sinusoidal=%s' %
+                (self.number_of_periods, self.grating_period, self.grating_period_end, self.wg1_width, self.wg2_width, self.corrugation_width1, self.corrugation_width2, self.gap, self.index, int(self.AR), int(self.sinusoidal)), t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = 0.1/dbu
     
