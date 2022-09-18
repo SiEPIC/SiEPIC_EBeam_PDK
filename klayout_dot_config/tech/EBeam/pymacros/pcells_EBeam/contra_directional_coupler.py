@@ -101,6 +101,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         else:
             misalignment = 0
 
+        self.number_of_periods = int(self.number_of_periods)
         N = self.number_of_periods
         if self.sinusoidal:
             npoints_sin = 40
