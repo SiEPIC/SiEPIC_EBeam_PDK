@@ -1,8 +1,6 @@
 from . import *
 from pya import *
 
-# TODO( pin definition needs to be done from bottom to top, not center defined due to error deviding 1 nm resolutions)  
-
 class ebeam_taper_te1550(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the strip waveguide taper.
@@ -65,7 +63,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     w2 = to_itype(self.wg_width2,dbu)
     length = to_itype(self.wg_length,dbu)
 
-    pts = [Point(0,0), Point(0,w1), Point(length,w2), Point(length,0)]
+    pts = [Point(0,-w1/2), Point(0,w1/2), Point(length,w2/2), Point(length,-w2/2)]
     shapes(LayerSiN).insert(Polygon(pts))
 
     
@@ -73,33 +71,34 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
     
     # Pin on the left side:
-    p1 = [Point(pin_length/2,w1/2), Point(-pin_length/2,w1/2)]
-    p1c = Point(0,w1/2)
+    p1 = [Point(pin_length/2,0), Point(-pin_length/2,0)]
+    p1c = Point(0,0)
     self.set_p1 = p1c
     self.p1 = p1c
     pin = Path(p1, w1)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, 0, w1/2)
+    t = Trans(Trans.R0, 0, 0)
     text = Text ("pin1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = to_itype(0.4,dbu)
 
     # Pin on the right side:
-    p2 = [Point(length-pin_length/2,w2/2), Point(length+pin_length/2,w2/2)]
-    p2c = Point(length, w2/2)
+    p2 = [Point(length-pin_length/2,0), Point(length+pin_length/2,0)]
+    p2c = Point(length, 0)
     self.set_p2 = p2c
     self.p2 = p2c
     pin = Path(p2, w2)
     shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, length, w2/2)
+    t = Trans(Trans.R0, length, 0)
     text = Text ("pin2", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size =to_itype(0.4,dbu)
     shape.text_halign = 2
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-    w_max = max([w1/2,w2/2])
-    path = Path([Point(0,w_max),Point(length,w_max)],w2+w1*2)
+    w_max = max([w1,w2])
+    w_min = max([w1,w2])
+    path = Path([Point(0,0),Point(length,0)],(w_max+w_min)*2)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
 
