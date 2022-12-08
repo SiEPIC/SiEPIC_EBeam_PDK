@@ -366,4 +366,5 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             shapeRib = shapes_rib.size(1400) - shapes_wg - (region_devrec2-region_devrec)
 
             shapes(LayerRib).insert(shapeRib)
+            shapes(LayerRib).insert(shapes_wg)
             shapes(LayerSiN).insert(shapes_wg)
