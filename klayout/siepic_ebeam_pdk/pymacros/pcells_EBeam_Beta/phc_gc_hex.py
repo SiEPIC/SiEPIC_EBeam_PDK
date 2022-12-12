@@ -25,7 +25,7 @@ class phc_gc_hex(pya.PCellDeclarationHelper):
     self.param("positive",  self.TypeInt, "Positive", default = False)
     self.param("apodized",  self.TypeInt, "apodized", default = False)
     self.param("feature_size", self.TypeDouble, "minimum feature size (microns)", default = 0.06)  
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['31_Si_p6nm'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])

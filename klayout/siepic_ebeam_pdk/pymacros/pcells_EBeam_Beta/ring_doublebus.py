@@ -1,6 +1,7 @@
 # This PCell instantiates two ebeam_dc_halfring_straight
 
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class ring_doublebus(pya.PCellDeclarationHelper):

@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class ebeam_dc_halfring_arc(pya.PCellDeclarationHelper):
@@ -21,7 +22,7 @@ class ebeam_dc_halfring_arc(pya.PCellDeclarationHelper):
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 0.0)
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell

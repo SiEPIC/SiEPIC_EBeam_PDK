@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
@@ -38,14 +39,14 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     self.param("overlay_ebl", self.TypeDouble, "Overlay accuracy (EBL) (um)", default = 0.05)
 #    self.param("m_dw", self.TypeDouble, "Metal Offset", default = 4)
     self.param("m_w", self.TypeDouble, "Metal Width", default = 10)
-    self.param("slayer", self.TypeLayer, "Slab Layer", default = TECHNOLOGY['Si - 90 nm rib'])
+    self.param("slayer", self.TypeLayer, "Slab Layer", default = TECHNOLOGY['Waveguide'])
 #    self.param("nlayer", self.TypeLayer, "N Layer", default = TECHNOLOGY['Si N'])
     self.param("npplayer", self.TypeLayer, "N++ Layer", default = TECHNOLOGY['Si N++'])
     self.param("vclayer", self.TypeLayer, "VC Layer", default = TECHNOLOGY['VC'])
     self.param("mlayer", self.TypeLayer, "Metal Layer", default = TECHNOLOGY['M2_router'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell

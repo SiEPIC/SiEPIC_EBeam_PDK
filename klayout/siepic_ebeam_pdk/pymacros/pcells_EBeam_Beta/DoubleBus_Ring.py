@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 import math
 from pya import *
 
@@ -53,7 +54,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
-    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 

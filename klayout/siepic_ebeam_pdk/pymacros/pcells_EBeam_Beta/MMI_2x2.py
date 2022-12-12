@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class MMI_2x2(pya.PCellDeclarationHelper):
@@ -19,7 +20,7 @@ class MMI_2x2(pya.PCellDeclarationHelper):
     self.param("L_a", self.TypeDouble, "Access waveguide Length", default = 10.0)
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell

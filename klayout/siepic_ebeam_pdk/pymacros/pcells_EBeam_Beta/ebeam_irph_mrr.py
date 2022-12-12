@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class ebeam_irph_mrr(pya.PCellDeclarationHelper):
@@ -17,7 +18,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
-    self.param("siriblayer", self.TypeLayer, "Si rib Layer", default = TECHNOLOGY['Si - 90 nm rib'])
+    self.param("siriblayer", self.TypeLayer, "Si rib Layer", default = TECHNOLOGY['Waveguide'])
     self.param("r", self.TypeDouble, "Radius", default = 15)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.156)
@@ -43,7 +44,7 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     self.param("mlayer", self.TypeLayer, "Metal Layer", default = TECHNOLOGY['M2_router'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell

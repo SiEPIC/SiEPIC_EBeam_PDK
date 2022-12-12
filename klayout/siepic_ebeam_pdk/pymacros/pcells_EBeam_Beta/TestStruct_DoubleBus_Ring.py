@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
@@ -20,7 +21,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
     self.param("npoints", self.TypeInt, "Number of points", default = 500)     
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
-    self.param("textlayer", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textlayer", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 

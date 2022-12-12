@@ -1,6 +1,7 @@
-from . import *
+import pya
 from pya import *
 import math
+
 class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
   """
   Input: length, width
@@ -10,6 +11,7 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_bragg_te1550, self).__init__()
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters

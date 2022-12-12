@@ -1,4 +1,4 @@
-from . import *
+import pya
 from pya import *
 
 class Waveguide_Bend(pya.PCellDeclarationHelper):
@@ -10,6 +10,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Bend, self).__init__()
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters

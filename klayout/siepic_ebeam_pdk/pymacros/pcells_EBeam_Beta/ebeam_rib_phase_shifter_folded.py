@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
@@ -35,14 +36,14 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
     self.param("vc_w", self.TypeDouble, "Contact via width", default = 5)
 #    self.param("m_dw", self.TypeDouble, "Metal Offset", default = 4)
     self.param("m_w", self.TypeDouble, "Metal Width", default = 10)
-    self.param("slayer", self.TypeLayer, "Slab Layer", default = TECHNOLOGY['Si - 90 nm rib'])
+    self.param("slayer", self.TypeLayer, "Slab Layer", default = TECHNOLOGY['Waveguide'])
 #    self.param("nlayer", self.TypeLayer, "N Layer", default = TECHNOLOGY['Si N'])
     self.param("npplayer", self.TypeLayer, "N++ Layer", default = TECHNOLOGY['Si N++'])
     self.param("vclayer", self.TypeLayer, "VC Layer", default = TECHNOLOGY['VC'])
     self.param("mlayer", self.TypeLayer, "Metal Layer", default = TECHNOLOGY['M2_router'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
@@ -281,7 +282,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           pts = [Point(-l/2 - in_taper, -y_move), 
             Point(wg_start, -y_move)]
           if self.io_wg_type:
-              waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si', 'Si - 90 nm rib'], [w*dbu, in_slab*dbu], [0,0], pts, radius_um, adiab, bezier)
+              waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si', 'Waveguide'], [w*dbu, in_slab*dbu], [0,0], pts, radius_um, adiab, bezier)
           else:
               waveguide_length = layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [w*dbu], [0], pts, radius_um, adiab, bezier)
       
@@ -301,7 +302,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
           pts = [Point(l/2 + in_taper, y_move), 
             Point(wg_end, y_move)]
           if self.io_wg_type:
-              total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si', 'Si - 90 nm rib'], [w*dbu, in_slab*dbu], [0,0], pts, radius_um, adiab, bezier)
+              total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si', 'Waveguide'], [w*dbu, in_slab*dbu], [0,0], pts, radius_um, adiab, bezier)
           else:
               total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [w*dbu], [0], pts, radius_um, adiab, bezier)
 

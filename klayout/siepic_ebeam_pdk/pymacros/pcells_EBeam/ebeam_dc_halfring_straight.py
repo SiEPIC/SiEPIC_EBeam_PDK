@@ -1,4 +1,4 @@
-from . import *
+import pya
 from pya import *
 
 class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
@@ -10,6 +10,7 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
   def __init__(self):
     # Important: initialize the super class
     super(ebeam_dc_halfring_straight, self).__init__()
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters

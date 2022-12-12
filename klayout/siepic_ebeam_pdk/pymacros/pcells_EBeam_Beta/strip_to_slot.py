@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 
 class strip_to_slot(pya.PCellDeclarationHelper):
     """
@@ -26,7 +27,7 @@ class strip_to_slot(pya.PCellDeclarationHelper):
         self.param("offset", self.TypeDouble, "Ending Offset for Curved section", default = 1.0)
         self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
         self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-        self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+        self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
     
     def display_text_impl(self):
         # Provide a descriptive text for the cell

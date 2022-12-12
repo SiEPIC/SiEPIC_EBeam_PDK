@@ -1,6 +1,7 @@
 # This PCell instantiates one ebeam_dc_halfring_straight and one waveguide
 
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class ring_singlebus(pya.PCellDeclarationHelper):

@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class ebeam_taper_strip_rib(pya.PCellDeclarationHelper):
@@ -16,7 +17,7 @@ class ebeam_taper_strip_rib(pya.PCellDeclarationHelper):
 
     # declare the parameters
     self.param("si220layer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
-    self.param("si90layer", self.TypeLayer, "Si slab Layer", default = TECHNOLOGY['Si - 90 nm rib'])
+    self.param("si90layer", self.TypeLayer, "Si slab Layer", default = TECHNOLOGY['Waveguide'])
     self.param("rib_wg_width1", self.TypeDouble, "Rib Waveguide Width 1", default = 0.35)
     self.param("rib_wg_width2", self.TypeDouble, "Rib Waveguide Width 2", default = 3)
     self.param("strip_wg_width", self.TypeDouble, "Strip Waveguide Width", default = 0.35)

@@ -1,4 +1,4 @@
-from . import *
+import pya
 from pya import *
 
 # TODO( pin definition needs to be done from bottom to top, not center defined due to error deviding 1 nm resolutions)  
@@ -12,6 +12,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_taper_te1550, self).__init__()
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
 
     # declare the parameters

@@ -1,4 +1,5 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
 from pya import *
 
 class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
@@ -24,7 +25,7 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
       self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
       self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
       self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-  #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
+  #    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
       self.param("oxideopen", self.TypeLayer, "Oxide Open Layer", default = TECHNOLOGY['Oxide open (to BOX)'])
 
     def display_text_impl(self):
