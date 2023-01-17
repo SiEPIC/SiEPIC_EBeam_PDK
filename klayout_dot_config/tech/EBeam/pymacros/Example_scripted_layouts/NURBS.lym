@@ -115,6 +115,15 @@ from SiEPIC.utils.layout import layout_waveguide2
 # [w.to_dtype(dbu) for w in spline_control_points]
 layout_waveguide2(TECHNOLOGY, ly, cell, ['Text'], [w_wg*dbu], [0], spline_control_points, r*dbu, True, 0.2)
 
+
+# generate Spline for inside and outside of the polygon
+spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, spline_weights, 
+    spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
+spline_dpoints = pya.Utils.spline_interpolation (spline_control_points, spline_weights, 
+    spline_degree, spline_knots, spline_relative_accuracy, spline_absolute_accuracy)
+
+
+
 #############################################################################################
 # benchmarking
 #############################################################################################
