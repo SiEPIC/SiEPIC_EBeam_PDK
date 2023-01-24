@@ -19,7 +19,7 @@
 
 """
 This file is part of the SiEPIC_EBeam_PDK
-by Lukas Chrostowski (c) 2015-2017
+by Lukas Chrostowski (c) 2015-2023
 
 This Python file implements a library called "SiEPIC_EBeam", consisting of mature components that 
 have Layouts and Compact Models for circuit simulations:
@@ -158,7 +158,7 @@ class SiEPIC_EBeam_Library(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.44, Components with models"
+    self.description = "v0.3.45, Components with models"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os
