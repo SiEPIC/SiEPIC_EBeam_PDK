@@ -13,7 +13,7 @@ class ebeam_taper_strip_rib(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_taper_strip_rib, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("si220layer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])

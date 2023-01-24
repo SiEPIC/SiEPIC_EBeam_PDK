@@ -45,7 +45,7 @@ class SiEPIC_EBeam_competition(Library):
 
   def __init__(self):
 
-    tech_name = 'SiEPIC_EBeam_PDK'
+    tech_name = 'EBeam'
     library = 'SiEPIC-'+tech_name+'-competition'
     
     print("Initializing '%s' Library." % library)

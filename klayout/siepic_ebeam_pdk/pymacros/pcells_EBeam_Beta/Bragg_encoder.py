@@ -6,12 +6,12 @@ class Bragg_encoder(pya.PCellDeclarationHelper):
   def __init__(self):
     #Important: initialize the super class
     super(Bragg_encoder,self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
     
     #declare the paramters
     #parameters: binary code, start period, end period, corrugation width, length
     self.param("N", self.TypeDouble, "Number of bits (N)", default = 8)
-    self.param("binary", self.TypeString, "identity (binary size N)", default = 10000000)
+    self.param("binary", self.TypeString, "identity (binary size N)", default = '10000000')
     self.param("start_period", self.TypeDouble, "start period (microns)", default = 0.314)
     self.param("stop_period", self.TypeDouble, "stop period (microns)", default = 0.342)
     self.param("corrugation_widths",self.TypeList,"Corrugations widths (microns)", default = [0.08, 0.06, 0.04, 0.02, 0.02, 0.04, 0.06, 0.08])
@@ -55,6 +55,9 @@ class Bragg_encoder(pya.PCellDeclarationHelper):
     dx = 0.01
     corrugations = self.corrugation_widths
     
+    print(self.binary)
+    print(type(self.binary))
+        
     if N != len(self.binary):
       pya.MessageBox.warning("Array length mismatch!", "Number of bits (N) does NOT equal the bits array length!",  pya.MessageBox.Ok)
       return

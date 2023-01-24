@@ -30,7 +30,7 @@ class phc_H0c(pya.PCellDeclarationHelper):
     self.param("S2y", self.TypeDouble, "S2y shift", default = 0.134)
     self.param("etch_condition", self.TypeInt, "etch = 1 if etch box, etch = 2 if no etch box", default = 1)  
     
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])

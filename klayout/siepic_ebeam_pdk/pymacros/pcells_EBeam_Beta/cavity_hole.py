@@ -13,7 +13,7 @@ class cavity_hole(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(cavity_hole, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("x", self.TypeDouble, "x coordinate", default = 0)
@@ -47,7 +47,7 @@ class cavity_hole(pya.PCellDeclarationHelper):
     LayerSiN = ly.layer(self.LayerSi)
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
     LayerTextN = TECHNOLOGY['Text']
     # cell: layout cell to place the layout
     # LayerSiN: which layer to use

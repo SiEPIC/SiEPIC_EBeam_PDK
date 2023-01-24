@@ -9,7 +9,7 @@ class MMI_2x2(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(MMI_2x2, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])

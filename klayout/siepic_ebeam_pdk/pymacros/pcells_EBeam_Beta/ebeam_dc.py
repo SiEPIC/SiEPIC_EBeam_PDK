@@ -18,14 +18,14 @@ class ebeam_dc(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_dc, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 10.0)
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])

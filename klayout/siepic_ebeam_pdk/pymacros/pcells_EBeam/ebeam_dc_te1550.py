@@ -18,11 +18,11 @@ class ebeam_dc_te1550(pya.PCellDeclarationHelper):
     # Important: initialize the super class
     super(ebeam_dc_te1550, self).__init__()
     from SiEPIC.utils import get_technology_by_name
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("Lc", self.TypeDouble, "Coupler Length", default = 10.0)
-    self.param("silayer", self.TypeLayer, "Si Layer", default = [TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
@@ -130,7 +130,7 @@ class ebeam_dc_te1550(pya.PCellDeclarationHelper):
 
     # Compact model information
     t = Trans(Trans.R0, 0, -w)
-    text = Text ("Lumerical_INTERCONNECT_library=Design kits/SiEPIC_EBeam_PDK", t)
+    text = Text ("Lumerical_INTERCONNECT_library=Design kits/EBeam", t)
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r*0.017
     t = Trans(Trans.R0, 0, 0)

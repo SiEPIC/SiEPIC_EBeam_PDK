@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <technology>
- <name>SiEPIC_EBeam_PDK</name>
+ <name>EBeam</name>
  <description/>
  <group/>
  <dbu>0.001</dbu>
  <base-path/>
- <original-base-path>C:\Users\Mustafa\KLayout\tech\SiEPIC_EBeam_PDK</original-base-path>
- <layer-properties_file>SiEPIC_EBeam_PDK.lyp</layer-properties_file>
+ <original-base-path>/Users/lukasc/Documents/GitHub/SiEPIC_EBeam_PDK/klayout_dot_config/tech/EBeam</original-base-path>
+ <layer-properties_file>EBeam.lyp</layer-properties_file>
  <add-other-layers>true</add-other-layers>
  <reader-options>
   <gds2>

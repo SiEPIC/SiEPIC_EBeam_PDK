@@ -22,7 +22,7 @@ class Bragg_Straight_from_file(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Bragg_Straight_from_file, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("forder", self.TypeString, "Forder", default = "C:\\Users\Rui\Dropbox\\RESEARCH\\CAD_Data\\Feb\\")

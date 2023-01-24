@@ -14,7 +14,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
     def __init__(self):
         # Important: initialize the super class
         super(contra_directional_coupler, self).__init__()
-        TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+        TECHNOLOGY = get_technology_by_name('EBeam')
 
         # declare the parameters
         self.param("number_of_periods", self.TypeInt, "Number of grating periods", default=500)

@@ -17,7 +17,7 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     
     # Important: initialize the super class
     super(ebeam_PWB_surface_taper, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     self.param("Wtip", self.TypeDouble, "Width of tip (microns)", default = 0.13)
     self.param("Wwaveguide", self.TypeDouble, "width of waveguide (microns)", default = 0.5)
@@ -30,7 +30,7 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     self.param("Grouse_Run", self.TypeBoolean, "Fabrication using ANT Grouse Run", default = False)
 
     # declare the layers
-    self.param("silayer", self.TypeLayer, "Si Layer", default=[TECHNOLOGY['Waveguide']])
+    self.param("silayer", self.TypeLayer, "Si Layer", default=TECHNOLOGY['Waveguide'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default=TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default=TECHNOLOGY['DevRec'])
     self.param("oxopen", self.TypeLayer, "OxOpen Layer", default=TECHNOLOGY['Oxide open (to BOX)'])

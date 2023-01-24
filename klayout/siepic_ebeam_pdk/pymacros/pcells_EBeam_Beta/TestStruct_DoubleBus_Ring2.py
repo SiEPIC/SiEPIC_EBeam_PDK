@@ -11,7 +11,7 @@ class TestStruct_DoubleBus_Ring2(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring2, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])

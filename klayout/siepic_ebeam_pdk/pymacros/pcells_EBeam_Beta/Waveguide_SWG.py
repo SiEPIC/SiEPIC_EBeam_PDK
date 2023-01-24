@@ -11,7 +11,7 @@ class Waveguide_SWG(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_SWG, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Waveguide length", default = 10.0)     

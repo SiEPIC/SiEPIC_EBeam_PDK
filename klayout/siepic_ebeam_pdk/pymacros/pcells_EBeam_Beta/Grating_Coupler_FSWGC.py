@@ -31,7 +31,7 @@ class Grating_Coupler_FSWGC(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Grating_Coupler_FSWGC, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters  
     self.param("wavelength", self.TypeDouble, "Design Wavelength (micron)", default = 1.55)  

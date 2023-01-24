@@ -10,7 +10,7 @@ class spiral(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(spiral, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("length", self.TypeDouble, "Target Waveguide length", default = 10.0)     
@@ -46,6 +46,7 @@ class spiral(pya.PCellDeclarationHelper):
 
     # draw spiral
     from math import pi, cos, sin, log, sqrt
+    from pya import Point, DPoint, Polygon, Trans, Path, Text
     
     # Archimedes spiral
     # r = b + a * theta

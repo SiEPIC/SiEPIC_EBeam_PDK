@@ -8,17 +8,18 @@
  <doc/>
  <autorun>true</autorun>
  <autorun-early>false</autorun-early>
+ <priority>0</priority>
  <shortcut/>
  <show-in-menu>false</show-in-menu>
  <group-name/>
  <menu-path/>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text># Python script
+ <text>
 
 """
 This file is part of the SiEPIC_EBeam_PDK
-by Lukas Chrostowski and Jaspreet Jhoja (c) 2015-2022
+by Lukas Chrostowski (c) 2015-2017
 
 This Python file implements a library called "SiEPIC_EBeam", consisting of mature components that 
 have Layouts and Compact Models for circuit simulations:
@@ -82,7 +83,7 @@ Lukas Chrostowski           2016/11/06
 
 Lukas Chrostowski           2017/02/14
  - renaming "SiEPIC" PCells library to "SiEPIC-EBeam PCells", update for Waveguide_Route
- - code simplifications: Box -&gt; Box
+ - code simplifications: Box -&amp;gt; Box
 
 Lukas Chrostowski           2017/03/08
  - S-Bend - 
@@ -112,14 +113,14 @@ Mustafa Hammood 2020/06/26
 
 Lukas 2021/04/01
  - fixing loading library (previous collisions with other PDKs)
-
- Jaspreet 2022/09/01
- - Refactoring for Quantum PDK
  
+Jaspreet 2022/09/01
+ - Refactoring for Quantum PDK
+
 """
 
 
-print('siepic_ebeam_library')
+print('SiEPIC_EBeam_Library')
 
 import pya
 from pya import *
@@ -133,34 +134,34 @@ if dir_path not in sys.path:
     sys.path.append(dir_path)
 
 files = [f for f in os.listdir(os.path.join(os.path.dirname(
-    os.path.realpath(__file__)),'pcells_ebeam')) if '.py' in pathlib.Path(f).suffixes  and '__init__' not in f]
-import pcells_ebeam ### folder name ###
+    os.path.realpath(__file__)),'pcells_EBeam')) if '.py' in pathlib.Path(f).suffixes  and '__init__' not in f]
+import pcells_EBeam ### folder name ###
 import importlib
 importlib.invalidate_caches()
 pcells_=[]
 for f in files:
-    module = 'pcells_ebeam.%s' % f.replace('.py','')  ### folder name ###
+    module = 'pcells_EBeam.%s' % f.replace('.py','')  ### folder name ###
     print(' - found module: %s' % module)
     m = importlib.import_module(module) 
     print(m)
     pcells_.append(importlib.reload(m))
 
 
-class siepic_ebeam_library(Library):
+class SiEPIC_EBeam_Library(Library):
   """
   The library where we will put the PCells and GDS into 
   """
 
   def __init__(self):
   
-    tech_name = 'SiEPIC_EBeam_PDK'
-    library = tech_name+""
+    tech_name = 'EBeam'
+    library = tech_name
     self.technology=tech_name
 
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.42, Components with models"
+    self.description = "v0.3.45, Components with models"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os
@@ -185,7 +186,7 @@ class siepic_ebeam_library(Library):
                         
     # Create the PCell declarations
     for m in pcells_:
-        mm = m.__name__.replace('pcells_ebeam.','')
+        mm = m.__name__.replace('pcells_EBeam.','')
         mm2 = m.__name__+'.'+mm+'()'
         print(' - register_pcell %s, %s' % (mm,mm2))
         self.layout().register_pcell(mm, eval(mm2))
@@ -197,6 +198,6 @@ class siepic_ebeam_library(Library):
     self.register(library)
  
 # Instantiate and register the library
-siepic_ebeam_library()
+SiEPIC_EBeam_Library()
 </text>
 </klayout-macro>

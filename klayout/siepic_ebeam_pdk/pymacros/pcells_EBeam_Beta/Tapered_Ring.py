@@ -12,7 +12,7 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Tapered_Ring, self).__init__()
-    TECHNOLOGY = get_technology_by_name('SiEPIC_EBeam_PDK')
+    TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
     self.param("w_top", self.TypeDouble, "Top width", default = .5)
