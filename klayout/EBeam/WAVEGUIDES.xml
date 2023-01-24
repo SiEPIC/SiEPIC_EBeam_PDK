@@ -239,4 +239,22 @@
       <taper_pin_mm>opt2</taper_pin_mm>
     </compound_waveguide>
   </waveguide>
+	<waveguide>
+	  <name>SiN Strip TE 895 nm, w=450 nm</name>
+	  <CML>EBeam</CML>
+	  <model>none</model>
+	  <bezier>0.20</bezier>
+      <radius>15.0</radius>
+      <width>0.45</width>
+	  <component>
+	    <layer>SiN</layer>
+	    <width>0.45</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	</waveguide>
 </waveguides>
