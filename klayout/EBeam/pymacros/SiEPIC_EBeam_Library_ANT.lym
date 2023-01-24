@@ -8,6 +8,7 @@
  <doc/>
  <autorun>true</autorun>
  <autorun-early>false</autorun-early>
+ <priority>0</priority>
  <shortcut/>
  <show-in-menu>false</show-in-menu>
  <group-name/>
@@ -16,6 +17,7 @@
  <dsl-interpreter-name/>
  <text>"""
 This file is part of the SiEPIC_EBeam_PDK
+by Lukas Chrostowski, et al., (c) 2015-2023
 
 This file implements a library called "EBeam-ANT", consisting of components that are biased to work the best with ANT process.
 """
@@ -59,7 +61,7 @@ class SiEPIC_EBeam_Library_ANT(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.44, ANT components"
+    self.description = "v0.3.45, ANT components"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os

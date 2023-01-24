@@ -10,7 +10,7 @@ class Bragg_encoder(pya.PCellDeclarationHelper):
     #declare the paramters
     #parameters: binary code, start period, end period, corrugation width, length
     self.param("N", self.TypeDouble, "Number of bits (N)", default = 8)
-    self.param("binary", self.TypeString, "identity (binary size N)", default = 10000000)
+    self.param("binary", self.TypeString, "identity (binary size N)", default = "10000000")
     self.param("start_period", self.TypeDouble, "start period (microns)", default = 0.314)
     self.param("stop_period", self.TypeDouble, "stop period (microns)", default = 0.342)
     self.param("corrugation_widths",self.TypeList,"Corrugations widths (microns)", default = [0.08, 0.06, 0.04, 0.02, 0.02, 0.04, 0.06, 0.08])
