@@ -75,9 +75,9 @@ class Waveguide(pya.PCellDeclarationHelper):
 
     # Draw the waveguide geometry, new function in SiEPIC-Tools v0.3.90
     from SiEPIC.utils.layout import layout_waveguide4
-    self.waveguide_length = layout_waveguide4(self.cell, self.path, self.waveguide_type)
+    self.waveguide_length = layout_waveguide4(self.cell, self.path, self.waveguide_type, debug=False)
 
-    print("EBeam.%s: length %.3f um, complete" % (self.cellName, self.waveguide_length))
+    # print("EBeam.%s: length %.3f um, complete" % (self.cellName, self.waveguide_length))
 
 '''
 import pya
