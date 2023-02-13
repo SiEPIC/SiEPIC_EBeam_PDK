@@ -147,4 +147,4 @@ class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
     path = Path([Point(0, 0), Point(length, 0)], 3*w)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
-    print('Done: ebeam_bragg_te1550')
+    # print('Done: ebeam_bragg_te1550')
