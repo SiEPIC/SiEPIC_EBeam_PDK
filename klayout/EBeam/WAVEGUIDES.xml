@@ -239,6 +239,17 @@
       <taper_pin_mm>opt2</taper_pin_mm>
     </compound_waveguide>
   </waveguide>
+  <waveguide>
+    <name>Si routing TE 1310 nm (compound waveguide)</name>
+    <compound_waveguide>
+      <singlemode>Strip TE 1310 nm, w=350 nm</singlemode>
+      <multimode>Multimode Strip TE 1550 nm, w=3000 nm</multimode>
+      <taper_library>EBeam</taper_library>
+      <taper_cell>taper_si_simm_1310</taper_cell>
+      <taper_pin_sm>opt1</taper_pin_sm>
+      <taper_pin_mm>opt2</taper_pin_mm>
+    </compound_waveguide>
+  </waveguide>
 	<waveguide>
 	  <name>SiN Strip TE 895 nm, w=450 nm</name>
 	  <CML>EBeam</CML>
