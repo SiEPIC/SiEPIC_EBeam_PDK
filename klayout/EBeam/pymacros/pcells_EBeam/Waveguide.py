@@ -1,7 +1,5 @@
 """
-This file is part of the SiEPIC-Tools and SiEPIC-AMF PDK
-
-This Python file implements a library called "AMF" 
+This file is part of the SiEPIC-EBeam-PDK
 
 Version history:
 
