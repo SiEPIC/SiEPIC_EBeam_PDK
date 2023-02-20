@@ -253,7 +253,7 @@
 	<waveguide>
 	  <name>SiN Strip TE 895 nm, w=450 nm</name>
 	  <CML>EBeam</CML>
-	  <model>none</model>
+	  <model>ebeam_wg_integral_895</model>
     <bezier>0.35</bezier>
     <radius>50.0</radius>
     <width>0.45</width>
