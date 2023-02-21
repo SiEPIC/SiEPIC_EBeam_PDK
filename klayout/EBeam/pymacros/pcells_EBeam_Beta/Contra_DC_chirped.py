@@ -37,7 +37,7 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
     self.param("metal_width", self.TypeDouble, "Metal contact width", default=5)
     self.param("l_heater", self.TypeLayer, "Heater Layer", default=TECHNOLOGY['M1_heater'])
     self.param("l_metal", self.TypeLayer, "Metal contact Layer", default=TECHNOLOGY['M2_router'])
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrecm", self.TypeLayer, "PinRecM Layer (metal)", default=TECHNOLOGY['PinRecM'])	
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])

@@ -465,7 +465,7 @@ class PCMSpiralBraggGrating(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
     
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("w", self.TypeDouble, "Waveguide Width [nm]", default = 400)
     self.param("DeviceLength", self.TypeDouble, "Device Path Length [mm]", default = 0.5)
     self.param("Cwidth", self.TypeDouble, "Corrugation Width [nm]", default = 80)
@@ -668,7 +668,7 @@ class PCMSpiralBraggGratingSlab(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("w", self.TypeDouble, "Waveguide Width [nm]", default = 400)
     self.param("DeviceLength", self.TypeDouble, "Device Path Length [mm]", default = 0.5)
     self.param("Cwidth", self.TypeDouble, "Corrugation Width [nm]", default = 80)
@@ -957,7 +957,7 @@ class Spiral_NoCenterBraggGrating(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("w", self.TypeDouble, "Waveguide Width [nm]", default = 400)
     self.param("DeviceLength", self.TypeDouble, "Device Path Length [mm]", default = 0.5)
     self.param("Cwidth", self.TypeDouble, "Corrugation Width [nm]", default = 80)
@@ -1195,7 +1195,7 @@ class CDCSpiralBraggGrating(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
     
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("w", self.TypeDouble, "Waveguide1 Width [nm]", default = 450)
     self.param("w2", self.TypeDouble, "Waveguide2 Width [nm]", default = 550)
     self.param("num_periods", self.TypeInt, "Number of periods", default = 400)
@@ -1548,7 +1548,7 @@ class SpiralWaveguide(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
     
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("w", self.TypeDouble, "Waveguide Width [nm]", default = 400)
     self.param("DeviceLength", self.TypeDouble, "Device Path Length [mm]", default = 0.5)
     self.param("wg_spacing", self.TypeDouble, "Waveguide spacing [microns]", default = 8)     

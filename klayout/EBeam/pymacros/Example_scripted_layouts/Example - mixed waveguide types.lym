@@ -44,7 +44,7 @@ def Example_mixed_waveguide_types():
   ly.prune_subcells(cell.cell_index(), 10)
   
   # Layer mapping:
-  LayerSiN = ly.layer(TECHNOLOGY['Waveguide'])
+  LayerSiN = ly.layer(TECHNOLOGY['Si'])
   TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
     
   # Create a sub-cell for our layout, place the cell in the top cell

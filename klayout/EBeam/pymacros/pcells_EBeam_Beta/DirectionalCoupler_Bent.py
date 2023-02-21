@@ -15,7 +15,7 @@ class DirectionalCoupler_Bent(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("bus_radius", self.TypeDouble, "Bus Radius", default = 5)
     self.param("gap", self.TypeDouble, "Gap", default = 0.2)

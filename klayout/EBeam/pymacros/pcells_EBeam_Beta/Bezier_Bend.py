@@ -24,7 +24,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     self.param("bezier_num", self.TypeDouble, "Bezier factor", default = 25)     
     self.param("eff_r", self.TypeDouble, "Effective bend radius (microns)", default = 5)
     self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.500)     
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))

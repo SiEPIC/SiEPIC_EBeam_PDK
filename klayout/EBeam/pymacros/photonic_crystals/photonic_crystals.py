@@ -107,7 +107,7 @@ class PhC_test(pya.PCellDeclarationHelper):
     self.param("n_sweep", self.TypeInt, "Different sizes of holes", default = 13)
     self.param("n_vertices", self.TypeInt, "Vertices of a hole", default = 32)                                
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -212,7 +212,7 @@ class Hole_cell_half(pya.PCellDeclarationHelper):
     self.param("a", self.TypeDouble, "lattice constant (microns)", default = 0.744)     
     self.param("r", self.TypeDouble, "hole radius (microns)", default = 0.179)
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -280,7 +280,7 @@ class Hexagon_cell_half(pya.PCellDeclarationHelper):
     self.param("a", self.TypeDouble, "lattice constant (microns)", default = 0.744)     
     self.param("r", self.TypeDouble, "hole radius (microns)", default = 0.179)
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -345,7 +345,7 @@ class wg_triangle_tapers(pya.PCellDeclarationHelper):
     self.param("taper_wg_length", self.TypeDouble, "Waveguide Length (microns)", default = 5)
     self.param("wg_width", self.TypeDouble, "Waveguide Width (microns)", default = 1)
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -539,7 +539,7 @@ class H0c_Test_Structure(pya.PCellDeclarationHelper):
     
     #Layer Parameters
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -668,7 +668,7 @@ class H0c_oxide_Test_Structure(pya.PCellDeclarationHelper):
     
     #Layer Parameters
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -789,7 +789,7 @@ class L3c_Test_Structure(pya.PCellDeclarationHelper):
     
     #Layer Parameters
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -884,7 +884,7 @@ class GC_to_GC_ref1(pya.PCellDeclarationHelper):
     
     #Layer Parameters
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
@@ -958,7 +958,7 @@ class PhC_W1wg_reference(pya.PCellDeclarationHelper):
     
     #Layer Parameters
     TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])

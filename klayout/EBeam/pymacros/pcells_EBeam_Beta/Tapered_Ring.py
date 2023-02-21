@@ -17,7 +17,7 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
     self.param("w_top", self.TypeDouble, "Top width", default = .5)
     self.param("w_bot", self.TypeDouble, "Bottom width (>Top Width)", default = 2)
     self.param("radius", self.TypeDouble, "Radius", default = 10)
-    self.param("LayerSi", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("LayerSi", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 

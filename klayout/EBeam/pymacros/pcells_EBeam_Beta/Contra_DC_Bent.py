@@ -15,7 +15,7 @@ class Contra_DC_Bent(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = TECHNOLOGY['Si'])
     self.param("radius", self.TypeDouble, "Radius (um)", default = 25)
     self.param("gap", self.TypeDouble, "Gap (um)", default = 0.28)

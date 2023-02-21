@@ -21,7 +21,7 @@ class BraggWaveguide_holes(pya.PCellDeclarationHelper):
     self.param("fill_factor", self.TypeDouble, "Grating fill factor", default = 0.5)     
     self.param("hole_width", self.TypeDouble, "Corrugration width (microns)", default = 0.07)     
     self.param("wg_width", self.TypeDouble, "Waveguide width", default = 0.35)     
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))

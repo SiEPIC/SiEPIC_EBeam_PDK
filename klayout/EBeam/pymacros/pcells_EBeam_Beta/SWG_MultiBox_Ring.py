@@ -21,7 +21,7 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
       self.param("busL", self.TypeDouble, "Bus Length [um]", default = 10)
       self.param("taperL", self.TypeDouble, "Taper Length [um]", default = 25)
       #self.param("doublebus", self.TypeBoolean, "Bus Type (Single=False, Double=True)", default = False)
-      self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+      self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
       self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
       self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
   #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
