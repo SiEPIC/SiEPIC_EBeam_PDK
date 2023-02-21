@@ -29,7 +29,7 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     self.param("Grouse_Run", self.TypeBoolean, "Fabrication using ANT Grouse Run", default = False)
 
     # declare the layers
-    self.param("silayer", self.TypeLayer, "Si Layer", default=TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default=TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default=TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default=TECHNOLOGY['DevRec'])
     self.param("oxopen", self.TypeLayer, "OxOpen Layer", default=TECHNOLOGY['Oxide open (to BOX)'])

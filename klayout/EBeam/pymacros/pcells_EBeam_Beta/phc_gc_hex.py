@@ -29,7 +29,7 @@ class phc_gc_hex(pya.PCellDeclarationHelper):
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
-    self.param("invert", self.TypeLayer, "Layer to invert", default =TECHNOLOGY['Waveguide'])
+    self.param("invert", self.TypeLayer, "Layer to invert", default =TECHNOLOGY['Si'])
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell

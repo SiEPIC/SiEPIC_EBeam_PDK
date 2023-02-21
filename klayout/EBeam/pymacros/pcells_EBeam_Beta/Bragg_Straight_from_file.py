@@ -27,7 +27,7 @@ class Bragg_Straight_from_file(pya.PCellDeclarationHelper):
     self.param("forder", self.TypeString, "Forder", default = "C:\\Users\Rui\Dropbox\\RESEARCH\\CAD_Data\\Feb\\")
     self.param("name", self.TypeString, "Name", default = "Square_BP_B3.5_N2536_DW6")  
     self.param("filetype", self.TypeString, "File type (txt)", default = 'txt')  
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("port_w", self.TypeDouble, "Port Waveguide width", default = 0.5)
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])

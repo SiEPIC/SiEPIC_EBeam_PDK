@@ -17,7 +17,7 @@ class ebeam_rib_phase_shifter_folded(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("io_wg_type", self.TypeBoolean, "I/O waveguide type, 0 - strip; 1 - rib", default = 0)
     self.param("fold_number", self.TypeInt, "Number of folds (3, 5, 7, ...)", default = 5)   
     self.param("input_rib_width", self.TypeDouble, "Input Rib Width (um)", default = 0.35)

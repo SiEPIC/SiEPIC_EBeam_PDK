@@ -19,7 +19,7 @@ class cavity_hole(pya.PCellDeclarationHelper):
     self.param("y", self.TypeDouble, "y coordinate", default = 0)
     self.param("radius", self.TypeDouble, "hole radius", default = 10)
     self.param("gap", self.TypeDouble, "half of the gap between surrounding holes (microns)", default = 2)
-    self.param("LayerSi", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("LayerSi", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     
