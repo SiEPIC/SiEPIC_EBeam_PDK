@@ -191,7 +191,7 @@ class ebeam_dc_SiN_TE_895(pya.PCellDeclarationHelper):
         shape = shapes(LayerDevRecN).insert(text)
         shape.text_size = r * 0.017
         t = Trans(Trans.R0, 0, 0)
-        text = Text("Component=ebeam_dc_te1550", t)
+        text = Text("Component=ebeam_dc_SiN_te895", t)
         shape = shapes(LayerDevRecN).insert(text)
         shape.text_size = r * 0.017
         t = Trans(Trans.R0, 0, w)
