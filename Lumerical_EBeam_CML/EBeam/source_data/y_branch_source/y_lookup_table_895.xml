@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "index_table">
+<association>
+    <design>
+        <value name="height" type="double">4.0e-07</value>
+        <value name="width" type="double">4.5e-07</value>
+    </design>
+    <extracted>
+        <value name="y_sparam" type="string">Ybranch_Thickness=400_width=450.sparam</value>
+    </extracted>
+</association>
+</lumerical_lookup_table>
