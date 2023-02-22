@@ -23,9 +23,14 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
 
     # Load all waveguides types
     self.waveguide_types = load_Waveguides_by_Tech(self.technology_name)   
-        
+    
+    # find SiN waveguide
+    names = [w['name'] for w in self.waveguide_types if 'SiN' in w['name']]
+    if not names:
+        raise Exception ('Waveguides.XML does not have a SiN waveguide.')
+    
     # declare the parameters
-    p = self.param("waveguide_type", self.TypeList, "Waveguide Type", default = self.waveguide_types[0]['name'])
+    p = self.param("waveguide_type", self.TypeList, "Waveguide Type", default = names[0])
     for wa in self.waveguide_types:
         p.add_choice(wa['name'],wa['name'])
 
