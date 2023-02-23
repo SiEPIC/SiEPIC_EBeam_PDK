@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "directional_coupler">
+<association>
+    <design>
+        <value name="Lc" type="double">0.274</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=120nm_Lc=0.274um.sparam</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="Lc" type="double">1.12</value>
+    </design>
+    <extracted>
+        <value name="s-param" type="string">dc_gap=120nm_Lc=1.12um.sparam</value>
+    </extracted>
+</association>
