@@ -18,7 +18,7 @@ class Bragg_encoder(pya.PCellDeclarationHelper):
     self.param("length", self.TypeInt, "length (microns)", default = 200)
     self.param("sum_format", self.TypeDouble, "sum format (1, 2, or 3)", default = 3)
     
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     

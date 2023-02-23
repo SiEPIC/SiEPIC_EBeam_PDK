@@ -16,6 +16,21 @@
    <source>300/0@1</source>
  </properties>
  <properties>
+   <frame-color>#882020</frame-color>
+   <fill-color>#882020</fill-color>
+   <frame-brightness>0</frame-brightness>
+   <fill-brightness>1</fill-brightness>
+   <dither-pattern>I0</dither-pattern>
+   <valid>true</valid>
+   <visible>true</visible>
+   <transparent>false</transparent>
+   <width>1</width>
+   <marked>false</marked>
+   <animation>0</animation>
+   <name>Silicon Wafer</name>
+   <source>299/0@1</source>
+ </properties>
+ <properties>
    <frame-color>#ff80a8</frame-color>
    <fill-color>#ff80a8</fill-color>
    <frame-brightness>0</frame-brightness>
@@ -27,9 +42,26 @@
    <width>1</width>
    <marked>false</marked>
    <animation>0</animation>
-   <name>Waveguide</name>
+   <name>Silicon</name>
    <source>301/0@1</source>
  </properties>
+
+ <properties>
+   <frame-color>#a6cee3</frame-color>
+   <fill-color>#a6cee3</fill-color>
+   <frame-brightness>0</frame-brightness>
+   <fill-brightness>1</fill-brightness>
+   <dither-pattern>I0</dither-pattern>
+   <valid>true</valid>
+   <visible>true</visible>
+   <transparent>false</transparent>
+   <width>1</width>
+   <marked>false</marked>
+   <animation>0</animation>
+   <name>Silicon Nitride</name>
+   <source>302/0@1</source>
+ </properties>
+
 
  <properties>
   <frame-color>#8000ff</frame-color>

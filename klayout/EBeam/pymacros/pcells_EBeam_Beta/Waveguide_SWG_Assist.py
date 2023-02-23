@@ -18,7 +18,7 @@ class Waveguide_SWG_Assist(pya.PCellDeclarationHelper):
     self.param("swg_wg_width", self.TypeDouble, "SWG Waveguide width", default = 0.5)     
     self.param("strip_wg_width", self.TypeDouble, "Strip Waveguide width", default = 0.06)     
     self.param("duty", self.TypeDouble, "Duty Cycle (0 to 1)", default = 0.5)
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))

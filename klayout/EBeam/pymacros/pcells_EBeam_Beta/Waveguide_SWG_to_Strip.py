@@ -28,7 +28,7 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
     self.param("wg_width_taper", self.TypeDouble, "Nanotaper width at taper end (microns)", default = 0.06)     
     self.param("duty_strip", self.TypeDouble, "SWG duty cycle at strip end (0 to 1)", default = 0.500)     
     self.param("duty_swg", self.TypeDouble, "SWG duty cycle at SWG end (0 to 1)", default = 0.700)     
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 

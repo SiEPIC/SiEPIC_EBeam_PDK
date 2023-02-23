@@ -30,7 +30,7 @@ class MultiBox_BraggGrating(pya.PCellDeclarationHelper):
       self.param("Length", self.TypeDouble, "Bragg Grating Length on Each side [um]", default = 30)
       self.param("taperL", self.TypeDouble, "Taper Length [um]", default = 10)
       self.param("phaseshifted", self.TypeBoolean, "Bragg Type (Uniform=False, Phase-shifted=True)", default = False)
-      self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+      self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
       self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
       self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
   #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))

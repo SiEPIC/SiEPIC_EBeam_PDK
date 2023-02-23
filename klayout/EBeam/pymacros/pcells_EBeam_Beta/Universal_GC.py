@@ -32,7 +32,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
     self.param("theta_c", self.TypeDouble, "Insertion Angle (deg)", default = -31.0)
     
     # Layer parameters
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 

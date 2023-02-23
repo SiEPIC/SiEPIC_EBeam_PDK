@@ -17,6 +17,11 @@
 	    <width>1.5</width>
 	    <offset>0.0</offset>
 	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.5</width>
+	    <offset>0.0</offset>
+	  </component>
 	</waveguide>
 	<waveguide>
 	  <name>Strip TE 1310 nm, w=410 nm</name>
@@ -32,6 +37,11 @@
 	  <component>
 	    <layer>DevRec</layer>
 	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.41</width>
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>
@@ -52,6 +62,11 @@
 	    <width>1.35</width>
 	    <offset>0.0</offset>
 	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.35</width>
+	    <offset>0.0</offset>
+	  </component>
 	</waveguide>
 	<waveguide>
 	  <name>Strip TM 1550 nm, w=500 nm</name>
@@ -67,6 +82,11 @@
 	  <component>
 	    <layer>DevRec</layer>
 	    <width>2.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.5</width>
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>
@@ -86,6 +106,11 @@
 	    <width>1.7</width>
 	    <offset>0.0</offset>
 	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.45</width>
+	    <offset>0.0</offset>
+	  </component>
 	</waveguide>
 	<waveguide>
 	  <name>Multimode Strip TE 1550 nm, w=2000 nm</name>
@@ -96,6 +121,11 @@
       <width>2.0</width>
 	  <component>
 	    <layer>Si</layer>
+	    <width>2.0</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
 	    <width>2.0</width>
 	    <offset>0.0</offset>
 	  </component>
@@ -115,6 +145,11 @@
 	  <component>
 	    <layer>DevRec</layer>
 	    <width>4.0</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>3.0</width>
 	    <offset>0.0</offset>
 	  </component>
 	</waveguide>
@@ -140,6 +175,11 @@
 	    <width>1.5</width>
 	    <offset>0.0</offset>
 	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.5</width>
+	    <offset>0.0</offset>
+	  </component>
 	</waveguide>
 	<waveguide>
 	  <name>eskid TE 1550</name>
@@ -148,6 +188,11 @@
       <radius>3.0</radius>
       <width>1.31</width>
 	  <bezier>0.20</bezier>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>1.31</width>
+	    <offset>0</offset>
+	  </component>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.35</width>
@@ -206,6 +251,11 @@
 	    <offset>0.0</offset>
 	  </component>
 	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
 	    <layer>Si - 90 nm rib</layer>
 	    <width>3</width>
 	    <offset>0.0</offset>
@@ -219,6 +269,11 @@
       <width>0.35</width>
 	  <component>
 	    <layer>Si</layer>
+	    <width>0.35</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
 	    <width>0.35</width>
 	    <offset>0.0</offset>
 	  </component>
@@ -240,19 +295,35 @@
     </compound_waveguide>
   </waveguide>
   <waveguide>
-    <name>SiN Strip TE 895 nm, w=450 nm, r=50 um</name>
-    <CML>EBeam</CML>
-    <model>ebeam_wg_integral_895</model>
+    <name>Si routing TE 1310 nm (compound waveguide)</name>
+    <compound_waveguide>
+      <singlemode>Strip TE 1310 nm, w=350 nm</singlemode>
+      <multimode>Multimode Strip TE 1550 nm, w=3000 nm</multimode>
+      <taper_library>EBeam</taper_library>
+      <taper_cell>taper_si_simm_1310</taper_cell>
+      <taper_pin_sm>opt1</taper_pin_sm>
+      <taper_pin_mm>opt2</taper_pin_mm>
+    </compound_waveguide>
+  </waveguide>
+	<waveguide>
+	  <name>SiN Strip TE 895 nm, w=450 nm, r=50 um</name>
+	  <CML>EBeam</CML>
+	  <model>ebeam_wg_integral_895</model>
     <bezier>0.35</bezier>
     <radius>50.0</radius>
     <width>0.45</width>
-    <component>
-      <layer>SiN</layer>
-      <width>0.45</width>
-      <offset>0.0</offset>
-    </component>
-    <component>
-      <layer>DevRec</layer>
+	  <component>
+	    <layer>SiN</layer>
+	    <width>0.45</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>Waveguide</layer>
+	    <width>0.45</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>DevRec</layer>
       <width>1.45</width>
       <offset>0.0</offset>
     </component>
@@ -269,6 +340,11 @@
       <width>0.45</width>
       <offset>0.0</offset>
     </component>
+    <component>
+	    <layer>Waveguide</layer>
+	    <width>0.45</width>
+	    <offset>0.0</offset>
+	  </component>
     <component>
       <layer>DevRec</layer>
       <width>1.45</width>

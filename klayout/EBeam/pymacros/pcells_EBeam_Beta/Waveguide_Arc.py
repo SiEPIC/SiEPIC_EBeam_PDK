@@ -15,7 +15,7 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("radius", self.TypeDouble, "Radius", default = 10)
     self.param("wg_width", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("start_angle", self.TypeDouble, "Start Angle", default = 0)

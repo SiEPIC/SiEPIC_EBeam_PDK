@@ -19,7 +19,7 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
       self.param("gap", self.TypeDouble, "Bus Gap [um]", default = 0.06)
       self.param("W_ratio", self.TypeDouble, "Lin/Lout", default = 1)
       self.param("doublebus", self.TypeBoolean, "Bus Type (Single=False, Double=True)", default = False)
-      self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+      self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
       self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
       self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
   #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
