@@ -35,11 +35,11 @@ mask(etch_si).etch(0.22, :taper => etch_angle, :bias =>  0, :into => x_si)
 x_si1 = x_si.dup
 
 # silicon nitride layer, and etching
-x_sin = grow(0.22)
+x_sin = grow(0.4)
 etch_sin = sin.inverted 
 # waveguide, assume 5 degree sidewall, with mid-point being the desired width; bias = sin(10)*220.
 etch_angle = 5
-mask(etch_sin).etch(0.22, :taper => etch_angle, :bias =>  0, :into => x_sin) 
+mask(etch_sin).etch(0.4, :taper => etch_angle, :bias =>  0, :into => x_sin) 
 x_sin1 = x_sin.dup
 
 # mh metal
