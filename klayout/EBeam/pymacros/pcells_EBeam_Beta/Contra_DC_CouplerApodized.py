@@ -25,7 +25,7 @@ class Contra_DC_CouplerApodized(pya.PCellDeclarationHelper):
     self.param("wg2_width", self.TypeDouble, "Waveguide 2 width", default = 0.55)          
     self.param("index", self.TypeDouble, "Gaussian Index", default = 2.5)
     self.param("H", self.TypeDouble, "Apodization H constant (microns)", default = 2)
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
 #    self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))

@@ -38,7 +38,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         self.param("port_w", self.TypeDouble, "Port Waveguide width", default=0.5)
         self.param("accuracy", self.TypeBoolean,
                    "Simulation Accuracy (on = high, off = fast)", default=True)
-        self.param("layer", self.TypeLayer, "Waveguide Layer", default=TECHNOLOGY['Waveguide'])
+        self.param("layer", self.TypeLayer, "Waveguide Layer", default=TECHNOLOGY['Si'])
         self.param("rib", self.TypeBoolean, "Use rib (ridge) waveguides?", default=False)
         self.param("layer_rib", self.TypeLayer, "Rib Layer",
                    default=TECHNOLOGY['Si - 90 nm rib'])

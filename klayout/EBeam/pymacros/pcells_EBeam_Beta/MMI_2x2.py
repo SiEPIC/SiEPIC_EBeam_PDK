@@ -11,7 +11,7 @@ class MMI_2x2(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
+    self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("w_mmi", self.TypeDouble, "Waveguide Width", default = 6.0)
     self.param("w_a", self.TypeDouble, "Access waveguide Width", default = 1.5)
