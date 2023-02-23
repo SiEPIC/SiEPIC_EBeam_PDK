@@ -49,9 +49,11 @@ class wg_heater(pya.PCellDeclarationHelper):
     self.param("mllayer", self.TypeLayer, "Metal contact layer", default=TECHNOLOGY['M2_router'])
     self.param("metal_width", self.TypeDouble, "Metal contact width", default=10)
 
+    self.param("wg_width", self.TypeDouble, "Waveguide width (microns)", default = 0.5, readonly=True)
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
     self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
     self.param("pinrecm", self.TypeLayer, "PinRecM Layer (metal)", default=TECHNOLOGY['PinRecM'])
+    self.param("text", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
     
     self.cellName="wg_heater"
 
@@ -60,8 +62,11 @@ class wg_heater(pya.PCellDeclarationHelper):
     return "%s_%s" % (self.cellName, self.length)
   
   def coerce_parameters_impl(self):
-    self.path = DPath([DPoint(0,0), DPoint(self.length,0)], 0.5)
-    print(self.waveguide_type)
+    params = [t for t in self.waveguide_types if t['name'] == self.waveguide_type]
+    if not params:
+        raise Exception ('Waveguides.XML not correctly configured')
+    from SiEPIC.extend import to_itype
+    self.wg_width = float(params[0]['width'])
     
   def can_create_from_shape_impl(self):
     return self.shape.is_path()
@@ -82,15 +87,22 @@ class wg_heater(pya.PCellDeclarationHelper):
     if self.layout.technology_name == '':
         self.layout.technology_name = self.technology_name
 
-    from SiEPIC.extend import to_itype
-    from SiEPIC.utils.layout import make_pin
-    dbu = self.layout.dbu
-    
-    
-    # Draw the waveguide geometry, new function in SiEPIC-Tools v0.3.90
-    from SiEPIC.utils.layout import layout_waveguide4
-    self.waveguide_length = layout_waveguide4(self.cell, self.path, self.waveguide_type, debug=False)
 
+    # fetch the parameters
+    dbu = self.layout.dbu
+    ly = self.layout
+    shapes = self.cell.shapes
+
+    from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+    TECHNOLOGY = get_technology_by_name('EBeam')
+    params = [t for t in self.waveguide_types if t['name'] == self.waveguide_type]
+    layer = [wg['layer'] for wg in params[0]['component']]
+    try:
+        layer.remove('DevRec')
+    except:
+        pass
+    if not layer:
+        raise Exception ('Waveguides.XML not correctly configured')
 
     # fetch design layers
     LayermlN = self.layout.layer(self.mllayer)
@@ -98,6 +110,18 @@ class wg_heater(pya.PCellDeclarationHelper):
     LayerPinRecN = self.layout.layer(self.pinrec)
     LayerDevRecN = self.layout.layer(self.devrec)
     LayerPinRecM = self.layout.layer(self.pinrecm)
+    LayerWG = ly.layer(TECHNOLOGY[layer[0]])
+    LayerTextN = ly.layer(self.text)
+
+
+    from SiEPIC.extend import to_itype
+    from SiEPIC.utils.layout import make_pin
+    dbu = self.layout.dbu
+    w = to_itype(self.wg_width,dbu)
+    
+    # Draw the waveguide geometry
+    path = DPath([DPoint(0,0), DPoint(self.length,0)], self.wg_width)
+    self.cell.shapes(LayerWG).insert(path.simple_polygon())
 
     # draw metal heater
     path = DPath([DPoint(0,0), DPoint(self.length,0)], self.mh_width)
@@ -117,4 +141,32 @@ class wg_heater(pya.PCellDeclarationHelper):
     make_pin(self.cell, "elec1", [self.metal_width / 2, self.mh_width/2], ml_width, LayerPinRecM, 90)
     make_pin(self.cell, "elec2", [self.length-self.metal_width / 2, self.mh_width/2], ml_width, LayerPinRecM, 90)
 
-    # print("EBeam.%s: length %.3f um, complete" % (self.cellName, self.waveguide_length))
+    # Create the pins on the waveguides
+    make_pin(self.cell, "opt1", [0,0], w, LayerPinRecN, 180)
+    make_pin(self.cell, "opt2", [to_itype(self.length,dbu),0], w, LayerPinRecN, 0)
+
+    # Compact model information
+    t = Trans(Trans.R0, 0, 0)
+    cml = 'EBeam'
+    if cml:
+        text = Text ('Lumerical_INTERCONNECT_library=Design kits/%s' % cml, t)
+        shape = shapes(LayerDevRecN).insert(text)
+        shape.text_size = 0.1/dbu
+        t = Trans(Trans.R0, 0, w*2)
+    model = 'wg_heater'
+    if model:
+        text = Text ('Component=%s' % model, t)
+        shape = shapes(LayerDevRecN).insert(text)
+        shape.text_size = 0.1/dbu
+        t = Trans(Trans.R0, 0, -w*2)
+    text = Text \
+      ('Spice_param:wg_length=%.3fu' %\
+      (self.length), t )
+    shape = shapes(LayerDevRecN).insert(text)
+    shape.text_size = 0.1/dbu
+
+    # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
+    h = max(w*3*dbu, self.mh_width/2) 
+    box1 = Box(0, -to_itype(h,dbu), to_itype(self.length,dbu), to_itype(h,dbu))
+    shapes(LayerDevRecN).insert(box1)
+
