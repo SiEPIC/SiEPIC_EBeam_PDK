@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "index_table">
+<association>
+    <design>
+        <value name="power" type="double">0</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.003</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.003.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.006</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.006.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.009</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.009.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.012</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.012.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.015</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.015.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.018</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.018.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.021</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.021.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.024</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.024.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.027</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.027.txt</value>
+    </extracted>
+</association>
+<association>
+    <design>
+        <value name="power" type="double">0.03</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=500,h=220,p=0.03.txt</value>
+    </extracted>
+</association>
+</lumerical_lookup_table>
