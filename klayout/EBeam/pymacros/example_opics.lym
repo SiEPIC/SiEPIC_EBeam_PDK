@@ -28,7 +28,7 @@ install('numpy')
 # using https://github.com/siepic/opics
 # has been installed in SiEPIC-Tools
 import SiEPIC.opics as opics
-from SiEPIC.opics import Network
+from SiEPIC.opics.network import Network
 from SiEPIC.opics.globals import C
 
 # Library has been imported into the EBeam PDK
@@ -48,7 +48,7 @@ circuit = Network(network_id="circuit_name", f=freq)
 
 input_gc = circuit.add_component(ebeam_lib.GC)
 y = circuit.add_component(ebeam_lib.Y)
-wg2 = circuit.add_component(ebeam_lib.Waveguide, params=dict(length=0e-6))
+wg2 = circuit.add_component(ebeam_lib.ebeam_wg_integral_1550, params=dict(wg_length=40e-6))
 wg1 = circuit.add_component(ebeam_lib.Waveguide, params={"length":15e-6})
 y2 = circuit.add_component(ebeam_lib.Y)
 output_gc = circuit.add_component(ebeam_lib.GC)

@@ -12,7 +12,7 @@ from pathlib import PosixPath
 datadir = Path(str(Path(__file__).parent)) / "data"
 
 
-class BDC(componentModel):
+class ebeam_bdc_te1550(componentModel):
     """
     50/50% broadband directional 3-dB couplers. Two 3-dB couplers can be used to make an unbalanced Mach-Zehnder Interferometer (MZI),
     showing a large extinction ratio. The advantage of this device compared to the Y-Branch is that it has 2x2 ports,
@@ -59,7 +59,7 @@ class BDC(componentModel):
             self.s = self.load_sparameters(data_folder, filename)
         else:
             self.s = np.zeros((self.f.shape[0], self.ports, self.ports))
-        self.component_id = "Ebeam_BDC"
+        self.component_id = "ebeam_bdc_te1550"
 
 
 class DC_temp(componentModel):
@@ -664,7 +664,8 @@ class ebeam_wg_integral_1550(componentModel):
 
 
 component_factory = dict(
-    BDC=BDC,
+    BDC = ebeam_bdc_te1550,
+    ebeam_bdc_te1550 = ebeam_bdc_te1550,
     DC_halfring=DC_halfring,
     # DC_temp=DC_temp,
     GC=GC,
@@ -685,11 +686,11 @@ __all__ = components_list
 __version__ = "0.3.41"
 
 if __name__ == "__main__":
-    import opics as op
+    import SiEPIC.opics as op
 
     w = np.linspace(1.52, 1.58, 3) * 1e-6
     f = op.C / w
-    c = BDC(f=f)
+    c = ebeam_bdc_te1550(f=f)
     s = c.get_data()
 
     print(components_list)
