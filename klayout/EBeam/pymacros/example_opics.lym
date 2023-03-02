@@ -18,13 +18,12 @@
  <text># Circuit simulation example using opics and EBeam library
 
 # Required packages
-from SiEPIC.install import install_ployly
-install_ployly()
-from SiEPIC.install import install_pandas
-install_pandas()
-from SiEPIC.install import install_packaging
-install_packaging()
-
+from SiEPIC.install import install
+install('plotly')
+install('pandas')
+install('packaging')
+install('defusedxml')
+install('numpy')
 
 # using https://github.com/siepic/opics
 # has been installed in SiEPIC-Tools
