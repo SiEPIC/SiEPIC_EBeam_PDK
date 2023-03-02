@@ -43,7 +43,7 @@ print(f"Components: {ebeam_lib.components_list}")
 
 # Create a Mach-Zehnder circuit simulation
 import numpy as np
-freq = np.linspace(C * 1e6 / 1.5, C * 1e6 / 1.6, 2000)
+freq = np.linspace(C * 1e6 / 1.45, C * 1e6 / 1.61, 5000)
 circuit = Network(network_id="circuit_name", f=freq)
 
 input_gc = circuit.add_component(ebeam_lib.GC)
@@ -72,7 +72,7 @@ circuit.simulate_network()
 import plotly.express as px
 import pandas as pd # https://pandas.pydata.org/docs/user_guide/10min.html
 result = circuit.sim_result.get_data()
-wavelengths = C/circuit.sim_result.f
+wavelengths = C/circuit.f
 transmission = result['S_0_1']
 reflection = result['S_0_0']
 
