@@ -20,14 +20,14 @@
 	</opt_in>
 	<tunable-laser>
 		<wavelength>1550</wavelength>
-		<wavelength-start>1500</wavelength-start>
-		<wavelength-stop>1600</wavelength-stop>
-		<wavelength-points>3000</wavelength-points>
+		<wavelength-start>1499</wavelength-start>
+		<wavelength-stop>1601</wavelength-stop>
+		<wavelength-points>5000</wavelength-points>
 		<polarization>TE</polarization>
 	</tunable-laser>
 	<tunable-laser>
 		<wavelength>1550</wavelength>
-		<wavelength-start>1500</wavelength-start>
+		<wavelength-start>1480</wavelength-start>
 		<wavelength-stop>1600</wavelength-stop>
 		<wavelength-points>3000</wavelength-points>
 		<polarization>TM</polarization>
