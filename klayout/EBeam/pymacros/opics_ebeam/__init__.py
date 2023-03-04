@@ -1,4 +1,4 @@
-""" OID: orthogonal ID for polarization
+""" OID: orthogonal ID for polarization, 1=TE (first mode)
 """
 
 from copy import deepcopy
@@ -9,7 +9,84 @@ from SiEPIC.opics.utils import LUT_reader
 from numpy import complex128, ndarray
 from pathlib import PosixPath
 
-datadir = Path(str(Path(__file__).parent)) / "data"
+datadir = Path(str(Path(__file__).parent.parent.parent)) / "CML/EBeam/source_data"
+
+
+
+class contra_directional_coupler(componentModel):
+    """
+    Bragg Grating-assisted Contra Directional Coupler. 
+    This component operates as an optical add-drop multiplexer (AODM) or filter.
+
+    Model schematic:
+    ~~~~~~~~~~~~~~~
+
+    0 ┌───┐             ┌───┐ 2
+      └───┼──┐       ┌──┼───┘
+          └──┼───────┼──┘
+             │┼┼┼┼┼┼┼│
+          ┌──┼───────┼──┐
+      ┌───┼──┘       └──┼───┐
+    1 └───┘             └───┘ 3
+    """
+
+    cls_attrs = {"wg1_width": 0, "wg2_width": 0, "corrugation1_width": 0, "corrugation2_width": 0, "gap": 0, "grating_period": 0, "number_of_periods": 0, "sinusoidal": 0, "apodization_index": 0, "rib": 0}
+    valid_OID = [1]
+    ports = 4
+
+
+    def __init__(
+        self,
+        f: ndarray = None,
+        wg1_width: float = 560e-9,
+        wg2_width: float = 440e-9,
+        corrugation1_width: float = 50e-9,
+        corrugation2_width: float = 25e-9,
+        gap: float = 100e-9,
+        grating_period: float = 316e-9,
+        number_of_periods: int = 1000,
+        sinusoidal: bool = False,
+        apodization_index: float = 10.0,
+        rib: bool = False,
+        OID: int = 1,
+    ) -> None:
+        data_folder = datadir / "contraDC"
+        file_search =  "w1=" + "%.0f"%(wg1_width*1e9) + ",w2=" + "%.0f"%(wg2_width*1e9) + ",dW1=" + "%.0f"%(corrugation1_width*1e9) + ",dW2=" + "%.0f"%(corrugation2_width*1e9) +  ",gap=" + "%.0f"%(gap*1e9) + ",p=" + "%.1f"%(grating_period*1e9) + ",N=" + "%.0f"%(number_of_periods) + ",s=" + str(1 if sinusoidal else 0) +  ",a=" + "%.2f"%apodization_index +  ",rib=" + str(1 if rib else 0) + ",pol=" + str(OID-1)
+        import os, fnmatch
+        files = fnmatch.filter(os.listdir(data_folder), file_search + '*')
+        if not files:
+            raise Exception ('The contra-directional coupler Compact Model Library does not have data for the chosen parameters. Requested file: ' + file_search);
+        else:
+            filename = files[0] # pick the first one. Could be improved to pick the one with the highest resolution, etc., or give people the choice.
+            print('contra directional coupler, data file: %s' % filename)    
+        LUT_attrs_ = deepcopy(self.cls_attrs)
+        LUT_attrs_["wg1_width"] = wg1_width,
+        LUT_attrs_["wg2_width"] = wg2_width,
+        LUT_attrs_["corrugation1_width"] = corrugation1_width,
+        LUT_attrs_["corrugation2_width"] = corrugation2_width,
+        LUT_attrs_["gap"] = gap,
+        LUT_attrs_["grating_period"] = grating_period,
+        LUT_attrs_["number_of_periods"] = number_of_periods,
+        LUT_attrs_["sinusoidal" ] = sinusoidal,
+        LUT_attrs_["apodization_index" ] = apodization_index,
+        LUT_attrs_["rib"] = rib,
+        LUT_attrs_["OID"] =  OID,
+
+        super().__init__(
+            f=f,
+            data_folder=data_folder,
+            filename=filename,
+            nports=4,
+            sparam_attr="contra_directional_coupler",
+            **LUT_attrs_
+        )
+
+        if OID in self.valid_OID:
+            self.s = self.load_sparameters(data_folder, filename)
+        else:
+            self.s = np.zeros((self.f.shape[0], self.ports, self.ports))
+        self.component_id = "contra_directional_coupler"
+
 
 
 class ebeam_bdc_te1550(componentModel):
@@ -664,6 +741,7 @@ class ebeam_wg_integral_1550(componentModel):
 
 
 component_factory = dict(
+    contra_directional_coupler = contra_directional_coupler,
     BDC = ebeam_bdc_te1550,
     ebeam_bdc_te1550 = ebeam_bdc_te1550,
     DC_halfring=DC_halfring,
@@ -683,7 +761,7 @@ component_factory = dict(
 
 components_list = list(component_factory.keys())
 __all__ = components_list
-__version__ = "0.3.41"
+__version__ = "0.3.52"
 
 if __name__ == "__main__":
     import SiEPIC.opics as op
@@ -694,3 +772,4 @@ if __name__ == "__main__":
     s = c.get_data()
 
     print(components_list)
+    print(datadir)
