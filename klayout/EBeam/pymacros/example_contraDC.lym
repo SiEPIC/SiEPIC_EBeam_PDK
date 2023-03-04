@@ -31,7 +31,7 @@ from SiEPIC.simulation.contraDC.contra_directional_coupler.ContraDC import *
 if num == 5:
 
     apod_shape = "gaussian"
-    period = 316.2e-9
+    period = 320e-9
     w1 = 560e-9
     w2 = 440e-9
 

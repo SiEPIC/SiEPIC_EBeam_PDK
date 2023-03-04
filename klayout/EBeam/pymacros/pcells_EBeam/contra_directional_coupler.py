@@ -17,27 +17,27 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         TECHNOLOGY = get_technology_by_name('EBeam')
 
         # declare the parameters
-        self.param("number_of_periods", self.TypeInt, "Number of grating periods", default=500)
+        self.param("number_of_periods", self.TypeInt, "Number of grating periods", default=1000)
         self.param("grating_period", self.TypeDouble,
-                   "Grating period (microns)", default=0.317)
-        self.param("gap", self.TypeDouble, "Gap (microns)", default=0.15)
+                   "Grating period (microns)", default=0.316)
+        self.param("gap", self.TypeDouble, "Gap (microns)", default=0.10)
         self.param("corrugation1_width", self.TypeDouble,
-                   "Waveguide 1 Corrugration width (microns)", default=0.03)
+                   "Waveguide 1 Corrugration width (microns)", default=0.05)
         self.param("corrugation2_width", self.TypeDouble,
-                   "Waveguide 2 Corrugration width (microns)", default=0.06)
+                   "Waveguide 2 Corrugration width (microns)", default=0.025)
         self.param("AR", self.TypeBoolean, "Anti-Reflection Design", default=True)
         self.param("sinusoidal", self.TypeBoolean,
                    "Grating Type (Rectangular=False, Sinusoidal=True)", default=False)
-        self.param("wg1_width", self.TypeDouble, "Waveguide 1 width", default=0.45)
-        self.param("wg2_width", self.TypeDouble, "Waveguide 2 width", default=0.55)
+        self.param("wg1_width", self.TypeDouble, "Waveguide 1 width", default=0.56)
+        self.param("wg2_width", self.TypeDouble, "Waveguide 2 width", default=0.44)
         self.param("sbend", self.TypeBoolean, "Include S-bends", default=1)
         self.param("sbend_r", self.TypeDouble, "S-bend radius (microns)", default=15)
         self.param("sbend_length", self.TypeDouble, "S-bend length (microns)", default=11)
         self.param("apodization_index", self.TypeDouble,
-                   "Gaussian Apodization Index", default=2.8)
+                   "Gaussian Apodization Index", default=10.0)
         self.param("port_w", self.TypeDouble, "Port Waveguide width", default=0.5)
         self.param("accuracy", self.TypeBoolean,
-                   "Simulation Accuracy (on = high, off = fast)", default=True)
+                   "Simulation Accuracy (on = high, off = fast)", default=True, hidden=True)
         self.param("layer", self.TypeLayer, "Waveguide Layer", default=TECHNOLOGY['Si'])
         self.param("rib", self.TypeBoolean, "Use rib (ridge) waveguides?", default=False)
         self.param("layer_rib", self.TypeLayer, "Rib Layer",
@@ -317,7 +317,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         make_devrec_label(self.cell, "EBeam", "contra_directional_coupler",
                           ly.layer(self.devrec))
 
-        text = Text('Spice_param:number_of_periods=%s grating_period=%.3fu wg1_width=%.3fu wg2_width=%.3fu corrugation1_width=%.3fu corrugation2_width=%.3fu gap=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s accuracy=%s' %
+        text = Text('Spice_param:number_of_periods=%s grating_period=%.4fu wg1_width=%.3fu wg2_width=%.3fu corrugation1_width=%.3fu corrugation2_width=%.3fu gap=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s accuracy=%s' %
                     (self.number_of_periods, self.grating_period, self.wg1_width, self.wg2_width, self.corrugation1_width, self.corrugation2_width, self.gap, self.apodization_index, int(self.AR), int(self.sinusoidal), int(self.accuracy)), t)
         shape = shapes(LayerDevRecN).insert(text)
         shape.text_size = 0.1/dbu
