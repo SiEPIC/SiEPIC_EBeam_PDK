@@ -1,0 +1,312 @@
+# FDTD simulations for a Directional Coupler using Lumerical FDTD Solutions
+# Version > 8.17
+# by Lukas Chrostowski, Xu Wang, Jonas Flueckiger, Chris Zeqin Lu (c) 2014-2016
+
+
+##################################################################
+# Description:
+##################################################################
+
+# S-Parameter compact model generation for the directional coupler
+# Using 3D FDTD simulations.
+# Draw the directional coupler, and perform two simulations:
+#  input on port 1
+#  input on port 2
+# in all cases, record the S-Parameters; plot and save data.
+# optionally choose the mode (TE, TM, or both)
+
+##################################################################
+# User Configuration:
+##################################################################
+
+# define simulation parameters:
+#  - 1 to check if the simulation is working 
+#  - 3 or 4 for accurate simulation
+#mesh_accuracy=1;
+
+# define which modes we should simulate:
+#  - 1 = TE, will result in a 3x3 matrix
+#  - 2 = TM, will result in a 3x3 matrix
+#  - 1:2 = {TE, TM}, will result in a 6x6 matrix
+#mode_selection=1;
+
+# S-Parameter output file:
+#s_filename = "ebeam_dc_halfring_straight.dat";
+
+# Wavelength range and number of points:
+#wavelength_start = 1.5e-6;   
+#wavelength_stop = 1.6e-6;  
+frequency_points_monitor=101;
+frequency_points_expansion=11;
+
+# define design parameters       
+#gap=5e-08;
+#radius=3e-06;
+#wg_width=5e-07;
+#wg_thickness=2.2e-07;
+#Lc=0;
+
+# define wafer and waveguide structure
+thickness_Si   = 0.22e-6;
+thickness_BOX  = 5.0e-6;
+
+# define materials
+material_Clad = "SiO2 (Glass) - Palik";
+material_Si   = "Si (Silicon) - Palik";
+#sim_time=3000e-15;
+# approximate total simulation time based on ring circumference,
+# group velocity, and 20% extra.
+sim_time = 2*pi*radius / c * 4.2 + 200e-15; 
+
+
+##################################################################
+# Draw geometries:
+##################################################################
+
+#newproject;
+deleteall;
+save("ebeam_dc_halfring_straight");
+if(fileextension(currentfilename) != "fsp") {
+ ?"This script should be run in Lumerical FDTD Solutions. Exiting.";
+ break;
+}
+
+# Draw the bus waveguide, for racetrack resonator
+if (Lc!=0) {
+    addrect;
+    set('name','coupler');
+    set("y span",wg_width);
+    set("x span",Lc);
+    set("y",(wg_width+gap)/2);
+    copy;
+    set("y",-(wg_width+gap)/2);
+}
+
+# Draw the straight straight waveguide
+addrect;
+set('name','straight');
+set("y span",wg_width);
+set("x",0);
+set("x span",Lc+3*radius+wg_width*2);
+set("y",-(wg_width+gap)/2);
+
+# Draw the bend (half ring)
+addring;
+set("name","bend");
+set("theta start",270); 
+bend_angle=90;
+set("theta stop",270+bend_angle+90);
+set("inner radius",radius-wg_width/2);
+set("outer radius",radius+wg_width/2);
+set("x",Lc/2);
+set("y", (wg_width+gap)/2+radius); 
+
+copy;
+set("theta start",270-bend_angle-90);
+set("theta stop",270);
+set("x",-Lc/2);
+
+# Configure all silicon geometry materials
+selectall;
+set("material",material_Si);
+set("z",0);
+set("z span",thickness_Si);
+
+# Draw the Buried Oxide and cladding
+maxvxWAFER = Lc/2+sin(bend_angle/360*2*pi)*radius+2e-6;
+minvxWAFER = -maxvxWAFER;
+maxvy=(1-cos(bend_angle/360*2*pi))*radius+(wg_width+gap)/2+1e-6;
+minvy=-1e-6;
+
+addrect; 
+set("name", "cladding");
+set("x min", minvxWAFER-3e-6); set("y min", minvy-4e-6);
+set("x max", maxvxWAFER+3e-6); set("y max", maxvy+4e-6);
+set("z min", -2.3e-6); set("z max", 2.3e-6);
+set("material", material_Clad);
+set("alpha",0.2);
+set("override mesh order from material database", 1);
+set("mesh order", 4);	
+
+
+
+
+
+##################################################################
+# Add the FDTD solver:
+##################################################################
+
+add_field_profile = 0;
+profile_N = 5;
+
+FDTD_above = 800e-9;	# Extra simulation volume added, 0.8 um on top and bottom
+FDTD_below = 800e-9;
+dx_port1_source = dy_port2_source = 0.1e-6;
+dx_source_pml = 0.5e-6;
+dy_source_pml_top = 0.2e-6;
+dy_source_pml_btm = 0.5e-6;
+dx_port1_pml = dx_port1_source+dx_source_pml +0.1e-6;
+dy_port2_pml_top = dy_port2_source+dy_source_pml_top;
+dy_port2_pml_btm = dy_port2_source+dy_source_pml_btm;
+
+bend_angle=90;
+FDTD_xmax = Lc/2+sin(bend_angle/360*2*pi)*radius+dx_port1_pml;
+FDTD_xmin = -FDTD_xmax;
+FDTD_ymax = (1-cos(bend_angle/360*2*pi))*radius+(wg_width+gap)/2+dy_port2_pml_top;
+FDTD_ymin = -(wg_width+gap)/2-dy_port2_pml_btm;
+FDTD_zmax = thickness_Si/2+FDTD_above;
+FDTD_zmin = -thickness_Si/2-FDTD_below;
+
+temp_x = Lc/2+radius;
+temp_y = (1-cos(bend_angle/360*2*pi))*radius+(wg_width+gap)/2;
+
+port1_x = -temp_x-wg_width;
+port1_y = -(wg_width+gap)/2;
+port2_x = -temp_x;
+port2_y = temp_y; #  + 0.1e-6;
+port3_x = temp_x+wg_width;
+port3_y = -(wg_width+gap)/2;
+port4_x = temp_x;
+port4_y = temp_y; #  + 0.1e-6;
+
+MonitorSpanX=3*wg_width;
+MonitorSpanY=3*wg_width;
+
+addfdtd;
+select("FDTD");
+set("x min", FDTD_xmin); 
+set("x max", FDTD_xmax);
+set("y min", FDTD_ymin); 
+set("y max", FDTD_ymax);
+set("z min", FDTD_zmin); 
+set("z max", FDTD_zmax);
+set("mesh accuracy", mesh_accuracy);
+set("simulation time",sim_time);
+set("same settings on all boundaries",0);
+set("pml layers",[16, 16, 8, 16, 8, 8]);
+# if we are doing a single-mode simulation, we can use symmetry (box & oxide):
+if (mode_selection == 1) {
+ set("z min bc", "symmetric");
+}
+#if (mode_selection == 2) {
+# set("z min bc", "anti-symmetric");
+#}
+
+setglobalsource ("wavelength start", wavelength_start);
+setglobalsource ("wavelength stop", wavelength_stop);
+setglobalmonitor("frequency points",frequency_points_monitor);
+
+
+# Add "port 1" (input source and monitors at port 1)
+addport; 
+set("injection axis", "x-axis");
+set("direction", "forward");
+set("frequency points",frequency_points_expansion);
+source_x = port1_x;
+source_y = port1_y;
+set("x", source_x); 
+set("y", source_y);
+set("y span",MonitorSpanY);  
+set("z min", FDTD_zmin);  
+set("z max", FDTD_zmax);
+updateportmodes(mode_selection); # select the number of modes of the port
+
+
+# Add "port 2" (input source and monitors at port 2)
+addport; 
+set("injection axis","y-axis"); 
+set("direction","Backward");
+set("frequency points",frequency_points_expansion);
+source_x = port2_x;
+source_y = port2_y;
+set("x", source_x); 
+set("y", source_y);
+set("phi",90);
+set("bent waveguide",1);
+set("bend radius",radius);
+set("bend orientation",-90);
+set("x min",FDTD_xmin);  
+set("x max",0);  
+set("z min", FDTD_zmin);  
+set("z max", FDTD_zmax);
+updateportmodes(mode_selection); # select the number of modes of the port
+
+
+# Add "port 3" (input source and monitors at port 3)
+addport; 
+set("injection axis", "x-axis");
+set("direction", "Backward");
+set("frequency points",frequency_points_expansion);
+source_x = port1_x;
+source_y = port1_y;
+set("x", -source_x); 
+set("y", source_y);
+set("y span",MonitorSpanY);  
+set("z min", FDTD_zmin);  
+set("z max", FDTD_zmax);
+updateportmodes(mode_selection); # select the number of modes of the port
+
+
+# Add "port 4" (input source and monitors at port 4)
+addport; 
+set("injection axis","y-axis"); 
+set("direction","Backward");
+set("frequency points",frequency_points_expansion);
+source_x = port2_x;
+source_y = port2_y;
+set("x", -source_x); 
+set("y", source_y);
+set("phi",90);
+set("bent waveguide",1);
+set("bend radius",radius);
+set("bend orientation",90);
+set("x max",FDTD_xmax);  
+set("x min",0);  
+set("z min", FDTD_zmin);  
+set("z max", FDTD_zmax);
+updateportmodes(mode_selection); # select the number of modes of the port
+
+select("FDTD::ports");
+set("monitor frequency points", frequency_points_monitor);
+
+
+##################################################################
+## Run simulations and obtain S-parameters
+##################################################################
+
+
+# add s-parameter sweep task
+deletesweep("s-parameter sweep");
+addsweep(3);
+
+# perform simulations using the first 2 ports, use symmetry later.
+NsimPorts=2;
+ 
+# define index entries for s-matrix mapping table (rows)
+Nports=4;
+for (port=1:Nports) { # inject light into each port
+ for (mode = mode_selection) { # for each mode
+  index1 = struct;
+  index1.Port = "port "+num2str(port);
+  index1.Mode = "mode "+num2str(mode);
+  # add index entries to s-matrix mapping table
+  addsweepparameter("s-parameter sweep",index1);
+ }
+}
+
+# run s-parameter sweep
+runsweep("s-parameter sweep");
+ 
+# collect results
+S_matrix = getsweepresult("s-parameter sweep","S matrix");
+S_parameters = getsweepresult("s-parameter sweep","S parameters");
+S_diagnostic = getsweepresult("s-parameter sweep","S diagnostic");
+ 
+# visualize results
+#visualize(S_matrix);
+#visualize(S_parameters);
+#visualize(S_diagnostic);
+ 
+# export S-parameter data to file named s_params.dat to be loaded in INTERCONNECT
+exportsweep("s-parameter sweep",s_filename);
+

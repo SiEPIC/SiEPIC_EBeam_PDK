@@ -1,0 +1,171 @@
+#
+#    Contra-directional coupler Lumerical simulation flow
+#    see [] for documentation
+#
+#    Author: Mustafa Hammood   ; mustafa@siepic.com   ; mustafa@ece.ubc.ca
+#    SiEPIC Kits Ltd. 2019     ; University of British Columbia
+#
+#clear;
+
+closeall; 
+switchtolayout;
+groupscope("::model");
+
+#ACCURATE = 1;
+
+if (ACCURATE == 1) {
+  n_modes_EME = 50; # accurate simulation
+  mesh_override = true; # accurate simulation
+} else {
+  n_modes_EME = 1;  # for testing simulation flow
+  mesh_override = false; # 
+}
+
+
+# Frequency sweep parameters
+number_of_plot_points=1000;
+#min_wavelength=1.5e-6;
+#max_wavelength=1.6e-6;
+
+# Grating parameters
+#grating_period = 430e-9;
+#number_of_periods=1000;
+#Wa = 560e-9;
+#dWa = 24e-9;
+#Wb = 440e-9;
+#dWb = 12e-9;
+#gap = 200e-9;
+#wl_ref = 1550e-9;  
+#pol = 'TM';
+
+# Set contra DC object parameters
+closeall;
+switchtolayout;
+
+select("mesh");
+set("enabled",mesh_override);
+
+select("ContraDC");
+set("widthA",Wa);
+set("delta_widthA",0); # intially unperturbed for modal analysis
+set("delta_widthB",0); # intially unperturbed for modal analysis
+set("widthB",Wb);        
+        
+set("grating_period",grating_period);
+set("gap",gap);
+
+# set number of trial modes
+select('EME::Ports::port_1');
+set('mode selection', 'user select');
+seteigensolver('number of trial modes',4);
+
+select('EME::Ports::port_2');
+set('mode selection', 'user select');
+seteigensolver('number of trial modes',4);
+
+# Find modes of unperturbed system
+select("EME::Ports::port_1");
+if(pol == 'TE'){
+    updateportmodes(1:2);
+}else{
+    updateportmodes(3:4);
+}
+select("EME::Ports::port_2");
+if(pol == 'TE'){
+    updateportmodes(1:2);
+}else{
+    updateportmodes(3:4);
+}
+
+# Frequency sweep
+select("ContraDC");
+set("delta_widthA",dWa); # perturb the system
+set("delta_widthB",dWb); # perturb the system
+switchtolayout;
+setactivesolver('EME');
+setnamed('EME','wavelength',wl_ref);
+setnamed('EME','x min',-grating_period/2);
+setnamed('EME',"group spans",[grating_period/2;grating_period/2]);
+setnamed('EME',"number of modes for all cell groups",n_modes_EME);
+
+run;
+
+# run wavelength sweep
+setemeanalysis("start wavelength",min_wavelength);
+setemeanalysis("stop wavelength",max_wavelength);
+setemeanalysis("number of wavelength points",number_of_plot_points);
+setemeanalysis("wavelength sweep",1);
+emesweep("wavelength sweep");
+
+# get propagation sweep result
+S = getemesweep("S_wavelength_sweep");
+
+
+# analysis: find bandwidth of drop response
+drop = 10*log10(abs(S.s21)^2);
+# find center wavelength and index
+# solve for contra-directional coupling wavelength
+tol = 0.001;
+center_index = find(drop,max(drop));
+lambda0 = S.wavelength(center_index);
+
+
+isInBand = drop>max(drop) - 20;
+leftBound = center_index;
+
+for(0; isInBand(leftBound)==1; 0) {
+    leftBound = leftBound-1;
+}
+
+rightBound=center_index;
+
+for(0; isInBand(rightBound)==1; 0) {
+    rightBound = rightBound+1;
+}
+
+delta_lambda = S.wavelength(rightBound)-S.wavelength(leftBound);
+
+# analysis: find bandwidth of self-bragg response
+drop = 10*log10(abs(S.s11)^2);
+# find center wavelength and index
+# solve for self coupling wavelength
+tol = 0.001;
+center_index = find(drop,max(drop));
+
+isInBand = drop>max(drop) - 20;
+leftBound = center_index;
+
+for(0; isInBand(leftBound)==1; 0) {
+    leftBound = leftBound-1;
+}
+
+rightBound=center_index;
+
+for(0; isInBand(rightBound)==1; 0) {
+    rightBound = rightBound+1;
+}
+
+delta_lambda_self1 = S.wavelength(rightBound)-S.wavelength(leftBound);
+
+
+# analysis: find bandwidth of self-bragg response
+drop = 10*log10(abs(S.s22)^2);
+# find center wavelength and index
+# solve for self coupling wavelength
+tol = 0.001;
+center_index = find(drop,max(drop));
+
+isInBand = drop>max(drop) - 20;
+leftBound = center_index;
+
+for(0; isInBand(leftBound)==1; 0) {
+    leftBound = leftBound-1;
+}
+
+rightBound=center_index;
+
+for(0; isInBand(rightBound)==1; 0) {
+    rightBound = rightBound+1;
+}
+
+delta_lambda_self2 = S.wavelength(rightBound)-S.wavelength(leftBound);
