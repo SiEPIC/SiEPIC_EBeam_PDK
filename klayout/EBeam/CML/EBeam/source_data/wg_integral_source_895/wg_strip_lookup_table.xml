@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lumerical_lookup_table version="1.0" name = "index_table">
+<association>
+    <design>
+        <value name="height" type="double">4e-07</value>
+        <value name="width" type="double">4.5e-07</value>
+    </design>
+    <extracted>
+        <value name="neff_ng" type="string">WaveGuideTETMStrip,w=450,h=400.txt</value>
+    </extracted>
+</association>
+</lumerical_lookup_table>
