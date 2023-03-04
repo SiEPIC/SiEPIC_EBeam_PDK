@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>'''
+Run a simulation of a contra directional coupler, with specific parameters
+Plot the S-parameters
+Update the Compact Model Library 
+
+'''
+
+num = 5
+
+from SiEPIC.simulation.contraDC.contra_directional_coupler.ContraDC import *
+
+"""Example 5: Lumerical-assisted flow
+"""
+if num == 5:
+
+    apod_shape = "gaussian"
+    period = 316.2e-9
+    w1 = 560e-9
+    w2 = 440e-9
+
+    device = ContraDC(w1= w1, w2=w2, apod_shape=apod_shape, period=period, kappa=25000)
+    device.simulate()
+
+drop = go.Scatter(x=device.wavelength*1e9, y=device.drop, mode='lines', name='Through')
+thru = go.Scatter(x=device.wavelength*1e9, y=device.thru, mode='lines', name='Drop')
+layout = go.Layout(title='Contra-directional coupler device', xaxis=dict(title='X Axis'), yaxis=dict(title='Y Axis'))
+fig = go.Figure(data=[thru, drop], layout=layout)
+fig.show()
+
+
+# Check if there is a layout open, so we know which technology to install
+lv = pya.Application.instance().main_window().current_view()
+if lv == None:
+    raise UserWarning("To save data to the Compact Model Library, first, please create a new layout and select the desired technology:\n  Menu: File &gt; New Layout, and a Technology.\nThen repeat.")
+
+# Get the Technology 
+from SiEPIC.utils import get_layout_variables
+TECHNOLOGY, lv, ly, top_cell = get_layout_variables()
+
+# Check if there is a CML folder in the Technology folder
+import os
+base_path = ly.technology().base_path()    
+folder_CML = os.path.join(base_path,'CML/EBeam/source_data/contraDC')
+
+
+# Generate compact model for Lumerical INTERCONNECT
+device.gen_sparams(filepath=folder_CML, make_plot=False) # this will create a ContraDC_sparams.dat file to import into INTC
+</text>
+</klayout-macro>
