@@ -64,7 +64,7 @@ class parameters():
     wg_bend_radius = 35     # waveguide routes bend radius
     device_spacing = 7.3    # spacing between devices
     wg_pitch = 5            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
-    pol = 'te'
+    pol = 'TE'
     waveguide_type='Strip TE 1550 nm, w=500 nm'
     gc_pitch = 127          # spacing between grating couplers array (for a single device)
     cdc_offset = 20
@@ -75,7 +75,7 @@ params = parameters()
 def import_fixed_cells(ly):
     '''Import the fixed cells from the library, and add them to the layout
     '''
-    params.cell_gc = ly.create_cell("ebeam_gc_%s1550" % params.pol, "EBeam") #.cell_index()
+    params.cell_gc = ly.create_cell("ebeam_gc_%s1550" % params.pol.lower(), "EBeam") #.cell_index()
     params.cell_y = ly.create_cell("ebeam_y_1550", "EBeam") # .cell_index()
 
     params.gc_length = 41          # Length of a grating coupler cell
@@ -142,10 +142,16 @@ def ebeam_c_te_mux_1ch_standard_1543nm(topcell, x_pos = 0, y_pos = 0, N = params
         raise Exception("Cannot find cell %s in library %s." % (params.component_contraDC, params.libname))
     t = Trans(Trans.R90, 
         to_itype(params.gc_length+params.cdc_offset,ly.dbu), 
-        to_itype(params.gc_height/2+params.gc_pitch*0,ly.dbu)) 
-    cell.insert(CellInstArray(pcell.cell_index(),t))
+        to_itype(params.gc_height/2+params.gc_pitch*0.2,ly.dbu)) 
+    instCDC = cell.insert(CellInstArray(pcell.cell_index(),t))
     '''
     '''
+
+    # Waveguides:
+    connect_pins_with_waveguide(instGCs[3], 'opt1', instCDC, 'opt3', waveguide_type=params.waveguide_type)
+    connect_pins_with_waveguide(instGCs[2], 'opt1', instCDC, 'opt4', waveguide_type=params.waveguide_type, turtle_A=[5,90,30,-90], turtle_B=[5,90])
+    connect_pins_with_waveguide(instGCs[1], 'opt1', instCDC, 'opt2', waveguide_type=params.waveguide_type, turtle_A=[5,-90,30,90], turtle_B=[5,-90])
+    connect_pins_with_waveguide(instGCs[0], 'opt1', instCDC, 'opt1', waveguide_type=params.waveguide_type)
     
     return cell
 
