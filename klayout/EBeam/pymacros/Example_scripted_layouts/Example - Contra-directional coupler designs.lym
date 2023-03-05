@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Contra-directional couplers sweep (EBeam)</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>Examples_EBeam</group-name>
+ <menu-path>siepic_menu.exlayout.begin</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>'''
+SiEPIC-Tools scripted layout 
+
+Create a complete layout for several contra-directional coupler circuits
+
+usage:
+ - the SiEPIC EBeam Library
+ - Uncomment path_to_waveguide to convert everything to waveguides, or just do it on your own from SiEPIC Tools menu.
+ - Run circuit simulations either using OPICS or INTERCONNECT
+
+Script will generate an series of devices with the selected parameters, and generate GCs for testing with automated measurement labels
+
+Author: Lukas Chrostowski, Mustafa Hammood 
+
+March 2023
+'''
+  
+  
+# Import KLayout-Python API
+from pya import *
+
+# Import from SiEPIC-Tools
+from SiEPIC.extend import to_itype
+from SiEPIC.scripts import connect_pins_with_waveguide, connect_cell
+
+# define layout parameters in the class below
+# ALL distance parameters are in microns unless specified otherwise
+class parameters():
+    '''Define the circuit layout parameters
+    '''
+
+    # Default contraDC PCell parameters
+    component_contraDC = 'contra_directional_coupler'
+    libname = 'EBeam'
+    N = 1000
+    period = 0.316
+    g = 100
+    w1 = 560
+    w2 = 440
+    dW1 = 0.05
+    dW2 = 0.025
+    sine = 0
+    a = 2.7
+
+    # routing and device placement parameters
+    x_offset = 170          # spacing between grating couplers columns
+    wg_bend_radius = 35     # waveguide routes bend radius
+    device_spacing = 7.3    # spacing between devices
+    wg_pitch = 5            # spacing between waveguides ( keep &gt; 2 microns to minimize cross coupling)
+    pol = 'te'
+    waveguide_type='Strip TE 1550 nm, w=500 nm'
+    gc_pitch = 127          # spacing between grating couplers array (for a single device)
+    cdc_offset = 20
+    name = 'contraDC'
+
+params = parameters()
+
+def import_fixed_cells(ly):
+    '''Import the fixed cells from the library, and add them to the layout
+    '''
+    params.cell_gc = ly.create_cell("ebeam_gc_%s1550" % params.pol, "EBeam") #.cell_index()
+    params.cell_y = ly.create_cell("ebeam_y_1550", "EBeam") # .cell_index()
+
+    params.gc_length = 41          # Length of a grating coupler cell
+    params.gc_height = 30          # Height of a grating coupler cell
+
+def ebeam_c_te_mux_1ch_standard_1543nm(topcell, x_pos = 0, y_pos = 0, N = params.N, period = .320, g = .1, w1 = .56, w2 = .44, dW1 = .048, dW2 = .024, sine = 0, a = 2.7, wg_width = 0.5, pol=params.pol):
+    '''Create a layout of a contradirectional coupler, with grating couplers
+    This is a known-good design by Mustafa Hammood, 
+    having been fabricated by Applied Nanotools, and tested at UBC
+    It is in the C-band and is used for the Process Control Monitor (PCM) structure (C-PCM).
+    Works well when cascaded.
+    Strip waveguides
+    Bandwidth ~6 nm;	Wavelength 1543 nm
+    Data: single stage, cascaded, exists on every PCM
+    function by Lukas Chrostowski
+    '''
+
+    # Create a sub-cell for our contraDC layout
+    cell = topcell.layout().create_cell("contraDC_GCarray")
+    
+    # place the cell in the top cell
+    t = Trans(Trans.R0, x_pos, y_pos)
+    topcell.insert(CellInstArray(cell.cell_index(), t))
+    ly = topcell.layout()
+    
+    # Grating couplers, Ports 1, 2, 3, 4 (top-down)
+    instGCs = []
+    for i in range(4):
+        t = Trans(Trans.R0, to_itype(params.gc_length,ly.dbu), to_itype(params.gc_height/2+i*params.gc_pitch,ly.dbu))
+        instGCs.append(
+            cell.insert(CellInstArray(params.cell_gc.cell_index(), t)) )
+#        cell.insert(CellInstArray(params.cell_gc, t, 
+#            DPoint(0,params.gc_pitch).to_itype(ly.dbu), 
+#            DPoint(params.x_offset,0).to_itype(ly.dbu), 4, 1))
+    t = Trans(Trans.R0, to_itype(params.gc_length,ly.dbu), to_itype(params.gc_height/2+params.gc_pitch*2,ly.dbu))
+    text = Text ("opt_in_%s_1550_device_%s%dN%dperiod%dg%dwa%dwb%ddwa%ddwb%dsine%sa" % (pol, params.name, N,1000*period,1000*g,1000*w1,1000*w2,1000*dW1,1000*dW2,sine,a),t)
+    #text = Text ("opt_in_TE_1550_device_contraDC1"
+    shape = cell.shapes(ly.layer(ly.TECHNOLOGY['Text'])).insert(text)
+    shape.text_size = 1.5/ly.dbu
+
+
+
+    '''
+    # test:
+    inst_test = connect_cell(instGCs[1], 'opt1', params.cell_y, 'opt1')
+
+    # load the cell from the PDK
+    cell_bragg = ly.create_cell('ebeam_bragg_te1550', params.libname, {
+        'number_of_periods':100, #adapted (60)
+        'grating_period': 0.269, #adapted (0.270)
+        'corrugation_width': 0.035, #adapted, my be a little small (0.08)
+        'wg_width': 0.385, #take the fabrication bias into account
+        'sinusoidal': False}) #rectangular grating (True)
+    if not cell_bragg:
+        raise Exception ('Cannot load Bragg grating cell; please check the script carefully.')
+    # instantiate Bragg grating (attached to GC)
+    inst_bragg1 = connect_cell(instGCs[0], 'opt1', cell_bragg, 'pin1')
+    '''
+
+    # contraDC PCell
+    pcell = ly.create_cell(params.component_contraDC, params.libname, 
+        { "sbend":1, "number_of_periods": N, "grating_period": period, "gap": g, "wg1_width": w1, "wg2_width": w2, "corrugation_width1": dW1, "corrugation_width2": dW2 , "sinusoidal": sine, "index": a} )
+    if not pcell:
+        raise Exception("Cannot find cell %s in library %s." % (params.component_contraDC, params.libname))
+    t = Trans(Trans.R90, 
+        to_itype(params.gc_length+params.cdc_offset,ly.dbu), 
+        to_itype(params.gc_height/2+params.gc_pitch*0,ly.dbu)) 
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    '''
+    '''
+    
+    return cell
+
+def layout_contraDC_circuits(newlayout=True):
+    '''
+    Generates contraDC circuits.
+    Either create a new layout using the EBeam technology,
+        newlayout = True
+    or delete everything in the present layout
+        newlayout = False
+    '''
+
+    if newlayout:
+        # create a new layout
+        mw = pya.Application().instance().main_window()
+        ly = mw.create_layout('EBeam', 1).layout()
+        topcell = ly.create_cell('SiEPIC_EBeam_contraDC_circuits')
+        mw.current_view().select_cell(topcell.cell_index(), 0)
+
+    # Import functions from SiEPIC-Tools, and get technology details
+    from SiEPIC.utils import select_paths, get_layout_variables
+    TECHNOLOGY, lv, ly, topcell = get_layout_variables()
+    from SiEPIC.extend import to_itype
+    dbu = ly.dbu
+    ly.TECHNOLOGY = TECHNOLOGY
+
+    if not newlayout:
+        # clean all cells within the present cell
+        ly.prune_subcells(topcell.cell_index(), 100)
+
+    # Import the grating couplers, and other fixed cells
+    import_fixed_cells(ly)
+
+
+    '''
+    # Layer mapping:
+    LayerSiN = ly.layer(TECHNOLOGY['Si'])
+    fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
+    TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+    # Load cells from library
+    cell_ebeam_gc = ly.create_cell('ebeam_gc_te1550', tech_name)
+    cell_ebeam_y = ly.create_cell('ebeam_y_1550', tech_name)
+    '''
+     
+    # create a floor plan
+    # 605 x 410 microns is the space allocation for the edX course and openEBL
+    # https://siepic.ca/openebl/
+    topcell.shapes(ly.layer(TECHNOLOGY['FloorPlan'])).insert(Box(0,0, 605/dbu, 410/dbu))
+
+    # Create the contraDC circuits
+    ebeam_c_te_mux_1ch_standard_1543nm(topcell)
+    
+    # Zoom out
+    lv.clear_object_selection()
+    lv.zoom_fit()
+    lv.max_hier()
+
+
+layout_contraDC_circuits(newlayout=False)
+   
+
+  
+
+# Instatiate the array of devices to sweep with their respective GC-device waveguide routes
+def create_deviceArray():
+  from SiEPIC.utils import select_paths, get_layout_variables
+  from SiEPIC.scripts import path_to_waveguide
+  from SiEPIC.extend import to_itype
+  TECHNOLOGY, lv, ly, cell = get_layout_variables()
+  LayerSiN = ly.layer(TECHNOLOGY['Si'])
+  TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+  
+  params = parameters()
+
+   # Instatiate the devices array
+  # Loop through the parameter sweep
+  for i in range(params.Num_sweep):
+      
+      create_contraDC(x_pos = params.device_spacing*i + params.x_offset*params.Num_sweep/2, y_pos = 0, N = int(params.N[i]), 
+      period = params.period[i], g = params.g[i], w1 = params.w1[i], w2 = params.w2[i], dW1 = params.dW1[i], dW2 = params.dW2[i], sine = params.sine, 
+      a = params.a[i], sbend_L = params.sbend_L, sbend_R = params.sbend_R, sbend_H = params.sbend_H, taper_L = params.taper_L, wg_width = params.wg_width)
+      
+      # Interleaved compact routing
+      
+      # Regular routing points if device ID (i) is even
+      if i % 2 == 0:
+        initial_x = params.x_offset*(params.Num_sweep-2-i)/2
+        device_x1 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)+params.sbend_H      
+        device_x2 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)-params.w1[i]/2-params.g[i]-params.w2[i]/2
+        device_y = -params.taper_L-params.sbend_L
+        
+        device_y_top = params.N[i]*params.period[i]+params.period[i]/2+params.sbend_L+params.taper_L
+  
+       # GC4 to device - downward routing
+        route_y4 = params.route_down+params.GC_pitch-params.wg_pitch*i*2-params.wg_pitch
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_bend_radius,0), DPoint(params.wg_bend_radius,route_y4),
+                                 DPoint(device_x1,route_y4),DPoint(device_x1,device_y)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 0))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+         
+        # GC3 to device - downward routing
+        route_y3 = params.route_down-params.wg_pitch*i*2
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_pitch + params.wg_bend_radius,0), DPoint(params.wg_pitch+params.wg_bend_radius, route_y3),
+                                 DPoint(device_x2,route_y3),DPoint(device_x2,device_y-params.GC_pitch)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+        
+        # GC2 to device - upward routing (measurement label here!)
+        route_y2 = params.route_up+params.wg_pitch*i*2
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_pitch + params.wg_bend_radius*2,0), DPoint(params.wg_pitch+params.wg_bend_radius*2, route_y2),
+                                 DPoint(device_x2,route_y2),DPoint(device_x2,device_y_top-params.GC_pitch*2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch*2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+        
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
+        t = Trans(Trans.R0, to_itype(initial_x,ly.dbu),to_itype(params.GC_pitch*2,ly.dbu) )
+        
+        ApodizationStr =str(params.a[i]).replace(".", "p");
+        polarization = (params.pol).upper()
+        text = Text ("opt_in_%s_1550_device_%s%dN%dperiod%dg%dwa%dwb%ddwa%ddwb%dsine%sa_input2" % (polarization, params.name,params.N[i],1000*params.period[i],1000*params.g[i],1000*params.w1[i],1000*params.w2[i],1000*params.dW1[i],1000*params.dW2[i],params.sine,ApodizationStr),t)
+        #text = Text ("opt_in_TE_1550_device_contraDC%f" % (int(params.N)),t)
+        shape = cell.shapes(TextLayerN).insert(text)
+        shape.text_size = 1.5/ly.dbu
+      
+        # GC1 to device - upward routing
+        route_y4 = params.route_up-params.GC_pitch+params.wg_pitch*i*2+params.wg_pitch
+        dpath = DPath([DPoint(0,0), DPoint(params.wg_bend_radius*2,0), DPoint(params.wg_bend_radius*2,route_y4),
+                                 DPoint(device_x1,route_y4),DPoint(device_x1,device_y_top-params.GC_pitch*3)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch*3))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+      
+    
+    # Backwards routing points if device ID (i) is odd
+      else:
+        initial_x = params.x_offset*(params.Num_sweep-2-i)/2
+        GC_x = params.x_offset/2
+        device_x1 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)+params.sbend_H
+        device_x2 = params.x_offset + (i)*(params.x_offset/2 +params.device_spacing)-params.w1[i]/2-params.g[i]-params.w2[i]/2
+        device_y = -params.taper_L-params.sbend_L
+  
+        device_y_top = params.N[i]*params.period[i]+params.period[i]/2+params.sbend_L+params.taper_L
+  
+        # GC4 to device - downward routing
+        route_y4 = params.route_down+params.GC_pitch/2-params.wg_pitch*i*2
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2,route_y4),
+                                 DPoint(device_x2,route_y4),DPoint(device_x2,device_y-params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+        
+        # GC3 to device - downward routing
+        route_y3 = params.route_down+params.GC_pitch/2-params.wg_pitch*i*2-params.wg_pitch-params.GC_pitch
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2-params.wg_pitch,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2-params.wg_pitch,route_y3),
+                                 DPoint(device_x1,route_y3),DPoint(device_x1,device_y-params.GC_pitch/2-params.GC_pitch)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 3*params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+        
+        # GC2 to device - upward routing (measurement label here!)
+        route_y2 = params.route_up+params.wg_pitch*i*2-params.GC_pitch/2+params.wg_pitch
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2-params.wg_pitch,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2-params.wg_pitch,route_y2),
+                                 DPoint(device_x1,route_y2),DPoint(device_x1,device_y_top-5*params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 5*params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+        
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
+        t = Trans(Trans.R0, to_itype(initial_x+GC_x,ly.dbu),to_itype(5*params.GC_pitch/2,ly.dbu) )
+        ApodizationStr =str(params.a[i]).replace(".", "p");
+        polarization = (params.pol).upper()
+        text = Text ("opt_in_%s_1550_device_%s%dN%dperiod%dg%dwa%dwb%ddwa%ddwb%dsine%sa_input1" % (polarization, params.name,params.N[i],1000*params.period[i],1000*params.g[i],1000*params.w1[i],1000*params.w2[i],1000*params.dW1[i],1000*params.dW2[i],params.sine,ApodizationStr),t)
+        
+        shape = cell.shapes(TextLayerN).insert(text)
+        shape.text_size = 1.5/ly.dbu
+        
+        # GC1 to device
+        route_y1 = params.route_up+params.wg_pitch*i*2-params.GC_pitch/2+params.wg_pitch-params.GC_pitch-params.wg_pitch
+        dpath = DPath([DPoint(GC_x,0), DPoint(GC_x+params.wg_bend_radius,0),DPoint(GC_x+params.wg_bend_radius,-params.GC_pitch/4),DPoint(GC_x-params.x_offset/2,-params.GC_pitch/4), DPoint(GC_x-params.x_offset/2,route_y1),
+                                 DPoint(device_x2,route_y1),DPoint(device_x2,device_y_top-7*params.GC_pitch/2)], params.wg_width).transformed(DTrans(DTrans.R0,initial_x, 7*params.GC_pitch/2))
+        cell.shapes(LayerSiN).insert(dpath.to_itype(ly.dbu))
+      
+
+  # Convert the paths to waveguides (very time consuming!)
+  #path_to_waveguide(cell = cell, verbose=True, params = {'width': params.wg_width, 'adiabatic': params.bezier, 'radius': params.wg_bend_radius, 'bezier': params.bezier_N, 'wgs': [{'width': params.wg_width, 'layer': 'Si', 'offset': 0.0}]})
+  
+# Instatiate a complete contraDC PCell with s-bends, tapers, and waveguide routes
+def create_contraDC(x_pos = 0, y_pos = 0, N = 1000, period = .318, g = .15, w1 = .56, w2 = .44, dW1 = .048, dW2 = .024, sine = 0, a = 2.7, sbend_L = 10, sbend_R = 13, sbend_H = 2, taper_L = 10, wg_width = 0.5):
+  from SiEPIC.extend import to_itype
+  from SiEPIC.utils import select_paths, get_layout_variables
+  TECHNOLOGY, lv, ly, cell = get_layout_variables()
+  
+  contraDC_offset = -w1/2-g/2
+  # contraDC PCell
+  pcell = ly.create_cell("contra_directional_coupler", "EBeam", { "sbend":0, "number_of_periods": N, "grating_period": period, "gap": g, "wg1_width": w1, "wg2_width": w2, "corrugation_width1": dW1, "corrugation_width2": dW2 , "sinusoidal": sine, "index": a} )
+  t = Trans(Trans.R90, (x_pos+contraDC_offset)/ly.dbu, to_itype(y_pos,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+
+  # S-Bend PCells (top and bottom)
+  pcell = ly.create_cell("Waveguide_SBend", "EBeam", { "length": sbend_L, "height": sbend_H, "wg_width": w1, "radius": sbend_R} )
+  t = Trans(Trans.R90, (x_pos+sbend_H)/ly.dbu, to_itype(y_pos-sbend_L,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+  t = Trans(Trans.R270.M45, (x_pos)/ly.dbu, to_itype(y_pos+N*period+period/2,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+  
+  # Waveguide straight PCells (top and bottom
+  pcell = ly.create_cell("Waveguide_Straight", "EBeam", { "wg_length": sbend_L/ly.dbu, "wg_width": w2/ly.dbu} )
+  t = Trans(Trans.R90, (x_pos-w1/2-g-w2/2)/ly.dbu, to_itype(y_pos-sbend_L/2,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+  t = Trans(Trans.R270.M45, (x_pos-w1/2-g-w2/2)/ly.dbu, to_itype(y_pos+N*period+period/2+sbend_L/2,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+  
+  # Waveguide taper PCells (top and bottom, left)
+  pcell = ly.create_cell("ebeam_taper_te1550", "EBeam", { "wg_length": taper_L, "wg_width1": wg_width, "wg_width2": w2} )
+  t = Trans(Trans.R90, (x_pos-w1/2-g-w2/2)/ly.dbu, to_itype(y_pos-2*sbend_L,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+  t = Trans(Trans.R270, (x_pos-w1/2-g-w2/2)/ly.dbu, to_itype(y_pos+N*period+period/2+2*sbend_L,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+
+  # Waveguide taper PCells (top and bottom, right)
+  pcell = ly.create_cell("ebeam_taper_te1550", "EBeam", { "wg_length": taper_L, "wg_width1": wg_width, "wg_width2": w1} )
+  t = Trans(Trans.R90, (x_pos+sbend_H)/ly.dbu, to_itype(y_pos-2*sbend_L,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+  t = Trans(Trans.R270, (x_pos+sbend_H)/ly.dbu, to_itype(y_pos+N*period+period/2+2*sbend_L,ly.dbu))
+  cell.insert(CellInstArray(pcell.cell_index(),t))
+
+  
+
+# All done!</text>
+</klayout-macro>
