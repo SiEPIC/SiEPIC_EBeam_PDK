@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Download merged layout from SiEPICfab openEBL</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>openEBL</group-name>
+ <menu-path>siepic_menu.openEBL&gt;end("openEBL").end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>'''
+Information for design submission to SiEPICfab openEBL
+https://siepic.ca/openebl/
+'''
+
+import pya
+
+pya.MessageBox.info("Information", 
+    "Please download the merged designs from &lt;a href=https://siepic.ca/openebl/&gt;SiEPICfab openEBL&lt;/a&gt;, at https://siepic.ca/openebl.\nThen inspect the merged layout, find your design, and make sure it is correct.", 
+    pya.MessageBox.Ok)
+</text>
+</klayout-macro>
