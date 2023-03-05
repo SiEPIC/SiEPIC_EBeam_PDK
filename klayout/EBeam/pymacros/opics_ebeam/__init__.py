@@ -51,6 +51,8 @@ class contra_directional_coupler(componentModel):
         OID: int = 1,
     ) -> None:
         data_folder = datadir / "contraDC"
+        filename = "contraDC.xml"
+        '''
         file_search =  "w1=" + "%.0f"%(wg1_width*1e9) + ",w2=" + "%.0f"%(wg2_width*1e9) + ",dW1=" + "%.0f"%(corrugation1_width*1e9) + ",dW2=" + "%.0f"%(corrugation2_width*1e9) +  ",gap=" + "%.0f"%(gap*1e9) + ",p=" + "%.1f"%(grating_period*1e9) + ",N=" + "%.0f"%(number_of_periods) + ",s=" + str(1 if sinusoidal else 0) +  ",a=" + "%.2f"%apodization_index +  ",rib=" + str(1 if rib else 0) + ",pol=" + str(OID-1)
         import os, fnmatch
         files = fnmatch.filter(os.listdir(data_folder), file_search + '*')
@@ -59,6 +61,7 @@ class contra_directional_coupler(componentModel):
         else:
             filename = files[0] # pick the first one. Could be improved to pick the one with the highest resolution, etc., or give people the choice.
             print('contra directional coupler, data file: %s' % filename)    
+        '''
         LUT_attrs_ = deepcopy(self.cls_attrs)
         LUT_attrs_["wg1_width"] = wg1_width,
         LUT_attrs_["wg2_width"] = wg2_width,
@@ -756,6 +759,7 @@ component_factory = dict(
     Y=Y,
     ebeam_y_1550=Y,
     ebeam_gc_te1550=GC,
+    GC_TE_1550_8degOxide_BB = GC,
     ebeam_wg_integral_1550=ebeam_wg_integral_1550,
 )
 
