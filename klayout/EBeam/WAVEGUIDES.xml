@@ -22,6 +22,11 @@
 	    <width>0.5</width>
 	    <offset>0.0</offset>
 	  </component>
+    <crossing>
+    		<crossing_cell>ebeam_crossing4</crossing_cell>
+    		<crossing_library>EBeam</crossing_library>
+    		<crossing_offset>(0,0)</crossing_offset>
+    </crossing>
 	</waveguide>
 	<waveguide>
 	  <name>Strip TE 1310 nm, w=410 nm</name>
