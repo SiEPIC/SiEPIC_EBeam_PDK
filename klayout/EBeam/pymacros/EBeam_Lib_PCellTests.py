@@ -14,8 +14,9 @@ files = [f for f in os.listdir(os.path.join(os.path.dirname(
 importlib.invalidate_caches()
 
 # get EBeam library layout object 
-ebeam_id = pya.Library().library_ids()[1]
-ebeam_layout = pya.Library().library_by_id(ebeam_id).layout()
+#ebeam_id = pya.Library().library_ids()[1]
+#ebeam_layout = pya.Library().library_by_id(ebeam_id).layout()
+ebeam_layout = pya.Library().library_by_name('EBeam', 'EBeam')
 
 error_occured = False
 
