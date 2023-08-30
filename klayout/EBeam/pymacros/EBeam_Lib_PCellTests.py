@@ -14,9 +14,12 @@ files = [f for f in os.listdir(os.path.join(os.path.dirname(
 importlib.invalidate_caches()
 
 # get EBeam library layout object 
-#ebeam_id = pya.Library().library_ids()[1]
-#ebeam_layout = pya.Library().library_by_id(ebeam_id).layout()
-ebeam_layout = pya.Library().library_by_name('EBeam', 'EBeam')
+tech_name = 'EBeam'
+library_name = 'EBeam'
+library = pya.Library().library_by_name(library_name,tech_name)
+ebeam_layout = library.layout()
+
+#ebeam_layout.technology_name=tech_name
 
 error_occured = False
 
@@ -27,6 +30,7 @@ for f in files:
         if mm not in ebeam_layout.pcell_names():
              print("PCell Registration Error. PCell {} could not be registered".format(mm))
              error_occured = True
+             continue
               
         # instantiate pcell in new layer and check that it contains polygons
         new_layout = pya.Layout()
