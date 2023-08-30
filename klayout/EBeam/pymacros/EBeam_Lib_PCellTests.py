@@ -2,9 +2,24 @@ import pya
 from pya import *
 import os
 import pathlib
+import sys
 
 #import pcells_EBeam ### folder name ###
 import importlib
+
+
+"""
+Python script to test that all EBeam Pcells are properly registered in the EBeam library and will display polygons when placed on a new layout.
+
+To run this script from the command line: '{path to klayout} -e -r {path to this script/EBeam_Lib_PCellTests.py}'.
+This script can also be run within KLayout.
+
+This is a preliminary test script and will be implemented using GitHub Actions to be run every time a new EBeam Pcell is added to the code base.
+
+by Jasmina Brar
+2023/08
+
+"""
 
 # get all .py files in pcells_EBeam folder
 files = [f for f in os.listdir(os.path.join(os.path.dirname(
@@ -19,7 +34,10 @@ library_name = 'EBeam'
 library = pya.Library().library_by_name(library_name,tech_name)
 ebeam_layout = library.layout()
 
-#ebeam_layout.technology_name=tech_name
+# check that EBeam library is not nil
+if ebeam_layout == None:
+      print("EBeam Library Error. Library is not registered.")
+      exit()
 
 error_occured = False
 
