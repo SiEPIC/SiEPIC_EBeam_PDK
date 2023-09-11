@@ -12,6 +12,10 @@ class ebeam_taper(pya.PCellDeclarationHelper):
     super(ebeam_taper, self).__init__()
     TECHNOLOGY = get_technology_by_name('EBeam')
 
+    # Button to launch separate window
+    self.param("documentation", self.TypeCallback, "Open documentation in web browser")
+#    self.param("simulation", self.TypeCallback, "Launch simulation GUI")
+    
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
     self.param("wg_width1", self.TypeDouble, "Waveguide Width1", default = 0.5)
@@ -22,6 +26,16 @@ class ebeam_taper(pya.PCellDeclarationHelper):
     # hidden parameters, can be used to query this component:
     self.param("p1", self.TypeShape, "DPoint location of pin1", default = Point(-10000, 0), hidden = True, readonly = True)
     self.param("p2", self.TypeShape, "DPoint location of pin2", default = Point(0, 10000), hidden = True, readonly = True)
+
+  def callback(self, layout, name, states):
+    ''' Callback for PCell, to launch documentation viewer
+        https://www.klayout.de/doc/code/class_PCellDeclaration.html#method9
+    '''
+    if name == 'documentation':
+        url = 'https://github.com/SiEPIC/SiEPIC_EBeam_PDK/blob/master/Documentation/Taper/Summary_Taper.pdf'
+        import webbrowser
+        webbrowser.open_new(url)
+
     
 
   def display_text_impl(self):

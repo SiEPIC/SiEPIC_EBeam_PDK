@@ -16,6 +16,10 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         super(contra_directional_coupler, self).__init__()
         TECHNOLOGY = get_technology_by_name('EBeam')
 
+        # Button to launch separate window
+        self.param("documentation", self.TypeCallback, "Open documentation in web browser")
+        self.param("simulation", self.TypeCallback, "Launch simulation GUI")
+
         # declare the parameters
         self.param("number_of_periods", self.TypeInt, "Number of grating periods", default=1000)
         self.param("grating_period", self.TypeDouble,
@@ -50,6 +54,21 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         self.param("pinrecm", self.TypeLayer, "PinRecM Layer (metal)", default=TECHNOLOGY['PinRecM'])
         self.param("pinrec", self.TypeLayer, "PinRec Layer", default=TECHNOLOGY['PinRec'])
         self.param("devrec", self.TypeLayer, "DevRec Layer", default=TECHNOLOGY['DevRec'])
+
+    def callback(self, layout, name, states):
+        ''' Callback for PCell, to launch documentation viewer
+            https://www.klayout.de/doc/code/class_PCellDeclaration.html#method9
+        '''
+        if name == 'documentation':
+            # Mustafa Hammood's repository for simulations of CDCs
+            url = 'https://github.com/SiEPIC/contraDC'
+            import webbrowser
+            webbrowser.open_new(url)
+        if name == 'simulation':
+            print('contraDC simulation window')
+            from SiEPIC.simulation.contraDC.klayout_gui import cdc_gui
+            cdc_gui()
+                        
 
     def display_text_impl(self):
         # Provide a descriptive text for the cell
