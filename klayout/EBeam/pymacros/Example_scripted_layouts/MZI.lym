@@ -56,7 +56,7 @@ waveguide_type='Strip TE 1550 nm, w=500 nm'
 # Load cells from library
 cell_ebeam_gc = ly.create_cell('ebeam_gc_te1550', tech_name)
 cell_ebeam_y = ly.create_cell('ebeam_y_1550', tech_name)
-cell_ebeam_y_dream = ly.create_cell('ebeam_dream_splitter_1x2_te1550_BB', 'EBeam-Dream')
+cell_ebeam_y_dream = ly.create_cell('ebeam_dream_splitter_1x2_te1550_BB', 'EBeam-Dream', {})
 
 # create a floor plan
 fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
