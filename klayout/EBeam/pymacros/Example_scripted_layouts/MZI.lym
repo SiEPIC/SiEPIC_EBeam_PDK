@@ -18,7 +18,7 @@
  <text>'''
 --- Simple MZI ---
 
-by Lukas Chrostowski, 2020
+by Lukas Chrostowski, 2020-2023
 
 Example simple script to
  - create a new layout with a top cell
@@ -56,6 +56,7 @@ waveguide_type='Strip TE 1550 nm, w=500 nm'
 # Load cells from library
 cell_ebeam_gc = ly.create_cell('ebeam_gc_te1550', tech_name)
 cell_ebeam_y = ly.create_cell('ebeam_y_1550', tech_name)
+cell_ebeam_y_dream = ly.create_cell('ebeam_dream_splitter_1x2_te1550_BB', 'EBeam-Dream')
 
 # create a floor plan
 fpLayerN = cell.layout().layer(TECHNOLOGY['FloorPlan'])
@@ -87,6 +88,36 @@ connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=wave
 connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
+
+# 2nd MZI using Dream Photonics 1x2 splitter
+# grating couplers, place at absolute positions
+x,y = 150000, 15000
+t = pya.Trans.from_s('r0 %s,%s' % (x,y))
+instGC1 = cell.insert(pya.CellInstArray(cell_ebeam_gc.cell_index(), t))
+t = pya.Trans.from_s('r0 %s,%s' % (x,y+127000))
+instGC2 = cell.insert(pya.CellInstArray(cell_ebeam_gc.cell_index(), t))
+
+# automated test label
+text = pya.Text ("opt_in_TE_1550_device_MZI_Dream", t)
+cell.shapes(ly.layer(TECHNOLOGY['Text'])).insert(text).text_size = 5/dbu
+
+# Y branches:
+# Version 1: place it at an absolute position:
+t = pya.Trans.from_s('r0 %s, %s' % (x+20000,y))
+instY1 = cell.insert(pya.CellInstArray(cell_ebeam_y_dream.cell_index(), t))
+
+# Version 2: attach it to an existing component, then move relative
+instY2 = connect_cell(instGC2, 'opt1', cell_ebeam_y_dream, 'opt1')
+instY2.transform(Trans(20000,-10000))
+
+# Waveguides:
+
+connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=waveguide_type)
+connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
+connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
+connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
+
+
 
 # Zoom out
 lv.clear_object_selection()
