@@ -1,0 +1,10 @@
+<layer_builder>
+    <process_name>EBeam</process_name>
+    <gds_ref_frame sidewall_angle_pos_ind="0"/>
+    <layers>
+        <layer material="Si (Silicon) - Palik" layer_name="None" background_alpha="0.1" name="wafer" pattern_material_index="0" process="Background" start_position_auto="0" start_position="-2.0e-6" pattern_alpha="0.10" enabled="1" pattern_material="" pattern_growth_delta="0" material_index="0" sidewall_angle="90" thickness="-.01e-06"/>
+        <layer material="SiO2 (Glass) - Palik" layer_name="None" background_alpha="0.3" name="BOX" pattern_material_index="0" process="Background" start_position="0" pattern_alpha="0.80" enabled="1" pattern_material="" pattern_growth_delta="0" start_position_auto="1" material_index="0" sidewall_angle="90" thickness="-2.0e-06"/>
+        <layer material="SiO2 (Glass) - Palik" layer_name="None" background_alpha="0.3" name="TOX" pattern_material_index="0" process="Background" start_position="0" pattern_alpha="0.8" enabled="1" pattern_material="" pattern_growth_delta="0" start_position_auto="1" material_index="0" sidewall_angle="90" thickness="3.42e-06"/>
+        <layer material="" layer_name="1:0" background_alpha="0.3" name="Si_CoreStripWG" pattern_material_index="0" process="Grow" start_position="0" pattern_alpha="0.8" enabled="1" pattern_material="Si (Silicon) - Palik" pattern_growth_delta="0" start_position_auto="0" material_index="0" sidewall_angle="88" thickness="2.2e-07"/>
+    </layers>
+</layer_builder>
