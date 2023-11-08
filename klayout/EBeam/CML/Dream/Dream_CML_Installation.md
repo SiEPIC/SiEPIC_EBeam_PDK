@@ -1,5 +1,14 @@
 ## Install the EBeam-Dream Photonics Compact Model Library (CML) in Lumerical INTERCONNECT
 
+# Option 1: Installation from KLayout
+
+* You need Lumerical INTERCONNECT, KLayout, SiEPIC-Tools, and the SiEPIC-EBeam-PDK installed.
+
+* In KLayout, start an empty layout using Technology=EBeam
+
+* menu SiEPIC > Simulation, Circuits > Setup Lumerical INTERCONNECT Compact Model Library
+
+# Option 2: Installation from Lumerical INTERCONNECT
 
 * You need Lumerical INTERCONNECT installed.
 
