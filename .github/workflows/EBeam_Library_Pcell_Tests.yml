@@ -18,10 +18,10 @@ jobs:
       - name: Pull gha_klayout image
         run: docker pull ghcr.io/farihais/gha_klayout:latest
 
-      - name: Run podman container from image
+      - name: Run docker container from image
         run: docker run -itd --name cloud_hosted_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/gha_klayout:latest
 
-      - name: Copy pymacros folder to podman container
+      - name: Copy pymacros folder to docker container
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros cloud_hosted_test:/home/pymacros
 
       - name: Run KLayout Python script inside container and capture the exit code 
