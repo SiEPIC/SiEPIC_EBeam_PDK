@@ -1,5 +1,5 @@
 
-name: EBeam Library Pcell Tests
+name: EBeam Tests
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  pcell-test:
+  ebeam-lib-pcell-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,19 +19,19 @@ jobs:
         run: docker pull ghcr.io/farihais/gha_klayout:latest
 
       - name: Run docker container from image
-        run: docker run -itd --name cloud_hosted_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/gha_klayout:latest
+        run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/gha_klayout:latest
 
       - name: Copy pymacros folder to docker container
-        run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros cloud_hosted_test:/home/pymacros
+        run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
 
       - name: Run KLayout Python script inside container and capture the exit code 
-        run: docker exec cloud_hosted_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
+        run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
 
       - name: Stop the container and remove it 
         run: |
-                docker stop cloud_hosted_test
-                docker rm cloud_hosted_test
+                docker stop ebeam_test
+                docker rm ebeam_test
       - name: Fail the job if exit code is non-zero
         run: |
                 if [ $KLAYOUT_EXIT_CODE -ne 0 ]; then
