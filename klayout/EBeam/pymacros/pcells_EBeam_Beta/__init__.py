@@ -68,4 +68,4 @@ def pin(w,pin_text, trans, LayerPinRecN, dbu, cell):
   shape = cell.shapes(LayerPinRecN).insert(text)
   shape.text_size = w*0.8
 
-  print("Done drawing the layout for - pin" )
+  # print("Done drawing the layout for - pin" )

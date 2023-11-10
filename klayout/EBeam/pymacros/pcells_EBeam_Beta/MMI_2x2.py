@@ -31,6 +31,9 @@ class MMI_2x2(pya.PCellDeclarationHelper):
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
 
+    # test by Lukas, to see if it breaks the PCell
+    # print(1/0)
+    
     from math import pi, cos, sin
 
     # fetch the parameters
@@ -81,4 +84,4 @@ class MMI_2x2(pya.PCellDeclarationHelper):
     dev = Box(-L_mmi/2-L_a, w_mmi/2+w, L_mmi/2+L_a, -w_mmi/2-w )
     shapes(LayerDevRecN).insert(dev)
 
-    print("Done drawing the layout for - mmi" )
+    # print("Done drawing the layout for - mmi" )

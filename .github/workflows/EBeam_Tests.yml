@@ -4,18 +4,20 @@ name: EBeam Tests
 on:
   push:
     branches:
-      - master
+      - '**'
   pull_request:
+    branches:
+      - master
 
 jobs:
   ebeam-lib-pcell-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the code
+      - name: Checkout code
         uses: actions/checkout@v3
       
-      - name: Pull gha_klayout image
+      - name: Pull siepic_klayout image
         run: docker pull ghcr.io/farihais/siepic_klayout:latest
 
       - name: Run docker container from image
@@ -24,17 +26,16 @@ jobs:
       - name: Copy pymacros folder to docker container
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
 
-      - name: Run KLayout Python script inside container and capture the exit code 
-        run: |
-                docker start ebeam_test
-                docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
+      - name: Run KLayout Python script inside container and capture exit code 
+        run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
 
-      - name: Stop the container and remove it 
+      - name: Stop container and remove it 
         run: |
                 docker stop ebeam_test
                 docker rm ebeam_test
-      - name: Fail the job if exit code is non-zero
+                
+      - name: Fail job if exit code is non-zero
         run: |
                 if [ $KLAYOUT_EXIT_CODE -ne 0 ]; then
                         echo "KLayout exited with non-zero exit code"

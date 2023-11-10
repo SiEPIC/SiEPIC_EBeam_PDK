@@ -100,7 +100,7 @@ class Contra_DC_SWG_segmented(pya.PCellDeclarationHelper):
     x_cdc = int(round(N_boxes * cdc_period)/2)
     xk = int(round(N_boxes * grating_period))
     N_cdc_boxes = 2*int(round((xk - x_cdc)/cdc_period))
-    print(N_cdc_boxes)
+    # print(N_cdc_boxes)
     for i in range(0,N_boxes+1+N_cdc_boxes):
 
       if i%2 == True:

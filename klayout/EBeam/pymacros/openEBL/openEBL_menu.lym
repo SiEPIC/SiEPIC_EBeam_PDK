@@ -31,8 +31,10 @@ def registerMenuItems():
     s2 = "openEBL"
     if not(menu.is_menu(s1 + "." + s2)):
         menu.insert_menu(s1 + ".end", s2, "openEBL")
+try:    
+    registerMenuItems()
+except:
+    pass
     
-registerMenuItems()
-
 </text>
 </klayout-macro>

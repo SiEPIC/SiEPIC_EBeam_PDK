@@ -71,8 +71,8 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     pt_idx = int(len(d)/2)
     ptA = d[pt_idx]
     ptB = d[pt_idx+1]
-    print(pt_idx)
-    print(d)
+    #print(pt_idx)
+    #print(d)
     if(abs(ptA.x-ptB.x)*dbu  == wg_width):
       new_y = (ptA.y+ptB.y)/2
       d[pt_idx].y = new_y
@@ -81,7 +81,7 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
       new_x = (ptA.x + ptB.x)/2
       d[pt_idx].x = new_x
       d[pt_idx+1].x = new_x
-    print(d)
+    #print(d)
   
     self.cell.shapes(LayerSiN).insert(Polygon(d))
     

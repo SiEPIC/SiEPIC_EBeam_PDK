@@ -15,6 +15,8 @@ import pya
 class wg_heater(pya.PCellDeclarationHelper):
 
   def __init__(self):
+    print('pcells_EBeam/wg_heater: __init__ start')
+    
     # Important: initialize the super class
     super(wg_heater, self).__init__()
     

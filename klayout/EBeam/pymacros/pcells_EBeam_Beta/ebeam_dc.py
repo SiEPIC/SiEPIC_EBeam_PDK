@@ -142,4 +142,4 @@ class ebeam_dc(pya.PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = r*0.017
 
-    print("Done drawing the layout for - ebeam_dc: %.3f" % ( self.Lc) )
+    # print("Done drawing the layout for - ebeam_dc: %.3f" % ( self.Lc) )

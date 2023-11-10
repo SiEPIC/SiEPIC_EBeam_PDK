@@ -23,14 +23,14 @@ by Jasmina Brar
 2023/08
 
 == Change log ==
-2023/10/30, Jasmina Brar
+2023/10/30, Jasmina Brar.
     - raise exceptions when errors occur and exits under these conditions
     - tests successful pcell registration in all libraries 
 """
 
-library_folders = ["pcells_EBeam", "pcells_EBeam_Beta", "pcells_SiN"]
-library_names = ["EBeam", "EBeam_Beta", "EBeam-SiN"]
-tech_names = ["EBeam", "EBeam", "EBeam"]
+library_folders = ["pcells_EBeam", "pcells_EBeam_Beta", "pcells_SiN","pcells_EBeam_Dream"]
+library_names = ["EBeam", "EBeam_Beta", "EBeam-SiN", "EBeam-Dream"]
+tech_names = ["EBeam", "EBeam", "EBeam","EBeam"]
 
 for i in range(len(library_folders)): 
 
@@ -44,6 +44,8 @@ for i in range(len(library_folders)):
     tech_name = tech_names[i]
     library_name = library_names[i]
     library = pya.Library().library_by_name(library_name,tech_name)
+
+    print('*** Testing library: %s' % library_name)
 
     layout = library.layout()
 
@@ -61,6 +63,8 @@ for i in range(len(library_folders)):
     
         try: 
             mm = f.replace('.py','')
+
+            print('  * Testing cell: %s' % mm)
             
             # Check that the pcell has been registered in the library's layout
             if mm not in layout.pcell_names():
@@ -76,12 +80,16 @@ for i in range(len(library_folders)):
             all_params = {}
             for p in parameter_decl:
                 all_params[p.name] = p.default
-                
+            
             pcell = new_layout.create_cell(mm, all_params)
                 
-            if pcell.is_empty():
-                if mm != 'phc_test':
-                    raise PCellInstantiationError(mm, library_name)
+            if pcell.is_empty() or pcell.bbox().area() == 0:
+                raise PCellInstantiationError(mm, library_name)
+
+            #topcell = new_layout.create_cell("top")
+            #t = Trans(Trans.R0, 0,0)
+            #inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
+            
         
         except (PCellRegistrationError, PCellInstantiationError) as e:
             print("Caught {}: {}".format(type(e).__name__, str(e)))

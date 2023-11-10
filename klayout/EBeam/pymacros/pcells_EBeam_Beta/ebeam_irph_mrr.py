@@ -225,4 +225,4 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.07/dbu
     
-    print("Done drawing the layout for - ebeam_IRPH_MRR: %.3f-%g" % ( self.r, self.g))
+    # print("Done drawing the layout for - ebeam_IRPH_MRR: %.3f-%g" % ( self.r, self.g))

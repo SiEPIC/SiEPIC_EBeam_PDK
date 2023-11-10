@@ -141,4 +141,4 @@ class ebeam_dc_halfring_arc(pya.PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size = self.r*0.017/dbu
 
-    print("Done drawing the layout for - ebeam_dc_halfring_arc: %.3f-%g" % ( self.r, self.g) )
+    # print("Done drawing the layout for - ebeam_dc_halfring_arc: %.3f-%g" % ( self.r, self.g) )

@@ -36,6 +36,8 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
       return False
 
     def produce_impl(self):
+      debug = False
+      
       from SiEPIC._globals import PIN_LENGTH
       from SiEPIC.extend import to_itype
       import math
@@ -60,14 +62,16 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
       gap = self.gap
       W_ratio = self.W_ratio
       doublebus = self.doublebus
-      print(doublebus)
+      if debug:
+        print(doublebus)
       
       # set the deltaL of sT-shaped silicon pillar (deltaL = (Lin-Lout)/4) 
       deltaL = (2*pitch*ff)*(W_ratio-1)/((1+W_ratio)*(4))
       
       if (r-w/2 <= 0):
         r = 5
-        print ('invalid radius, set r to default: 5')
+        if debug:
+          print ('invalid radius, set r to default: 5')
 
       #Calculate number of segments
       s1 = pitch*ff #silicon
@@ -79,7 +83,8 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
       #if doesn't divide evenly, replace r with best possible r
       if ((2*pi*r)%(s1+s2) != 0):
         r = const*(s1+s2)/(2*pi)
-        print('r adjusted to '+str(r)+'um to fit periods perfectly.')
+        if debug:
+          print('r adjusted to '+str(r)+'um to fit periods perfectly.')
       
       #theta1 = (s1/r)
       #theta2 = (s2/r)

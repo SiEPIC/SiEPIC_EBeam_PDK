@@ -143,4 +143,4 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     if self.textpolygon:
       layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
 
-    print("Done drawing the layout for - DoubleBus_Ring: %.3f-%g" % ( self.r, self.g) )
+    # print("Done drawing the layout for - DoubleBus_Ring: %.3f-%g" % ( self.r, self.g) )

@@ -108,4 +108,4 @@ class BraggWaveguide_holes(pya.PCellDeclarationHelper):
     path = Path([Point(0, 0), Point(length, 0)], 3*w)
     shapes(LayerDevRecN).insert(path.simple_polygon())
 
-    print('Done: BraggWaveguide_holes')
+    # print('Done: BraggWaveguide_holes')

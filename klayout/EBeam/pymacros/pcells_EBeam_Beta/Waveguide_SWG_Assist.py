@@ -50,7 +50,7 @@ class Waveguide_SWG_Assist(pya.PCellDeclarationHelper):
     # Determine the period such that the waveguide length is as desired.  Slight adjustment to period
     N_boxes = int(round(self.length / self.target_period-0.5))
     grating_period = self.length / (N_boxes) / dbu
-    print("N boxes: %s, grating_period: %s" % (N_boxes, grating_period) )
+    # print("N boxes: %s, grating_period: %s" % (N_boxes, grating_period) )
     
     # Draw the Bragg grating:
     box_width = int(round(grating_period*self.duty))
