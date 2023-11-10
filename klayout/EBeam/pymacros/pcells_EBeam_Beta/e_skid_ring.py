@@ -9,7 +9,7 @@ class e_skid_ring(pya.PCellDeclarationHelper):
     """ 
     Author: Ben Cohen (UBC), Hang Bobby Zou (UBC)
     bcohenkl@ece.ubc.ca
-    June 9, 2023
+    Nov 9, 2023
 
     - This Pcell creates a single-bus ring resonator modified with e-skid concentric rings
     - Design control over number of inner/outer concentric rings. Gap between two rings and width is parameterized
@@ -47,6 +47,10 @@ class e_skid_ring(pya.PCellDeclarationHelper):
         self.param("pinrec",    self.TypeLayer, "PinRec Layer",     default = TECHNOLOGY['PinRec'],               hidden = True)
         self.param("devrec",    self.TypeLayer, "DevRec Layer",     default = TECHNOLOGY['DevRec'],               hidden = True)
         self.param("oxideopen", self.TypeLayer, "Oxide Open Layer", default = TECHNOLOGY['Oxide open (to BOX)'],  hidden = True)
+
+    def display_text_impl(self):
+        # Provide a descriptive text for the cell
+        return "ring_resonator_with_e_skid_pillar"
 
     # Creating the layout
     def produce_impl(self):
@@ -165,5 +169,5 @@ class e_skid_ring(pya.PCellDeclarationHelper):
         # Dev box
         # Encapsulate the pcell within a box for error checking
         w = self.w
-        dev = pya.DBox(-(r + w), r + w + cg + bus_w, r + w, -(r + w))  
+        dev = pya.DBox(-(r + w), r + w + cg + bus_w + 0.5, r + w, -(r + w) - 0.5)  
         shapes(LayerDevRecN).insert(dev)

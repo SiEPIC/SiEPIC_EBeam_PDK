@@ -10,8 +10,8 @@ import math
 # Author:   Hang (Bobby) Zou
 # Purpose:  PCell in EBeam library for a common parallel e-skid design that have adjustable period
 #           and fill factor
-# Version:  V1.2
-# Date:     2023-05-11
+# Version:  V2.0
+# Date:     2023-11-09
 #====================================================================================================
 
 class e_skid(pya.PCellDeclarationHelper):
@@ -26,11 +26,11 @@ class e_skid(pya.PCellDeclarationHelper):
 
         # e_skid Parameters:
         # core parameter
-        self.param('divider0',      self.TypeBoolean,    '==============Core Parameter==============')
+        self.param('divider0',      self.TypeNone,    '==============Core Parameter==============')
         
         self.param('w',             self.TypeDouble,  'Core Waveguide Width [um]'           , default = 0.3)
         
-        self.param('divider1',      self.TypeBoolean,    '==============Clad Parameter==============')
+        self.param('divider1',      self.TypeNone,    '==============Clad Parameter==============')
 
         # clad parameter
         self.param('p',             self.TypeDouble,  'e-skid Period [um]'                  , default = 0.1)
@@ -38,20 +38,20 @@ class e_skid(pya.PCellDeclarationHelper):
         self.param('p_num',         self.TypeInt,     'e-skid Period Number'                , default = 5)
         self.param('length',        self.TypeDouble,  'Length of e-skid Waveguide [um]'     , default = 10)
 
-        self.param('divider2',      self.TypeBoolean,    '==============Taper Parameter=============')
+        self.param('divider2',      self.TypeNone,    '==============Taper Parameter=============')
 
         # taper
         self.param('taper_True',    self.TypeBoolean, 'Taper [T/F]'                         , default = True)
         self.param('taperL',        self.TypeDouble,  'Strip -> e-skid Taper Length [um]'   , default = 5)
         self.param('taperW',        self.TypeDouble,  'Strip Width [um]'                    , default = 0.5)
 
-        self.param('divider3',      self.TypeBoolean,    '============Extended Clad Parameter==========')        
+        self.param('divider3',      self.TypeNone,    '============Extended Clad Parameter==========')        
 
         # extended clad parameter
         self.param('clad_taper_L',  self.TypeDouble,  'Extended e-skid Length [um]'         , default = 5)
         self.param('clad_taper_angle', self.TypeDouble,'Extended e-skid Angle [degree]'     , default = 2)
         
-        self.param('divider4',      self.TypeBoolean,    '=====================================')
+        self.param('divider4',      self.TypeNone,    '=====================================')
 
         # Layer Parameters - Don't touch
         self.param("layer",  self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
@@ -59,6 +59,9 @@ class e_skid(pya.PCellDeclarationHelper):
         self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
         self.param("oxideopen", self.TypeLayer, "Oxide Open Layer", default = TECHNOLOGY['Oxide open (to BOX)'])
     
+    def display_text_impl(self):
+        # Provide a descriptive text for the cell
+        return "configurable_e_skid"
 
     # Creating the layout
     def produce_impl(self):
@@ -189,44 +192,6 @@ class e_skid(pya.PCellDeclarationHelper):
                 dpolygon = DPolygon(dpts)
                 element = Polygon.from_dpoly(dpolygon*(1/dbu))
                 shapes(LayerSiN).insert(element)
-
-                # # draw the right clad, offeset method
-                # # x, y coordinates of the top clad
-                # x_clad_top = [length, length+clad_taper_L, length+clad_taper_L, length] 
-                # y_clad_top = [w/2+i*p-(p*ff), w/2+i*p-(p*ff)+i*w_offset, w/2+i*p+i*w_offset, w/2+i*p]
-
-                # dpts = [pya.DPoint(x_clad_top[i], y_clad_top[i]) for i in range(len(x_clad_top))] # Core body
-                # dpolygon = DPolygon(dpts)
-                # element = Polygon.from_dpoly(dpolygon*(1/dbu))
-                # shapes(LayerSiN).insert(element)
-        
-                # # x, y coordinates of the bottom clad
-                # x_clad_bottom = [length, length+clad_taper_L, length+clad_taper_L, length] 
-                # y_clad_bottom = [-w/2-i*p+(p*ff), -w/2-i*p+(p*ff)-i*w_offset, -w/2-i*p-i*w_offset, -w/2-i*p]
-
-                # dpts = [pya.DPoint(x_clad_bottom[i], y_clad_bottom[i]) for i in range(len(x_clad_bottom))] # Core body
-                # dpolygon = DPolygon(dpts)
-                # element = Polygon.from_dpoly(dpolygon*(1/dbu))
-                # shapes(LayerSiN).insert(element)
-            
-                # draw the left clad
-                # x, y coordinates of the top clad
-                # x_clad_top = [0, -clad_taper_L, -clad_taper_L, 0] 
-                # y_clad_top = [w/2+i*p-(p*ff), w/2+i*p-(p*ff)+i*w_offset, w/2+i*p+i*w_offset, w/2+i*p]
-
-                # dpts = [pya.DPoint(x_clad_top[i], y_clad_top[i]) for i in range(len(x_clad_top))] # Core body
-                # dpolygon = DPolygon(dpts)
-                # element = Polygon.from_dpoly(dpolygon*(1/dbu))
-                # shapes(LayerSiN).insert(element)
-        
-                # # x, y coordinates of the bottom clad
-                # x_clad_bottom = [0, -clad_taper_L, -clad_taper_L, 0] 
-                # y_clad_bottom = [-w/2-i*p+(p*ff), -w/2-i*p+(p*ff)-i*w_offset, -w/2-i*p-i*w_offset, -w/2-i*p]
-
-                # dpts = [pya.DPoint(x_clad_bottom[i], y_clad_bottom[i]) for i in range(len(x_clad_bottom))] # Core body
-                # dpolygon = DPolygon(dpts)
-                # element = Polygon.from_dpoly(dpolygon*(1/dbu))
-                # shapes(LayerSiN).insert(element)
             
             # left taper
             x_taper_left = [0, 0, -taperL, -taperL]              
@@ -267,13 +232,9 @@ class e_skid(pya.PCellDeclarationHelper):
 
             # Devbox 
             dev = pya.DBox(-taperL, 
-                            clad_end_point_position, 
+                            clad_end_point_position + 0.5, 
                             length + taperL,
-                            -clad_end_point_position)
-            # dev = pya.DBox(-taperL, 
-            #                 w/2 + p_num*p + p_num*w_offset, 
-            #                 length + taperL,
-            #                 -w/2 - p_num*p - p_num*w_offset)
+                            -clad_end_point_position - 0.5)
                         
             shapes(LayerDevRecN).insert(dev)
 
@@ -299,9 +260,9 @@ class e_skid(pya.PCellDeclarationHelper):
 
             # Devbox 
             dev = pya.DBox(0, 
-                            w/2 + p_num*p, 
+                            w/2 + p_num*p + 0.5, 
                             length,
-                            -w/2 - p_num*p)
+                            -w/2 - p_num*p - 0.5)
                         
             shapes(LayerDevRecN).insert(dev)
 
