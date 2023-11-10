@@ -84,7 +84,7 @@ for i in range(len(library_folders)):
                 
             pcell = new_layout.create_cell(mm, all_params)
                 
-            if pcell.is_empty():
+            if pcell.is_empty() or pcell.bbox().area() == 0:
                 if mm != 'phc_test':
                     raise PCellInstantiationError(mm, library_name)
         
