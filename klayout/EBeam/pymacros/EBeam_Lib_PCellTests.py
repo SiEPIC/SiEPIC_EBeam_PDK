@@ -46,6 +46,8 @@ for i in range(len(library_folders)):
     library_name = library_names[i]
     library = pya.Library().library_by_name(library_name,tech_name)
 
+    print('*** Testing library: %s' % library_name)
+
     # With self hosted runner, EBeam library is not being initialized, skip over it
     if library == None:
         break;
@@ -66,6 +68,8 @@ for i in range(len(library_folders)):
     
         try: 
             mm = f.replace('.py','')
+
+            print('  * Testing cell: %s' % mm)
             
             # check that the pcell has been registered in the library's layout
             if mm not in layout.pcell_names():
@@ -84,7 +88,7 @@ for i in range(len(library_folders)):
                 
             pcell = new_layout.create_cell(mm, all_params)
                 
-            if pcell.is_empty():
+            if pcell.is_empty() or pcell.bbox().area() == 0:
                 if mm != 'phc_test':
                     raise PCellInstantiationError(mm, library_name)
         
