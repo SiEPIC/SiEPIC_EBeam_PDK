@@ -61,7 +61,7 @@ class wg_heater(pya.PCellDeclarationHelper):
   
   def coerce_parameters_impl(self):
     self.path = DPath([DPoint(0,0), DPoint(self.length,0)], 0.5)
-    print(self.waveguide_type)
+    # print(self.waveguide_type)
     
   def can_create_from_shape_impl(self):
     return self.shape.is_path()
@@ -74,6 +74,7 @@ class wg_heater(pya.PCellDeclarationHelper):
         
   def produce_impl(self):
 
+
     # https://github.com/KLayout/klayout/issues/879
     # tech = self.layout.library().technology
         
@@ -85,12 +86,10 @@ class wg_heater(pya.PCellDeclarationHelper):
     from SiEPIC.extend import to_itype
     from SiEPIC.utils.layout import make_pin
     dbu = self.layout.dbu
-    
-    
+        
     # Draw the waveguide geometry, new function in SiEPIC-Tools v0.3.90
     from SiEPIC.utils.layout import layout_waveguide4
     self.waveguide_length = layout_waveguide4(self.cell, self.path, self.waveguide_type, debug=False)
-
 
     # fetch design layers
     LayermlN = self.layout.layer(self.mllayer)

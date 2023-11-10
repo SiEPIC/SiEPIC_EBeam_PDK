@@ -33,6 +33,7 @@ class spiral(pya.PCellDeclarationHelper):
     return False
     
   def produce_impl(self):
+    debug = False
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
@@ -156,7 +157,8 @@ class spiral(pya.PCellDeclarationHelper):
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(-b/dbu, 0, b/dbu, self.wg_width/dbu, 0, 180))
     #layout_arc_wg_dbu(self.cell, LayerSiN, b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0)
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(b/dbu, 0, b/dbu, self.wg_width/dbu, 180, 0))
-    print("spiral length: %s microns" % spiral_length) 
+    if debug:
+        print("spiral length: %s microns" % spiral_length) 
 
     # Pins on the waveguide:
     from SiEPIC._globals import PIN_LENGTH as pin_length
@@ -213,4 +215,4 @@ class spiral(pya.PCellDeclarationHelper):
       pts.append(Point.from_dpoint(DPoint(r*cos(i*da), r*sin(i*da))))
     shapes(LayerDevRecN).insert(Polygon(pts))
 
-    print("spiral done.")
+    # print("spiral done.")

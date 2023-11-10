@@ -47,7 +47,7 @@ class ring_singlebus(pya.PCellDeclarationHelper):
 
     from SiEPIC.extend import to_itype
 
-    print(self.layout.technology_name)  # the technology is not assigned in a PCell, for some reason    
+    # print(self.layout.technology_name)  # the technology is not assigned in a PCell, for some reason    
     self.layout.technology_name=self.technology_name
  
     # Create the PCell   
@@ -84,4 +84,4 @@ class ring_singlebus(pya.PCellDeclarationHelper):
     inst = self.cell.insert(pya.CellInstArray(wg_pcell.cell_index(), pya.Trans(pya.Trans.R0, 0, 0)))
 
 
-    print("Done drawing the layout for - ring_singlebus: %.3f-%g" % ( self.r, self.g) )
+    # print("Done drawing the layout for - ring_singlebus: %.3f-%g" % ( self.r, self.g) )

@@ -63,7 +63,7 @@ class Bragg_Straight_from_file(pya.PCellDeclarationHelper):
     LayerPinRec  = ly.layer(self.pinrec)
     
     file_path = os.path.join(self.forder, self.name + '.' + self.filetype)   
-    print('Bragg_Straight_from_file: input file: ' + file_path)
+    # print('Bragg_Straight_from_file: input file: ' + file_path)
 
     if not(os.path.isfile(file_path)):
       error = 'File not found: ' + file_path

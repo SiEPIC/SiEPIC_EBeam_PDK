@@ -42,7 +42,7 @@ class Wireguide(pya.PCellDeclarationHelper):
     import pya
     from SiEPIC.extend import to_itype
     
-    print("EBeam.Wireguide")
+    # print("EBeam.Wireguide")
     
     TECHNOLOGY = get_technology_by_name('EBeam')
     

@@ -43,7 +43,7 @@ class phc_gc_hex(pya.PCellDeclarationHelper):
     return False
     
   def produce_impl(self):
-    
+    debug = False
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
@@ -169,8 +169,9 @@ class phc_gc_hex(pya.PCellDeclarationHelper):
          
             #radius=minimum_feature
           hole_cell = circle(0,0,radius)
-          hole_poly = pya.Polygon(hole_cell)  
-          print("x1 "+str(apodization))
+          hole_poly = pya.Polygon(hole_cell) 
+          if debug: 
+              print("x1 "+str(apodization))
           hole_x = abs(i)/i*(abs(i)-0.5)*a
           hole_y = j*a*math.sqrt(3)/2
           hole_trans = pya.Trans(Trans.R0, hole_x,hole_y)
@@ -207,8 +208,9 @@ class phc_gc_hex(pya.PCellDeclarationHelper):
           #radius=r*(float(abs(i))/(2*(n_x+1)))
           hole_cell = circle(0,0,radius)
           hole_poly = pya.Polygon(hole_cell) 
-          print("x2 "+str(apodization))
-          print("p "+str(n_x))
+          if debug:
+              print("x2 "+str(apodization))
+              print("p "+str(n_x))
           hole_x = i*a
           hole_y = j*a*math.sqrt(3)/2
           hole_trans = pya.Trans(Trans.R0, hole_x,hole_y)

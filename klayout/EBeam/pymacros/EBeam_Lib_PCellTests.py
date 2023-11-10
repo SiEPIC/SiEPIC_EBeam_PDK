@@ -29,9 +29,9 @@ by Jasmina Brar
 
 """
 
-library_folders = ["pcells_EBeam", "pcells_EBeam_Beta", "pcells_SiN"]
-library_names = ["EBeam", "EBeam_Beta", "EBeam-SiN"]
-tech_names = ["EBeam", "EBeam", "EBeam"]
+library_folders = ["pcells_EBeam", "pcells_EBeam_Beta", "pcells_SiN","pcells_EBeam_Dream"]
+library_names = ["EBeam", "EBeam_Beta", "EBeam-SiN", "EBeam-Dream"]
+tech_names = ["EBeam", "EBeam", "EBeam","EBeam"]
 
 for i in range(len(library_folders)): 
 
@@ -50,7 +50,7 @@ for i in range(len(library_folders)):
 
     # With self hosted runner, EBeam library is not being initialized, skip over it
     if library == None:
-        break;
+        raise LibraryNotRegistered(library_name)
         
     layout = library.layout()
 
@@ -85,12 +85,16 @@ for i in range(len(library_folders)):
             all_params = {}
             for p in parameter_decl:
                 all_params[p.name] = p.default
-                
+            
             pcell = new_layout.create_cell(mm, all_params)
                 
             if pcell.is_empty() or pcell.bbox().area() == 0:
-                if mm != 'phc_test':
-                    raise PCellInstantiationError(mm, library_name)
+                raise PCellInstantiationError(mm, library_name)
+
+            #topcell = new_layout.create_cell("top")
+            #t = Trans(Trans.R0, 0,0)
+            #inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
+            
         
         except (PCellRegistrationError, PCellInstantiationError) as e:
             print("Caught {}: {}".format(type(e).__name__, str(e)))

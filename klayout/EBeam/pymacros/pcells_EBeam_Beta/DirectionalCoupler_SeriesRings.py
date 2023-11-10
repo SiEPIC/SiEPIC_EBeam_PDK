@@ -133,4 +133,4 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
     shape = shapes(LayerDevRecN).insert(text)
     shape.text_size =  r*0.017
 
-    print("Done drawing the layout for - DirectionalCoupler_SeriesRings: %.3f-%.3f-%g" % ( self.r1, self.r2, self.g) )
+    # print("Done drawing the layout for - DirectionalCoupler_SeriesRings: %.3f-%.3f-%g" % ( self.r1, self.r2, self.g) )

@@ -44,7 +44,7 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
     return False
     
   def produce_impl(self):
-
+    debug = False
     # Layout and layers:
     dbu = self.layout.dbu
     ly = self.layout
@@ -68,7 +68,8 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
     # Determine the period such that the waveguide length is as desired.  Slight adjustment to period
     N_boxes = int(round(self.length / (self.period_swg+self.period_strip)*2.0)-0.5)
     grating_period = self.length / (N_boxes) / dbu
-    print("N boxes: %s, grating_period: %s" % (N_boxes, grating_period) )
+    if debug:
+      print("N boxes: %s, grating_period: %s" % (N_boxes, grating_period) )
 
     # taper length, minus last SWG block
     # taper_length = int(round(self.taper_fraction * self.length / dbu))
@@ -95,7 +96,8 @@ class Waveguide_SWG_to_Strip(pya.PCellDeclarationHelper):
       local_period = to_itype((1.0*(N_boxes - i) / N_boxes * self.period_swg + 1.0*i / N_boxes * self.period_strip ),dbu)
       local_wg_width = (1.0*(N_boxes - i) / N_boxes * wg_width_swg_taperend + 1.0*i / N_boxes * wg_width_strip  )
       if (i==0) | (i==N_boxes):
-        print("local_duty: %s, local_period: %s, local_wg_width: %s" % (local_duty, local_period, local_wg_width) )     
+        if debug:
+          print("local_duty: %s, local_period: %s, local_wg_width: %s" % (local_duty, local_period, local_wg_width) )     
       local_box_width = int(round(local_period*local_duty))
 #      x = int(round((i * local_period - local_box_width/2)))
       if i != 0:

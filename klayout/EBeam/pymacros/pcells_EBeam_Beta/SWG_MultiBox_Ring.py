@@ -39,6 +39,7 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
       return False
 
     def produce_impl(self):
+      debug = False
       from SiEPIC._globals import PIN_LENGTH
       from SiEPIC.extend import to_itype
       import math
@@ -72,13 +73,16 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
       
       if (r-w/2 <= 0):
         r = 5
-        print ('invalid radius, set r to default: 5')
+        if debug:
+            print ('invalid radius, set r to default: 5')
       if row <= 1:
         row = 1
-        print ('invalid number of rows, set row to default: 1')
+        if debug:
+            print ('invalid number of rows, set row to default: 1')
       if busL <= 10:
         busL = taperL*2+10
-        print('invalid length of SWG bus waveguide, set length at least 2 times larger than taper length and pluse 10 um')
+        if debug:
+            print('invalid length of SWG bus waveguide, set length at least 2 times larger than taper length and pluse 10 um')
       #Calculate number of segments
       s1 = pitch*ff #silicon
       s2 = pitch-s1 #gap
@@ -97,7 +101,8 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
         #if doesn't divide evenly, replace r with best possible r
         if ((2*pi*r)%(s1+s2) != 0):
           r = const*(s1+s2)/(2*pi)
-          print('r adjusted to '+str(r)+'um to fit periods perfectly.')
+          if debug:
+              print('r adjusted to '+str(r)+'um to fit periods perfectly.')
         
         
         theta1 = math.atan(s1/r)
@@ -259,8 +264,9 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
       text = Text ("opt1", t)
       shape = shapes(LayerPinRecN).insert(text)
       shape.text_size = 0.4/dbu
-      print(dev_up)
-      print(dev_up*dbu)
+      if debug:
+          print(dev_up)
+          print(dev_up*dbu)
       #Pin2
       t = Trans(Trans.R0, xstdu[-1]/dbu+251,dev_down-1)
       pin = Path([Point(0, pin_length/2), Point(0, -pin_length/2)], 500)

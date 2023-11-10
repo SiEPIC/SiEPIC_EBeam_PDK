@@ -77,7 +77,7 @@ class ebeam_ring_heater(pya.PCellDeclarationHelper):
     self.cell.shapes(mh_layer).insert(Polygon(pts))
     
     # add rings
-    print(self.layout.technology_name)  # the technology is not assigned in a PCell, for some reason    
+    #print(self.layout.technology_name)  # the technology is not assigned in a PCell, for some reason    
     self.layout.technology_name=self.technology_name
     
     pcell = self.layout.create_cell("ebeam_dc_halfring_straight", self.technology_name, {
@@ -98,6 +98,6 @@ class ebeam_ring_heater(pya.PCellDeclarationHelper):
         raise Exception("problem! cannot create PCell from library: %s" % self.technology_name)
     inst = self.cell.insert(pya.CellInstArray(pcell.cell_index(), pya.Trans(pya.Trans.R0, 0, 0)))
     inst = self.cell.insert(pya.CellInstArray(pcell.cell_index(), pya.Trans(pya.Trans.R180, 0, to_itype(self.r*2+self.g*2+self.w*2,self.layout.dbu))))
-    print((self.r*2+self.g*2+self.w*2)/self.layout.dbu)
+    #print((self.r*2+self.g*2+self.w*2)/self.layout.dbu)
 
-    print("Done drawing the layout for - ebeam_ring_heater: %.3f-%g" % ( self.r, self.g) )
+    # print("Done drawing the layout for - ebeam_ring_heater: %.3f-%g" % ( self.r, self.g) )

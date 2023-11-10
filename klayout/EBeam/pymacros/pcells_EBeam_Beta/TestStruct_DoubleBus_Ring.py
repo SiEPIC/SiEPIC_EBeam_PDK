@@ -10,7 +10,8 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(TestStruct_DoubleBus_Ring, self).__init__()
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    self.technology_name = 'EBeam'
+    TECHNOLOGY = get_technology_by_name(self.technology_name)
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
@@ -62,10 +63,11 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 #    print(instance.cell_index)
 
 
+    self.layout.technology_name=self.technology_name
 
-    lib = Library.library_by_name("EBeam_Beta")
+    lib = Library.library_by_name("EBeam_Beta","EBeam")
     if lib == None:
-      raise Exception("Unknown lib 'EBeam-dev'")
+      raise Exception("Unknown lib 'EBeam_Beta'")
 
     pcell_decl = lib.layout().pcell_declaration("DoubleBus_Ring");
     if pcell_decl == None:
@@ -96,13 +98,13 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     GC_name = "ebeam_gc_te1550"
     GC_imported = ly.cell(GC_name)
     if GC_imported == None:
-      GC_imported = ly.create_cell(GC_name, "SiEPIC-EBeam").cell_index()
+      GC_imported = ly.create_cell(GC_name, "EBeam").cell_index()
     else:
       GC_imported = GC_imported.cell_index()  
-    print( "Cell: GC_imported: #%s" % GC_imported )
+    # print( "Cell: GC_imported: #%s" % GC_imported )
     t = Trans(Trans.R0, 0, 0)
     instance = cell.insert(CellInstArray(GC_imported, t, Point(0,127/dbu), Point(0,0), 4, 1))
-    print(instance.cell_index)
+    # print(instance.cell_index)
 
     # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3, 4
     t = Trans(Trans.R0, 0, 127*2/dbu)
@@ -133,4 +135,4 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
 
 
 
-    print( "Done drawing the layout for - TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g) )
+    # print( "Done drawing the layout for - TestStruct_DoubleBus_Ring: %.3f-%g" % (r, g) )
