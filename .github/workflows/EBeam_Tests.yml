@@ -15,9 +15,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install Xvfb
+        run: sudo apt-get install -y xvfb
       
       - name: Pull siepic_klayout image
         run: docker pull ghcr.io/farihais/siepic_klayout:latest
+
+      - name: Start Xvfb
+        run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+      - name: Set display variable
+        run: export DISPLAY=:99
 
       - name: Run docker container from image
         run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/siepic_klayout:latest
@@ -33,6 +42,9 @@ jobs:
         run: |
                 docker stop ebeam_test
                 docker rm ebeam_test
+
+      - name: Stop Xvfb
+        run: killall Xvfb
                 
       - name: Fail job if exit code is non-zero
         run: |
