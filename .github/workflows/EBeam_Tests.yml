@@ -16,26 +16,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Xvfb and X11 dependencies
-        run: sudo apt-get install -y xvfb libx11-dev libxkbcommon-x11-0
-
-      - name: Debug Xvfb
-        run: |
-                export DISPLAY=:99
-                echo $DISPLAY
-                ps aux | grep Xvfb
-      
       - name: Pull siepic_klayout image
         run: docker pull ghcr.io/farihais/siepic_klayout:latest
 
-      - name: Start Xvfb
-        run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-
-      - name: Set display variable
-        run: export DISPLAY=:99
-
+      - name: Run xhost command
+        run: xhost +local:docker
+        
       - name: Run docker container from image
-        run: docker run -itd --name ebeam_test -e DISPLAY=:99 -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/siepic_klayout:latest
+        run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/siepic_klayout:latest
 
       - name: Copy pymacros folder to docker container
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
@@ -49,9 +37,6 @@ jobs:
                 docker stop ebeam_test
                 docker rm ebeam_test
 
-      - name: Stop Xvfb
-        run: killall Xvfb
-                
       - name: Fail job if exit code is non-zero
         run: |
                 if [ $KLAYOUT_EXIT_CODE -ne 0 ]; then
