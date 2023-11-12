@@ -1,4 +1,4 @@
-name: EBeam Tests
+name: EBeam Tests 
 
 on:
   push:
