@@ -8,6 +8,7 @@
  <doc/>
  <autorun>true</autorun>
  <autorun-early>false</autorun-early>
+ <priority>0</priority>
  <shortcut/>
  <show-in-menu>false</show-in-menu>
  <group-name/>
@@ -1224,18 +1225,21 @@ class XSectionScriptEnvironment
 
 end
 
-$xsection_processing_environment = XSectionScriptEnvironment.new
+if RBA::Application::instance::main_window
 
-if RBA::LayoutView::current &amp;&amp; $xs_run &amp;&amp; $xs_cut =~ /^(.*),(.*);(.*),(.*)$/ &amp;&amp; $xs_out
+  $xsection_processing_environment = XSectionScriptEnvironment.new
 
-  p1 = RBA::DPoint::new($1.to_f, $2.to_f)
-  p2 = RBA::DPoint::new($3.to_f, $4.to_f)
+  if RBA::LayoutView::current &amp;&amp; $xs_run &amp;&amp; $xs_cut =~ /^(.*),(.*);(.*),(.*)$/ &amp;&amp; $xs_out
 
-  puts("Running XSection script #{$xs_run} with #{p1.to_s} to #{p2.to_s} ..")
-  target_view = $xsection_processing_environment.run_script($xs_run, p1, p2)
-  puts("Writing #{$xs_out} ..")
-  target_view.active_cellview.layout.write($xs_out)
+    p1 = RBA::DPoint::new($1.to_f, $2.to_f)
+    p2 = RBA::DPoint::new($3.to_f, $4.to_f)
 
+    puts("Running XSection script #{$xs_run} with #{p1.to_s} to #{p2.to_s} ..")
+    target_view = $xsection_processing_environment.run_script($xs_run, p1, p2)
+    puts("Writing #{$xs_out} ..")
+    target_view.active_cellview.layout.write($xs_out)
+
+  end
 end
 </text>
 </klayout-macro>
