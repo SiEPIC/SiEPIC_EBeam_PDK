@@ -18,7 +18,6 @@ jobs:
 
       - name: Install Xvfb and X11 dependencies
         run: sudo apt-get install -y xvfb libx11-dev libxkbcommon-x11-0
-        background: true
 
       - name: Debug Xvfb
         run: |
