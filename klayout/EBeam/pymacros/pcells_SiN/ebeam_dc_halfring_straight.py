@@ -62,8 +62,8 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(x+Lc2, y, r, w, 270, 360))
     
     # Pins on the top side:
-    make_pin(self.cell, "pin2", [-r-Lc2, y], w, LayerPinRecN, 270)
-    make_pin(self.cell, "pin4", [r+Lc2, y], w, LayerPinRecN, 270)
+    make_pin(self.cell, "pin2", [-r-Lc2, y], w, LayerPinRecN, 90)
+    make_pin(self.cell, "pin4", [r+Lc2, y], w, LayerPinRecN, 90)
 
     if Lc > 0:
       wg1 = Box(-Lc2, -w2+w+g, Lc2, w2+w+g)
@@ -75,8 +75,8 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     shapes(LayerSiN).insert(wg1)
 
     # Pins on the bus waveguide side:
-    make_pin(self.cell, "pin2", [-r-w2-w-Lc2, 0], w, LayerPinRecN, 0)
-    make_pin(self.cell, "pin4", [r+w2+w+Lc2, y], w, LayerPinRecN, 180)
+    make_pin(self.cell, "pin1", [-r-w2-w-Lc2, 0], w, LayerPinRecN, 180)
+    make_pin(self.cell, "pin3", [r+w2+w+Lc2, 0], w, LayerPinRecN, 0)
 
     # Merge all the waveguide shapes, to avoid any small gaps
     layer_temp = self.layout.layer(LayerInfo(913, 0))
