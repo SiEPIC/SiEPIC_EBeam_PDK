@@ -39,4 +39,4 @@ jobs:
                 if [ $KLAYOUT_EXIT_CODE -ne 0 ]; then
                         echo "KLayout exited with non-zero exit code"
                         exit 1
-                fi 
+                fi
