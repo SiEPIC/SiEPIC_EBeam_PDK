@@ -21,7 +21,7 @@ jobs:
 
       - name: Run xhost command
         run: xhost +local:docker
-        
+
       - name: Run docker container from image
         run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/siepic_klayout:latest
 
@@ -29,7 +29,7 @@ jobs:
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
 
       - name: Run KLayout Python script inside container and capture exit code 
-        run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
+        run: docker exec ebeam_test xvfb-run -a -s "-screen 0 1024x768x24" klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
 
       - name: Stop container and remove it 
