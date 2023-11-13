@@ -300,7 +300,7 @@
     <valid>true</valid>
     <visible>true</visible>
     <transparent>false</transparent>
-    <width>3</width>
+    <width>5</width>
     <marked>false</marked>
     <animation>0</animation>
     <name>FloorPlan</name>
@@ -335,7 +335,7 @@
     <valid>true</valid>
     <visible>true</visible>
     <transparent>true</transparent>
-    <width>2</width>
+    <width>1</width>
     <marked>false</marked>
     <xfill>false</xfill>
     <animation>0</animation>
@@ -352,12 +352,31 @@
     <valid>true</valid>
     <visible>true</visible>
     <transparent>false</transparent>
-    <width>10</width>
+    <width>6</width>
     <marked>false</marked>
     <xfill>false</xfill>
     <animation>0</animation>
     <name>Chip design area</name>
     <source>290/0@1</source>
+  </group-members>
+
+  
+  <group-members>
+    <frame-color>#303030</frame-color>
+    <fill-color>#a0a0c0</fill-color>
+    <frame-brightness>0</frame-brightness>
+    <fill-brightness>0</fill-brightness>
+    <dither-pattern>I10</dither-pattern>
+    <line-style/>
+    <valid>true</valid>
+    <visible>true</visible>
+    <transparent>true</transparent>
+    <width>1</width>
+    <marked>false</marked>
+    <xfill>false</xfill>
+    <animation>0</animation>
+    <name>Keep out</name>
+    <source>202/0@1</source>
   </group-members>
   
   <group-members>
