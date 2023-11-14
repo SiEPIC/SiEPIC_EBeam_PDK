@@ -28,9 +28,9 @@ by Jasmina Brar
     - tests successful pcell registration in all libraries 
 """
 
-library_folders = ["pcells_EBeam", "pcells_EBeam_Beta", "pcells_SiN", "pcells_EBeam_Dream"]
-library_names = ["EBeam", "EBeam_Beta", "EBeam-SiN", "EBeam-Dream"]
-tech_names = ["EBeam", "EBeam", "EBeam", "EBeam"]
+library_folders = ["pcells_EBeam", "pcells_EBeam_Beta", "pcells_SiN"]
+library_names = ["EBeam", "EBeam_Beta", "EBeam-SiN"]
+tech_names = ["EBeam", "EBeam", "EBeam"]
 
 for i in range(len(library_folders)): 
 
@@ -94,5 +94,5 @@ for i in range(len(library_folders)):
             pya.Application.instance().exit(1)
 
     print("Complete. All pcells from {} folder were successfully registered in {} library".format(library_folders[i], library_names[i]))
-    
+
 print("Complete. All pcells were succcessfully registered in all libraries.")
