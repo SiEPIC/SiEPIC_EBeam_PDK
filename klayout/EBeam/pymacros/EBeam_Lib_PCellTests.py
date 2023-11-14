@@ -25,7 +25,7 @@ by Jasmina Brar
 == Change log ==
 2023/10/30, Jasmina Brar
     - raise exceptions when errors occur and exits under these conditions
-    - tests successful pcell registration in all libraries 
+    - tests successful pcell registration in all libraries except 'EBeam' 
 """
 
 library_folders = ["pcells_EBeam", "pcells_EBeam_Beta", "pcells_SiN"]
@@ -47,7 +47,7 @@ for i in range(len(library_folders)):
 
     print('*** Testing library: %s' % library_name)
 
-    # With self hosted runner, EBeam library is not being initialized, skip over it
+    # With cloud hosted runner, EBeam library is not being initialized, skip over it
     if library == None:
         break;
         
@@ -86,7 +86,7 @@ for i in range(len(library_folders)):
             pcell = new_layout.create_cell(mm, all_params)
                 
             if pcell.is_empty():
-                if mm != 'phc_test':
+                if mm != 'phc_test': # this pcell has an empty python script, skip over it
                     raise PCellInstantiationError(mm, library_name)
         
         except (PCellRegistrationError, PCellInstantiationError) as e:
