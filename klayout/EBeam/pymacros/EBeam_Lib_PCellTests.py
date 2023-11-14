@@ -14,7 +14,8 @@ exec(open(custom_exceptions_path).read())
 """
 Python script to test that all Pcells are properly registered in their respective library and will display polygons when placed on a new layout.
 
-To run this script from the command line: '{path to klayout} -e -r {path to this script/EBeam_Lib_PCellTests.py}'.
+To run this script from the command line: '{path to klayout} -zz -r {path to this script/EBeam_Lib_PCellTests.py}'.
+
 This script can also be run within KLayout.
 
 This is a preliminary test script and will be implemented using GitHub Actions to be run every time a new Pcell is added to the code base.

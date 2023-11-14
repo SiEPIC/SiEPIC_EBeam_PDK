@@ -36,6 +36,7 @@ print('siepic_ebeam_library_SiN')
 import pya
 from pya import *
 from SiEPIC.utils import get_technology_by_name
+from SiEPIC.utils.layout import make_pin
 import os
 import pathlib
 import sys
