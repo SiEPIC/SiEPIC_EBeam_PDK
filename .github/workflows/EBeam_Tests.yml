@@ -17,10 +17,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Pull siepic_klayout image
-        run: docker pull ghcr.io/farihais/siepic_klayout:latest
+        run: docker pull ghcr.io/farihais/siepic_klayout:1.0
 
       - name: Run docker container from image
-        run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/siepic_klayout:latest
+        run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/farihais/siepic_klayout:1.0
 
       - name: Copy pymacros folder to docker container
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
