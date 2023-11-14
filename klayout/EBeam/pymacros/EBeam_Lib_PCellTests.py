@@ -23,7 +23,7 @@ by Jasmina Brar
 2023/08
 
 == Change log ==
-2023/10/30, Jasmina Brar
+2023/10/30, Jasmina Brar.
     - raise exceptions when errors occur and exits under these conditions
     - tests successful pcell registration in all libraries except 'EBeam' 
 """
