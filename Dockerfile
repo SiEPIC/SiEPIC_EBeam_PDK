@@ -5,10 +5,10 @@ RUN dnf -y update && \
     dnf -y install wget bzip2 unzip git mesa-dri-drivers Xvfb
 
 # Set up virtual display
-ENV DISPLAY=:99
+#ENV DISPLAY=:99
 
 # Start Xvfb
-CMD ["Xvfb", ":99", "-ac"]
+#CMD ["Xvfb", ":99", "-ac"]
 
 # Install the newest version of KLayout
 RUN wget https://www.klayout.org/downloads/CentOS_8/klayout-0.28.12-0.x86_64.rpm -O ~/klayout.rpm && \
