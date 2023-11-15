@@ -178,7 +178,7 @@ class spiral(pya.PCellDeclarationHelper):
     else:
       x = (2*b + a * (turn+1) * 2 * pi)/dbu
     t = Trans(Trans.R0, x,0)
-    pin = Path([Point(0,pin_length/2), Point(0,-pin_length/2)], w)
+    pin = Path([Point(0,-pin_length/2), Point(0,pin_length/2)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
