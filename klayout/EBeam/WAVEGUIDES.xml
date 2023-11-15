@@ -4,6 +4,7 @@
 	  <name>Strip TE 1550 nm, w=500 nm</name>
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_integral_1550</model>
+	  <sbends>true</sbends>
 	  <bezier>0.20</bezier>
       <radius>5.0</radius>
       <width>0.5</width>
@@ -31,6 +32,7 @@
 	<waveguide>
 	  <name>Strip TE 1310 nm, w=410 nm</name>
 	  <CML>EBeam</CML>
+	  <sbends>true</sbends>
 	  <model>ebeam_wg_integral_1310</model>
       <radius>5.0</radius>
       <width>0.41</width>
@@ -54,6 +56,7 @@
 	  <name>Strip TE 1310 nm, w=350 nm</name>
 	  <CML>EBeam</CML>
 	  <model>ebeam_wg_integral_1310</model>
+	  <sbends>true</sbends>
 	  <bezier>0.20</bezier>
       <radius>5.0</radius>
       <width>0.35</width>
@@ -76,6 +79,7 @@
 	<waveguide>
 	  <name>Strip TM 1550 nm, w=500 nm</name>
 	  <CML>EBeam</CML>
+	  <sbends>true</sbends>
 	  <model>ebeam_wg_integral_1550</model>
       <radius>15.0</radius>
       <width>0.5</width>
@@ -98,6 +102,7 @@
 	<waveguide>
 	  <name>Strip TE-TM 1550, w=450 nm</name>
 	  <CML>EBeam</CML>
+	  <sbends>true</sbends>
 	  <model>ebeam_wg_integral_1550</model>
       <radius>10.0</radius>
       <width>0.45</width>
@@ -310,9 +315,11 @@
       <taper_pin_mm>opt2</taper_pin_mm>
     </compound_waveguide>
   </waveguide>
+  
     <waveguide>
     <name>SiN Strip TE 895 nm, w=450 nm</name>
     <CML>EBeam</CML>
+	  <sbends>true</sbends>
     <model>ebeam_wg_integral_895</model>
     <bezier>0.25</bezier>
     <radius>25.0</radius>
@@ -333,10 +340,12 @@
       <offset>0.0</offset>
     </component>
   </waveguide>
+  
   <waveguide>
   <name>SiN Strip TE 1550 nm, w=750 nm</name>
   <CML>None</CML>
   <model>None</model>
+  <sbends>true</sbends>
   <bezier>0.3</bezier>
   <radius>50.0</radius>
   <width>0.75</width>
