@@ -20,17 +20,20 @@ jobs:
       #  run: docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASS }}
 
       - name: Pull siepic_klayout image
-        run:  docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master
+        run:  docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master-
         #run: docker pull ghcr.io/farihais/siepic_klayout:1.0
 
       - name: Run docker container from image
-        run: docker run -itd --name ebeam_test --security-opt label=type:container_runtime_t ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master
+        run: docker run -itd --name ebeam_test --security-opt label=type:container_runtime_t ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master-
 
       - name: Copy pymacros folder to docker container
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
 
+      - name: Run Xvfb
+        run: Xvfb :99 -ac
+
       - name: Run KLayout Python script inside container and capture exit code 
-        run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
+        run: docker exec -e DISPLAY=.99 ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
 
       - name: Stop container and remove it 
