@@ -16,11 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASS }}
+      #- name: Login to Docker Hub
+      #  run: docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASS }}
 
       - name: Pull siepic_klayout image
-        run:  docker pull docker.io/library/siepic_klayout:1700068664
+        run:  docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master
         #run: docker pull ghcr.io/farihais/siepic_klayout:1.0
 
       - name: Run docker container from image
