@@ -8,6 +8,7 @@
  <doc/>
  <autorun>false</autorun>
  <autorun-early>false</autorun-early>
+ <priority>0</priority>
  <shortcut/>
  <show-in-menu>true</show-in-menu>
  <group-name>Examples_EBeam</group-name>
@@ -128,7 +129,7 @@ class layout():
   def drawDeviceArray(self):
     p = self.p
     TECHNOLOGY, lv, ly, cell = get_layout_variables()
-    LayerSiN = ly.layer(TECHNOLOGY['Si'])
+    LayerSiN = ly.layer(TECHNOLOGY['Waveguide'])
     TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
   
     
