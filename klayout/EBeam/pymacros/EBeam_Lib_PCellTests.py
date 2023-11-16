@@ -97,7 +97,7 @@ for i in range(len(library_folders)):
             #inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
             
         
-        except (PCellRegistrationError, PCellInstantiationError) as e:
+        except (PCellRegistrationError, PCellInstantiationError, Exception) as e:
             print("Caught {}: {}".format(type(e).__name__, str(e)))
             pya.Application.instance().exit(1)
 
