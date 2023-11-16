@@ -35,7 +35,8 @@ jobs:
 
       - name: Run KLayout Python script inside container and capture exit code 
         #run: docker exec -e DISPLAY=.99 ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-        run: docker exec -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
+        #run: docker exec -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
+        run: docker exec ebeam_test klayout -z -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
 
       - name: Stop container and remove it 
