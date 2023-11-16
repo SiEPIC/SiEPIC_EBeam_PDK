@@ -42,7 +42,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Extract metadata (labels) for Docker
+      - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
@@ -53,5 +53,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: "${{ steps.date.outputs.date }}.${{ github.run_number }}"
+          tags: "${{ steps.meta.outputs.tags }}.${{ steps.date.outputs.date }}.${{ github.run_number }}"
           labels: ${{ steps.meta.outputs.labels }}
