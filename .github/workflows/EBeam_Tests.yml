@@ -20,7 +20,7 @@ jobs:
       #  run: docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASS }}
 
       - name: Pull siepic_klayout image
-        run: docker pull docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master.20231116.22
+        run: docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master.20231116.22
         #run:  docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master-siepic_tools_v0.4.5
         #run: docker pull ghcr.io/farihais/siepic_klayout:1.0
 
