@@ -1,14 +1,16 @@
 
 '''
-Create a layout of a paperclip spiral
-by Lukas Chrostowski, 2023
+Create a layout of a paperclip spiral,
+uses: delay line, waveguide loss cutback structure
 
 - this can be executed directly, or loaded by the technology library
 - you can resize the PCell by using the Partial select tool "L", and moving 
    the GUIDING SHAPE Box
 - Waveguide types are loaded from the XML file
 - Pitch of the waveguides is determined by the DevRec layer
-   
+- When executed directly, the unit test instantiates all the waveguide types
+
+by Lukas Chrostowski, 2023
 '''
 
 
@@ -22,8 +24,9 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         self.cellName=self.__class__.__name__
         super(eval(self.cellName), self).__init__()
         
-        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
         self.technology_name = 'EBeam' 
+
+        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
         self.TECHNOLOGY = get_technology_by_name(self.technology_name)
                         
         # Load all strip waveguides
@@ -36,22 +39,45 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         
         self.param("loops", self.TypeInt, "Number of loops", default = 2)
         self.minlength = 2*float(self.waveguide_types[0]['radius'])
-        self.param("length1", self.TypeDouble, "Inner length (min 2 x bend radius)", default = self.minlength)
+        self.param("length", self.TypeDouble, "Inner length (min 2 x bend radius)", default = self.minlength)
         self.param("box", self.TypeShape, "Box", default = pya.DBox(-self.minlength, -self.minlength/2, self.minlength, self.minlength/2))
-        self.param("length", self.TypeDouble, "length: for PCell", default = self.minlength, hidden = True)
+        self.param("length1", self.TypeDouble, "length: for PCell", default = self.minlength, hidden = True)
         
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return "%s_%s_%s_%s" % (self.cellName, self.loops, self.length, self.waveguide_type.replace(' ','_'))
 
-    def coerce_parameters_impl(self):
-        # Get the Waveguide Type from the PCell, and update waveguide parameters
+    def get_waveguide_parameters(self):
+        '''
+        Get the Waveguide Type from the PCell, and update waveguide parameters
+        '''
         self.waveguide_params = [t for t in self.waveguide_types if t['name'] == self.waveguide_type]
         if not self.waveguide_params:
             raise Exception ('Waveguides.XML not correctly configured')
         self.waveguide_params = self.waveguide_params [0]
-        self.radius = float(self.waveguide_params['radius'])
+        wg_params = self.waveguide_params
+        wg_params2 = wg_params
+        
+        # check for compound type
+        if 'compound_waveguide' in wg_params:
+            sm_wg = self.waveguide_params['compound_waveguide']['singlemode']
+            mm_wg = self.waveguide_params['compound_waveguide']['multimode']
+            wg_params = [t for t in self.waveguide_types if t['name'] == sm_wg][0]
+            wg_params2 = [t for t in self.waveguide_types if t['name'] == mm_wg][0]
 
+        # DevRec width
+        if ('DevRec' not in [wg['layer'] for wg in wg_params2['component']]):
+            from SiEPIC import _globals
+            self.devrec = max([float(wg['width']) for wg in wg_params2['component']]) + _globals.WG_DEVREC_SPACE * 2
+        else:
+            self.devrec = float([f for f in wg_params2['component'] if f['layer']=='DevRec'][0]['width'])
+
+        # Radius
+        self.radius = float(wg_params['radius'])
+
+    def coerce_parameters_impl(self):
+        self.get_waveguide_parameters()
+        
         # We employ coerce_parameters_impl to decide whether the handle or the 
         # numeric parameters have changed. We update the 
         # numerical value or the shape, depending on which on has not changed.
@@ -62,7 +88,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         if isinstance(self.box, pya.DBox): 
             w = self.box.right
             print('%s DBox: width %s ' %(self.cellName,w))
-        if w != None and abs(self.length-self.length1) < 1e-6:
+        if w != None and abs(self.length1-self.length) < 1e-6:
             if w < self.minlength:
                 w = self.minlength
             print('%s update from GUI Box: %s ' %(self.cellName,w))
@@ -70,7 +96,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             self.length1 = w
         else:
             print('%s update from PCell parameters: %s ' %(self.cellName,self.length1))
-            self.length = self.length1
+            self.length1 = self.length
         self.box = pya.DBox(-self.length,-self.minlength/2,self.length,self.minlength/2)
                     
 
@@ -90,19 +116,10 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         self.height = self.shape.bbox().height() * self.layout.dbu
     
     def produce_impl(self):
-        self.layout.technology_name = self.technology_name
     
-        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
-    
-        # DevRec width
-        if ('DevRec' not in [wg['layer'] for wg in self.waveguide_params['component']]):
-            from SiEPIC import _globals
-            devrec = max([float(wg['width']) for wg in self.waveguide_params['component']]) + _globals.WG_DEVREC_SPACE * 2
-        else:
-            devrec = float([f for f in self.waveguide_params['component'] if f['layer']=='DevRec'][0]['width'])
-
-        # Radius
-        radius = float(self.waveguide_params['radius'])
+        self.get_waveguide_parameters()
+        devrec=self.devrec
+        radius = self.radius
 
         # SBend offset in the middle of the spiral
         if 'sbends' in self.waveguide_params:
@@ -117,7 +134,10 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
     
         # Ensure the length is sufficient
         self.minlength = 2*radius
-        length0 = max(self.minlength, self.length)  
+        length0 = max(self.minlength, self.length)
+        
+        # min loops
+        self.loops = max(self.loops, 1)
     
         # spiral points    
         points = [DPoint(-length0,offset), DPoint(0.0,offset), DPoint(0.0,-offset), DPoint(length0,-offset)]
@@ -137,6 +157,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
 
         # Create a path and waveguide    
         path  = DPath(points, 0.5)
+        self.layout.technology_name = self.technology_name # required otherwise "create_cell" doesn't load
         pcell = self.layout.create_cell("Waveguide", self.technology_name, 
                     {"path": path,
                      "waveguide_type": self.waveguide_type})
@@ -162,23 +183,43 @@ if __name__ == "__main__":
     
     from SiEPIC.utils.layout import new_layout, floorplan
     from SiEPIC.scripts import zoom_out
-    
-    tech = 'EBeam'
+
+    # load the test library, and technology
+    t = test_lib()
+    tech = t.technology
 
     # Create a new layout for the chip floor plan   
     topcell, ly = new_layout(tech, "test", GUI = True, overwrite = True)
     #floorplan(topcell, 100e3, 100e3)
-    
-    # load the test library
-    t = test_lib()
-    print(t.technology)
-    
+        
     # instantiate the cell
     library = tech + 'test_lib'
-    pcell = ly.create_cell("spiral_paperclip", library, 
-                    {
-                    })
-    t = Trans(Trans.R0, 0, 0)
-    topcell.insert(CellInstArray(pcell.cell_index(), t))
+
+    if 0:
+        # default waveguide
+        pcell = ly.create_cell("spiral_paperclip", library, {})
+        t = Trans(Trans.R0, 0, 0)
+        topcell.insert(CellInstArray(pcell.cell_index(), t))
+    
+        # multimode
+        pcell = ly.create_cell("spiral_paperclip", library, {
+                'waveguide_type':'Si routing TE 1550 nm (compound waveguide)',
+                'length':100,
+                'loops':1})
+        t = Trans(Trans.R0, 0, 40000)
+        topcell.insert(CellInstArray(pcell.cell_index(), t))
+
+    # Create spirals for all the types of waveguides
+    from SiEPIC.utils import load_Waveguides_by_Tech
+    waveguide_types = load_Waveguides_by_Tech(tech)   
+    y = 0
+    for wg in waveguide_types:
+        pcell = ly.create_cell("spiral_paperclip", library, {
+                'waveguide_type':wg['name'],
+                'length':100,
+                'loops':1})
+        t = Trans(Trans.R0, 0, y + pcell.bbox().height()/2)
+        inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
+        y += pcell.bbox().height()+2000
       
     zoom_out(topcell)
