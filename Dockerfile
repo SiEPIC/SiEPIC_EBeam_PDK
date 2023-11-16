@@ -25,5 +25,5 @@ RUN mkdir -p /root/.klayout/salt && \
 WORKDIR /home
 
 # Set PATH
-ENV PATH="/usr/local/bin:${PATH}"
-ENV QT_QPA_PLATFORM=minimal
+#ENV PATH="/usr/local/bin:${PATH}"
+#ENV QT_QPA_PLATFORM=minimal
