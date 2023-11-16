@@ -1,6 +1,13 @@
 name: Create and Publish Docker image
 
 on:
+  release:
+    types:
+      - created
+    repository:
+      - 'SiEPIC/SiEPIC_EBeam_PDK'
+      - 'SiEPIC/SiEPIC-Tools'
+  
   push:
     branches: [ "master" ]
     paths:
@@ -23,21 +30,28 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Get the current date
+        id: date
+        run: echo "::set-output name=date::$(date +%Y%m%d)"
+        
       - name: Log in to the container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for Docker
+          
+      - name: Extract metadata (labels) for Docker
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          
       - name: Build and push Docker image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}-siepic_tools_v0.4.5
+          tags: "${{ steps.date.outputs.date }}.${{ github.run_number }}"
           labels: ${{ steps.meta.outputs.labels }}
