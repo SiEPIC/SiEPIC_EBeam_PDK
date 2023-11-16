@@ -1,10 +1,14 @@
 name: Create and Publish Docker image
 
 on:
-  #push:
-    #branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'Dockerfile'
   pull_request:
     branches: [ "master" ]
+    paths:
+      - 'Dockerfile'
     
 env:
   REGISTRY: ghcr.io
