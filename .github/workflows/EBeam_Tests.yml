@@ -25,7 +25,7 @@ jobs:
         #run: docker pull ghcr.io/farihais/siepic_klayout:1.0
 
       - name: Run docker container from image
-        run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master.20231116.21
+        run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master.20231116.21
 
       - name: Copy pymacros folder to docker container
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
