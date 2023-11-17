@@ -9,6 +9,16 @@ on:
       - master
 
 jobs:
+  # this should be moved to after ebeam-lib-pcell-tests but for now since that job fails, it is above to trigger dashboard build
+  code-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          
   ebeam-lib-pcell-test:
     runs-on: ubuntu-latest
 
