@@ -1,9 +1,6 @@
-name: EBeam Tests Coverage
+name: Coverage EBeam Tests
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
