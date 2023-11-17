@@ -12,7 +12,8 @@ custom_exceptions_path = os.path.join(current_directory, 'custom_exceptions.py')
 exec(open(custom_exceptions_path).read())
 
 """
-Python script to test that all Pcells are properly registered in their respective library and will display polygons when placed on a new layout.
+Python script to test that all EBeam libraries are registered and all Pcells are properly registered in their respective library and 
+will display polygons when placed on a new layout.
 
 To run this script from the command line: '{path to klayout} -zz -r {path to this script/EBeam_Lib_PCellTests.py}'.
 
