@@ -13,6 +13,8 @@ on:
     paths:
       - 'Dockerfile'
   pull_request:
+    types:
+      - closed 
     branches: [ "master" ]
     paths:
       - 'Dockerfile'
@@ -23,11 +25,19 @@ env:
 
 jobs:
   build-and-push-image:
+  
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      
     steps:
+      - name: Check pull request was merged
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
+        run: |
+          echo "Error: Pull request is not merged."
+          exit 1
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
