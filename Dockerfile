@@ -1,6 +1,6 @@
 FROM quay.io/centos/centos:stream8
 
-# Update the system and install necessary tools
+# Update the system and install necessary tools.
 RUN dnf -y update && \
     dnf -y install wget bzip2 unzip git mesa-dri-drivers
 
