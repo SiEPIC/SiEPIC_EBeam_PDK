@@ -2,7 +2,7 @@ FROM quay.io/centos/centos:stream8
 
 # Update the system and install necessary tools
 RUN dnf -y update && \
-    dnf -y install wget bzip2 unzip git mesa-dri-drivers
+    dnf -y install wget bzip2 unzip git mesa-dri-drivers python3-pip
 
 # Install the newest version of KLayout
 RUN wget https://www.klayout.org/downloads/CentOS_8/klayout-0.28.12-0.x86_64.rpm -O ~/klayout.rpm && \
@@ -19,5 +19,5 @@ RUN mkdir -p /root/.klayout/salt && \
 WORKDIR /home
 
 # Set PATH
-ENV PATH="/usr/local/bin:${PATH}"
+ENV PATH="/usr/local/bin:${PATH}:/usr/local/bin/python3:/root/.local/bin"
 ENV QT_QPA_PLATFORM=minimal
