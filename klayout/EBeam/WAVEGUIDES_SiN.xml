@@ -172,4 +172,41 @@
   </component>
 </waveguide>
 
+<waveguide>
+  <name>Multimode SiN Strip TE 1550 nm, w=3000 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <radius>300</radius>
+  <width>3.0</width>
+  <component>
+    <layer>SiN</layer>
+    <width>3.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>3.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>4.0</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+
+<waveguide>
+  <name>SiN routing TE 1550 nm (compound waveguide)</name>
+  <compound_waveguide>
+    <singlemode>SiN Strip TE 1550 nm, w=750 nm</singlemode>
+    <multimode>Multimode SiN Strip TE 1550 nm, w=3000 nm</multimode>
+    <taper_library>EBeam-SiN</taper_library>
+    <taper_cell>taper_SiN_750_3000</taper_cell>
+    <taper_pin_sm>opt1</taper_pin_sm>
+    <taper_pin_mm>opt2</taper_pin_mm>
+  </compound_waveguide>
+</waveguide>
+
 </waveguides>
