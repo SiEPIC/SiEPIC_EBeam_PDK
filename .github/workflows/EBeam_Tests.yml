@@ -25,9 +25,6 @@ jobs:
       - name: Copy pymacros folder to docker container
         run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
 
-      - name: Install coverage package inside the container
-        run: docker exec ebeam_test pip install coverage
-
       - name: Run KLayout Python script inside container and capture exit code
       # run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         run: |
