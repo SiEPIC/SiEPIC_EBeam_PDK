@@ -1,7 +1,6 @@
-from . import *
 from pya import *
 
-class Wireguide(pya.PCellDeclarationHelper):
+class Wireguide(PCellDeclarationHelper):
   '''
   RIT Integrated Photonics Group of Stefan Preble (Karl McNulty) 
   new wireguide class (essentially the metal path equivalent to a waveguide but no bend is allowed)
@@ -10,6 +9,7 @@ class Wireguide(pya.PCellDeclarationHelper):
     # Important: initialize the super class
     super(Wireguide, self).__init__()
     # declare the parameters
+    from SiEPIC.utils import get_technology_by_name    
     TECHNOLOGY = get_technology_by_name('EBeam')
     self.param("path", self.TypeShape, "Path", default = DPath([DPoint(0,0), DPoint(10,0), DPoint(10,10)], 0.5))
     self.radius = 0
@@ -44,6 +44,7 @@ class Wireguide(pya.PCellDeclarationHelper):
     
     # print("EBeam.Wireguide")
     
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('EBeam')
     
     dbu = self.layout.dbu

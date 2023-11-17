@@ -1,7 +1,6 @@
-from . import *
 from pya import *
 
-class Waveguide_SBend(pya.PCellDeclarationHelper):
+class Waveguide_SBend(PCellDeclarationHelper):
   """
   Input: 
   """
@@ -10,6 +9,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_SBend, self).__init__()
+    from SiEPIC.utils import get_technology_by_name    
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
@@ -54,7 +54,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     h = to_itype(self.height,dbu)
    
 #    waveguide_length = layout_waveguide_sbend(self.cell, LayerSiN, pya.Trans(Trans.R0, 0,0), w, r, h, length)
-    waveguide_length = to_itype(layout_waveguide_sbend_bezier(self.cell, LayerSiN, pya.Trans(), self.wg_width, self.wg_width, self.height,self.length), dbu)
+    waveguide_length = to_itype(layout_waveguide_sbend_bezier(self.cell, LayerSiN, Trans(), self.wg_width, self.wg_width, self.height,self.length), dbu)
     
     from SiEPIC._globals import PIN_LENGTH as pin_length
 

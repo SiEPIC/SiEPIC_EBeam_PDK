@@ -218,8 +218,8 @@ if __name__ == "__main__":
                 'waveguide_type':wg['name'],
                 'length':100,
                 'loops':1})
-        t = Trans(Trans.R0, 0, y + pcell.bbox().height()/2)
+        t = Trans(Trans.R0, 0, y - pcell.bbox().bottom)
         inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
         y += pcell.bbox().height()+2000
-      
+    
     zoom_out(topcell)

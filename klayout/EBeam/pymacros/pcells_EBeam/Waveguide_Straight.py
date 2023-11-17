@@ -1,7 +1,6 @@
-from . import *
 from pya import *
 
-class Waveguide_Straight(pya.PCellDeclarationHelper):
+class Waveguide_Straight(PCellDeclarationHelper):
   """
   Input: length, width
   draws a straight waveguide with pins. centred at the instantiation point.
@@ -12,6 +11,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Straight, self).__init__()
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
@@ -66,7 +66,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
       pin_length = 2
 
     t = Trans(Trans.R0,-length/2,0)
-    pin = pya.Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
+    pin = Path([Point(pin_length/2, 0), Point(-pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin1", t)
@@ -74,7 +74,7 @@ class Waveguide_Straight(pya.PCellDeclarationHelper):
     shape.text_size = 0.4/dbu
 
     t = Trans(Trans.R0,length/2,0)
-    pin = pya.Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
+    pin = Path([Point(-pin_length/2, 0), Point(pin_length/2, 0)], w)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
     text = Text ("pin2", t)

@@ -1,7 +1,6 @@
-from . import *
 from pya import *
 
-class Waveguide_Bend(pya.PCellDeclarationHelper):
+class Waveguide_Bend(PCellDeclarationHelper):
   """
   The PCell declaration for the waveguide bend.
   """
@@ -10,6 +9,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Waveguide_Bend, self).__init__()
+    from SiEPIC.utils import get_technology_by_name    
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters

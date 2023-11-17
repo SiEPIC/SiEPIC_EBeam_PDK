@@ -1,7 +1,6 @@
-from . import *
 from pya import *
 
-class ebeam_dc_te1550(pya.PCellDeclarationHelper):
+class ebeam_dc_te1550(PCellDeclarationHelper):
   """
   The PCell declaration for the Directional Coupler
   by Lukas Chrostowski, 2018/09
@@ -17,6 +16,7 @@ class ebeam_dc_te1550(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(ebeam_dc_te1550, self).__init__()
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
