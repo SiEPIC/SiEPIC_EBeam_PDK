@@ -33,8 +33,7 @@ jobs:
                 docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
                 docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
                 echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-  continue-on-error: true
-
+                
       # docker exec ebeam_test sh -c "echo -e '#!/bin/bash\n/usr/bin/klayout -zz -r \$@' > /usr/local/bin/run_klayout.sh && chmod +x /usr/local/bin/run_klayout.sh"
       # docker exec ebeam_test sh -c "coverage run --source=/home/pymacros /usr/local/bin/run_klayout.sh pymacros/EBeam_Lib_PCellTests.py"
       # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
