@@ -1,6 +1,7 @@
-from . import *
+import pya
 import math
 from pya import *
+from SiEPIC.utils import get_technology_by_name
 
 class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
   """

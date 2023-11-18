@@ -100,8 +100,6 @@ Lukas 2021/04/01
 """
 
 
-print('SiEPIC_EBeam_Library')
-
 import pya
 from pya import *
 from SiEPIC.utils import get_technology_by_name

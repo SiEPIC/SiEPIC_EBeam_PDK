@@ -1,5 +1,6 @@
-from . import *
+import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name
 
 class ebeam_bragg_apodized(pya.PCellDeclarationHelper):
   """

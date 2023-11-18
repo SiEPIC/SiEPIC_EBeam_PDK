@@ -16,6 +16,7 @@ by Lukas Chrostowski, 2023
 
 import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name
 
 class spiral_paperclip(pya.PCellDeclarationHelper):
 

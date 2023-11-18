@@ -1,5 +1,7 @@
-from . import *
+import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name
+from . import *
 
 class Universal_GC(pya.PCellDeclarationHelper):
   """
@@ -16,14 +18,17 @@ class Universal_GC(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Universal_GC, self).__init__()
+    from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
     TECHNOLOGY = get_technology_by_name('EBeam')
-
+    self.TECHNOLOGY = TECHNOLOGY
+    
     # declare the parameters  
     self.param("wavelength", self.TypeDouble, "Design Wavelength (micron)", default = 1.55)  
     self.param("Si_thickness", self.TypeDouble, "Silicon Thickness (micron)", default = 0.22)
     self.param("etch_depth", self.TypeDouble, "Etch Depth (micron)", default = 0.13)
     self.param("pol", self.TypeString, "Polarization", default = "TE")
     self.param("n_t", self.TypeDouble, "Cladding Index", default = 1.444)
+    self.param("n_2", self.TypeDouble, "Waveguide Core Index", default = 3.47)
     self.param("angle_e", self.TypeDouble, "Taper Angle (deg)", default = 35.0)
     self.param("grating_length", self.TypeDouble, "Grating Length (micron)", default = 15.0)
     self.param("taper_length", self.TypeDouble, "Taper Length (micron)", default = 19.0)
@@ -54,7 +59,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
     dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
-    TECHNOLOGY = get_technology_by_name('EBeam')
+    TECHNOLOGY = self.TECHNOLOGY
 
     LayerSi = self.layer
     LayerSiN = ly.layer(LayerSi)
@@ -65,7 +70,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
     
     ######## effective index function ##########
     
-    def effective_index(wl = self.wavelength, etch_depth = self.etch_depth, Si_thickness = self.Si_thickness, n_t = self.n_t, pol = self.pol, dc = self.dc):
+    def effective_index(wl = self.wavelength, etch_depth = self.etch_depth, Si_thickness = self.Si_thickness, n_t = self.n_t, pol = self.pol, dc = self.dc, n_2 = self.n_2):
       
       from math import pi, cos, sin, log, sqrt, tan
       from SiEPIC.utils import points_per_circle
@@ -74,7 +79,14 @@ class Universal_GC(pya.PCellDeclarationHelper):
       n_0 = n_t
       n_1 = 0
       n_3 = 1.444
-      n_2 = sqrt(7.9874+(3.68*pow(3.9328,2)*pow(10,30))/((pow(3.9328,2)*pow(10,30)-pow(2*3.14*3*pow(10,8)/(wl*pow(10,-6)),2))))  # Silicon wavelength-dependant index of refraction
+      if n_2 == None:
+          if self.layer == self.TECHNOLOGY['Si']:
+              n_2 = sqrt(7.9874+(3.68*pow(3.9328,2)*pow(10,30))/((pow(3.9328,2)*pow(10,30)-pow(2*3.14*3*pow(10,8)/(wl*pow(10,-6)),2))))  # Silicon wavelength-dependant index of refraction
+              print(n_2)
+          elif self.layer == self.TECHNOLOGY['SiN']:
+              n_2 = 2.0
+          else:
+              raise Exception('Unknown waveguide material in Universal_GC PCell')
       delta = n_0 - n_3 
       t = Si_thickness
       t_slot = t - etch_depth
@@ -120,12 +132,12 @@ class Universal_GC(pya.PCellDeclarationHelper):
         nTE_0 = b_0[index_TE_0]/k_0
         nTE_1 = b_0[index_TE_1]/k_0
         
-        while (nTE_0<2 or nTE_0>3):
+        while (nTE_0<1.5 or nTE_0>3):
           abs_te_0[index_TE_0] = 100
           index_TE_0 = abs_te_0.index(min(abs_te_0))
           nTE_0 = b_0[index_TE_0]/k_0
           
-        while (nTE_1<2 or nTE_1>3):
+        while (nTE_1<1.5 or nTE_1>3):
           abs_te_1[index_TE_1] = 100
           index_TE_1 = abs_te_1.index(min(abs_te_1))
           nTE_1 = b_0[index_TE_1]/k_0

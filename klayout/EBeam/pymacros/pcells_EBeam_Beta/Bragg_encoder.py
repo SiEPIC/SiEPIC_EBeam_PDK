@@ -1,5 +1,6 @@
-from . import *
+import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name
 
 class Bragg_encoder(pya.PCellDeclarationHelper):
   def __init__(self):

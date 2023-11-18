@@ -1,6 +1,6 @@
-from . import *
 import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name
 
 class SWG_bentWG(pya.PCellDeclarationHelper):
 

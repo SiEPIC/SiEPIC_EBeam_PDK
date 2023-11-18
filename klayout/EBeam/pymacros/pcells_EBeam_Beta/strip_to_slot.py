@@ -1,4 +1,6 @@
-from . import *
+import pya
+from SiEPIC.utils import get_technology_by_name
+from pya import *
 
 class strip_to_slot(pya.PCellDeclarationHelper):
     """

@@ -1,5 +1,7 @@
-from . import *
+import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name
+from . import *
 
 class MMI_2x2(pya.PCellDeclarationHelper):
   """

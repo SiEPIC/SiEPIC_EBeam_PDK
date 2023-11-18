@@ -47,7 +47,10 @@ class Waveguide(pya.PCellDeclarationHelper):
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "%s_%s" % (self.cellName, self.path)
+    if 'waveguide_length' in dir(self):
+        return "%s_%s_%.3f" % (self.cellName, self.waveguide_type.replace(' ','_').replace(',',''), self.waveguide_length)
+    else:
+        return "%s_%s_%.3f" % (self.cellName, self.waveguide_type.replace(' ','_').replace(',',''), 0)
   
   def coerce_parameters_impl(self):
 #    self.length = self.waveguide_length
