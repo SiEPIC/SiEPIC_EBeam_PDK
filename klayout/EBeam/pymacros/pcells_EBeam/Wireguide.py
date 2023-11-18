@@ -15,8 +15,8 @@ class Wireguide(PCellDeclarationHelper):
     self.radius = 0
     self.param("width", self.TypeDouble, "Width", default = 0.5)
     self.adiab = False
-    self.param("layers", self.TypeList, "Layers", default = ['Waveguide'])
-    self.param("widths", self.TypeList, "Widths", default =  [0.5])
+    self.param("layers", self.TypeList, "Layers", default = ['M2_router'])
+    self.param("widths", self.TypeList, "Widths", default =  [5])
     self.param("offsets", self.TypeList, "Offsets", default = [0])
    
   def display_text_impl(self):

@@ -33,10 +33,3 @@ ly.write(os.path.join(path_out,'a.gds'))
 export_layout(topcell, path_out,'a_static',format='oas')
 print('done')
 
-
-'''
-path_project = os.path.join(path_GitHub, 'ANT-SiN-2301-H3LoQP/ANT-SiN-2301-H3LoQP')
-if not path_project in sys.path:
-    sys.path.append(path_project)
-import Dream_EBeam_Library_SiN
-'''
