@@ -96,6 +96,9 @@ Mustafa Hammood 2020/06/26
 
 Lukas 2021/04/01
  - fixing loading library (previous collisions with other PDKs)
+
+Lukas 2023/11
+ - compatibility with PyPI usage of KLayout
  
 """
 

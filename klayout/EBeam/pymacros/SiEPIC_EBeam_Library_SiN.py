@@ -18,6 +18,7 @@ Lukas Chrostowski, 2023/11
  - components for 1550 and 1310
  - waveguides for 1550 and 1310
  - compound waveguide
+ - compatibility with PyPI usage of KLayout
 
 """
 print('siepic_ebeam_library_SiN')

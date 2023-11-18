@@ -1,6 +1,7 @@
 from pya import *
+import pya
 
-class Waveguide_SBend(PCellDeclarationHelper):
+class Waveguide_SBend(pya.PCellDeclarationHelper):
   """
   Input: 
   """

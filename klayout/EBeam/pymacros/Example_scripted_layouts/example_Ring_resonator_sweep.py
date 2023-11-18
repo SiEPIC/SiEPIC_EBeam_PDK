@@ -1,32 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
-<klayout-macro>
- <description>Double-bus ring resonator sweep (EBeam)</description>
- <version/>
- <category>pymacros</category>
- <prolog/>
- <epilog/>
- <doc/>
- <autorun>false</autorun>
- <autorun-early>false</autorun-early>
- <priority>0</priority>
- <shortcut/>
- <show-in-menu>true</show-in-menu>
- <group-name>Examples_EBeam</group-name>
- <menu-path>siepic_menu.exlayout.begin</menu-path>
- <interpreter>python</interpreter>
- <dsl-interpreter-name/>
- <text>'''
+# $description: Double-bus ring resonator sweep (EBeam)
+# $show-in-menu
+# $group-name: Examples_EBeam
+# $menu-path: siepic_menu.exlayout.begin
+# Unit testing for all library layout fixed cells and PCells
+
+'''
 Scripted layout for ring resonators using SiEPIC-Tools
 in the SiEPIC-EBeam-PDK "EBeam" technology
 
-by Lukas Chrostowski, 2020-2022
+by Lukas Chrostowski, 2020-2023
 
 '''
 
+print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py')
+import pya
 from pya import *
+import SiEPIC
+import os
+
+from SiEPIC._globals import Python_Env
+from SiEPIC.scripts import load_klayout_technology
+
+if Python_Env == 'Script':
+    path_GitHub = '/Users/lukasc/Documents/GitHub/'
+    path_module = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout')
+    path_lyt_file = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout/EBeam/EBeam.lyt')
+    tech = load_klayout_technology('EBeam', path_module, path_lyt_file)
+
 
 # Example layout function
 def dbl_bus_ring_res():
+
+    # Import functions from SiEPIC-Tools
+    from SiEPIC.extend import to_itype
+    from SiEPIC.scripts import connect_cell, connect_pins_with_waveguide, zoom_out, export_layout
+    from SiEPIC.utils.layout import new_layout, floorplan
 
     # Create a layout for testing a double-bus ring resonator.
     # uses:
@@ -55,17 +63,12 @@ def dbl_bus_ring_res():
     and Draw the floor plan
     '''    
     tech_name = 'EBeam'
-    from SiEPIC.utils.layout import new_layout, floorplan
     cell, ly = new_layout(tech_name, 'top', GUI=True, overwrite = True)
     floorplan(cell, 605e3, 410e3)
 
-    if SiEPIC.__version__ &lt; '0.4.7':
+    if SiEPIC.__version__ < '0.4.7':
         pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.4.7 or greater.", pya.MessageBox.Ok)
 
-    # Import functions from SiEPIC-Tools
-    from SiEPIC.extend import to_itype
-    from SiEPIC.scripts import connect_cell, connect_pins_with_waveguide
-    
     # Layer mapping:
     LayerSiN = ly.layer(ly.TECHNOLOGY['Si'])
     fpLayerN = cell.layout().layer(ly.TECHNOLOGY['FloorPlan'])
@@ -152,13 +155,12 @@ def dbl_bus_ring_res():
         connect_pins_with_waveguide(instGCs[3], 'opt1', inst_dc2, 'pin3', waveguide_type=waveguide_type)
         
     # Zoom out
-    from SiEPIC.scripts import zoom_out
     zoom_out(cell)
-
-    from SiEPIC.scripts import export_layout
+    
+    # Save
     path = os.path.dirname(os.path.realpath(__file__))
     export_layout(cell, path, 'Test_structures_ring_resonators', relative_path = '', format='oas', screenshot=True)
     
 dbl_bus_ring_res()
-</text>
-</klayout-macro>
+
+print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - done')

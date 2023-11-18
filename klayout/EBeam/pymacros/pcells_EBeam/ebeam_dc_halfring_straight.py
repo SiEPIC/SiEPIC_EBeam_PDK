@@ -1,6 +1,7 @@
+import pya
 from pya import *
 
-class ebeam_dc_halfring_straight(PCellDeclarationHelper):
+class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the ebeam_dc_halfring_straight.
   Consists of a half-ring with 1 waveguides.

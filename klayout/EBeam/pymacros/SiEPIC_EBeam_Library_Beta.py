@@ -111,6 +111,9 @@ Mustafa Hammood 2018/02/06
 
 Lukas Chrostowski 2020/04/03
  - SWG_assisted_Strip_WG based on SWG waveguide: adds a strip waveguide
+
+Lukas 2023/11
+ - compatibility with PyPI usage of KLayout
    
 todo:
 replace:     

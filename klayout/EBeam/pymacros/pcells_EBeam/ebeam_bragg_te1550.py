@@ -1,6 +1,7 @@
+import pya
 from pya import *
 import math
-class ebeam_bragg_te1550(PCellDeclarationHelper):
+class ebeam_bragg_te1550(pya.PCellDeclarationHelper):
   """
   Input: length, width
   """

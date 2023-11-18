@@ -1,6 +1,7 @@
+import pya
 from pya import *
 
-class ebeam_taper_te1550(PCellDeclarationHelper):
+class ebeam_taper_te1550(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the strip waveguide taper.
   """

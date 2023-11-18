@@ -1,6 +1,7 @@
 from pya import *
+import pya
 
-class ebeam_dc_te1550(PCellDeclarationHelper):
+class ebeam_dc_te1550(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the Directional Coupler
   by Lukas Chrostowski, 2018/09

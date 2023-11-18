@@ -1,6 +1,7 @@
 from pya import *
+import pya
 
-class Waveguide_Bend(PCellDeclarationHelper):
+class Waveguide_Bend(pya.PCellDeclarationHelper):
   """
   The PCell declaration for the waveguide bend.
   """

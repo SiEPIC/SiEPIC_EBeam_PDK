@@ -1,6 +1,7 @@
 from pya import *
+import pya
 
-class Waveguide_Straight(PCellDeclarationHelper):
+class Waveguide_Straight(pya.PCellDeclarationHelper):
   """
   Input: length, width
   draws a straight waveguide with pins. centred at the instantiation point.

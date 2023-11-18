@@ -1,6 +1,7 @@
 from pya import *
+import pya
 
-class Wireguide(PCellDeclarationHelper):
+class Wireguide(pya.PCellDeclarationHelper):
   '''
   RIT Integrated Photonics Group of Stefan Preble (Karl McNulty) 
   new wireguide class (essentially the metal path equivalent to a waveguide but no bend is allowed)
