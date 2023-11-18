@@ -6,7 +6,8 @@
 
 # SiEPIC_EBeam_PDK
 
-[![coverage](https://codecov.io/gh/jasminabrar/SiEPIC_EBeam_PDK/main/graph/badge.svg)](https://codecov.io/gh/jasminabrar/SiEPIC_EBeam_PDK)
+[![codecov](https://codecov.io/gh/jasminabrar/SiEPIC_EBeam_PDK/main/graph/badge.svg)](https://codecov.io/gh/jasminabrar/SiEPIC_EBeam_PDK)
+**Coverage:** [![codecov](https://codecov.io/gh/jasminabrar/SiEPIC_EBeam_PDK/main/graph/badge.svg)](https://codecov.io/gh/jasminabrar/SiEPIC_EBeam_PDK)
 
 - <a href="www.siepic.ubc.ca">SiEPIC</a> EBeam PDK, Library - for silicon photonics layout, design, verification and circuit simulation
 - by <a href="https://ca.linkedin.com/in/chrostowski">Lukas Chrostowski</a> (<a href="http://github.com/lukasc-ubc">lukasc-ubc</a>), (c) 2015-2023, with contributions by: <a href="https://ca.linkedin.com/in/zeqin-lu-13a52394">Zeqin Lu</a>, <a href="https://uk.linkedin.com/in/jaspreet-jhoja-00a56b64">Jaspreet Jhoja</a>, <a href="https://ca.linkedin.com/in/121comeon">Xu Wang</a>, <a href="https://ca.linkedin.com/in/jonas-flückiger-92a4831">Jonas Flueckiger</a>, <a href="https://www.linkedin.com/in/brett-poulsen-7bb7b449">Brett Poulsen</a> (<a href="https://github.com/bpoulse">bpoulse</a>).
