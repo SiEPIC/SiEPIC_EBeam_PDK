@@ -27,19 +27,21 @@ import SiEPIC
 
 from SiEPIC._globals import Python_Env
 from SiEPIC.scripts import load_klayout_technology
+from SiEPIC.scripts import zoom_out, export_layout
 
 if Python_Env == 'Script':
     path_module = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout')
     path_lyt_file = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout/EBeam/EBeam.lyt')
     tech = load_klayout_technology('EBeam', path_module, path_lyt_file)
 
+tech_name = 'EBeam'
 
 # Example layout function
 def dbl_bus_ring_res():
 
     # Import functions from SiEPIC-Tools
     from SiEPIC.extend import to_itype
-    from SiEPIC.scripts import connect_cell, connect_pins_with_waveguide, zoom_out, export_layout
+    from SiEPIC.scripts import connect_cell, connect_pins_with_waveguide
     from SiEPIC.utils.layout import new_layout, floorplan
 
     # Create a layout for testing a double-bus ring resonator.
@@ -68,7 +70,6 @@ def dbl_bus_ring_res():
     with a top cell
     and Draw the floor plan
     '''    
-    tech_name = 'EBeam'
     cell, ly = new_layout(tech_name, 'top', GUI=True, overwrite = True)
     floorplan(cell, 605e3, 410e3)
 
@@ -159,22 +160,33 @@ def dbl_bus_ring_res():
         
         # GC3 to bottom-right of ring
         connect_pins_with_waveguide(instGCs[3], 'opt1', inst_dc2, 'pin3', waveguide_type=waveguide_type)
-        
-    # Zoom out
-    zoom_out(cell)
-    
-    # Save
-    path = os.path.dirname(os.path.realpath(__file__))
-    export_layout(cell, path, 'Test_structures_ring_resonators', relative_path = '', format='oas', screenshot=True)
+
+    # Introduce an error, to demonstrate the Functional Verification
+    inst_dc2.transform(Trans(1000,-1000))
+
 
     return ly, cell
     
 ly, cell = dbl_bus_ring_res()
 
+# Zoom out
+zoom_out(cell)
+
+# Save
+path = os.path.dirname(os.path.realpath(__file__))
+filename = 'Test_structures_ring_resonators'
+file_out = export_layout(cell, path, filename, relative_path = '', format='oas', screenshot=True)
+
 from SiEPIC.verification import layout_check
 print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - verification')
 
-layout_check(cell = cell, verbose=True, GUI=True)
+file_lyrdb = os.path.join(path,filename+'.lyrdb')
+layout_check(cell = cell, verbose=False, GUI=True, file_rdb=file_lyrdb)
+
+from SiEPIC.utils import klive
+klive.show(file_out, lyrdb_filename=file_lyrdb, technology=tech_name)
+
+# klive.lyrbd(file_lyrdb, technology=tech_name)
 
 
 print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - done')

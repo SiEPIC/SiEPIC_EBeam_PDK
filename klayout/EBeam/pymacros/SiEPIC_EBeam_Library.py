@@ -102,6 +102,7 @@ Lukas 2023/11
  
 """
 
+verbose=False
 
 import pya
 from pya import *
@@ -133,9 +134,11 @@ importlib.invalidate_caches()
 pcells_=[]
 for f in files:
     module = 'pcells_EBeam.%s' % f.replace('.py','')  ### folder name ###
-    print(' - found module: %s' % module)
+    if verbose:
+        print(' - found module: %s' % module)
     m = importlib.import_module(module) 
-    print(m)
+    if verbose:
+        print(m)
     pcells_.append(importlib.reload(m))
 
 
@@ -150,7 +153,8 @@ class SiEPIC_EBeam_Library(Library):
     library = tech_name
     self.technology=tech_name
 
-    print("Initializing '%s' Library." % library)
+    if verbose:
+        print("Initializing '%s' Library." % library)
 
     # Set the description
     self.description = "v0.3.58, Components with models"
@@ -162,28 +166,33 @@ class SiEPIC_EBeam_Library(Library):
     # Import all the GDS files from the tech folder
     import os, fnmatch
     dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/EBeam"))
-    print('  library path: %s' % dir_path)
+    if verbose:
+        print('  library path: %s' % dir_path)
     search_str = '*.[Oo][Aa][Ss]' # OAS
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
         for filename in fnmatch.filter(filenames, search_str):
             file1=os.path.join(root, filename)
-            print(" - reading %s" % file1 )
+            if verbose:
+                print(" - reading %s" % file1 )
             self.layout().read(file1)
     search_str = '*.[Gg][Dd][Ss]' # GDS
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
         for filename in fnmatch.filter(filenames, search_str):
             file1=os.path.join(root, filename)
-            print(" - reading %s" % file1 )
+            if verbose:
+                print(" - reading %s" % file1 )
             self.layout().read(file1)
                         
     # Create the PCell declarations
     for m in pcells_:
         mm = m.__name__.replace('pcells_EBeam.','')
         mm2 = m.__name__+'.'+mm+'()'
-        print(' - register_pcell %s, %s' % (mm,mm2))
+        if verbose:
+            print(' - register_pcell %s, %s' % (mm,mm2))
         self.layout().register_pcell(mm, eval(mm2))
                 
-    print(' done with pcells')
+    if verbose:
+        print(' done with pcells')
     
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.

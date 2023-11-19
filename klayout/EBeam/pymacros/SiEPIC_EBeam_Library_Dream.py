@@ -6,7 +6,10 @@ This file implements a library called "EBeam-Dream",
 consisting of components developed by Dream Photonics Inc, 
 that have been validated in the ANT process.
 """
-print('EBeam-Dream')
+verbose=False
+
+if verbose:
+    print('EBeam-Dream')
 
 import pya
 from pya import *
@@ -26,9 +29,11 @@ importlib.invalidate_caches()
 pcells_=[]
 for f in files:
     module = 'pcells_EBeam_Dream.%s' % f.replace('.py','')  ### folder name ###
-    print(' - found module: %s' % module)
+    if verbose:
+        print(' - found module: %s' % module)
     m = importlib.import_module(module) 
-    print(m)
+    if verbose:
+        print(m)
     pcells_.append(importlib.reload(m))
 
 
@@ -43,7 +48,8 @@ class EBeam_Dream(Library):
     library = tech_name +'-Dream'
     self.technology=tech_name
 
-    print("Initializing '%s' Library." % library)
+    if verbose:
+        print("Initializing '%s' Library." % library)
 
     # Set the description
     self.description = "v0.0.1, Dream Photonics"
@@ -75,10 +81,12 @@ class EBeam_Dream(Library):
     for m in pcells_:
         mm = m.__name__.replace('pcells_EBeam_Dream.','')
         mm2 = m.__name__+'.'+mm+'()'
-        print(' - register_pcell %s, %s' % (mm,mm2))
+        if verbose:
+            print(' - register_pcell %s, %s' % (mm,mm2))
         self.layout().register_pcell(mm, eval(mm2))
                 
-    print(' done with pcells')
+    if verbose:
+        print(' done with pcells')
     
     # Register us the library with the technology name
     # If a library with that name already existed, it will be replaced then.
