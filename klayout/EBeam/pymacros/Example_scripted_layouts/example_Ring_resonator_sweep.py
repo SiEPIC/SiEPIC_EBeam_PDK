@@ -15,14 +15,20 @@ by Lukas Chrostowski, 2020-2023
 print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py')
 import pya
 from pya import *
+
+# SiEPIC - can be loaded from PyPI or in KLayout Application, or loaded from a local folder such as GitHub
+import os, sys
+path_GitHub = '/Users/lukasc/Documents/GitHub/'
+if os.path.exists(path_GitHub):
+    path_siepic = os.path.join(path_GitHub, 'SiEPIC-Tools/klayout_dot_config/python')
+    if not path_siepic in sys.path:
+        sys.path.insert(0,path_siepic)  # put SiEPIC at the beginning so that it is overrides the system-installed module
 import SiEPIC
-import os
 
 from SiEPIC._globals import Python_Env
 from SiEPIC.scripts import load_klayout_technology
 
 if Python_Env == 'Script':
-    path_GitHub = '/Users/lukasc/Documents/GitHub/'
     path_module = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout')
     path_lyt_file = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout/EBeam/EBeam.lyt')
     tech = load_klayout_technology('EBeam', path_module, path_lyt_file)
@@ -160,7 +166,15 @@ def dbl_bus_ring_res():
     # Save
     path = os.path.dirname(os.path.realpath(__file__))
     export_layout(cell, path, 'Test_structures_ring_resonators', relative_path = '', format='oas', screenshot=True)
+
+    return ly, cell
     
-dbl_bus_ring_res()
+ly, cell = dbl_bus_ring_res()
+
+from SiEPIC.verification import layout_check
+print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - verification')
+
+layout_check(cell = cell, verbose=True, GUI=True)
+
 
 print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - done')
