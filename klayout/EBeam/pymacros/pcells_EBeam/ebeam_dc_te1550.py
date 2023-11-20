@@ -68,24 +68,24 @@ class ebeam_dc_te1550(pya.PCellDeclarationHelper):
     dc_angle = acos((r-abs(port_spacing/2))/r)*180/pi
 
     # bottom S-bends
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(Lc/2,-r-(w+g)/2, r, w, 90-dc_angle, 90))
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-Lc/2, -r-(w+g)/2, r, w, 90, 90+dc_angle))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(Lc/2,-r-(w+g)/2, r, w, 90-dc_angle, 90, dbu=dbu))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-Lc/2, -r-(w+g)/2, r, w, 90, 90+dc_angle, dbu=dbu))
     y_bottom = round(-2*(1-cos(dc_angle/180.0*pi))*r)-(w+g)/2
     x_bottom = round(2*sin(dc_angle/180.0*pi)*r)
     t = Trans(Trans.R0,-x_bottom-Lc/2, y_bottom+r)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90, -90+dc_angle).transformed(t))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90, -90+dc_angle, dbu=dbu).transformed(t))
     t = Trans(Trans.R0,x_bottom+Lc/2, y_bottom+r)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90-dc_angle, -90).transformed(t))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, -90-dc_angle, -90, dbu=dbu).transformed(t))
 
     # top S-bends
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(Lc/2,r+(w+g)/2, r, w, 270, 270+dc_angle))
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-Lc/2, r+(w+g)/2, r, w, 270-dc_angle, 270))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(Lc/2,r+(w+g)/2, r, w, 270, 270+dc_angle, dbu=dbu))
+    self.cell.shapes(LayerSiN).insert(arc_wg_xy(-Lc/2, r+(w+g)/2, r, w, 270-dc_angle, 270, dbu=dbu))
     y_top = round(2*(1-cos(dc_angle/180.0*pi))*r)+(w+g)/2
     x_top = round(2*sin(dc_angle/180.0*pi)*r)
     t = Trans(Trans.R0,-x_top-Lc/2, y_top-r)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90-dc_angle, 90).transformed(t))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90-dc_angle, 90, dbu=dbu).transformed(t))
     t = Trans(Trans.R0,x_top+Lc/2, y_top-r)
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90, 90+dc_angle).transformed(t))
+    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90, 90+dc_angle, dbu=dbu).transformed(t))
     
     # Pins on the bottom waveguide side:
     pin = Path([Point(-x_bottom+PIN_LENGTH/2-Lc/2, y_bottom), Point(-x_bottom-PIN_LENGTH/2-Lc/2, y_bottom)], w)

@@ -9,27 +9,21 @@ Scripted layout for ring resonators using SiEPIC-Tools
 in the SiEPIC-EBeam-PDK "EBeam" technology
 
 by Lukas Chrostowski, 2020-2023
-
 '''
 
-print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py')
+print('SiEPIC_EBeam_PDK: Example - Ring_resonator_sweep.py')
 import pya
 from pya import *
 
-# SiEPIC - can be loaded from PyPI or in KLayout Application, or loaded from a local folder such as GitHub
-import os, sys
-path_GitHub = '/Users/lukasc/Documents/GitHub/'
-if os.path.exists(path_GitHub):
-    path_siepic = os.path.join(path_GitHub, 'SiEPIC-Tools/klayout_dot_config/python')
-    if not path_siepic in sys.path:
-        sys.path.insert(0,path_siepic)  # put SiEPIC at the beginning so that it is overrides the system-installed module
 import SiEPIC
-
 from SiEPIC._globals import Python_Env
-from SiEPIC.scripts import load_klayout_technology
 from SiEPIC.scripts import zoom_out, export_layout
 
 if Python_Env == 'Script':
+    # Load the PDK from a folder, e.g, GitHub, when running externally from the KLayout Application
+    import os, sys
+    from SiEPIC.utils import load_klayout_technology
+    path_GitHub = os.path.expanduser('~/Documents/GitHub/')
     path_module = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout')
     path_lyt_file = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout/EBeam/EBeam.lyt')
     tech = load_klayout_technology('EBeam', path_module, path_lyt_file)
@@ -73,8 +67,8 @@ def dbl_bus_ring_res():
     cell, ly = new_layout(tech_name, 'top', GUI=True, overwrite = True)
     floorplan(cell, 605e3, 410e3)
 
-    if SiEPIC.__version__ < '0.4.7':
-        pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.4.7 or greater.", pya.MessageBox.Ok)
+    if SiEPIC.__version__ < '0.5.1':
+        pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.5.1 or greater.", pya.MessageBox.Ok)
 
     # Layer mapping:
     LayerSiN = ly.layer(ly.TECHNOLOGY['Si'])
@@ -183,10 +177,8 @@ print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - verification')
 file_lyrdb = os.path.join(path,filename+'.lyrdb')
 layout_check(cell = cell, verbose=False, GUI=True, file_rdb=file_lyrdb)
 
-from SiEPIC.utils import klive
-klive.show(file_out, lyrdb_filename=file_lyrdb, technology=tech_name)
-
-# klive.lyrbd(file_lyrdb, technology=tech_name)
-
+if Python_Env == 'Script':
+    from SiEPIC.utils import klive
+    klive.show(file_out, lyrdb_filename=file_lyrdb, technology=tech_name)
 
 print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - done')

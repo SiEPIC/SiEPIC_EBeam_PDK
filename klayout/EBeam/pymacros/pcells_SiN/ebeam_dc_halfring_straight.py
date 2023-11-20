@@ -58,8 +58,13 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
     # draw the half-circle
     x = 0
     y = r+w+g
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x-Lc2, y, r, w, 180, 270))
-    self.cell.shapes(LayerSiN).insert(arc_wg_xy(x+Lc2, y, r, w, 270, 360))
+    from SiEPIC import __version__ 
+    if __version__ > '0.5.0':
+      self.cell.shapes(LayerSiN).insert(arc_wg_xy(x-Lc2, y, r, w, 180, 270, dbu=dbu))
+      self.cell.shapes(LayerSiN).insert(arc_wg_xy(x+Lc2, y, r, w, 270, 360, dbu=dbu))
+    else:
+      self.cell.shapes(LayerSiN).insert(arc_wg_xy(x-Lc2, y, r, w, 180, 270))
+      self.cell.shapes(LayerSiN).insert(arc_wg_xy(x+Lc2, y, r, w, 270, 360))
     
     # Pins on the top side:
     make_pin(self.cell, "pin2", [-r-Lc2, y], w, LayerPinRecN, 90)

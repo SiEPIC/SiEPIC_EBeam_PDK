@@ -86,9 +86,9 @@ class Wireguide(pya.PCellDeclarationHelper):
             pt_radius = dis2/2
         # wireguide bends:
         if(self.adiab):
-          wg_pts += Path(arc_bezier(pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]), self.bezier, DevRec='DevRec' in self.layers[lr]), 0).transformed(Trans(angle, turn < 0, pts[i])).get_points()
+          wg_pts += Path(arc_bezier(pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]), self.bezier, DevRec='DevRec' in self.layers[lr], dbu=dbu), 0).transformed(Trans(angle, turn < 0, pts[i])).get_points()
         else:
-          wg_pts += Path(arc_xy(-pt_radius, pt_radius, pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]),DevRec='DevRec' in self.layers[lr]), 0).transformed(Trans(angle, turn < 0, pts[i])).get_points()
+          wg_pts += Path(arc_xy(-pt_radius, pt_radius, pt_radius, 270, 270 + inner_angle_b_vectors(pts[i-1]-pts[i], pts[i+1]-pts[i]),DevRec='DevRec' in self.layers[lr], dbu=dbu), 0).transformed(Trans(angle, turn < 0, pts[i])).get_points()
       wg_pts += [pts[-1]]
       wg_pts = pya.Path(wg_pts, 0).unique_points().get_points()
       wg_polygon = Path(wg_pts, wg_width)

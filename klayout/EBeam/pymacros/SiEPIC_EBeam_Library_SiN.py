@@ -70,7 +70,7 @@ class siepic_ebeam_library_hubbard(Library):
         print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.58, Silicon Nitride"
+    self.description = "v0.3.59, Silicon Nitride"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os

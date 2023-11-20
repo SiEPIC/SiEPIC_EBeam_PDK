@@ -69,7 +69,11 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
     y = r
    # layout_arc_wg_dbu(self.cell, LayerSiN, x, y, r, w, 270, 360)
     t = Trans(Trans.R0,x, y)
-    self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r, 270, 360), w).transformed(t))
+    from SiEPIC import __version__ 
+    if __version__ > '0.5.0':
+      self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r, 270, 360, dbu=dbu), w).transformed(t))
+    else:
+      self.cell.shapes(LayerSiN).insert(arc_to_waveguide(arc(r, 270, 360), w).transformed(t))
     
     # Create the pins on the waveguides, as short paths:
     from SiEPIC._globals import PIN_LENGTH as pin_length
@@ -100,7 +104,10 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     t = Trans(Trans.R0,x, y)
-    self.cell.shapes(LayerDevRecN).insert(arc_to_waveguide(arc(r, 270, 360), w*3).transformed(t))
+    if __version__ > '0.5.0':
+      self.cell.shapes(LayerDevRecN).insert(arc_to_waveguide(arc(r, 270, 360,dbu=dbu), w*3).transformed(t))
+    else:
+      self.cell.shapes(LayerDevRecN).insert(arc_to_waveguide(arc(r, 270, 360), w*3).transformed(t))
     #layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, 270, 360)
 
     # Compact model information

@@ -201,7 +201,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
         # calculate such that the vertex & edge placement error is < 0.5 nm.
         #   see "SiEPIC_EBeam_functions - points_per_circle" for more details
         radius = N*lambda_0 / (n_e*( 1 - e )) + j*period
-        seg_points = int(points_per_circle(radius/dbu)/360.*self.angle_e) # number of points grating arc
+        seg_points = int(points_per_circle(radius/dbu, dbu=dbu)/360.*self.angle_e) # number of points grating arc
         theta_up = []
         for m in range(seg_points+1):    
           theta_up = theta_up + [start + m*(stop-start)/seg_points]

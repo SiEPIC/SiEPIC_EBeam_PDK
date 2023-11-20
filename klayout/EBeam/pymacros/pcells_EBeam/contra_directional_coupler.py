@@ -271,7 +271,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
 
             t = Trans(Trans.R180, 0, y_offset_top)
             shapes_wg += layout_waveguide_sbend(self.cell, LayerSiN,
-                                                t, w1, sbend_r, sbend_offset, sbend_length, insert=False)
+                                                t, w1, sbend_r, sbend_offset, sbend_length, insert=False, dbu=dbu)
             t = Trans(Trans.R0, -sbend_length-taper_length, y_offset_top-sbend_offset)
             shapes_wg += layout_taper(self.cell, LayerSiN, t,  port_w,
                                       w1, taper_length, insert=False)
@@ -303,7 +303,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
 
             t = Trans(Trans.R0, length, y_offset_top)
             shapes_wg += layout_waveguide_sbend(self.cell, LayerSiN, t,
-                                                w1, sbend_r, -sbend_offset, sbend_length, insert=False)
+                                                w1, sbend_r, -sbend_offset, sbend_length, insert=False, dbu=dbu)
             t = Trans(Trans.R0, length+sbend_length, y_offset_top-sbend_offset)
             shapes_wg += layout_taper(self.cell, LayerSiN, t, w1,
                                       port_w, taper_length, insert=False)

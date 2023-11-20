@@ -153,12 +153,20 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     delta_length = waveguide_length - length
         
     t = Trans(Trans.R0,x, round(y+r))
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270., 270.+theta).transformed(t))
-    t = Trans(Trans.R0,round(x+length/2), round(y-r+ 2*r*(1-cos(theta/180.0*pi))))
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90.-theta, 90.+theta).transformed(t))
-    t = Trans(Trans.R0,round(x+length), round(y+r))
-    self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270.-theta, 270).transformed(t))
-
+    from SiEPIC import __version__ 
+    if __version__ > '0.5.0':
+        self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270., 270.+theta, dbu=dbu).transformed(t))
+        t = Trans(Trans.R0,round(x+length/2), round(y-r+ 2*r*(1-cos(theta/180.0*pi))))
+        self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90.-theta, 90.+theta, dbu=dbu).transformed(t))
+        t = Trans(Trans.R0,round(x+length), round(y+r))
+        self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270.-theta, 270, dbu=dbu).transformed(t))
+    else:
+        self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270., 270.+theta, dbu=dbu).transformed(t))
+        t = Trans(Trans.R0,round(x+length/2), round(y-r+ 2*r*(1-cos(theta/180.0*pi))))
+        self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 90.-theta, 90.+theta, dbu=dbu).transformed(t))
+        t = Trans(Trans.R0,round(x+length), round(y+r))
+        self.cell.shapes(LayerSiN).insert(arc_wg(r, w, 270.-theta, 270, dbu=dbu).transformed(t))
+       
     # Create the pins on the waveguides, as short paths:
     from SiEPIC.utils.layout import make_pin
     make_pin(self.cell, "pin1", [x,y], w, LayerPinRecN, 180)

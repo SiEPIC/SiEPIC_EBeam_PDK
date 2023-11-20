@@ -7,16 +7,18 @@
 import pya # klayout
 import os, sys
 
-path_GitHub = '/Users/lukasc/Documents/GitHub/'
-if 'SiEPIC' not in sys.modules:
-    path_siepic = os.path.join(path_GitHub, 'SiEPIC-Tools/klayout_dot_config/python')
-    if not path_siepic in sys.path:
-        sys.path.append(path_siepic)
-    import SiEPIC
+path_GitHub = os.path.expanduser('~/Documents/GitHub/')
+if 0:
+    if 'SiEPIC' not in sys.modules:
+        path_siepic = os.path.join(path_GitHub, 'SiEPIC-Tools/klayout_dot_config/python')
+        if not path_siepic in sys.path:
+            sys.path.insert(0,path_siepic)
+import SiEPIC
 from SiEPIC._globals import Python_Env
 print('KLayout running in mode: %s' % Python_Env)
 from SiEPIC.utils.layout import new_layout, floorplan
-from SiEPIC.scripts import load_klayout_technology, instantiate_all_library_cells, zoom_out, export_layout
+from SiEPIC.utils import load_klayout_technology
+from SiEPIC.scripts import instantiate_all_library_cells, zoom_out, export_layout
 
 path_module = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout')
 path_lyt_file = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout/EBeam/EBeam.lyt')
