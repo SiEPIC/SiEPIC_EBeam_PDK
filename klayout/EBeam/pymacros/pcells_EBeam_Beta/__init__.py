@@ -1,7 +1,5 @@
 import os, sys
 import SiEPIC
-# import xml before lumapi (SiEPIC.lumerical), otherwise XML doesn't work:
-from xml.etree import cElementTree
 from SiEPIC.utils import get_technology, get_technology_by_name
 from pya import *
 import math

@@ -1,0 +1,21 @@
+[project]
+name = "siepic_ebeam_pdk"
+version = "0.4.0"
+authors = [
+  { name="Lukas Chrostowski", email="lukasc@ece.ubc.ca" },
+]
+description = "SiEPIC_EBeam_PDK: process design kit (PDK) for fabrication using electron beam lithography, and a library silicon photonics components. "
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "SiEPIC>=0.5.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/SiEPIC/SiEPIC_EBeam_PDK"
+Issues = "https://github.com/SiEPIC/SiEPIC_EBeam_PDK/issues"
