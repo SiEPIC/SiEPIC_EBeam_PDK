@@ -17,7 +17,7 @@ RUN mkdir -p /root/.klayout/salt && \
     git clone https://github.com/SiEPIC/SiEPIC_EBeam_PDK.git
 
 # Install coverage package
-RUN pip3 install coverage
+#RUN pip3 install coverage
 
 # Set the working directory
 WORKDIR /home
