@@ -9,7 +9,7 @@ RUN wget https://www.klayout.org/downloads/CentOS_8/klayout-0.28.12-0.x86_64.rpm
     dnf -y localinstall ~/klayout.rpm && \
     rm ~/klayout.rpm
 
-# Clone SiEPIC-Tools and SiEPIC_EBeam_PDK
+# Clone SiEPIC-Tools and SiEPIC_EBeam_PDK.
 RUN mkdir -p /root/.klayout/salt && \
     cd /root/.klayout/salt && \
     git clone https://github.com/jasminabrar/SiEPIC-Tools.git && \
