@@ -93,7 +93,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Fail job if exit code is non-zero.
+      - name: Fail job if exit code is non-zero
         run: |
                 if [ $KLAYOUT_EXIT_CODE -ne 0 ]; then
                         echo "KLayout exited with non-zero exit code"
