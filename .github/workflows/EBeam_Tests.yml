@@ -27,71 +27,12 @@ jobs:
 
       - name: Run KLayout Python script inside container and capture exit code
         run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-        # run: |
-        #           docker exec ebeam_test sh -c "klayout -zz -r 'coverage run --source=/home/pymacros pymacros/EBeam_Lib_PCellTests.py'"
-        #           docker exec ebeam_test sh -c "coverage xml -o /home/pymacros/coverage.xml"
-        #           docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-        #           echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-      
-      # docker exec ebeam_test coverage run --source=/home/pymacros /usr/bin/klayout -zz -r /home/pymacros/EBeam_Lib_PCellTests.py
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-  
-      # docker exec ebeam_test sh -c "echo -e '#!/bin/bash\n/usr/bin/klayout -zz -r \$@' > /usr/local/bin/run_klayout.sh && chmod +x /usr/local/bin/run_klayout.sh"
-      # docker exec ebeam_test bash -c "coverage run --source=/home/pymacros /usr/local/bin/run_klayout.sh pymacros/EBeam_Lib_PCellTests.py"
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-                
-      # docker exec ebeam_test sh -c "echo -e '#!/bin/bash\n/usr/bin/klayout -zz -r \$@' > /usr/local/bin/run_klayout.sh && chmod +x /usr/local/bin/run_klayout.sh"
-      # docker exec ebeam_test sh -c "coverage run --source=/home/pymacros /usr/local/bin/run_klayout.sh pymacros/EBeam_Lib_PCellTests.py"
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-        
-      # docker exec ebeam_test sh -c "echo '#!/bin/bash' > /usr/local/bin/run_klayout.sh && echo '/usr/bin/klayout -zz -r \$@' >> /usr/local/bin/run_klayout.sh && chmod +x /usr/local/bin/run_klayout.sh"
-      # docker exec ebeam_test sh -c "coverage run --source=/home/pymacros /usr/local/bin/run_klayout.sh pymacros/EBeam_Lib_PCellTests.py"
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-                
-      # docker exec ebeam_test sh -c "coverage run --source=/home/pymacros /usr/bin/klayout -zz -r pymacros/EBeam_Lib_PCellTests.py"
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-                
-      # K_LAYOUT_BINARY=$(docker exec ebeam_test sh -c "which klayout")
-      # docker exec ebeam_test sh -c "coverage run --source=/home/pymacros $K_LAYOUT_BINARY -zz -r pymacros/EBeam_Lib_PCellTests.py"
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-      
-      # docker exec ebeam_test sh -c "coverage run --source=/home/pymacros /usr/local/bin/klayout -zz -r pymacros/EBeam_Lib_PCellTests.py"
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-                
-      # docker exec ebeam_test sh -c "klayout -zz -r 'coverage run --source=/home/pymacros pymacros/EBeam_Lib_PCellTests.py'"
-      # docker exec ebeam_test sh -c "coverage xml -o /home/pymacros/coverage.xml"
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-      
-      # docker exec ebeam_test klayout -zz -r "coverage run --source=/home/pymacros pymacros/EBeam_Lib_PCellTests.py" || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
-      # docker exec ebeam_test coverage xml -o /home/pymacros/coverage.xml
-      # docker cp ebeam_test:/home/pymacros/coverage.xml $GITHUB_WORKSPACE/coverage.xml
-      # echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
 
       - name: Stop container and remove it 
         run: |
                 docker stop ebeam_test
                 docker rm ebeam_test
-
-      - name: Upload coverage reports to Codecov.
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Fail job if exit code is non-zero.
         run: |
