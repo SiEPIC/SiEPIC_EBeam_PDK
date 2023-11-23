@@ -1,4 +1,0 @@
-- master: original image with klayout and newest siepic tools and siepic ebeam_pdk
-- master-siepic_tools_v0.4.5: uses v0.4.5 of siepic tools
-- master.20231116.21: uses jasminabrar forked SiEPIC Tools repo with added QApplication line
-- master.20231116.22: uses jasminabrar forked SiEPIC Tools repo with added QApplication line + ENV vars removed from docker file
