@@ -20,8 +20,6 @@ from SiEPIC._globals import Python_Env
 from SiEPIC.scripts import zoom_out, export_layout
 import os
 
-import siepic_ebeam_pdk
-'''
 if Python_Env == 'Script':
     try:
         # For external Python mode, when installed using pip install siepic_ebeam_pdk
@@ -32,7 +30,7 @@ if Python_Env == 'Script':
         path_GitHub = os.path.expanduser('~/Documents/GitHub/')
         sys.path.append(os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout'))
         import siepic_ebeam_pdk
-'''
+
 tech_name = 'EBeam'
 
 # Example layout function
