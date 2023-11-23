@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Pull siepic_klayout image.
+      - name: Pull siepic_klayout image
         run: docker pull ghcr.io/jasminabrar/siepic_ebeam_pdk/siepic_klayout:master-latest
      
       - name: Run docker container from image
