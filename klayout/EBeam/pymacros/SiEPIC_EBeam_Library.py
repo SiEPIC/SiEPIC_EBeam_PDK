@@ -116,9 +116,9 @@ from SiEPIC._globals import KLAYOUT_VERSION, KLAYOUT_VERSION_3
 if KLAYOUT_VERSION < 28:
     question = pya.QMessageBox()
     question.setStandardButtons(pya.QMessageBox.Ok)
-    question.setText("SiEPIC-EBeam is no longer compatible with older versions (<0.28) of KLayout.")
+    question.setText("SiEPIC-EBeam is not compatible with older versions (<0.28) of KLayout.")
     KLayout_link0='https://www.klayout.de/build.html'
-    question.setInformativeText("\nSiEPIC-EBeam is no longer compatible with older versions (<0.28) of KLayout.\nPlease download an install the highest version of 0.28.x, from %s" % (KLayout_link0))
+    question.setInformativeText("\nSiEPIC-EBeam is not compatible with older versions (<0.28) of KLayout.\nPlease download an install the latest version, from %s" % (KLayout_link0))
     pya.QMessageBox_StandardButton(question.exec_())
 
 
@@ -157,7 +157,7 @@ class SiEPIC_EBeam_Library(Library):
         print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.4.0, Components with models"
+    self.description = "v0.4.2, Components with models"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os

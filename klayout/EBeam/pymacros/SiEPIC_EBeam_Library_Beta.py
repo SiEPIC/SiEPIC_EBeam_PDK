@@ -170,7 +170,7 @@ class SiEPIC_EBeam_Library_Beta(Library):
         print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.4.0, Beta components"
+    self.description = "v0.4.2, Beta components"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os

@@ -18,16 +18,21 @@ from pya import *
 import SiEPIC
 from SiEPIC._globals import Python_Env
 from SiEPIC.scripts import zoom_out, export_layout
+import os
 
+import siepic_ebeam_pdk
+'''
 if Python_Env == 'Script':
-    # Load the PDK from a folder, e.g, GitHub, when running externally from the KLayout Application
-    import os, sys
-    from SiEPIC.utils import load_klayout_technology
-    path_GitHub = os.path.expanduser('~/Documents/GitHub/')
-    path_module = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout')
-    path_lyt_file = os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout/EBeam/EBeam.lyt')
-    tech = load_klayout_technology('EBeam', path_module, path_lyt_file)
-
+    try:
+        # For external Python mode, when installed using pip install siepic_ebeam_pdk
+        import siepic_ebeam_pdk
+    except:
+        # Load the PDK from a folder, e.g, GitHub, when running externally from the KLayout Application
+        import os, sys
+        path_GitHub = os.path.expanduser('~/Documents/GitHub/')
+        sys.path.append(os.path.join(path_GitHub, 'SiEPIC_EBeam_PDK/klayout'))
+        import siepic_ebeam_pdk
+'''
 tech_name = 'EBeam'
 
 # Example layout function
@@ -175,7 +180,7 @@ from SiEPIC.verification import layout_check
 print('SiEPIC_EBeam_PDK: example_Ring_resonator_sweep.py - verification')
 
 file_lyrdb = os.path.join(path,filename+'.lyrdb')
-layout_check(cell = cell, verbose=False, GUI=True, file_rdb=file_lyrdb)
+num_errors = layout_check(cell = cell, verbose=False, GUI=True, file_rdb=file_lyrdb)
 
 if Python_Env == 'Script':
     from SiEPIC.utils import klive

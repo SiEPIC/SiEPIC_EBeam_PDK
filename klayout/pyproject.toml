@@ -1,6 +1,6 @@
 [project]
 name = "siepic_ebeam_pdk"
-version = "0.4.0"
+version = "0.4.2"
 authors = [
   { name="Lukas Chrostowski", email="lukasc@ece.ubc.ca" },
 ]
@@ -14,8 +14,12 @@ classifiers = [
 ]
 dependencies = [
   "SiEPIC>=0.5.3",
+  "numpy",
 ]
+
+
 
 [project.urls]
 Homepage = "https://github.com/SiEPIC/SiEPIC_EBeam_PDK"
 Issues = "https://github.com/SiEPIC/SiEPIC_EBeam_PDK/issues"
+

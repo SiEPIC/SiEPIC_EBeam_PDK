@@ -1,0 +1,5 @@
+mv siepic_ebeam_pdk siepic_ebeam_pdk1
+mv EBeam siepic_ebeam_pdk
+python3 -m build
+mv siepic_ebeam_pdk EBeam
+mv siepic_ebeam_pdk1 siepic_ebeam_pdk
