@@ -105,7 +105,3 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     shapes(LayerDevRecN).insert(box1)
     
 #    print('2020/11/28 update')
-
-
-
-# add more than one newline 
