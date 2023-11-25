@@ -53,6 +53,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
+    self.param("d", self.TypeBoolean, "Drop", default = False)
     self.param("textpolygon", self.TypeInt, "Draw text polygon label? 0/1", default = 1)
     self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))
     self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
@@ -87,6 +88,7 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     w = int(round(self.w/dbu))
     r = int(round(self.r/dbu))
     g = int(round(self.g/dbu))
+    d = self.d
 
  #   pcell = ly.create_cell("DirectionalCoupler_HalfRing_Straight", "SiEPIC", { "r": self.r, "w": self.w, "g": self.g, "silayer": LayerSi, "bustype": 0 } )
  #   print ("Cell: pcell: #%s" % pcell.cell_index())
@@ -99,9 +101,11 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     # Create the two waveguides
     wg1 = Box(0, -w/2, w+2*r, w/2)
     shapes(LayerSiN).insert(wg1)
-    y_offset = 2*r + 2*g + 2*w
-    wg2 = Box(0, y_offset-w/2, w+2*r, y_offset+w/2)
-    shapes(LayerSiN).insert(wg2)
+    y_offset = 0
+    if d==True:
+      y_offset = 2*r + 2*g + 2*w
+      wg2 = Box(0, y_offset-w/2, w+2*r, y_offset+w/2)
+      shapes(LayerSiN).insert(wg2)
 
     from SiEPIC._globals import PIN_LENGTH as pin_length
     # Create the pins, as short paths:
@@ -120,19 +124,20 @@ class DoubleBus_Ring(pya.PCellDeclarationHelper):
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
-    pin = Path([Point(pin_length/2, y_offset), Point(-pin_length/2, y_offset)], w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, 0, y_offset)
-    text = Text ("pin3", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    if d==True:
+      pin = Path([Point(pin_length/2, y_offset), Point(-pin_length/2, y_offset)], w)
+      shapes(LayerPinRecN).insert(pin)
+      t = Trans(Trans.R0, 0, y_offset)
+      text = Text ("pin3", t)
+      shape = shapes(LayerPinRecN).insert(text)
+      shape.text_size = 0.4/dbu
 
-    pin = Path([Point(w+2*r-pin_length/2, y_offset), Point(w+2*r+pin_length/2, y_offset)], w)
-    shapes(LayerPinRecN).insert(pin)
-    t = Trans(Trans.R0, w+2*r, y_offset)
-    text = Text ("pin4", t)
-    shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+      pin = Path([Point(w+2*r-pin_length/2, y_offset), Point(w+2*r+pin_length/2, y_offset)], w)
+      shapes(LayerPinRecN).insert(pin)
+      t = Trans(Trans.R0, w+2*r, y_offset)
+      text = Text ("pin4", t)
+      shape = shapes(LayerPinRecN).insert(text)
+      shape.text_size = 0.4/dbu
 
 
     # Create the device recognition layer
