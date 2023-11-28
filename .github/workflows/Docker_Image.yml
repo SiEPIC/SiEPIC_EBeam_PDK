@@ -1,12 +1,12 @@
 name: Create and Publish Docker Image
 
 on:
+  workflow_dispatch:
   release:
     types:
-      - created
+      - published
     repository:
       - 'SiEPIC/SiEPIC_EBeam_PDK'
-      - 'SiEPIC/SiEPIC-Tools'
   
   push:
     branches: [ "master" ]
