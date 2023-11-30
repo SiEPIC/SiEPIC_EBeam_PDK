@@ -8,7 +8,7 @@ RUN dnf -y update && \
 RUN pip3 install numpy
 
 # Install the newest version of KLayout
-RUN wget https://www.klayout.org/downloads/CentOS_8/klayout-0.28.12-0.x86_64.rpm -O ~/klayout.rpm && \
+RUN wget https://www.klayout.org/downloads/CentOS_8/klayout-0.28.13-0.x86_64.rpm -O ~/klayout.rpm && \
     dnf -y localinstall ~/klayout.rpm && \
     rm ~/klayout.rpm
 
