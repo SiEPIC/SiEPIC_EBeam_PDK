@@ -24,3 +24,12 @@ class LibraryNotRegistered(Exception):
     def __init__(self, library):
         self.library = library
         super().__init__("Library {} is not registered in KLayout".format(library))
+
+class PCellImplementationError(Exception):
+    """
+    Raised when an error arises when trying to produce the pcell. These errors are displayed in the error layer
+    in KLayout.
+    """
+    def __init__(self, pcell, library, error):
+        self.library = library
+        super().__init__("Error {} for pcell {} in library {}".format(error, pcell, library))
