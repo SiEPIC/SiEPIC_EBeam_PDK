@@ -5,7 +5,7 @@ RUN dnf -y update && \
     dnf -y install wget bzip2 unzip git mesa-dri-drivers python3-pip
 
 # Install the newest version of KLayout
-RUN wget https://www.klayout.org/downloads/CentOS_8/klayout-0.28.12-0.x86_64.rpm -O ~/klayout.rpm && \
+RUN wget https://www.klayout.org/downloads/CentOS_8/klayout-0.28.13-0.x86_64.rpm -O ~/klayout.rpm && \
     dnf -y localinstall ~/klayout.rpm && \
     rm ~/klayout.rpm
 
