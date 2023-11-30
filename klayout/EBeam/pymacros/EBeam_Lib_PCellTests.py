@@ -50,7 +50,7 @@ for i in range(len(library_folders)):
 
     print('*** Testing library: %s' % library_name)
 
-    # With self hosted runner, EBeam library is not being initialized, skip over it
+    # If library does not exist in klayout
     if library == None:
         raise LibraryNotRegistered(library_name)
         
@@ -99,6 +99,7 @@ for i in range(len(library_folders)):
                 
             if pcell.is_empty() or pcell.bbox().area() == 0:
                 raise PCellInstantiationError(mm, library_name)
+            
 
             #topcell = new_layout.create_cell("top")
             #t = Trans(Trans.R0, 0,0)
