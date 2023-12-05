@@ -41,7 +41,8 @@ class Bezier_Bend(pya.PCellDeclarationHelper):
     return False
     
   def produce_impl(self):
-  
+    1/0
+    
     # fetch the parameters
     dbu = self.layout.dbu
     ly = self.layout
