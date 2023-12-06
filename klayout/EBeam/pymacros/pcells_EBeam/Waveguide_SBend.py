@@ -38,7 +38,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
   def produce_impl(self):
   
     # fetch the parameters
-    dbu = self.layt.dbu
+    dbu = self.layout.dbu
     ly = self.layout
     shapes = self.cell.shapes
 
