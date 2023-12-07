@@ -72,12 +72,6 @@ jobs:
         run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
 
-      - name: Trigger Docker build workflow if new pcells were added on a push or a merged PR #since merged commmits act as a direct push
-        if: github.event_name == 'push' && steps.added-files.outputs.added_files != ''
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run Docker_Image.yml
-
       - name: Stop container and remove it 
         run: |
                 docker stop ebeam_test
