@@ -204,6 +204,11 @@
 	    <offset>0</offset>
 	  </component>
 	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
 	    <layer>Si</layer>
 	    <width>0.35</width>
 	    <offset>0.0</offset>
@@ -261,6 +266,11 @@
 	    <offset>0.0</offset>
 	  </component>
 	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
 	    <layer>Waveguide</layer>
 	    <width>0.5</width>
 	    <offset>0.0</offset>
@@ -280,6 +290,11 @@
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.35</width>
+	    <offset>0.0</offset>
+	  </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
 	    <offset>0.0</offset>
 	  </component>
 	  <component>

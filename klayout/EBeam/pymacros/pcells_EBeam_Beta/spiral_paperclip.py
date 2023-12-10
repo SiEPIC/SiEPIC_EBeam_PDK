@@ -43,6 +43,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         self.param("length", self.TypeDouble, "Inner length (min 2 x bend radius)", default = self.minlength)
         self.param("box", self.TypeShape, "Box", default = pya.DBox(-self.minlength, -self.minlength/2, self.minlength, self.minlength/2))
         self.param("length1", self.TypeDouble, "length: for PCell", default = self.minlength, hidden = True)
+        self.param("flatten", self.TypeBoolean, "Flatten the PCell, for scripting", default = False)
         
     def display_text_impl(self):
         # Provide a descriptive text for the cell
@@ -75,6 +76,9 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
 
         # Radius
         self.radius = float(wg_params['radius'])
+
+        # Waveguide pin width
+        self.wg_width = float(wg_params['width'])
 
     def coerce_parameters_impl(self):
         self.get_waveguide_parameters()
@@ -152,9 +156,9 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             points.append(DPoint(-length0-devrec*i,-radius*2+offset-devrec*i-extra))
             points.append(DPoint(length0+devrec*(i+1),-radius*2+offset-devrec*i-extra))
         points.append(DPoint(length0+devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
-        points.append(DPoint(-length0-devrec*(i),radius*2-offset+devrec*(i+1)+extra))
+        points.append(DPoint(-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
         points.pop(0)
-        points.insert(0, DPoint(-length0-devrec*(i),-offset+radius*2+devrec*i+extra))
+        points.insert(0, DPoint(-length0-devrec*(i+1),-offset+radius*2+devrec*i+extra))
 
         # Create a path and waveguide    
         path  = DPath(points, 0.5)
@@ -164,6 +168,23 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
                      "waveguide_type": self.waveguide_type})
         t = Trans(Trans.R0, 0, 0)
         self.cell.insert(CellInstArray(pcell.cell_index(), t))
+
+        # If the waveguide is a Compound type:
+        # Flatten the PCell and remove the DevRec and PinRec layers
+        if 'compound_waveguide' in self.waveguide_params and self.flatten:
+            self.cell.flatten(True)
+            LayerPinRecN = self.layout.layer(self.TECHNOLOGY['PinRec'])
+            LayerDevRecN = self.layout.layer(self.TECHNOLOGY['DevRec']) 
+            self.cell.clear(LayerPinRecN)
+            bbox = self.cell.bbox()
+            self.cell.clear(LayerDevRecN)     
+            self.cell.clear(self.layout.layer(self.TECHNOLOGY['Waveguide']))
+            self.cell.shapes(LayerDevRecN).insert(bbox)
+    
+            # Create the pins on the input & output waveguides
+            from SiEPIC.utils.layout import make_pin
+            make_pin(self.cell, "optA", [-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra], self.wg_width, LayerPinRecN, 180)
+            make_pin(self.cell, "optB", [-length0-devrec*(i+1),-offset+radius*2+devrec*i+extra], self.wg_width, LayerPinRecN, 180)
 
 
 # Save the path, used for loading WAVEGUIDES.XML

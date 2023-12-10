@@ -124,9 +124,11 @@ with:
 
 """
 
+version = '0.4.3'
+
 verbose=False
-if verbose:
-    print('SiEPIC_EBeam_Library_Beta')
+
+print('SiEPIC_EBeam_Library_Beta, version %s' % version)
 
 import pya
 from pya import *
@@ -170,7 +172,7 @@ class SiEPIC_EBeam_Library_Beta(Library):
         print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.4.2, Beta components"
+    self.description = "v%s, Beta components" % version
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os

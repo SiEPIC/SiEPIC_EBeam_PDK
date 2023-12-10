@@ -73,6 +73,7 @@ dbu = ly.dbu
 
 from SiEPIC.scripts import connect_pins_with_waveguide, connect_cell
 waveguide_type='Strip TE 1550 nm, w=500 nm'
+waveguide_type_delay='Si routing TE 1550 nm (compound waveguide)'
 
 # Load cells from library
 cell_ebeam_gc = ly.create_cell('GC_TE_1550_8degOxide_BB', tech_name)
@@ -131,6 +132,43 @@ connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=wave
 connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
+
+
+
+# 3rd MZI, with a very long delay line
+cell_ebeam_delay = ly.create_cell('spiral_paperclip', 'EBeam_Beta',{
+                        'waveguide_type':waveguide_type_delay,
+                        'length':200,
+                        'loops':4,
+                        'flatten':True})
+x,y = 60000, 175000
+t = Trans(Trans.R0,x,y)
+instGC1 = cell.insert(CellInstArray(cell_ebeam_gc.cell_index(), t))
+t = Trans(Trans.R0,x,y+127000)
+instGC2 = cell.insert(CellInstArray(cell_ebeam_gc.cell_index(), t))
+
+# automated test label
+text = Text ("opt_in_TE_1550_device_%s_MZI3" % designer_name, t)
+cell.shapes(ly.layer(ly.TECHNOLOGY['Text'])).insert(text).text_size = 5/dbu
+
+# Y branches:
+instY1 = connect_cell(instGC1, 'opt1', cell_ebeam_y_dream, 'opt1')
+instY1.transform(Trans(20000,0))
+instY2 = connect_cell(instGC2, 'opt1', cell_ebeam_y_dream, 'opt1')
+instY2.transform(Trans(20000,0))
+
+# Spiral:
+instSpiral = connect_cell(instY2, 'opt2', cell_ebeam_delay, 'optA')
+instSpiral.transform(Trans(20000,0))
+
+# Waveguides:
+connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=waveguide_type)
+connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
+connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
+connect_pins_with_waveguide(instY2, 'opt2', instSpiral, 'optA', waveguide_type=waveguide_type)
+connect_pins_with_waveguide(instY1, 'opt3', instSpiral, 'optB', waveguide_type=waveguide_type,turtle_B=[5,-90])
+
+
 
 # Zoom out
 zoom_out(cell)
