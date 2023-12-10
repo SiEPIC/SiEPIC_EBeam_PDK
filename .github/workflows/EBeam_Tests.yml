@@ -20,6 +20,13 @@ jobs:
         with:
             repository: ${{ github.repository_owner }}/SiEPIC_EBeam_PDK
             ref: ${{ github.ref }}
+      
+      - name: Connect to Container Registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull siepic_klayout image
         run: docker pull ghcr.io/siepic/siepic_ebeam_pdk/siepic_klayout:master-latest
