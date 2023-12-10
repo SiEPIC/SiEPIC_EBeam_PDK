@@ -85,18 +85,18 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         w = None
         if isinstance(self.box, pya.Box): 
             w = self.box.right*self.layout.dbu
-            print('%s Box: width %s ' %(self.cellName,w))
+            # print('%s Box: width %s ' %(self.cellName,w))
         if isinstance(self.box, pya.DBox): 
             w = self.box.right
-            print('%s DBox: width %s ' %(self.cellName,w))
+            # print('%s DBox: width %s ' %(self.cellName,w))
         if w != None and abs(self.length1-self.length) < 1e-6:
             if w < self.minlength:
                 w = self.minlength
-            print('%s update from GUI Box: %s ' %(self.cellName,w))
+            # print('%s update from GUI Box: %s ' %(self.cellName,w))
             self.length = w
             self.length1 = w
         else:
-            print('%s update from PCell parameters: %s ' %(self.cellName,self.length1))
+            # print('%s update from PCell parameters: %s ' %(self.cellName,self.length1))
             self.length1 = self.length
         self.box = pya.DBox(-self.length,-self.minlength/2,self.length,self.minlength/2)
                     
