@@ -31,7 +31,7 @@ jobs:
           pip install klayout numpy scipy pytest pytest-cov SiEPIC
 
       - name: Test with pytest
-        run: pytest --cov=klayout/siepic_ebeam_pdk klayout/siepic_ebeam_pdk/pymacros/tests/tests_All_Library_Cells.py  --cov-report=xml
+        run: pytest --cov=klayout/siepic_ebeam_pdk   --cov-report=xml
   
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
