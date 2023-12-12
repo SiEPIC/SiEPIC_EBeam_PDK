@@ -1,3 +1,9 @@
+[![pypi](https://img.shields.io/pypi/v/SiEPIC_EBeam_PDK)](https://pypi.org/project/SiEPIC_EBeam_PDK/)
+[![codecov](https://codecov.io/gh/SiEPIC/SiEPIC_EBeam_PDK/graph/badge.svg?token=MD7OI5BGZ3)](https://codecov.io/gh/SiEPIC/SiEPIC_EBeam_PDK)
+[![issues](https://img.shields.io/github/issues/SiEPIC/SiEPIC_EBeam_PDK)](https://github.com/SiEPIC/SiEPIC_EBeam_PDK/issues)
+![forks](https://img.shields.io/github/forks/SiEPIC/SiEPIC_EBeam_PDK)
+![Stars](https://img.shields.io/github/stars/SiEPIC/SiEPIC_EBeam_PDK)
+
 ```diff
 ::ATTENTION::
 -  Due to the changes in ANT's EBL process, the coupling angles for *ebeam_gc_te1550* and *ebeam_gc_tm1550* components may be impacted. 
