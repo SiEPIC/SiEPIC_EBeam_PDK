@@ -57,5 +57,5 @@ jobs:
           pip install klayout numpy scipy pytest pytest-cov SiEPIC
 
       - name: Test with pytest
-        run: pytest --cov=klayout/siepic_ebeam_pdk klayout/siepic_ebeam_pdk  --cov-report=xml
+        run: pytest klayout/siepic_ebeam_pdk
           
