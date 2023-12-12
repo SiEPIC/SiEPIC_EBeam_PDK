@@ -25,7 +25,7 @@ class Bragg_Straight_from_file(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('EBeam')
 
     # declare the parameters
-    self.param("forder", self.TypeString, "Forder", default = "C:\\Users\Rui\Dropbox\\RESEARCH\\CAD_Data\\Feb\\")
+    self.param("forder", self.TypeString, "Forder", default = "")
     self.param("name", self.TypeString, "Name", default = "Square_BP_B3.5_N2536_DW6")  
     self.param("filetype", self.TypeString, "File type (txt)", default = 'txt')  
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
