@@ -42,10 +42,35 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        
+      - name: install jq
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install jq -y
 
-      - name: Get the current date
-        id: date
-        run: echo "::set-output name=date::$(date +%Y%m%d)"
+        # docker image always built with latest version
+      - name: get latest version of siepic ebeam pdk 
+        id: ebeampdk
+        run: |
+          EBEAM_PDK=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/SiEPIC/SiEPIC_EBeam_PDK/releases/latest" \
+            | jq -r .tag_name)
+          
+          echo "::set-output name=ebeampdk::${EBEAM_PDK}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        #docker image always built with latest version
+      - name: get latest version of siepic tools
+        id: siepictools
+        run: |
+          SIEPIC_TOOLS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/SiEPIC/SiEPIC-Tools/releases/latest" \
+            | jq -r .tag_name)
+          
+          echo "::set-output name=siepictools::${SIEPIC_TOOLS}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Log in to the container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
@@ -68,10 +93,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}-latest
           labels: ${{ steps.meta.outputs.labels }}
 
+        # note that the order is siepic_ebeam_pdk and then siepic_tools for version numbers in the tag
       - name: Build and push Docker image as unique image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
           push: true
-          tags: "${{ steps.meta.outputs.tags }}.${{ steps.date.outputs.date }}.${{ github.run_number }}"
+          tags: "${{ steps.meta.outputs.tags }}.${{ steps.ebeampdk.outputs.ebeampdk }}.${{ steps.siepictools.outputs.siepictools}}"
           labels: ${{ steps.meta.outputs.labels }}
