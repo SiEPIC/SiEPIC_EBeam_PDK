@@ -95,6 +95,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}-latest
           labels: ${{ steps.meta.outputs.labels }}
 
+        # note that the order is siepic_ebeam_pdk and then siepic_tools for version numbers in the tag
       - name: Build and push Docker image as unique image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
