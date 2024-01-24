@@ -49,8 +49,8 @@ jobs:
           EBEAM_PDK=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/SiEPIC/SiEPIC_EBeam_PDK/releases/latest" \
             | jq -r .tag_name)
-          
-          echo "::set-output name=ebeampdk::${EBEAM_PDK}"
+
+          echo "EBEAM_PDK=$EBEAM_PDK" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -61,8 +61,8 @@ jobs:
           SIEPIC_TOOLS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/SiEPIC/SiEPIC-Tools/releases/latest" \
             | jq -r .tag_name)
-          
-          echo "::set-output name=siepictools::${SIEPIC_TOOLS}"
+
+          echo "SIEPIC_TOOLS=$SIEPIC_TOOLS" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
@@ -93,5 +93,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: "${{ steps.meta.outputs.tags }}.${{ steps.ebeampdk.outputs.ebeampdk }}.${{ steps.siepictools.outputs.siepictools}}"
+          tags: "${{ steps.meta.outputs.tags }}.${{ env.EBEAM_PDK }}.${{ env.SIEPIC_TOOLS }}"
           labels: ${{ steps.meta.outputs.labels }}
