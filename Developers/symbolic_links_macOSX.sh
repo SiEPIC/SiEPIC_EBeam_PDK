@@ -15,8 +15,8 @@ export INTC=$HOME/.config/Lumerical
 export REPO=SiEPIC_EBeam_PDK
 
 mkdir $DEST/tech
-ln -s $SRC/$REPO/klayout_dot_config/tech/* $DEST/tech/
-ln -s $SRC/$REPO/klayout_dot_config/pymacros/* $DEST/pymacros
+ln -s $SRC/$REPO/klayout/tech/* $DEST/tech/
+ln -s $SRC/$REPO/klayout/pymacros/* $DEST/pymacros
 
 ln -s $SRC/$REPO/Lumerical_EBeam_CML/EBeam $INTC/Custom/
 ln -s $SRC/$REPO/Lumerical_EBeam_CML/EBeam-dev $INTC/Custom/
