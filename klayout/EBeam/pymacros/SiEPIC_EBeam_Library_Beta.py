@@ -124,7 +124,7 @@ with:
 
 """
 
-version = '0.4.4'
+version = '0.4.5'
 
 verbose=False
 

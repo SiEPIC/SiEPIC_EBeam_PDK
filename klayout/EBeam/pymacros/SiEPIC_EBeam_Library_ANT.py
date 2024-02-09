@@ -49,7 +49,7 @@ class SiEPIC_EBeam_Library_ANT(Library):
         print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.4.4, ANT components"
+    self.description = "v0.4.5, ANT components"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os
