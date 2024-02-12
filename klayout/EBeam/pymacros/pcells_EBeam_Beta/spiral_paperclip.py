@@ -159,7 +159,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             points.append(DPoint(-length0-devrec*i,radius*2-offset+devrec*(i-1)+extra))
             points.append(DPoint(-length0-devrec*i,-radius*2+offset-devrec*i-extra))
             points.append(DPoint(length0+devrec*(i+1),-radius*2+offset-devrec*i-extra))
-        if not ports_opposite:
+        if not self.ports_opposite:
             points.append(DPoint(length0+devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
             points.append(DPoint(-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
         points.pop(0)
@@ -188,7 +188,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
     
             # Create the pins on the input & output waveguides
             from SiEPIC.utils.layout import make_pin
-            if ports_opposite:
+            if self.ports_opposite:
                 make_pin(self.cell, "optA", [length0+devrec*(i+1),-radius*2+offset-devrec*i-extra], self.wg_width, LayerPinRecN, 0)
             else:
                 make_pin(self.cell, "optA", [-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra], self.wg_width, LayerPinRecN, 180)
