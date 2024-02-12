@@ -89,7 +89,7 @@ class Grating_Coupler_FSWGC(pya.PCellDeclarationHelper):
     
     gc_number = int(round(self.grating_length/self.period)) ##number of periods
     e = self.n_t*sin((pi/180)*self.theta_c)/self.n_e
-    N = round(self.taper_length*(1+e)*self.n_e/lambda_0) ##allows room for the taper
+    N = self.taper_length*(1+e)*self.n_e/lambda_0 ##allows room for the taper
 
     start = (pi - (pi/180)*self.angle_e/2)
     stop = (pi + (pi/180)*self.angle_e/2)
