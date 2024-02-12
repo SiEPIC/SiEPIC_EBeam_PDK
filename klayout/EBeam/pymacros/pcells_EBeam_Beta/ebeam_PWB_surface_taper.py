@@ -11,6 +11,8 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
   V2: Sept 8, 2020
   V3: Dec 4, 2020
   blin@ece.ubc.ca
+  
+  Lukas, 2024/02/12: rounding error on width conversion to integer, fixed using to_itype.
   """
 
   def __init__(self):
@@ -54,6 +56,7 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     # import neccessary libraries
     from math import pi, sin, cos, tan
     from SiEPIC._globals import PIN_LENGTH as pin_length
+    from SiEPIC.extend import to_itype
     import ctypes
 
     # fetch the parameters
@@ -71,8 +74,8 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     Layer31SiN = ly.layer(self.ZEP_invert)
     Layer63N = ly.layer(self.Grouse_Si_Keepout)
 
-    w1 = self.Wtip/dbu
-    w2 = self.Wwaveguide/dbu
+    w1 = to_itype(self.Wtip, dbu)
+    w2 = to_itype(self.Wwaveguide, dbu)
     offset = self.edge_offset
     angle = self.OxOp_angle * (pi/180)
     excl = 750
