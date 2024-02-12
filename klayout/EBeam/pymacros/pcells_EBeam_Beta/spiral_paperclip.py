@@ -10,7 +10,11 @@ uses: delay line, waveguide loss cutback structure
 - Pitch of the waveguides is determined by the DevRec layer
 - When executed directly, the unit test instantiates all the waveguide types
 
-by Lukas Chrostowski, 2023
+PCell options:
+ - waveguide type
+ - ports_opposite = True: input on left, output on right
+                  = False: both i/o on left
+by Lukas Chrostowski, 2023-2024
 '''
 
 
@@ -37,7 +41,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         p = self.param("waveguide_type", self.TypeList, "Waveguide Type", default = self.waveguide_types[0]['name'])
         for wa in self.waveguide_types:
             p.add_choice(wa['name'],wa['name'])
-        
+        self.param("ports_opposite", self.TypeBoolean, "Waveguide ports on opposite sides", default = False)
         self.param("loops", self.TypeInt, "Number of loops", default = 2)
         self.minlength = 2*float(self.waveguide_types[0]['radius'])
         self.param("length", self.TypeDouble, "Inner length (min 2 x bend radius)", default = self.minlength)
@@ -155,8 +159,9 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             points.append(DPoint(-length0-devrec*i,radius*2-offset+devrec*(i-1)+extra))
             points.append(DPoint(-length0-devrec*i,-radius*2+offset-devrec*i-extra))
             points.append(DPoint(length0+devrec*(i+1),-radius*2+offset-devrec*i-extra))
-        points.append(DPoint(length0+devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
-        points.append(DPoint(-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
+        if not ports_opposite:
+            points.append(DPoint(length0+devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
+            points.append(DPoint(-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
         points.pop(0)
         points.insert(0, DPoint(-length0-devrec*(i+1),-offset+radius*2+devrec*i+extra))
 
@@ -183,7 +188,10 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
     
             # Create the pins on the input & output waveguides
             from SiEPIC.utils.layout import make_pin
-            make_pin(self.cell, "optA", [-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra], self.wg_width, LayerPinRecN, 180)
+            if ports_opposite:
+                make_pin(self.cell, "optA", [length0+devrec*(i+1),-radius*2+offset-devrec*i-extra], self.wg_width, LayerPinRecN, 0)
+            else:
+                make_pin(self.cell, "optA", [-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra], self.wg_width, LayerPinRecN, 180)
             make_pin(self.cell, "optB", [-length0-devrec*(i+1),-offset+radius*2+devrec*i+extra], self.wg_width, LayerPinRecN, 180)
 
 
@@ -234,14 +242,22 @@ if __name__ == "__main__":
     # Create spirals for all the types of waveguides
     from SiEPIC.utils import load_Waveguides_by_Tech
     waveguide_types = load_Waveguides_by_Tech(tech)   
-    y = 0
-    for wg in waveguide_types:
-        pcell = ly.create_cell("spiral_paperclip", library, {
-                'waveguide_type':wg['name'],
-                'length':100,
-                'loops':1})
-        t = Trans(Trans.R0, 0, y - pcell.bbox().bottom)
-        inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
-        y += pcell.bbox().height()+2000
+    xmax = 0
+    for ports_opposite in [True, False]:
+        for flatten in [True, False]:
+            y = 0
+            x = xmax
+            for wg in waveguide_types:
+                pcell = ly.create_cell("spiral_paperclip", library, {
+                        'waveguide_type':wg['name'],
+                        'length':100,
+                        'loops':1,
+                        'flatten':flatten,
+                        'ports_opposite':ports_opposite})
+                t = Trans(Trans.R0, x, y - pcell.bbox().bottom)
+                inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
+                y += pcell.bbox().height()+2000
+                xmax = max(xmax, x + inst.bbox().width())
+
     
     zoom_out(topcell)
