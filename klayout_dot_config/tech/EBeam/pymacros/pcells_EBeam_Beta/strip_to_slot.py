@@ -6,6 +6,10 @@ class strip_to_slot(pya.PCellDeclarationHelper):
     draft by Lukas Chrostowski july 24, 2017
     Modified by Alexander Tofini march 17, 2021
     based on https://www.osapublishing.org/oe/fulltext.cfm?uri=oe-21-16-19029&id=259920
+
+    updated by Lukas Chrostowski, 2021/12
+      - reduce the curved waveguide section, longer device for lower loss
+      - simulated using EME to give 99% efficiency
     """
 
     def __init__(self):       
@@ -13,11 +17,13 @@ class strip_to_slot(pya.PCellDeclarationHelper):
         TECHNOLOGY = get_technology_by_name('EBeam')
         # declare the parameters
         self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
-        self.param("r", self.TypeDouble, "Radius", default = 10)
+        self.param("r", self.TypeDouble, "Radius", default = 15)
         self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
         self.param("rails", self.TypeDouble, "Rails", default=0.25) 
         self.param("slot", self.TypeDouble, "Slot", default=0.1)
-        self.param("taper",self.TypeDouble,"Taper Length",default=10.0)   
+        self.param("taper",self.TypeDouble,"Taper Length",default=15.0)   
+        self.param("wt", self.TypeDouble, "Terminated Curved Width", default = 0.1)
+        self.param("offset", self.TypeDouble, "Ending Offset for Curved section", default = 1.0)
         self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
         self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
         self.param("textl", self.TypeLayer, "Text Layer", default = LayerInfo(10, 0))

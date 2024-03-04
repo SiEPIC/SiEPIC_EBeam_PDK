@@ -178,7 +178,7 @@ class SiEPIC_EBeam_Library_Beta(Library):
     print("Initializing '%s' Library." % library)
 
     # Set the description
-    self.description = "v0.3.41, Beta components"
+    self.description = "v0.3.42, Beta components"
 
     # Save the path, used for loading WAVEGUIDES.XML
     import os
@@ -186,7 +186,7 @@ class SiEPIC_EBeam_Library_Beta(Library):
                 
     # Import all the GDS files from the tech folder
     import os, fnmatch
-    dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/mature"))
+    dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/development"))
     print('  library path: %s' % dir_path)
     search_str = '*.[Oo][Aa][Ss]' # OAS
     for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
