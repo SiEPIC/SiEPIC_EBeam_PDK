@@ -32,7 +32,7 @@ jobs:
       - name: install python packages
         run: |
           python -m pip install --upgrade pip
-          pip install klayout numpy scipy pytest pytest-cov SiEPIC
+          pip install klayout==0.28.17 numpy scipy pytest pytest-cov SiEPIC
 
       - name: Test with pytest
         run: pytest --cov=klayout/siepic_ebeam_pdk klayout/siepic_ebeam_pdk  --cov-report=xml
