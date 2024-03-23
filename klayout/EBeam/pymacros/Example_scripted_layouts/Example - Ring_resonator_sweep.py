@@ -2,7 +2,6 @@
 # $show-in-menu
 # $group-name: Examples_EBeam
 # $menu-path: siepic_menu.exlayout.begin
-# Unit testing for all library layout fixed cells and PCells
 
 '''
 Scripted layout for ring resonators using SiEPIC-Tools
