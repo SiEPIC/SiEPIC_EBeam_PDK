@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<lumerical_lookup_table version="1.0" name = "index_table">
+<lumerical_lookup_table version="1.0" name="index_table">
 <association>
     <design>
         <value name="height" type="double">2.1e-07</value>
@@ -78,7 +77,7 @@
         <value name="deltaw" type="double">0e-07</value>
     </design>
     <extracted>
-        <value name="gc_sparam" type="string">GC_TE1550_thickness=230 deltaw=0.txt</value>
+        <value name="gc_sparam" type="string">GC_TE1550_thickness=230 deltaw=0.txt;GC_TE1550_thickness=230 deltaw=0.npz</value>
     </extracted>
 </association>
 </lumerical_lookup_table>
