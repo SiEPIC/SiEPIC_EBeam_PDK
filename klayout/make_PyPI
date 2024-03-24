@@ -5,5 +5,4 @@ mv siepic_ebeam_pdk EBeam
 mv siepic_ebeam_pdk1 siepic_ebeam_pdk
 
 
-python3 -m twine upload -u __token__ -p pypi-AgEIcHlwaS5vcmcCJDMxNjQzZDViLWY5ZWMtNDM0Ni04NjI3LTgzZTk5OTQ2NjQyOQACKlszLCI1NjQ1ZmZlNS1iYmEyLTRjODAtOThlMy1iZTIyMzliNDI5ZDkiXQAABiA2EVfNxrbNTRBC7KcaImFi-7NmlHxVIGgh9mqg45xUNQ dist/*
-
+#python3 -m twine upload -u __token__ -p ...
