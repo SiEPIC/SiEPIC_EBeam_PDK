@@ -63,17 +63,16 @@ class contra_directional_coupler(componentModel):
             print('contra directional coupler, data file: %s' % filename)    
         '''
         LUT_attrs_ = deepcopy(self.cls_attrs)
-        LUT_attrs_["wg1_width"] = wg1_width,
-        LUT_attrs_["wg2_width"] = wg2_width,
-        LUT_attrs_["corrugation1_width"] = corrugation1_width,
-        LUT_attrs_["corrugation2_width"] = corrugation2_width,
-        LUT_attrs_["gap"] = gap,
-        LUT_attrs_["grating_period"] = grating_period,
-        LUT_attrs_["number_of_periods"] = number_of_periods,
-        LUT_attrs_["sinusoidal" ] = sinusoidal,
-        LUT_attrs_["apodization_index" ] = apodization_index,
-        LUT_attrs_["rib"] = rib,
-        LUT_attrs_["OID"] =  OID,
+        LUT_attrs_["wg1_width"] = wg1_width
+        LUT_attrs_["wg2_width"] = wg2_width
+        LUT_attrs_["corrugation1_width"] = corrugation1_width
+        LUT_attrs_["corrugation2_width"] = corrugation2_width
+        LUT_attrs_["gap"] = gap
+        LUT_attrs_["grating_period"] = grating_period
+        LUT_attrs_["number_of_periods"] = number_of_periods
+        LUT_attrs_["sinusoidal" ] = sinusoidal
+        LUT_attrs_["apodization_index" ] = apodization_index
+        LUT_attrs_["rib"] = rib
 
         super().__init__(
             f=f,
@@ -85,7 +84,7 @@ class contra_directional_coupler(componentModel):
         )
 
         if OID in self.valid_OID:
-            self.s = self.load_sparameters(data_folder, filename)
+            self.s = self.load_sparameters(data_folder, filename, verbose = True)
         else:
             self.s = np.zeros((self.f.shape[0], self.ports, self.ports))
         self.component_id = "contra_directional_coupler"

@@ -50,7 +50,7 @@
         <value name="deltaw" type="double">0e-07</value>
     </design>
     <extracted>
-        <value name="gc_sparam" type="string">GC_TE1550_thickness=220 deltaw=0.txt</value>
+        <value name="gc_sparam" type="string">GC_TE1550_thickness=220 deltaw=0.txt;GC_TE1550_thickness=220 deltaw=0.txt.npz</value>
     </extracted>
 </association>
 <association>
