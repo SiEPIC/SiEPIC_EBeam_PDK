@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/PyCQA/bandit #checks for security vulnerabilities
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: [--exit-zero]
+        # ignore all tests, not just tests data
+        exclude: ^tests/
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit #run ruff's linter and formatter
+    rev: "6c0ceaccffa1ebb1db1ea1a6d7289b50d29bfce2"
+    hooks:
+      - id: ruff
+        args: [ --fix, --exit-non-zero-on-fix ]
+
+  - repo: https://github.com/psf/black
+    rev: 1b028cc9d99c2c2e82f9b727742539173a92a373
+    hooks:
+      - id: black #python code formatter
+
+  - repo: https://github.com/codespell-project/codespell #fix common misspellings in text files
+    rev: 38bc4a97f6e22827e86526148efa38f1044a97f8
+    hooks:
+      - id: codespell
+        additional_dependencies:
+          - tomli

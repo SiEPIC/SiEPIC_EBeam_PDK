@@ -1,0 +1,189 @@
+#clear;
+matlabload('ContraDC_sparams.dat');
+lambda = lambda*1e-9;
+f = transpose(c/lambda);
+
+
+#mode_label = "TE";
+#mode_ID = "1";
+#sfile = 'ContraDC_sparams.dat';
+
+S11 = transpose(S11);
+S21 = transpose(S21);
+S31 = transpose(S31);
+S41 = transpose(S41);
+
+S12 = transpose(S12);
+S22 = transpose(S22);
+S32 = transpose(S32);
+S42 = transpose(S42);
+
+S13 = transpose(S13);
+S23 = transpose(S23);
+S33 = transpose(S33);
+S43 = transpose(S43);
+
+S14 = transpose(S14);
+S24 = transpose(S24);
+S34 = transpose(S34);
+S44 = transpose(S44);
+
+# test passivity of S matrix
+make_plot=1;
+FREQ_PTS=length(S11);
+S_norm = matrix(1,FREQ_PTS);
+S_err = S_norm;
+for (ff=1:FREQ_PTS)
+{
+	S=[unique(S11(ff)),unique(S12(ff)),unique(S13(ff)),unique(S14(ff));
+	   unique(S21(ff)),unique(S22(ff)),unique(S23(ff)),unique(S24(ff));
+	   unique(S31(ff)),unique(S32(ff)),unique(S33(ff)),unique(S34(ff));
+	   unique(S41(ff)),unique(S42(ff)),unique(S43(ff)),unique(S44(ff))];
+
+	S_norm(ff) = norm(S);
+	S_err(ff) = max(abs(S-transpose(S)));
+}
+
+if (max(S_err) > 0.05){
+    ? '******* Warning: S parameters violate reciprocity by more than 5% *********';
+}
+
+if (max(S_norm) > 1+1e-6){
+    ? '******* Warning: S parameters not passive *********';
+    ?max(S_norm);
+    
+    ? 'scaled S parameters to make passive';
+    scale_factor = 1/max(S_norm)*0.9999999;
+  
+    scale_s_parameters;
+}
+else {
+    ? '******* S paramters are passive ********'; 
+}
+if (make_plot==1 ){
+    plot(f, S_norm, 'Wavelength (um)', 'Norm |S|');
+    plot(c/f*1e6, S_err, 'Wavelength (um)', 'abs(S-transpose(S))', 'Reciprocity');
+}
+
+
+# prepare data and write
+
+if (fileexists(sfile)) {
+  rm(sfile);
+}
+
+S11_data=[f,abs(S11),unwrap(angle(S11))];
+write(sfile,"('port 1',"+mode_label+','+mode_ID+','+"'port 1',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S11_data)
+       );
+S21_data=[f,abs(S21),unwrap(angle(S21))];
+write(sfile,"('port 2',"+mode_label+','+mode_ID+','+"'port 1',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S21_data)
+       );
+S31_data=[f,abs(S31),unwrap(angle(S31))];
+write(sfile,"('port 3',"+mode_label+','+mode_ID+','+"'port 1',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S31_data)
+       );
+S41_data=[f,abs(S41),unwrap(angle(S41))];
+write(sfile,"('port 4',"+mode_label+','+mode_ID+','+"'port 1',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S41_data)
+       );
+
+S12_data=[f,abs(S12),unwrap(angle(S12))];
+write(sfile,"('port 1',"+mode_label+','+mode_ID+','+"'port 2',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S12_data)
+       );
+S22_data=[f,abs(S22),unwrap(angle(S22))];
+write(sfile,"('port 2',"+mode_label+','+mode_ID+','+"'port 2',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S22_data)
+       );
+S32_data=[f,abs(S32),unwrap(angle(S32))];
+write(sfile,"('port 3',"+mode_label+','+mode_ID+','+"'port 2',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S32_data)
+       );
+S42_data=[f,abs(S42),unwrap(angle(S42))];
+write(sfile,"('port 4',"+mode_label+','+mode_ID+','+"'port 2',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S42_data)
+       );
+       
+S13_data=[f,abs(S13),unwrap(angle(S13))];
+write(sfile,"('port 1',"+mode_label+','+mode_ID+','+"'port 3',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S13_data)
+       );
+S23_data=[f,abs(S23),unwrap(angle(S23))];
+write(sfile,"('port 2',"+mode_label+','+mode_ID+','+"'port 3',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S23_data)
+       );
+S33_data=[f,abs(S33),unwrap(angle(S33))];
+write(sfile,"('port 3',"+mode_label+','+mode_ID+','+"'port 3',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S33_data)
+       );
+S43_data=[f,abs(S43),unwrap(angle(S43))];
+write(sfile,"('port 4',"+mode_label+','+mode_ID+','+"'port 3',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S43_data)
+       );
+
+S14_data=[f,abs(S14),unwrap(angle(S14))];
+write(sfile,"('port 1',"+mode_label+','+mode_ID+','+"'port 4',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S14_data)
+       );
+S24_data=[f,abs(S24),unwrap(angle(S24))];
+write(sfile,"('port 2',"+mode_label+','+mode_ID+','+"'port 4',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S24_data)
+       );
+S34_data=[f,abs(S34),unwrap(angle(S34))];
+write(sfile,"('port 3',"+mode_label+','+mode_ID+','+"'port 4',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S34_data)
+       );
+S44_data=[f,abs(S44),unwrap(angle(S44))];
+write(sfile,"('port 4',"+mode_label+','+mode_ID+','+"'port 4',"+mode_ID+','+"'transmission')"
+       +endl+"("
+       +num2str(length(f))
+       +",3)"
+       +endl+num2str(S44_data)
+       );

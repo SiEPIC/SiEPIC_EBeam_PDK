@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>KLayout Design Rule Check (DRC) - EBeam</description>
+ <version/>
+ <category>drc</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut>D</shortcut>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>siepic_menu.verification.begin</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
+ <text># Basic DRC deck for SiEPIC_EBeam_PDK
+# Lukas Chrostowski, 2016
+# Mustafa Hammood, 2020 update
+# Lukas Chrostowski, 2023 update
+
+# Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
+# http://klayout.de/doc/manual/drc_basic.html
+
+# Added SiN based on publication: https://doi.org/10.1117/12.2650447
+
+report("SiEPIC-EBeam-PDK DRC")
+
+# Layers:
+LayerSi=input(1,0)
+#LayerSip6nm=input(31,0)
+#LayerSi_rib=input(2,0)
+LayerSiN = input(1,5)
+DevRec=input(68,0)
+PinRec=input(1,10)
+LayerFP=input(99)
+LayerM1=input(11,0)
+LayerM2=input(12,0)
+LayerMLOpen=input(13,0)
+#LayerVC=input(40,0)
+#LayerN=input(20,0)
+#LayerNpp=input(24,0)
+
+#################
+# non-physical checks
+#################
+
+# Check device overlaps (functional check)
+overlaps = DevRec.merged(2)
+output(overlaps, "Devices","Devices cannot be overlapping")
+
+# make sure the devices are within the floor plan layer region;
+LayerSi.outside(LayerFP).output("Boundary","devices are out of boundary")
+LayerSiN.outside(LayerFP).output("Boundary","devices are out of boundary")
+
+#################
+# physical checks
+#################
+
+tol = 1e-3  # users typically shoot for exactly the min features
+            # for curves, this leads to lots of false errors.
+
+# minimum feature size of Si is 70 nm and minimum exclusion between Si is 70 nm
+LayerSi.width(0.07-tol, angle_limit(80)).output("Si_width","Si minimum feature size violation; min 60 nm")
+#LayerSip6nm.width(0.07-tol, angle_limit(80)).output("Sip6nm_width","Si minimum feature size violation; min 60 nm")
+LayerSi.space(0.07-tol, angle_limit(80)).output("Si_space","Si minimum space violation; min 60 nm")
+#LayerSip6nm.space(0.07-tol, angle_limit(80)).output("Sip6nm_space","Si minimum space violation; min 60 nm")
+
+# minimum feature size of SiN is 120 nm and minimum exclusion between Si is 120 nm
+LayerSiN.width(0.12-tol, angle_limit(80)).output("SiN_width","SiN minimum feature size violation; min 120 nm")
+LayerSiN.space(0.12-tol, angle_limit(80)).output("SiN_space","SiN minimum space violation; min 120 nm")
+
+# minimum feature size of Si rib is 100 nm and minimum exclusion between Si is 60 nm
+#LayerSi_rib.width(0.1-tol, angle_limit(80)).output("Si_rib_width","Si_rib minimum feature size violation; min 100 nm")
+
+# Metal rules based on the metalization process provided by Applied Nanotools, based on contact optical lithography.
+# Metal heater, M1
+LayerM1.width(3.0-tol, angle_limit(70)).output("M1_width","M1 minimum feature size violation; min 3 µm")
+LayerM1.space(3.0-tol).output("M1_space","M1 minimum space violation; min 3 µm")
+
+# Metal routing/contact, M2
+LayerM2.width(5.0-tol, angle_limit(70)).output("M2_width","M2 minimum feature size violation; min 5 µm")
+LayerM2.space(8.0-tol).output("M2_space","M2 minimum space violation; min 8 µm")
+
+# Metal pad air opening, MLOpen
+LayerMLOpen.width(10.0-tol).output("MLOpen_width","MLOpen minimum feature size violation; min 10 µm")
+LayerMLOpen.space(10.0-tol).output("MLOpen_space","MLOpen minimum space violation; min 10 µm")
+
+# Doping rules based on the experimental process
+# Oxide contact vias
+#LayerVC.width(5.0-tol, angle_limit(70)).output("VC_width","VC minimum feature size violation; min 5 µm")
+#LayerVC.space(5.0-tol).output("VC_space","VC minimum space violation; min 5 µm")
+
+# NPP Doping
+#LayerNpp.width(2.0-tol, angle_limit(70)).output("Npp_width","Npp Doping minimum feature size violation; min 2 µm")
+#LayerNpp.space(2.0-tol).output("Npp_space","Npp minimum space violation; min 2 µm")
+
+# N Doping
+#LayerN.width(2.0-tol, angle_limit(70)).output("N_width","N Doping minimum feature size violation; min 2 µm")
+#LayerN.space(2.0-tol).output("N_space","N minimum space violation; min 2 µm")
+
+# minimum separation between NPP and Si
+#LayerNpp.separation(LayerSi, 2.0-tol).output("Npp_Si_separation","Npp-Si minimum separation violation; min 2 µm")
+
+# minimum separation between VC and Si
+#LayerVC.separation(LayerSi, 3.0-tol).output("VC_Si_separation","VC-Si minimum separation violation; min 3 µm")
+
+# minimum overlap rules:
+LayerM2.overlap(LayerM1,3.0-tol).output("M2_M1_overlap","M2 minimum overlap with M1 violation; min 3 µm")
+#LayerM2.overlap(LayerVC, 5.0-tol).output("M2_VC_overlap","Metal2-VC minimum overlap violation; min 5 µm")
+#LayerN.overlap(LayerNpp, 3.0-tol).output("N_Npp_overlap","N-Npp minimum overlap violation; min 3 µm")
+#LayerVC.overlap(LayerNpp, 5.0-tol).output("VC_Npp_overlap","VC-Npp minimum overlap violation; min 5 µm")
+
+# minimum inclusion rules:
+#LayerM2.enclosing(LayerVC, 1.0-tol).output("M2_VC_enclosure","M2-VC minimum enclosure violation; min 1 µm")
+#LayerSi_rib.enclosing(LayerVC, 1.0-tol).output("Si_rib_VC_enclosure","Si_rib-VC minimum enclosure violation; min 1 µm")
+
+
+# Waveguide checks:
+# disconnects, mismatched
+
+PinRec.not_inside(LayerSi).and(PinRec.not_inside(LayerSiN))
+    .output( "SiEPIC-1a" , "Warning: Possible waveguide mismatch or waveguide disconnect: PinRec must enclose only one waveguide material." )
+
+</text>
+</klayout-macro>

@@ -12,5 +12,5 @@ zip -r EBeam_v2010_01_14.cml EBeam
 
 3) For KLayout integration:
 		Copy the .cml file into:
-		../klayout_dot_config/tech/EBeam
+		../klayout/EBeam
 

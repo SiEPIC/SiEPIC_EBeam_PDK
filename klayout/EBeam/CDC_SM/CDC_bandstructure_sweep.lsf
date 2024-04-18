@@ -1,0 +1,93 @@
+############################################################################
+## CDC Bandstructure Sweep
+## Extracts the central wavelength and bandgap of a CDC unitcell
+## Exports data to MATLAB
+
+## Three Unitcell Types
+##    - Rectangular grating with or without anti-reflection coating
+##    - Sinusoidal gratings with anti-reflection coating
+
+## Ajay Mistry, UBC, January 2017
+
+##############################################################################
+#cd("/ubc/ece/home/nj/grads/amistry/Documents/Lumerical/Bandstructure/BandStructure Sweeps");
+#addpath("/ubc/ece/home/nj/grads/amistry/Documents/Lumerical/Bandstructure/BandStructure Sweeps");
+
+## Define structure;
+#gap = 150e-9;
+#period = 324e-9;
+
+#bus_width2=5.5e-07;
+#bus2_delta = 40e-9; 
+#bus_width1=4.5e-07;
+#bus1_delta = 30e-9;
+
+#slab = 0;
+#slab_thickness = 90e-9;
+
+##Choose Unit Cell Type
+#sinusoidal = 0; #0 for rectangular, 1 for sinusoidal
+##Choose Anti-Reflection Coating 
+#AR = 1;
+
+#if (sinusoidal){
+    #AR = 1;
+#}
+
+#setnamed("::model","gap",gap);
+#setnamed("::model","ax",period);
+#setnamed("::model","bus1_width",bus_width1);
+#setnamed("::model","bus2_width",bus_width2);
+#setnamed("::model","bus1_delta",bus1_delta);
+#setnamed("::model","bus2_delta",bus2_delta);
+#setnamed("::model","slab",slab);
+#setnamed("::model","slab_thickness",slab_thickness);
+#setnamed("::model","AR",AR);
+#setnamed("::model","sinusoidal",sinusoidal);
+#select("FDTD"); setview("extent");  # zoom to extent
+
+#filename = 'SCDC_strip_W'+num2str(bus_width1*1e9)+num2str(bus_width2*1e9)+'dw'+num2str(bus1_delta*1e9)+num2str(bus2_delta*1e9)+'P'+num2str(period*1e9)+'Gap'+num2str(gap*1e9)+'AR='+num2str(AR)+'Sine='+num2str(sinusoidal);
+##newdir = '"mkdir '+filename+'"';
+##system(newdir);
+#save(pwd+'/'+filename+'/'+filename+".fsp");
+
+#############################################################################
+# User Defined properties:
+tolerance = 1e-4; #tolerance for finding peaks and accepting bands
+#                 setting this too low will result in noisy data where sidelobes of
+#                 peaks are interpreted as new bands
+#                 setting it too high will mean that some bands are not found 
+num_band = 4;    #number of bands to search for in the bandstructure
+#
+#############################################################################
+
+# 4 sweeps will be performed
+points = 11;
+# set up initial sweep
+cent_kx = .470;
+setsweep("band_structure", "type", "Ranges");
+setsweep("band_structure", "number of points", points); 
+
+
+sim_time_x = 1e-15*[10000,12500,15000,175000];
+spacing_x = [.01/2, .001, .0001, .00001];
+
+if (0){
+for (i = 1:2){
+    
+    iter = i;
+    sim_time = sim_time_x(i);
+    spacing = spacing_x(i); #spacing between swept kx vectors
+
+    bandstructure_sweep;
+    bandstructure_analysis;
+    
+    if(length(cent_kx_new) > 1){
+        break;
+    }
+}
+}
+run;
+bandwidth = 9e-9;
+lambda_0 = 1550e-9;
+#matlabsave(filename, cent_kx, bandwidth, lambda_0);

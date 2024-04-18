@@ -1,0 +1,92 @@
+name: EBeam Tests 
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - master
+
+jobs:     
+  ebeam-lib-pcell-test:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+            repository: ${{ github.repository_owner }}/SiEPIC_EBeam_PDK
+            ref: ${{ github.ref }}
+      
+      - name: Connect to Container Registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull siepic_klayout image
+        run: docker pull ghcr.io/siepic/siepic_ebeam_pdk/siepic_klayout:master-latest
+     
+      - name: Run docker container from image
+        run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/siepic/siepic_ebeam_pdk/siepic_klayout:master-latest
+
+      - name: Copy pymacros folder to docker container
+        run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
+
+      - name: Fetch changes from main repository
+        run: git fetch https://github.com/SiEPIC/SiEPIC_EBeam_PDK.git master
+
+      - name: Find files that are different
+        id: changed-files
+        run: |
+
+          if [ "${{ github.repository }}" == "${{ env.GITHUB_REPOSITORY }}" ]; then
+            # If we are in the main repository, copy entire siepic_ebeam_pdk/klayout/ folder to docker container ebeam_test
+            docker exec ebeam_test rm -r /root/.klayout/salt/SiEPIC_EBeam_PDK/klayout
+            docker cp $GITHUB_WORKSPACE/klayout ebeam_test:/root/.klayout/salt/SiEPIC_EBeam_PDK
+          else 
+            # If we are in a forked repository or another branch, copy changed files to ebeam_test
+            changed_files=$(git diff --name-only FETCH_HEAD)
+
+            IFS=$'\n' # Set Internal Field Separator to newline to handle multiple files
+
+            for file in $changed_files; do
+              # Determine the library folder based on the file path
+              folder=$(dirname "$file")
+
+              # Extract the last part of the path (directory name)
+              folder=$(basename "$folder")
+
+              # Extract the filename
+              filename=$(basename "$file")
+
+              # Define the destination path in the Docker container
+              destination_path="/root/.klayout/salt/SiEPIC_EBeam_PDK"
+
+              # Perform docker cp for each file
+              docker cp "$GITHUB_WORKSPACE/$file" ebeam_test:"$destination_path/$file"
+
+              echo "Copied $file to $destination_path/$file"
+            done
+          fi
+
+      
+      - name: Run KLayout Python script inside container and capture exit code
+        run: docker exec ebeam_test klayout -zz -r pymacros/EBeam_Lib_PCellTests.py || echo "KLAYOUT_EXIT_CODE=$?" >> $GITHUB_ENV
+        continue-on-error: true
+
+      - name: Stop container and remove it 
+        run: |
+                docker stop ebeam_test
+                docker rm ebeam_test
+
+      - name: Fail job if exit code is non-zero
+        run: |
+                if [ $KLAYOUT_EXIT_CODE -ne 0 ]; then
+                        echo "KLayout exited with non-zero exit code"
+                        exit 1
+                fi

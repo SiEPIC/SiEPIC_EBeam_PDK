@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Circuit simulation example using opics and EBeam library
+
+# Required packages
+from SiEPIC.install import install
+install('plotly')
+install('pandas')
+install('packaging')
+install('defusedxml')
+install('numpy')
+
+# using https://github.com/siepic/opics
+# has been installed in SiEPIC-Tools
+import SiEPIC.opics as opics
+from SiEPIC.opics.network import Network
+from SiEPIC.opics.globals import C
+
+# Library has been imported into the EBeam PDK
+#import SiEPIC.opics.libraries.ebeam
+#ebeam_lib = opics.libraries.ebeam
+import opics_ebeam
+ebeam_lib = opics_ebeam
+
+print(f"Components: {ebeam_lib.components_list}")
+
+
+
+# Create a Mach-Zehnder circuit simulation
+import numpy as np
+freq = np.linspace(C * 1e6 / 1.45, C * 1e6 / 1.61, 5000)
+circuit = Network(network_id="circuit_name", f=freq)
+
+input_gc = circuit.add_component(ebeam_lib.GC)
+y = circuit.add_component(ebeam_lib.Y)
+wg2 = circuit.add_component(ebeam_lib.ebeam_wg_integral_1550, params=dict(wg_length=40e-6))
+wg1 = circuit.add_component(ebeam_lib.Waveguide, params={"length":15e-6})
+y2 = circuit.add_component(ebeam_lib.Y)
+output_gc = circuit.add_component(ebeam_lib.GC)
+
+input_gc.set_port_reference(0, "input_port")
+output_gc.set_port_reference(0, "output_port")
+
+circuit.connect(input_gc, 1, y, 0)
+circuit.connect(y, 1, wg1, 0)
+circuit.connect(y, 2, wg2, 0)
+circuit.connect(y2, 0, output_gc, 1)
+circuit.connect(wg1, 1, y2, 1)
+circuit.connect(wg2, 1, y2, 2)
+
+circuit.simulate_network()
+
+# Plot using Matplotlib:
+# circuit.sim_result.plot_sparameters(show_freq=False)
+
+# Plot using Plotly:
+import plotly.express as px
+import pandas as pd # https://pandas.pydata.org/docs/user_guide/10min.html
+result = circuit.sim_result.get_data()
+wavelengths = C/circuit.f
+transmission = result['S_0_1']
+reflection = result['S_0_0']
+
+# Single line:
+#df = pd.DataFrame(transmission, index=wavelengths, columns=['Transmission'])
+
+# Two lines:
+df = pd.DataFrame(np.stack((transmission, reflection)).transpose(), index=wavelengths, columns=['Transmission','Reflections'])
+fig = px.line(df, labels={'index':'Wavelength', 'value':'Transmission (dB)'}, markers=True)
+fig.show()
+
+
+</text>
+</klayout-macro>

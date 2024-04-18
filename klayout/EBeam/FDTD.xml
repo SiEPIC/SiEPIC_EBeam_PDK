@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FDTD>
+	<floats>
+		<frequency_points_monitor>101</frequency_points_monitor>
+		<frequency_points_expansion>1</frequency_points_expansion>
+		<thickness_Si>0.22e-6</thickness_Si>
+		<thickness_Si_corners>0.01e-6</thickness_Si_corners>
+		<width_Si_corners>0.01e-6</width_Si_corners>
+		<thickness_BOX>2.0e-6</thickness_BOX>
+		<thickness_Clad>2.0e-6</thickness_Clad>
+		<wavelength_start>1450e-9</wavelength_start>
+		<wavelength_stop>1650e-9</wavelength_stop>
+		<Efield_intensity_cutoff_eigenmode>1e-5</Efield_intensity_cutoff_eigenmode>
+		<Initial_FDTD_Z_span>4e-6</Initial_FDTD_Z_span>
+		<convergence_tests>0</convergence_tests>
+		<convergence_test_span_incremement>200e-9</convergence_test_span_incremement>
+		<convergence_test_rms_error_limit>1e-4</convergence_test_rms_error_limit>
+		<Perform-quick-corner-analysis>0</Perform-quick-corner-analysis>
+		<mesh_accuracy>1</mesh_accuracy>
+		<Perform-final-corner-analysis>1</Perform-final-corner-analysis>
+	</floats>
+	<strings>
+		<material_Clad>SiO2 (Glass) - Palik</material_Clad>
+		<material_Si>Si (Silicon) - Palik</material_Si>
+		<mode_selection>1</mode_selection>
+		<Initial_Z-Boundary-Conditions>PML</Initial_Z-Boundary-Conditions>
+		<Z-Boundary-Conditions>PML</Z-Boundary-Conditions>
+	</strings>
+</FDTD>

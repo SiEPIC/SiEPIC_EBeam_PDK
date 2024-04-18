@@ -1,0 +1,150 @@
+# 2WG_supermode.lsf - draw a two-waveguide system and run supermode analysis
+# Mustafa Hammood	Mustafa@ece.ubc.ca
+# August 2018
+
+new;
+#clear;
+
+# define wafer and waveguide structure
+thick_Clad = 2.0e-6; 
+thick_Si   = 0.22e-6;
+thick_BOX  = 2.0e-6;
+thick_Slab = 0;          # for strip waveguides
+#thick_Slab = 0.09e-6;          # for strip-loaded ridge waveguides
+#width_1 = 0.4e-6;       # width of the waveguide
+#width_2 = 0.6e-6;
+#gap = 200e-9;	# Directional coupler gap
+
+# define materials
+material_Clad = "SiO2 (Glass) - Dispersive & Lossless";
+material_BOX  = "SiO2 (Glass) - Dispersive & Lossless";
+material_Si   = "Si (Silicon) - Dispersive & Lossless";
+materials;     # run script to add materials
+
+# define simulation region
+width_margin  = 2.5e-6;	 # space to include on the side of the waveguide
+height_margin = 0.5e-6;  # space to include above and below the waveguide
+
+# calculate simulation volume
+# propagation in the x-axis direction; z-axis is wafer-normal
+Xmin = -2e-6;  Xmax = 2e-6; # length of the waveguide
+Zmin = -height_margin;  Zmax = thick_Si + height_margin;
+Y_span = 2*width_margin + (width_1+width_2)/2; Ymin = -Y_span/2;  Ymax = -Ymin;
+
+# draw cladding
+addrect; set("name","Clad");  set("material", material_Clad);
+set("y", 0);              set("y span", Y_span+1e-6);
+set("z min", 0);          set("z max", thick_Clad);
+set("x min", Xmin);       set("x max", Xmax);
+set("override mesh order from material database",1);
+set("mesh order",3);  # similar to "send to back", put the cladding as a background.
+set("alpha", 0.05);
+
+# draw buried oxide
+addrect; set("name", "BOX"); set("material", material_BOX);
+set("x min", Xmin);       set("x max", Xmax);
+set("z min", -thick_BOX); set("z max", 0);
+set("y", 0);              set("y span", Y_span+1e-6);
+set("alpha", 0.05);
+
+# draw silicon wafer
+addrect; set("name", "Wafer"); set("material", material_Si);
+set("x min", Xmin);       set("x max", Xmax);
+set("z max", -thick_BOX); set("z min", -thick_BOX-2e-6);
+set("y", 0);              set("y span", Y_span+1e-6);
+set("alpha", 0.1);
+
+# draw waveguide 1
+addrect; set("name", "waveguide1"); set("material",material_Si);
+set("y", -width_1/2-gap/2);        set("y span", width_1);
+set("z min", 0);    set("z max", thick_Si);
+set("x min", Xmin); set("x max", Xmax);
+
+# draw waveguide 2
+addrect; set("name", "waveguide2"); set("material",material_Si);
+set("y", width_2/2+gap/2);        set("y span", width_2);
+set("z min", 0);    set("z max", thick_Si);
+set("x min", Xmin); set("x max", Xmax);
+
+# draw slab for strip-loaded ridge waveguides
+addrect; set("name", "slab"); set("material",material_Si);
+if (thick_Slab==0) {
+ set("y min", 0);     set("y max", 0);
+} else { 
+ set("y", 0);         set("y span", Y_span+1e-6);
+}
+set("z min", 0);      set("z max", thick_Slab);
+set("x min", Xmin);   set("x max", Xmax);
+set("alpha", 0.2);
+
+
+wavelength=1.5e-6;
+wavelength_stop = 1.6e-6;
+meshsize = 10e-9; # mesh size
+
+# add 2D mode solver 
+addfde; set("solver type","2D X normal");
+
+set("x", 0); set("z", 0.1e-6);
+set("y max", Ymin); set("y min", Ymax); 
+set("wavelength", wavelength);
+set("define y mesh by","maximum mesh step");
+set("dy", meshsize);
+modes=2; # modes to output
+set("number of test modes",modes);
+
+
+#set("start wavelength", wavelength);
+set("stop wavelength",wavelength_stop);
+set("track selected mode",1);
+
+n=findmodes;     # calculate the modes 
+
+selectmode(1);
+frequencysweep;  # run frequency sweep 
+
+
+n_eff1 =abs(getdata("frequencysweep","neff"));
+n_g1 =c/abs(getdata("frequencysweep","vg"));
+f= getdata("frequencysweep","f");
+plot(c/f*1e6,n_eff1,"Wavelength (um)", "Effective Index");
+n_eff1_fit = polyfit(c/f,n_eff1,1);
+n_g1_fit = polyfit(c/f(1:9),n_g1,1);
+
+
+selectmode(2);
+frequencysweep;  # run frequency sweep for all modes
+
+
+n_eff2=abs(getdata("frequencysweep","neff"));
+n_g2 =c/abs(getdata("frequencysweep","vg"));
+f=getdata("frequencysweep","f");
+plot(c/f*1e6,n_eff2,"Wavelength (um)", "Effective Index");
+n_eff2_fit = polyfit(c/f,n_eff2,1);
+n_g2_fit = polyfit(c/f(1:9),n_g2,1);
+
+lambda = c/f;
+
+filename = "n_eff1_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_eff1_fit));
+
+filename = "n_g1_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_g1_fit));
+
+filename = "n_eff2_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_eff2_fit));
+
+filename = "n_g2_fit";
+if (fileexists(filename)){
+    rm(filename);
+}
+write(filename,num2str(n_g2_fit));
