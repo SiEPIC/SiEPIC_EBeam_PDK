@@ -1,0 +1,8 @@
+<layer_builder>
+    <layer_group_name>silicon</layer_group_name>
+    <background_geometry x_span="0.0001" z="0" x="0" y="0" y_span="0.0001"/>
+    <gds_ref_frame y_gds_center="0" x_gds_center="0" gds_pos_ind="0"/>
+    <layers>
+        <layer pattern_material="Si (Silicon) - Palik" pattern_material_index="0" sidewall_angle="90" layer_name="1:0" thickness="2.2e-07" material_index="0" start_position="0" start_position_auto="1" process="Grow" material="SiO2 (Glass) - Palik" name="Si" enabled="1"/>
+    </layers>
+</layer_builder>

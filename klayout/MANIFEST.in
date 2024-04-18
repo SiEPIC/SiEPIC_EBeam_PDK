@@ -1,0 +1,14 @@
+
+global-include *.gds *.oas *.lydrc *.lyp *.lyt *.xml 
+
+graft siepic_ebeam_pdk/pymacros/opics_ebeam
+
+prune siepic_ebeam_pdk/CML
+prune siepic_ebeam_pdk/CDC_SM
+prune siepic_ebeam_pdk/fdtd
+prune siepic_ebeam_pdk/pymacros/broken
+prune siepic_ebeam_pdk/pymacros/broken
+prune siepic_ebeam_pdk/pymacros/SiEPIC-EBeam-competition
+
+global-exclude *.py[cod] # for some reason this line adds all the other root folders
+prune dist

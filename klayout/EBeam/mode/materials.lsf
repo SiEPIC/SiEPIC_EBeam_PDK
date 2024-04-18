@@ -1,0 +1,30 @@
+# materials.lsf - creates a dispersive material model in Lumerical.
+matname = "Si (Silicon) - Dispersive & Lossless";
+newmaterial = addmaterial("Lorentz");
+setmaterial(newmaterial,"name",matname);
+setmaterial(matname,"Permittivity",7.98737492);
+setmaterial(matname,"Lorentz Linewidth",1e8);
+setmaterial(matname,"Lorentz Resonance",3.93282466e+15);
+setmaterial(matname,"Lorentz Permittivity",3.68799143);
+setmaterial(matname,"color",[0.85, 0, 0, 1]); # red
+
+matname = "Air (1)";
+if (1) { newmaterial = addmaterial("Dielectric"); }
+setmaterial(newmaterial,"name",matname);
+setmaterial(matname,"Refractive Index",1);
+setmaterial(matname,"color",[0.85, 0.85, 0, 1]);
+
+matname = "SiO2 (Glass) - Dispersive & Lossless";
+newmaterial = addmaterial("Lorentz");
+setmaterial(newmaterial,"name",matname);
+setmaterial(matname,"Permittivity",2.119881);
+setmaterial(matname,"Lorentz Linewidth",1e10);
+setmaterial(matname,"Lorentz Resonance",3.309238e+13);
+setmaterial(matname,"Lorentz Permittivity", 49.43721);
+setmaterial(matname,"color",[0.5, 0.5, 0.5, 1]); # grey
+
+matname = "SiO2 (Glass) - Const";
+newmaterial = addmaterial("Dielectric");
+setmaterial(newmaterial,"name",matname);
+setmaterial(matname,"Permittivity",1.444^2);
+setmaterial(matname,"color",[0.5, 0.5, 0.5, 1]); # grey

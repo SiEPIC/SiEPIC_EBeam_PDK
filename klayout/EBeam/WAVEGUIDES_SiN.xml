@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<waveguides>
+
+    <waveguide>
+    <name>SiN Strip TE 895 nm, w=450 nm</name>
+    <CML>EBeam</CML>
+	  <sbends>true</sbends>
+    <model>ebeam_wg_integral_895</model>
+    <bezier>0.25</bezier>
+    <radius>25.0</radius>
+    <width>0.45</width>
+    <component>
+      <layer>SiN</layer>
+      <width>0.45</width>
+      <offset>0.0</offset>
+    </component>
+    <component>
+	    <layer>Waveguide</layer>
+	    <width>0.45</width>
+	    <offset>0.0</offset>
+	  </component>
+    <component>
+      <layer>DevRec</layer>
+      <width>1.45</width>
+      <offset>0.0</offset>
+    </component>
+  </waveguide>
+  
+  <waveguide>
+  <name>SiN Strip TE 1550 nm, w=750 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <bezier>0.3</bezier>
+  <radius>50.0</radius>
+  <width>0.75</width>
+  <component>
+    <layer>SiN</layer>
+    <width>0.75</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>0.75</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>1.95</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+  <waveguide>
+  <name>SiN Strip TE 1550 nm, w=800 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <bezier>0.3</bezier>
+  <radius>50.0</radius>
+  <width>0.8</width>
+  <component>
+    <layer>SiN</layer>
+    <width>0.8</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>0.8</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>1.95</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+  <waveguide>
+  <name>SiN Strip TE 1550 nm, w=1000 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <radius>120</radius>
+  <width>1.0</width>
+  <component>
+    <layer>SiN</layer>
+    <width>1.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>1.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>2.0</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+  <waveguide>
+  <name>SiN Strip TM 1550 nm, w=1000 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <radius>180</radius>
+  <width>1.0</width>
+  <component>
+    <layer>SiN</layer>
+    <width>1.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>1.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>2.0</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+  <waveguide>
+  <name>SiN Strip TE 1310 nm, w=750 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <radius>110</radius>
+  <width>0.75</width>
+  <component>
+    <layer>SiN</layer>
+    <width>0.75</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>0.75</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>2.0</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+  <waveguide>
+  <name>SiN Strip TM 1310 nm, w=750 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <radius>150</radius>
+  <width>0.75</width>
+  <component>
+    <layer>SiN</layer>
+    <width>0.75</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>0.75</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>2.0</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+<waveguide>
+  <name>Multimode SiN Strip TE 1550 nm, w=3000 nm</name>
+  <CML>None</CML>
+  <model>None</model>
+  <sbends>true</sbends>
+  <radius>300</radius>
+  <width>3.0</width>
+  <component>
+    <layer>SiN</layer>
+    <width>3.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>Waveguide</layer>
+    <width>3.0</width>
+    <offset>0.0</offset>
+  </component>
+  <component>
+    <layer>DevRec</layer>
+    <width>4.0</width>
+    <offset>0.0</offset>
+  </component>
+</waveguide>
+
+
+<waveguide>
+  <name>SiN routing TE 1550 nm (compound waveguide)</name>
+  <compound_waveguide>
+    <singlemode>SiN Strip TE 1550 nm, w=750 nm</singlemode>
+    <multimode>Multimode SiN Strip TE 1550 nm, w=3000 nm</multimode>
+    <taper_library>EBeam-SiN</taper_library>
+    <taper_cell>taper_SiN_750_3000</taper_cell>
+    <taper_pin_sm>opt1</taper_pin_sm>
+    <taper_pin_mm>opt2</taper_pin_mm>
+  </compound_waveguide>
+</waveguide>
+
+</waveguides>

@@ -1,0 +1,97 @@
+name: Create and Publish Docker Image
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'Dockerfile'
+  pull_request:
+    types:
+      - closed 
+    branches: [ "master" ]
+    paths:
+      - 'Dockerfile'
+    
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/siepic_klayout
+
+jobs:
+  build-and-push-image:
+  
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+      - name: Check pull request was merged
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
+        run: |
+          echo "Error: Pull request is not merged."
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: install jq
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install jq -y
+
+        # docker image always built with latest version
+      - name: get latest version of siepic ebeam pdk 
+        id: ebeampdk
+        run: |
+          EBEAM_PDK=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/SiEPIC/SiEPIC_EBeam_PDK/releases/latest" \
+            | jq -r .tag_name)
+
+          echo "EBEAM_PDK=$EBEAM_PDK" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        #docker image always built with latest version
+      - name: get latest version of siepic tools
+        id: siepictools
+        run: |
+          SIEPIC_TOOLS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/SiEPIC/SiEPIC-Tools/releases/latest" \
+            | jq -r .tag_name)
+
+          echo "SIEPIC_TOOLS=$SIEPIC_TOOLS" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Log in to the container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          
+      - name: Build and push Docker image as latest image
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}-latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+        # note that the order is siepic_ebeam_pdk and then siepic_tools for version numbers in the tag
+      - name: Build and push Docker image as unique image
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: "${{ steps.meta.outputs.tags }}.${{ env.EBEAM_PDK }}.${{ env.SIEPIC_TOOLS }}"
+          labels: ${{ steps.meta.outputs.labels }}

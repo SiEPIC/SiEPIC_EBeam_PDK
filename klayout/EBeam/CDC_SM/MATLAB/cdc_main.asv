@@ -1,0 +1,17 @@
+%% Contra-DC parameters
+if(1)
+    contraDC_kappa = 33000;
+    contraDC_period = 3e-9;
+    contraDC_a =2;
+    contraDC_N = 1000;
+
+    n_eff2_fit1 = 4.23027;
+    n_eff1_fit1 = 4.02561;
+    n_eff2_fit2 = -1.2208e6;
+    n_eff1_fit2 = -965224;
+end
+
+%% Run script
+GratingPlotter;
+%% Extract .mat file to be generate a .dat file
+%lumerical_dat_export

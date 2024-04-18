@@ -1,0 +1,82 @@
+<lumerical_lookup_table version="1.0" name="index_table">
+	<association>
+		<design>
+			<value name="wg1_width" type="double">5.6e-07</value>
+			<value name="wg2_width" type="double">4.4e-07</value>
+			<value name="corrugation1_width" type="double">5e-08</value>
+			<value name="corrugation2_width" type="double">2.5e-08</value>
+			<value name="gap" type="double">1.0e-07</value>
+			<value name="grating_period" type="double">3.16e-07</value>
+			<value name="number_of_periods" type="int">1000</value>
+			<value name="sinusoidal" type="bool">False</value>
+			<value name="rib" type="bool">False</value>
+			<value name="apodization_index" type="double">10.0</value>
+			<value name="lambda_start" type="double">1530.0</value>
+			<value name="lambda_end" type="double">1580.0</value>
+			<value name="lambda_points" type="double">500</value>
+		</design>
+		<extracted>
+			<value name="sparam" type="string">w1=560,w2=440,dW1=50,dW2=25,gap=100,p=316.0,N=1000,s=0,a=10.00,rib=0,pol=0,l1=1530,l2=1580,ln=500.dat</value>
+		</extracted>
+	</association>
+	<association>
+		<design>
+			<value name="wg1_width" type="double">5.6e-07</value>
+			<value name="wg2_width" type="double">4.4e-07</value>
+			<value name="corrugation1_width" type="double">5e-08</value>
+			<value name="corrugation2_width" type="double">2.5e-08</value>
+			<value name="gap" type="double">1.0e-07</value>
+			<value name="grating_period" type="double">3.20e-07</value>
+			<value name="number_of_periods" type="int">1000</value>
+			<value name="sinusoidal" type="bool">False</value>
+			<value name="rib" type="bool">False</value>
+			<value name="apodization_index" type="double">10.0</value>
+			<value name="lambda_start" type="double">1530.0</value>
+			<value name="lambda_end" type="double">1580.0</value>
+			<value name="lambda_points" type="double">500</value>
+		</design>
+		<extracted>
+			<value name="sparam" type="string">w1=560,w2=440,dW1=50,dW2=25,gap=100,p=320.0,N=1000,s=0,a=10.00,rib=0,pol=0,l1=1530,l2=1580,ln=500.dat</value>
+		</extracted>
+	</association>
+	<association>
+		<design>
+			<value name="wg1_width" type="double">5.6e-07</value>
+			<value name="wg2_width" type="double">4.4e-07</value>
+			<value name="corrugation1_width" type="double">5e-08</value>
+			<value name="corrugation2_width" type="double">2.5e-08</value>
+			<value name="gap" type="double">1.0e-07</value>
+			<value name="grating_period" type="double">3.16e-07</value>
+			<value name="number_of_periods" type="int">200</value>
+			<value name="sinusoidal" type="bool">False</value>
+			<value name="rib" type="bool">False</value>
+			<value name="apodization_index" type="double">10.0</value>
+			<value name="lambda_start" type="double">1499.0</value>
+			<value name="lambda_end" type="double">1601.0</value>
+			<value name="lambda_points" type="double">500</value>
+		</design>
+		<extracted>
+			<value name="sparam" type="string">w1=560,w2=440,dW1=50,dW2=25,gap=100,p=316.0,N=200,s=0,a=10.00,rib=0,pol=0,l1=1499,l2=1601,ln=500.dat</value>
+		</extracted>
+	</association>
+	<association>
+		<design>
+			<value name="wg1_width" type="double">5.6e-07</value>
+			<value name="wg2_width" type="double">4.4e-07</value>
+			<value name="corrugation1_width" type="double">5e-08</value>
+			<value name="corrugation2_width" type="double">2.5e-08</value>
+			<value name="gap" type="double">1.0e-07</value>
+			<value name="grating_period" type="double">3.16e-07</value>
+			<value name="number_of_periods" type="int">500</value>
+			<value name="sinusoidal" type="bool">False</value>
+			<value name="rib" type="bool">False</value>
+			<value name="apodization_index" type="double">10.0</value>
+			<value name="lambda_start" type="double">1499.0</value>
+			<value name="lambda_end" type="double">1601.0</value>
+			<value name="lambda_points" type="double">500</value>
+		</design>
+		<extracted>
+			<value name="sparam" type="string">w1=560,w2=440,dW1=50,dW2=25,gap=100,p=316.0,N=500,s=0,a=10.00,rib=0,pol=0,l1=1499,l2=1601,ln=500.dat</value>
+		</extracted>
+	</association>
+</lumerical_lookup_table>

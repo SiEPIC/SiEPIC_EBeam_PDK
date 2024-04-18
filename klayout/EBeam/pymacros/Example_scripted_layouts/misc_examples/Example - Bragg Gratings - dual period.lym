@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>  # SiEPIC-Tools scripted layout 
+  #
+  # Create a complete layout for parameter sweeping Bragg gratings with added 3 dB splitter
+  # usage:
+  #  - the SiEPIC EBeam Library
+  # Script will generate an array of the devices with the selected parameters, and generate GCs for testing with automated measurement labels
+  # and finally generate interleaved waveguide routes between GCs and devices for compact routing
+  #
+  # Author:       Mustafa Hammood 
+  #                   Mustafa@ece.ubc.ca
+  # October 2019
+  # 
+  # Uncomment line 263 to enable path_to_waveguide, or just do it on your own.
+  
+  
+# Import KLayout-Python API
+from pya import *
+from SiEPIC.extend import to_itype
+from SiEPIC.utils import select_paths, get_layout_variables
+
+  
+# linspace function without using numpy, because why not?
+def linspace(a, b, n):
+    if n &lt; 2:
+        return b
+    diff = (float(b) - a)/(n - 1)
+    return [diff * i + a  for i in range(n)]
+        
+def truncate(number, digits) -&gt; float:
+    stepper = 10.0 ** digits
+    return math.trunc(stepper * number) / stepper
+
+def stepper(a, step, n):
+  if n&lt;=1:
+    return a
+  return [ a + step*i for i in range(n)] 
+  
+class parameters():
+  # parameter to sweep
+  # number of devices (i.e. length of this array) MUST BE EVEN as this is interleaved routing configuration!
+  Num_sweep = 10
+
+  # Bragg device parameters (refer to PCell definition)
+  Nbits = 2
+  ID = '11'
+  L =  linspace(370,370,Num_sweep)
+  startPeriod = linspace(.314,.314,Num_sweep)
+  stopPeriod = linspace(.32,.32,Num_sweep)   
+  w = linspace(.5,.5,Num_sweep)
+  dW1 = linspace(0.02,.12,Num_sweep)
+  dW2 = linspace(0.02,.12,Num_sweep)
+  
+  SumFormat = 2
+
+  # routing and device placement parameters  
+  device_spacing = 10.5   # spacing between devices
+
+  GC_pitch = 127         # Vertical spacing between grating couplers array (i.e. pitch of the fibers)
+  GC_offset = 80          # Horizontal spacing between grating couplers in the array  
+  GC_device_spacing = 50 # spacing between the GC array and the device array
+  
+  wg_bend_radius = 15    # waveguide routes bend radius
+  bezier = 1                   # Use adiabatic bezier bends (if 1)
+  bezier_N = 0.2            # Bezier bend parameter
+  wg_width = .5          # waveguide routes width  
+  wg_pitch = 5            # spacing between waveguides ( keep &gt; 3 microns to minimize cross coupling)
+  route_up = 420        # y-space (from top GC) for upward routing, increase if length of the device length is exceeding the length of routes
+  route_down = -2*wg_bend_radius   # y-space (from bottom GC) for downward routing, do not change this one
+
+  name = 'BraggDual'
+  pol = 'te'
+  PDK = 'EBeam'
+  PDK2 = 'EBeam-dev'
+  
+class layout():
+
+  def __init__(self):
+    self.p  = parameters()
+
+  def drawDevice(self, idx, pos):
+    p = self.p
+    TECHNOLOGY, lv, ly, cell = get_layout_variables()
+    
+    # Bragg section PCell
+    pcell_name = "Bragg_Encoder"
+    pcell_lib = p.PDK2
+    dW = [ p.dW1[idx], p.dW2[idx] ] 
+    pcell_params =  { "N": p.Nbits, "binary": p.ID, "start_period": p.startPeriod[idx], "stop_period": p.stopPeriod[idx], 
+    "corrugation_widths": dW, "wg_width": p.w[idx], "length": p.L[idx], "sum_format": p.SumFormat} 
+    pcell = ly.create_cell(pcell_name, pcell_lib, pcell_params)
+    
+    L_ybranch = 14.8
+    H_ybranch = 5.5    
+    
+    x_pos = pos[0]
+    y_pos = L_ybranch + pos[1]
+    t = Trans(Trans.R90, to_itype(x_pos, dbu), to_itype(y_pos, dbu))
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+    # Ybranch section PCell
+    pcell_name = "ebeam_y_1550"
+    pcell_lib = p.PDK
+    pcell = ly.create_cell(pcell_name, pcell_lib)
+    x_pos = pos[0]
+    y_pos = L_ybranch/2 +  pos[1]
+    t = Trans(Trans.R270, to_itype(x_pos, dbu), to_itype(y_pos, dbu))
+    cell.insert(CellInstArray(pcell.cell_index(),t))
+    
+  def drawDeviceArray(self):
+    p = self.p
+    TECHNOLOGY, lv, ly, cell = get_layout_variables()
+    LayerSiN = ly.layer(TECHNOLOGY['Si'])
+    TextLayerN = cell.layout().layer(TECHNOLOGY['Text'])
+  
+    
+    # clean all cells within the present cell
+    ly.prune_subcells(cell.cell_index(), 100)
+    
+    # Create a sub-cell for the grating coupler array
+    top_cell = cell
+    cell = cell.layout().create_cell(p.name)
+    t = Trans(Trans.R0, 0, 0)
+    # place the cell in the top cell
+    top_cell.insert(CellInstArray(cell.cell_index(), t))    
+    # draw grating couplers array
+    pcell_name = "ebeam_gc_%s1550"% p.pol
+    pcell_lib = p.PDK
+    GC_imported = ly.create_cell(pcell_name, pcell_lib).cell_index()
+    # Grating couplers, Ports 1, 2, 3 (top-down):
+    GC_imported = ly.create_cell("ebeam_gc_%s1550" % p.pol, p.PDK).cell_index()
+    # Instatiate GC array sufficient enough for the number of devices to be swept
+    x = p.GC_offset
+    t = Trans(Trans.R0, 0, 0)
+    cell.insert(CellInstArray(GC_imported, t, DPoint(0,p.GC_pitch/2).to_itype(dbu), DPoint(p.GC_offset,0).to_itype(dbu), 6, p.Num_sweep/2))
+   
+    L_ybranch = 14.8
+    H_ybranch = 5.5
+    for i in range(p.Num_sweep):
+      device_xpos = ((p.Num_sweep-2)/2)*p.GC_offset + p.GC_device_spacing + i*p.device_spacing
+      device_ypos =0 
+      device_ypos_top = L_ybranch + p.L[i]
+
+      self.drawDevice(i, [device_xpos, device_ypos])
+      
+      # routing even device
+      if i%2 == 0:
+        GC_xpos = p.GC_offset*(p.Num_sweep-2-i)/2
+
+        # 1st (bottom GC to reflection port)
+        GC_ypos = 0
+        route_ypos = p.route_down-2*p.wg_pitch*(i+1) +p.wg_pitch
+        
+        pts = [ DPoint(GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos, route_ypos), DPoint(device_xpos+H_ybranch/2, route_ypos), DPoint(device_xpos+H_ybranch/2, device_ypos)]
+        dpath = DPath( pts, p.wg_width )
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # 2nd (middle GC to input port) measurement label here!
+        GC_ypos += p.GC_pitch
+        route_ypos = p.route_down-2*p.wg_pitch*(i) 
+        
+        pts = [ DPoint(GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos, route_ypos), DPoint(device_xpos-H_ybranch/2, route_ypos), DPoint(device_xpos-H_ybranch/2, device_ypos)]
+        dpath = DPath( pts, p.wg_width )
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3
+        t = Trans(Trans.R0, to_itype(GC_xpos,dbu),to_itype(GC_ypos,dbu) )
+        polarization = (p.pol).upper()
+        text = Text ("opt_in_%s_1550_%s_%dpA%dpB%dw%ddwA%ddwB%dLength" % (polarization, p.name,1000*p.startPeriod[i], 1000*p.stopPeriod[i], 1000*p.w[i],1000*p.dW1[i], 1000*p.dW2[i],p.L[i]),t)
+        shape = cell.shapes(TextLayerN).insert(text)
+        shape.text_size = 1.5/dbu
+
+        # 3rd (top GC to transmission port) hi debugger
+        GC_ypos += p.GC_pitch
+        route_ypos = p.route_up+p.wg_pitch*(i) 
+        
+        pts = [ DPoint(GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos, route_ypos), DPoint(device_xpos, route_ypos), DPoint(device_xpos, device_ypos_top)]
+        dpath = DPath( pts, p.wg_width )
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+      # routing odd device
+      if i%2 != 0:
+        GC_xpos = p.GC_offset*(p.Num_sweep-1-i)/2
+
+        # 1st (bottom GC to reflection port)
+        GC_ypos = p.GC_pitch/2
+        route_ypos = p.route_down-2*p.wg_pitch*(i+1) +2*p.wg_pitch
+        
+        pts = [ DPoint(GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos, GC_ypos-p.GC_pitch/4), 
+        DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+3*p.wg_pitch, GC_ypos-p.GC_pitch/4), DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+3*p.wg_pitch, route_ypos),
+        DPoint(device_xpos-H_ybranch/2, route_ypos), DPoint(device_xpos-H_ybranch/2, device_ypos)]
+        
+        dpath = DPath( pts, p.wg_width )
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+        # 2nd (middle GC to input port) measurement label here!
+        GC_ypos += p.GC_pitch
+        route_ypos = p.route_down-2*p.wg_pitch*(i) -p.wg_pitch
+        
+        pts = [ DPoint(GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos,GC_ypos-p.GC_pitch/4), 
+        DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+2*p.wg_pitch,GC_ypos-p.GC_pitch/4), DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+2*p.wg_pitch,route_ypos),
+        DPoint(device_xpos+H_ybranch/2, route_ypos), DPoint(device_xpos+H_ybranch/2, device_ypos)]
+        
+        dpath = DPath( pts, p.wg_width )
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        # Label for automated measurements, laser on Port 2, detectors on Ports 1, 3
+        t = Trans(Trans.R0, to_itype(GC_xpos,dbu),to_itype(GC_ypos,dbu) )
+        polarization = (p.pol).upper()
+        text = Text ("opt_in_%s_1550_%s_%dpA%dpB%dw%ddwA%ddwB%dLength" % (polarization, p.name,1000*p.startPeriod[i], 1000*p.stopPeriod[i], 1000*p.w[i],1000*p.dW1[i], 1000*p.dW2[i],p.L[i]),t)
+        shape = cell.shapes(TextLayerN).insert(text)
+        shape.text_size = 1.5/dbu
+        
+        # 3rd (top GC to transmission port)
+        GC_ypos += p.GC_pitch
+        route_ypos = p.route_up+p.wg_pitch*(i) 
+        
+        pts = [ DPoint(GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos,GC_ypos), DPoint(p.wg_bend_radius+GC_xpos, route_ypos), DPoint(device_xpos, route_ypos), DPoint(device_xpos, device_ypos_top)]
+        dpath = DPath( pts, p.wg_width )
+        cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
+        
+# automated layout routine
+myLayout = layout()
+myLayout.drawDeviceArray()</text>
+</klayout-macro>

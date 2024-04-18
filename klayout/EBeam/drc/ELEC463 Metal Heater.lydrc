@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>drc</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>drc_scripts</group-name>
+ <menu-path>tools_menu.drc.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
+ <text># DRC deck for EBeam PDK, for ELEC463-2018
+# Lukas Chrostowski, 2018
+'''
+Chip1 process:
+ - partial etch on layer Si
+ - oxide
+ - metal heater
+ 
+Process Layers
+ - Si 1/0
+ - M Heater: 47/0
+ - Text: for automated measurement labels
+
+'''
+
+# Read about DRC scripts in the User Manual under "Design Rule Check (DRC)"
+# http://klayout.de/doc/manual/drc_basic.html
+
+report("DRC ELEC463-2018 Chip1")
+
+# Layers:
+LayerSi=input(1,0)
+LayerM=input(47,0)
+DevRec=input(68,0)
+LayerFP=input(99)
+
+# minimum feature size of 60nm
+LayerSi.width(0.06, angle_limit(80)).output("Si_width","Si minimum feature size violation; min 60 nm")
+LayerSi.space(0.06).output("Si_space","Si minimum space violation; min 60 nm")
+
+# minimum feature size of 3 µm
+LayerM.width(3.0, angle_limit(80)).output("M_width","Si minimum feature size violation; min 3 µm")
+LayerM.space(3.0).output("M_space","Metal minimum space violation; min 3 µm")
+
+# make sure the devices are within the floor plan layer region;
+LayerSi.outside(LayerFP).output("Boundary","devices are out of boundary")
+
+</text>
+</klayout-macro>

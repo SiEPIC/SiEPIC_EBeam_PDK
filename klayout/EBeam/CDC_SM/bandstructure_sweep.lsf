@@ -1,0 +1,17 @@
+##########################################################
+# bandstructure_sweep
+# Ajay Mistry,January 2017
+##########################################################
+setsweep("band_structure", "number of points", points);
+removesweepparameter("band_structure","kx");
+para = struct;
+para.Name = "kx";
+para.Parameter = "::model::kx";
+para.Type = "Number";
+para.Start = cent_kx-spacing;
+para.Stop = cent_kx+spacing;
+
+addsweepparameter("band_structure", para);
+# run 1st sweep with short simulation time
+select("FDTD"); set("simulation time", sim_time);
+runsweep; 

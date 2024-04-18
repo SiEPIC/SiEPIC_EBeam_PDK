@@ -1,0 +1,14 @@
+gap=2e-07;
+radius=5e-06;
+wg_width=5e-07;
+wg_thickness=2.2e-07;
+Lc=0;
+wavelength_start =1.5e-06;
+wavelength_stop =1.6e-06;
+mode_selection=1;
+mesh_accuracy=1;
+s_filename="/Users/zqlu/Desktop/ebeam_v1.2/fdtd/ebeam_dc_halfring_straight/te_ebeam_dc_halfring_straight_gap=200nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat";
+cd("/Users/zqlu/Desktop/ebeam_v1.2/fdtd/ebeam_dc_halfring_straight");
+ebeam_dc_halfring_straight;
+rm("ebeam_dc_halfring_straight.fsp"); rm("ebeam_dc_halfring_straight_S-ParameterMatrixSweep/S-ParameterMatrixSweep_1.fsp"); rm("ebeam_dc_halfring_straight_S-ParameterMatrixSweep/S-ParameterMatrixSweep_2.fsp"); rm("ebeam_dc_halfring_straight_S-ParameterMatrixSweep/S-ParameterMatrixSweep_3.fsp");rm("ebeam_dc_halfring_straight_S-ParameterMatrixSweep/S-ParameterMatrixSweep_4.fsp");
+exit(2);
