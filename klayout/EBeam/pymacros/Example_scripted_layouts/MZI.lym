@@ -105,8 +105,53 @@ instY2.transform(Trans(20000,-10000))
 
 connect_pins_with_waveguide(instGC1, 'opt1', instY1, 'opt1', waveguide_type=waveguide_type)
 connect_pins_with_waveguide(instGC2, 'opt1', instY2, 'opt1', waveguide_type=waveguide_type)
-connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
-connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
+inst_wg1 = connect_pins_with_waveguide(instY1, 'opt2', instY2, 'opt3', waveguide_type=waveguide_type)
+inst_wg2 = connect_pins_with_waveguide(instY1, 'opt3', instY2, 'opt2', waveguide_type=waveguide_type,turtle_B=[25,-90])
+
+# determine path length difference for the MZI
+
+# Method 1
+def inst_spice_param(inst, param):
+    '''
+    Input:
+        inst: an instance of a cell
+        param: which spice parameter you want to query, e.g., param="wg_length"
+            the cell needs to have a Text layer containing "spice_param:", e.g., "spice_param:wg_length=100.000 width=0.5"
+    Output: 
+        the numerical value of the parameter, in microns
+    Approach:
+        This function scans the GDS layout for a Text label ("spice_param").
+        It should work with GDS files create by any tool, 
+        as long as it contains the required Text label.
+        Alternatively, this could be implemented by querying the PCell directly, but
+        this would only work while the script is running.
+    '''    
+    # get "param" from instance
+    params1 = inst.cell.find_components(cell_selected=inst.cell)[0].params
+    param_val = dict([p.split('=') for p in params1.split(' ')])[param]
+    return float(param_val)*1e6
+    
+wg_length1 = inst_spice_param(inst_wg1, 'wg_length')
+wg_length2 = inst_spice_param(inst_wg2, 'wg_length')
+print('Length difference: %s; lengths: %s, %s' % (abs(wg_length2-wg_length1), wg_length2, wg_length1))
+
+# Method 2
+def wg_length_EBeam(inst):
+    '''
+    Input: 
+        inst: an instance of a "EBeam.Waveguide" PCell
+    Output: 
+        the waveguide length, in microns
+    Approach:
+        Use the display title for the cell
+        only works inside a scripted layout
+    '''
+    return float(inst.cell.display_title().split('_')[-1])
+
+wg_length1 = wg_length_EBeam(inst_wg1)
+wg_length2 = wg_length_EBeam(inst_wg2)
+print('Length difference: %s; lengths: %s, %s' % (abs(wg_length2-wg_length1), wg_length2, wg_length1))
+
 
 # 2nd MZI using Dream Photonics 1x2 splitter
 # grating couplers, place at absolute positions
@@ -173,9 +218,14 @@ connect_pins_with_waveguide(instY1, 'opt3', instSpiral, 'optB', waveguide_type=w
 # Zoom out
 zoom_out(cell)
 
-# Save
+# Save with PCell details
 path = os.path.dirname(os.path.realpath(__file__))
 filename = os.path.splitext(os.path.basename(__file__))[0]
+ly.write(os.path.join(path,'..',filename+'.gds'))
+
+# Export for fabrication:
 file_out = export_layout(cell, path, filename, relative_path = '..', format='oas', screenshot=True)
+
+
 </text>
 </klayout-macro>
