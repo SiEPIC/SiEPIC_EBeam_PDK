@@ -1,21 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<klayout-macro>
- <description/>
- <version/>
- <category>pymacros</category>
- <prolog/>
- <epilog/>
- <doc/>
- <autorun>false</autorun>
- <autorun-early>false</autorun-early>
- <priority>0</priority>
- <shortcut/>
- <show-in-menu>false</show-in-menu>
- <group-name/>
- <menu-path/>
- <interpreter>python</interpreter>
- <dsl-interpreter-name/>
- <text>
+
 '''
 Create a layout with band bends
 uses: waveguide bend cutback structure
@@ -103,7 +86,7 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
 
         wg_params = self.waveguide_params
 
-        if self.override_width &gt; 0:
+        if self.override_width > 0:
             delta_width = self.override_width - float(self.waveguide_params['width'] )
             self.waveguide_params['width'] = str(self.override_width)
         else:
@@ -112,9 +95,9 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         for wg in wg_params['component']:
             wg['width'] = str ( float(wg['width']) + delta_width )
 
-        if self.override_radius &gt; 0:
+        if self.override_radius > 0:
             self.waveguide_params['radius'] = str(self.override_radius)
-        if self.override_bezier &gt; 0:
+        if self.override_bezier > 0:
             self.waveguide_params['bezier'] = str(self.override_bezier)
 
         
@@ -297,5 +280,3 @@ if __name__ == "__main__":
 
     
     zoom_out(topcell)
-</text>
-</klayout-macro>
