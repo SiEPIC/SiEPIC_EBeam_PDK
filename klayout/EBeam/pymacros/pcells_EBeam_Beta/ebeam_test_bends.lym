@@ -6,7 +6,7 @@
  <prolog/>
  <epilog/>
  <doc/>
- <autorun>true</autorun>
+ <autorun>false</autorun>
  <autorun-early>false</autorun-early>
  <priority>0</priority>
  <shortcut/>
@@ -49,8 +49,18 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
         self.TECHNOLOGY = get_technology_by_name(self.technology_name)
                         
-        # Load all strip waveguides
-        self.waveguide_types = load_Waveguides_by_Tech(self.technology_name)   
+        # Load all waveguides
+        waveguide_types = load_Waveguides_by_Tech(self.technology_name)
+
+        # Make a copy so that we don't modify the original definitions
+        import copy
+        self.waveguide_types = copy.deepcopy(waveguide_types)
+        '''
+        # Debugging:
+        print(id(waveguide_types))
+        print(id(self.waveguide_types))
+        '''
+                
         # downselect to non-compound types only.
         self.waveguide_types = [t for t in self.waveguide_types if 'compound_waveguide' not in t]
             
@@ -58,10 +68,11 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         p = self.param("waveguide_type", self.TypeList, "Waveguide Type", default = self.waveguide_types[0]['name'])
         for wa in self.waveguide_types:
             p.add_choice(wa['name'],wa['name'])
-        self.param("override_width", self.TypeDouble, "Override waveguide width", default = 0.5)
-        self.param("override_radius", self.TypeDouble, "Override waveguide radius", default = 5)
-        self.param("override_bezier", self.TypeDouble, "Override waveguide Bezier parameter", default = 0.2)
+        self.param("override_width", self.TypeDouble, "Override waveguide width", default = 0)
+        self.param("override_radius", self.TypeDouble, "Override waveguide radius", default = 0)
+        self.param("override_bezier", self.TypeDouble, "Override waveguide Bezier parameter", default = 0)
         self.param("ports_opposite", self.TypeBoolean, "Waveguide ports on opposite sides", default = False)
+        self.param("bends", self.TypeInt, "Number of bends", default = 10)
         self.param("loops", self.TypeInt, "Number of loops", default = 2)
         self.minlength = 2*float(self.waveguide_types[0]['radius'])
         self.param("length", self.TypeDouble, "Inner length (min 2 x bend radius)", default = self.minlength)
@@ -77,25 +88,58 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         '''
         Get the Waveguide Type from the PCell, and update waveguide parameters
         '''
+        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+        # Load all waveguides
+        waveguide_types = load_Waveguides_by_Tech(self.technology_name)
+        # Make a copy so that we don't modify the original definitions
+        import copy
+        self.waveguide_types = copy.deepcopy(waveguide_types)
+
         self.waveguide_params = [t for t in self.waveguide_types if t['name'] == self.waveguide_type]
         if not self.waveguide_params:
             raise Exception ('Waveguides.XML not correctly configured')
         self.waveguide_params = self.waveguide_params [0]
+
         wg_params = self.waveguide_params
-        wg_params2 = wg_params
+
+        if self.override_width &gt; 0:
+            delta_width = self.override_width - float(self.waveguide_params['width'] )
+            self.waveguide_params['width'] = str(self.override_width)
+        else:
+            delta_width = 0
+        # Adjust all the width parameters
+        for wg in wg_params['component']:
+            wg['width'] = str ( float(wg['width']) + delta_width )
+
+        if self.override_radius &gt; 0:
+            self.waveguide_params['radius'] = str(self.override_radius)
+        if self.override_bezier &gt; 0:
+            self.waveguide_params['bezier'] = str(self.override_bezier)
+
         
         # DevRec width
-        if ('DevRec' not in [wg['layer'] for wg in wg_params2['component']]):
+        if ('DevRec' not in [wg['layer'] for wg in wg_params['component']]):
             from SiEPIC import _globals
-            self.devrec = max([float(wg['width']) for wg in wg_params2['component']]) + _globals.WG_DEVREC_SPACE * 2
+            self.devrec = max([float(wg['width']) for wg in wg_params['component']]) + _globals.WG_DEVREC_SPACE * 2
         else:
-            self.devrec = float([f for f in wg_params2['component'] if f['layer']=='DevRec'][0]['width'])
+            self.devrec = float([f for f in wg_params['component'] if f['layer']=='DevRec'][0]['width'])
 
         # Radius
         self.radius = float(wg_params['radius'])
 
         # Waveguide pin width
         self.wg_width = float(wg_params['width'])
+        
+        '''
+        # Debugging:
+        from SiEPIC.utils import load_Waveguides_by_Tech
+        print(load_Waveguides_by_Tech(self.technology_name)[0] )
+        print(id(load_Waveguides_by_Tech(self.technology_name)[0] ))
+        print(self.waveguide_types[0])
+        print(id(self.waveguide_types[0]))
+        '''   
+        print(wg_params)     
+        
 
     def produce_impl(self):
     
@@ -121,6 +165,8 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         # min loops
         self.loops = max(self.loops, 1)
     
+    
+
         # spiral points    
         points = [DPoint(-length0,offset), DPoint(0.0,offset), DPoint(0.0,-offset), DPoint(length0,-offset)]
         for i in range(1,self.loops*2,2):
@@ -141,14 +187,18 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         # Create a path and waveguide    
         path  = DPath(points, 0.5)
 
-        if 1:
+        if 0:
+            # This inserts a waveguide where the parameters are fixed from Waveguide.XML
+            # using the Waveguide PCell
             self.layout.technology_name = self.technology_name # required otherwise "create_cell" doesn't load
             pcell = self.layout.create_cell("Waveguide", self.technology_name, 
                         {"path": path,
                          "waveguide_type": self.waveguide_type})
             t = Trans(Trans.R0, 0, 0)
             self.cell.insert(CellInstArray(pcell.cell_index(), t))
-        else:        
+        else:   
+            # This inserts a waveguide where the parameters can be modified
+            # using the function layout_waveguide3.     
             from SiEPIC.utils.layout import layout_waveguide3
             # Make sure the technology name is associated with the layout
             #  PCells don't seem to know to whom they belong!
@@ -156,8 +206,9 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
                 self.layout.technology_name = self.technology_name
             self.waveguide_params['waveguide_type'] = self.waveguide_type
             ipoints = [p.to_itype(self.layout.dbu) for p in points]
-            waveguide_length = layout_waveguide3(self.cell, points, self.waveguide_params, debug=False)
 
+            waveguide_length = layout_waveguide3(self.cell, ipoints, self.waveguide_params, debug=False)
+            print('done layout_waveguide3 test_bends')
 
 # Save the path, used for loading WAVEGUIDES.XML
 import os
