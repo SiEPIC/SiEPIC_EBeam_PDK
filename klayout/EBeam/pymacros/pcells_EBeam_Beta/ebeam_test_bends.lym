@@ -71,18 +71,19 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         self.param("override_width", self.TypeDouble, "Override waveguide width", default = 0)
         self.param("override_radius", self.TypeDouble, "Override waveguide radius", default = 0)
         self.param("override_bezier", self.TypeDouble, "Override waveguide Bezier parameter", default = 0)
-        self.param("ports_opposite", self.TypeBoolean, "Waveguide ports on opposite sides", default = False)
-        self.param("bends", self.TypeInt, "Number of bends", default = 10)
-        self.param("loops", self.TypeInt, "Number of loops", default = 2)
-        self.minlength = 2*float(self.waveguide_types[0]['radius'])
-        self.param("length", self.TypeDouble, "Inner length (min 2 x bend radius)", default = self.minlength)
-        self.param("box", self.TypeShape, "Box", default = pya.DBox(-self.minlength, -self.minlength/2, self.minlength, self.minlength/2))
-        self.param("length1", self.TypeDouble, "length: for PCell", default = self.minlength, hidden = True)
-        self.param("flatten", self.TypeBoolean, "Flatten the PCell, for scripting", default = False)
-        
+        self.param("columns", self.TypeInt, "Number of columns", default = 5)
+        self.param("rows", self.TypeInt, "Number of double rows", default = 5)
+#        self.param("tot_bends", self.TypeInt, "Total number of bends", default = 2, readonly=True)
+        self.param("tot_bends", self.TypeInt, "Total number of bends", default = 2, readonly=True)
+
+    def coerce_parameters_impl(self): 
+#        if 'tot_bends1' in dir(self):         
+#            self.tot_bends = self.tot_bends1 # self.columns * self.rows
+        self.tot_bends = self.columns*2*4 * self.rows + 2
+            
     def display_text_impl(self):
         # Provide a descriptive text for the cell
-        return "%s_%s_%s_%s" % (self.cellName, self.loops, self.length, self.waveguide_type.replace(' ','_'))
+        return "%s_%s_%s_override:%s_%s_%s" % (self.cellName, self.tot_bends, self.waveguide_type.replace(' ','_'),self.override_width, self.override_radius, round(self.override_bezier, 3))
 
     def get_waveguide_parameters(self):
         '''
@@ -137,8 +138,8 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         print(id(load_Waveguides_by_Tech(self.technology_name)[0] ))
         print(self.waveguide_types[0])
         print(id(self.waveguide_types[0]))
-        '''   
         print(wg_params)     
+        '''   
         
 
     def produce_impl(self):
@@ -147,46 +148,77 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         devrec=self.devrec
         radius = self.radius
 
-        # SBend offset in the middle of the spiral
-        if 'sbends' in self.waveguide_params:
-            # Use the Bezier S-Bend (more space efficient)
-            # if sbends=True in Waveguide.xml
-            offset = radius - devrec/2  
-            extra = 0
-        else:
-            # Use 2 x 90 degree bends
-            offset = radius
-            extra = devrec
+        if 0:
+            # Spiral
     
-        # Ensure the length is sufficient
-        self.minlength = 2*radius
-        length0 = max(self.minlength, self.length)
+            # SBend offset in the middle of the spiral
+            if 'sbends' in self.waveguide_params:
+                # Use the Bezier S-Bend (more space efficient)
+                # if sbends=True in Waveguide.xml
+                offset = radius - devrec/2  
+                extra = 0
+            else:
+                # Use 2 x 90 degree bends
+                offset = radius
+                extra = devrec
         
-        # min loops
-        self.loops = max(self.loops, 1)
-    
-    
-
-        # spiral points    
-        points = [DPoint(-length0,offset), DPoint(0.0,offset), DPoint(0.0,-offset), DPoint(length0,-offset)]
-        for i in range(1,self.loops*2,2):
-            points.insert(0, DPoint(-length0-devrec*(i-1),offset-radius*2-devrec*(i-1)-extra))
-            points.insert(0, DPoint(length0+devrec*i,offset-radius*2-devrec*(i-1)-extra))
-            points.insert(0, DPoint(length0+devrec*i,-offset+radius*2+devrec*i+extra))
+            # Ensure the length is sufficient
+            self.minlength = 2*radius
+            length0 = max(self.minlength, self.length)
+            
+            # min loops
+            self.loops = max(self.loops, 1)
+        
+            # spiral points    
+            points = [DPoint(-length0,offset), DPoint(0.0,offset), DPoint(0.0,-offset), DPoint(length0,-offset)]
+            for i in range(1,self.loops*2,2):
+                points.insert(0, DPoint(-length0-devrec*(i-1),offset-radius*2-devrec*(i-1)-extra))
+                points.insert(0, DPoint(length0+devrec*i,offset-radius*2-devrec*(i-1)-extra))
+                points.insert(0, DPoint(length0+devrec*i,-offset+radius*2+devrec*i+extra))
+                points.insert(0, DPoint(-length0-devrec*(i+1),-offset+radius*2+devrec*i+extra))
+                points.append(DPoint(length0+devrec*(i-1),radius*2-offset+devrec*(i-1)+extra))
+                points.append(DPoint(-length0-devrec*i,radius*2-offset+devrec*(i-1)+extra))
+                points.append(DPoint(-length0-devrec*i,-radius*2+offset-devrec*i-extra))
+                points.append(DPoint(length0+devrec*(i+1),-radius*2+offset-devrec*i-extra))
+            if not self.ports_opposite:
+                points.append(DPoint(length0+devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
+                points.append(DPoint(-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
+            points.pop(0)
             points.insert(0, DPoint(-length0-devrec*(i+1),-offset+radius*2+devrec*i+extra))
-            points.append(DPoint(length0+devrec*(i-1),radius*2-offset+devrec*(i-1)+extra))
-            points.append(DPoint(-length0-devrec*i,radius*2-offset+devrec*(i-1)+extra))
-            points.append(DPoint(-length0-devrec*i,-radius*2+offset-devrec*i-extra))
-            points.append(DPoint(length0+devrec*(i+1),-radius*2+offset-devrec*i-extra))
-        if not self.ports_opposite:
-            points.append(DPoint(length0+devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
-            points.append(DPoint(-length0-devrec*(i+1),radius*2-offset+devrec*(i+1)+extra))
-        points.pop(0)
-        points.insert(0, DPoint(-length0-devrec*(i+1),-offset+radius*2+devrec*i+extra))
 
+        else:
+            # bend test structure
+            points = [DPoint(0,0)]
+            for j in range(0,self.rows):
+                dy = radius*4*j
+                for i in range(1,self.columns*2+1, 2):
+                    points.append(DPoint(radius*2*(i),dy)) 
+                    points.append(DPoint(radius*2*(i),radius*2+dy)) 
+                    points.append(DPoint(radius*2*(i+1),radius*2+dy)) 
+                    points.append(DPoint(radius*2*(i+1),dy)) 
+                points.append(DPoint(radius*2*(i+2),dy)) 
+                points.append(DPoint(radius*2*(i+2),radius*2+dy)) 
+                for i in range(self.columns*2-1, 0, -2):
+                    points.append(DPoint(radius*2*(i+1),radius*2+dy)) 
+                    points.append(DPoint(radius*2*(i+1),radius*4+dy)) 
+                    points.append(DPoint(radius*2*(i),radius*4+dy)) 
+                    points.append(DPoint(radius*2*(i),radius*2+dy)) 
+                points.pop(-1)
+                points.pop(-1)
+#            points.append(DPoint(radius*2*(i+2),radius*2*self.rows)) 
+            points.append(DPoint(0,radius*4*self.rows)) 
+            self.tot_bends1 = len(points)
+            print('Number of bends: %s' % self.tot_bends)
+            
         # Create a path and waveguide    
         path  = DPath(points, 0.5)
-
+        '''
+        # Debuggin, to make sure there are no duplicate vertices
+        print(path.to_s())
+        path = path.unique_points()
+        print(path.to_s())
+        '''
+        
         if 0:
             # This inserts a waveguide where the parameters are fixed from Waveguide.XML
             # using the Waveguide PCell
