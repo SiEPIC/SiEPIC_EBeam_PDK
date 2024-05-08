@@ -314,7 +314,7 @@
       <singlemode>Strip TE 1550 nm, w=500 nm</singlemode>
       <multimode>Multimode Strip TE 1550 nm, w=3000 nm</multimode>
       <taper_library>EBeam</taper_library>
-      <taper_cell>taper_si_simm_1550</taper_cell>
+      <taper_cell>ebeam_routing_taper_te1550_w=500nm_to_w=3000nm_L=40um</taper_cell>
       <taper_pin_sm>opt1</taper_pin_sm>
       <taper_pin_mm>opt2</taper_pin_mm>
     </compound_waveguide>
