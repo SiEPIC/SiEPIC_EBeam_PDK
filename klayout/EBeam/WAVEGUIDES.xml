@@ -6,8 +6,8 @@
 	  <model>ebeam_wg_integral_1550</model>
 	  <sbends>true</sbends>
 	  <bezier>0.20</bezier>
-      <radius>5.0</radius>
-      <width>0.5</width>
+    <radius>5.0</radius>
+    <width>0.5</width>
 	  <component>
 	    <layer>Si</layer>
 	    <width>0.5</width>

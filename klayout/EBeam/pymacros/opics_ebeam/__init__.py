@@ -764,7 +764,7 @@ component_factory = dict(
 
 components_list = list(component_factory.keys())
 __all__ = components_list
-__version__ = "0.4.7"
+__version__ = "0.4.9"
 
 if __name__ == "__main__":
     import SiEPIC.opics as op
