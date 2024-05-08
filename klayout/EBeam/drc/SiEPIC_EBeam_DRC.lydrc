@@ -38,6 +38,7 @@ LayerFP=input(99)
 LayerM1=input(11,0)
 LayerM2=input(12,0)
 LayerMLOpen=input(13,0)
+LayerDeepTrench=input(201,0)
 #LayerVC=input(40,0)
 #LayerN=input(20,0)
 #LayerNpp=input(24,0)
@@ -123,5 +124,5 @@ LayerM2.overlap(LayerM1,3.0-tol).output("M2_M1_overlap","M2 minimum overlap with
 PinRec.not_inside(LayerSi).and(PinRec.not_inside(LayerSiN))
     .output( "SiEPIC-1a" , "Warning: Possible waveguide mismatch or waveguide disconnect: PinRec must enclose only one waveguide material." )
 
-</text>
+LayerDeepTrench.separation(LayerM2, 20.0-tol).output("DT_Metal_separation","DT-Metal minimum separation violation; min 20 µm")</text>
 </klayout-macro>

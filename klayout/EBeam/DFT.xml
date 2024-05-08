@@ -5,7 +5,7 @@
 		<detectors-above-laser>1</detectors-above-laser>
 		<detectors-below-laser>2</detectors-below-laser>
 		<gc-pitch>127</gc-pitch>
-		<minimum-gc-pitch-between-separate-circuits>40</minimum-gc-pitch-between-separate-circuits>
+		<minimum-gc-spacing>60</minimum-gc-spacing>
 		<gc-orientation>
 			<GC_TE_1310_8degOxide_BB>0</GC_TE_1310_8degOxide_BB>
 			<GC_TE_1550_8degOxide_BB>0</GC_TE_1550_8degOxide_BB>
