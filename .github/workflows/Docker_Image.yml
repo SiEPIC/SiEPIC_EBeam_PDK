@@ -1,6 +1,6 @@
 name: Create and Publish Docker Image
 
-on:
+on:  
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
@@ -21,6 +21,7 @@ env:
 
 jobs:
   build-and-push-image:
+    if: github.repository_owner == 'SiEPIC'
   
     runs-on: ubuntu-latest
     permissions:
