@@ -48,6 +48,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         self.param("box", self.TypeShape, "Box", default = pya.DBox(-self.minlength, -self.minlength/2, self.minlength, self.minlength/2))
         self.param("length1", self.TypeDouble, "length: for PCell", default = self.minlength, hidden = True)
         self.param("flatten", self.TypeBoolean, "Flatten the PCell, for scripting", default = False)
+        self.param("tot_length", self.TypeDouble, "Total length estimate (mm)", default = 0, readonly=True)
         
     def display_text_impl(self):
         # Provide a descriptive text for the cell
@@ -107,6 +108,9 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             # print('%s update from PCell parameters: %s ' %(self.cellName,self.length1))
             self.length1 = self.length
         self.box = pya.DBox(-self.length,-self.minlength/2,self.length,self.minlength/2)
+
+        # estimate length
+        self.tot_length = self.length*2 * (2* self.loops+1+ 0 if self.ports_opposite else 1 )/ 1000 # micron to mm.
                     
 
     def can_create_from_shape_impl(self):
@@ -248,6 +252,7 @@ if __name__ == "__main__":
             y = 0
             x = xmax
             for wg in waveguide_types:
+                print(wg)
                 pcell = ly.create_cell("spiral_paperclip", library, {
                         'waveguide_type':wg['name'],
                         'length':100,
