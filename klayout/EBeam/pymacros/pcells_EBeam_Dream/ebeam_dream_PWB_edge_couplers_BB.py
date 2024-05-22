@@ -17,8 +17,6 @@ class ebeam_dream_PWB_edge_couplers_BB(pya.PCellDeclarationHelper):
         from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech, get_layout_variables
         self.technology_name = 'EBeam'
         TECHNOLOGY = get_technology_by_name(self.technology_name)
-        TECHNOLOGY, lv, ly, cell = get_layout_variables()
-
 
         # declare the parameters
         self.param("num_channels", self.TypeInt, "Number of Channels (1 - 16)", default = 1)
