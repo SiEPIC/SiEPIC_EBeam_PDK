@@ -38,7 +38,7 @@ jobs:
         run: pytest --cov=klayout/siepic_ebeam_pdk klayout/siepic_ebeam_pdk  --cov-report=xml
   
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: github.repository_owner == 'SiEPIC'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
