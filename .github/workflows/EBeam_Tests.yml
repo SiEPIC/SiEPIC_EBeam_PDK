@@ -35,7 +35,9 @@ jobs:
         run: docker run -itd --name ebeam_test -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --security-opt label=type:container_runtime_t ghcr.io/siepic/siepic_ebeam_pdk/siepic_klayout:master-latest
 
       - name: Copy pymacros folder to docker container
-        run: docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
+        run: |
+          docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
+          docker cp $GITHUB_WORKSPACE/klayout/EBeam/gds ebeam_test:/home/gds
 
       - name: Fetch changes from main repository
         run: git fetch https://github.com/SiEPIC/SiEPIC_EBeam_PDK.git master
