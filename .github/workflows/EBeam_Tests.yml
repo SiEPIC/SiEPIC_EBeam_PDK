@@ -37,7 +37,7 @@ jobs:
       - name: Copy pymacros folder to docker container
         run: |
           docker cp $GITHUB_WORKSPACE/klayout/EBeam/pymacros ebeam_test:/home/pymacros
-          docker cp $GITHUB_WORKSPACE/klayout/EBeam/gds ebeam_test:/home/gds
+          docker cp -r $GITHUB_WORKSPACE/klayout/EBeam/gds ebeam_test:/home/gds
 
       - name: Fetch changes from main repository
         run: git fetch https://github.com/SiEPIC/SiEPIC_EBeam_PDK.git master
