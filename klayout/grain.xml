@@ -16,4 +16,9 @@
   <url/>
   <version>0.5.4</version>
  </depends>
+ <depends>
+  <name>xsection</name>
+  <url/>
+  <version>1.7</version>
+ </depends>
 </salt-grain>
