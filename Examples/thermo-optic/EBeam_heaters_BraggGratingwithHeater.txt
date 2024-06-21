@@ -1,0 +1,9 @@
+% X-coord, Y-coord, Polarization, wavelength, type, deviceID, params 
+50, 303, TE, 1550, device, BraggGratingwithHeater, comment
+
+% X-coord, Y-coord, deviceID, padName, params 
+390, 422, BraggGratingwithHeater, comment, comment
+
+% X-coord, Y-coord, recipeID, params 
+
+
