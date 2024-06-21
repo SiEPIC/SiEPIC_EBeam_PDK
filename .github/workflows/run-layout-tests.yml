@@ -43,7 +43,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
       - name: setup python, 3.11
         uses: actions/setup-python@v4
