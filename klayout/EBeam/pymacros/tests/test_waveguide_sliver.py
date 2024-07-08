@@ -52,7 +52,7 @@ def test_sliver():
     polygon = [p for p in wg1.cell.shapes(ly.layer(ly.TECHNOLOGY['Si'])).each()][0].polygon
     for p in [r for r in polygon.to_simple_polygon().each_point()]:
         if p.x < 0:
-            print(' Polygon error: %s' %p)
+            raise Exception(' Polygon error: %s' %p)
 
 
     # Save
