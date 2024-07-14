@@ -1,3 +1,8 @@
+[tool.setuptools]
+packages = [
+  "siepic_ebeam_pdk",
+]
+
 [project]
 name = "siepic_ebeam_pdk"
 version = "0.4.11"
@@ -16,7 +21,6 @@ dependencies = [
   "SiEPIC>=0.5.4",
   "numpy",
 ]
-
 
 
 [project.urls]
