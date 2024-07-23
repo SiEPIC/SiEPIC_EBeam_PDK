@@ -108,9 +108,54 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             # print('%s update from PCell parameters: %s ' %(self.cellName,self.length1))
             self.length1 = self.length
         self.box = pya.DBox(-self.length,-self.minlength/2,self.length,self.minlength/2)
-
+        
         # estimate length
-        self.tot_length = self.length*2 * (2* self.loops+1+ 0 if self.ports_opposite else 1 )/ 1000 # micron to mm.
+        # estimate total length of the spiral
+        length0 = max(self.minlength, self.length)
+        devrec = self.devrec
+        radius = self.radius
+
+        # SBend offset in the middle of the spiral
+        if 'sbends' in self.waveguide_params:
+            # Use the Bezier S-Bend (more space efficient)
+            # if sbends=True in Waveguide.xml
+            offset = radius - devrec/2  
+            extra = 0
+        else:
+            # Use 2 x 90 degree bends
+            offset = radius
+            extra = devrec
+    
+        # Ensure the length is sufficient
+        self.minlength = 2*radius
+        
+        # min loops
+        self.loops = max(self.loops, 1)
+
+        # Calculate the points again to estimate the total length of the spiral using .distance pya method
+        points = [DPoint(-length0, radius), DPoint(0.0, radius), DPoint(0.0, -radius), DPoint(length0, -radius)]
+        for i in range(1, self.loops * 2, 2):
+            points.insert(0, DPoint(-length0 - devrec * (i - 1), radius - radius * 2 - devrec * (i - 1)))
+            points.insert(0, DPoint(length0 + devrec * i, radius - radius * 2 - devrec * (i - 1)))
+            points.insert(0, DPoint(length0 + devrec * i, -radius + radius * 2 + devrec * i))
+            points.insert(0, DPoint(-length0 - devrec * (i + 1), -radius + radius * 2 + devrec * i))
+            points.append(DPoint(length0 + devrec * (i - 1), radius * 2 - radius + devrec * (i - 1)))
+            points.append(DPoint(-length0 - devrec * i, radius * 2 - radius + devrec * (i - 1)))
+            points.append(DPoint(-length0 - devrec * i, -radius * 2 + radius - devrec * i))
+            points.append(DPoint(length0 + devrec * (i + 1), -radius * 2 + radius - devrec * i))
+        if not self.ports_opposite:
+            points.append(DPoint(length0 + devrec * (i + 1), radius * 2 - radius + devrec * (i + 1)))
+            points.append(DPoint(-length0 - devrec * (i + 1), radius * 2 - radius + devrec * (i + 1)))
+        points.pop(0)
+        points.insert(0, DPoint(-length0 - devrec * (i + 1), -radius + radius * 2 + devrec * i))
+        
+        for j in range(1, len(points)):
+            self.tot_length += points[j - 1].distance(points[j])
+
+        # Update the total length parameter
+        self.tot_length = self.tot_length / 1000  # Convert to mm
+        
+        #self.tot_length = self.length*2 * (2* self.loops+1+ 0 if self.ports_opposite else 1 )/ 1000 # micron to mm.
                     
 
     def can_create_from_shape_impl(self):
