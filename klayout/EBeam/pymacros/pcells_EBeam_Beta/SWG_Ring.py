@@ -1,6 +1,7 @@
 import pya
 from pya import *
 from SiEPIC.utils import get_technology_by_name
+from SiEPIC.utils.layout import make_pin
 
 class SWG_Ring(pya.PCellDeclarationHelper):
 
@@ -243,19 +244,28 @@ class SWG_Ring(pya.PCellDeclarationHelper):
       bus_length = to_itype(bus_length/2,dbu)
 
       # Pin1
-      t = DTrans(Trans.R0, (max(xTu) - w/2)/dbu, max(yTu)/dbu)
-      pin = Path([Point(0, -pin_length/2), Point(0, pin_length/2)], 500) #500 is width of std WG
-      pin_t = pin.transformed(t)
-      shapes(LayerPinRecN).insert(pin_t)
-      text = Text ("opt1", t)
-      shape = shapes(LayerPinRecN).insert(text)
-      shape.text_size = 0.4/dbu
+      x_pin = max(xTu) - w/2
+      y_pin = max(yTu)
+      make_pin(self.cell, "opt1", [x_pin, y_pin], w, LayerPinRecN, 90)
+      
+      
+      #t = DTrans(Trans.R0, (max(xTu) - w/2)/dbu, max(yTu)/dbu)
+      #pin = Path([Point(0, -pin_length/2), Point(0, pin_length/2)], 500) #500 is width of std WG
+      #pin_t = pin.transformed(t)
+      #shapes(LayerPinRecN).insert(pin_t)
+      #text = Text ("opt1", t)
+      #shape = shapes(LayerPinRecN).insert(text)
+      #shape.text_size = 0.4/dbu
 
       # Pin2
-      t = DTrans(Trans.R0, (max(xTu) - w/2)/dbu, min(yTd)/dbu)
-      pin = Path([Point(0, pin_length/2), Point(0, -pin_length/2)], 500) #500 is width of std WG
-      pin_t = pin.transformed(t)
-      shapes(LayerPinRecN).insert(pin_t)
-      text = Text ("opt2", t)
-      shape = shapes(LayerPinRecN).insert(text)
-      shape.text_size = 0.4/dbu
+      x_pin = max(xTu) - w/2
+      y_pin = min(yTd)
+      make_pin(self.cell, "opt2", [x_pin, y_pin], w, LayerPinRecN, 270)
+
+      #t = DTrans(Trans.R0, (max(xTu) - w/2)/dbu, min(yTd)/dbu)
+      #pin = Path([Point(0, pin_length/2), Point(0, -pin_length/2)], 500) #500 is width of std WG
+      #pin_t = pin.transformed(t)
+      #shapes(LayerPinRecN).insert(pin_t)
+      #text = Text ("opt2", t)
+      #shape = shapes(LayerPinRecN).insert(text)
+      #shape.text_size = 0.4/dbu
