@@ -35,9 +35,6 @@ class cavity_hole(pya.PCellDeclarationHelper):
 
 
   def produce_impl(self):   
-    import pya
-    from operator import xor
-    from math import pi, cos, sin
     
     dbu = self.layout.dbu
     ly = self.layout
@@ -61,7 +58,7 @@ class cavity_hole(pya.PCellDeclarationHelper):
     y = self.y/dbu
     r = self.radius/dbu
     r= r/2
-    w = 2*r;
+    w = 2*r
     
     gap = self.gap/dbu #gap between one hole to another
 

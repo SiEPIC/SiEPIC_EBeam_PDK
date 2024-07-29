@@ -105,7 +105,7 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
           x = x + grating_period[i]
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
+        profile = int(round(self.corrugation_width1/2/dbu))*profileFunction
         box1 = Box(x, 0, x + box_width[i], half_w+profile)
         pts1 = [Point(x,0)]
         pts3 = [Point(x + misalignment[i],0)]
@@ -134,7 +134,7 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
           x = x + grating_period[i]
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width1/2/dbu))*profileFunction;
+        profile = int(round(self.corrugation_width1/2/dbu))*profileFunction
         box1 = Box(x, 0, x + box_width[i], to_itype(half_w+profile,dbu*1000))
         box2 = Box(x + box_width[i], 0, x + grating_period[i], to_itype(half_w-profile,dbu*1000))
         box3 = Box(x + misalignment[i], 0, x + box_width[i] + misalignment[i], to_itype(-half_w-profile,dbu*1000))
@@ -174,7 +174,7 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
           x = x + grating_period[i]
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
+        profile = int(round(self.corrugation_width2/2/dbu))*profileFunction
         box1 = Box(x, 0, x + box_width[i], -half_w+profile).transformed(t)
         pts1 = [Point(x,0)]
         pts3 = [Point(x + misalignment[i],0)]
@@ -204,7 +204,7 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
           x = x + grating_period[i]
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width2/2/dbu))*profileFunction;
+        profile = int(round(self.corrugation_width2/2/dbu))*profileFunction
         box1 = Box(x, 0, x + box_width[i], -half_w-profile).transformed(t)
         box2 = Box(x + box_width[i], 0, x + grating_period[i], -half_w+profile).transformed(t)
         box3 = Box(x + misalignment[i], 0, x + box_width[i] + misalignment[i], half_w+profile).transformed(t)
@@ -222,7 +222,6 @@ class Contra_DC_chirped(pya.PCellDeclarationHelper):
         
          
     # Create the pins on the waveguides, as short paths:
-    from SiEPIC._globals import PIN_LENGTH as pin_length
     w1 = to_itype(self.wg1_width, dbu)
     w2 = to_itype(self.wg2_width, dbu)
     y_offset_top = -w/2 - to_itype(self.gap/2, dbu)

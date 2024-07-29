@@ -1,8 +1,7 @@
 import pya
 from pya import *
-from SiEPIC.utils import get_technology, get_technology_by_name
-from SiEPIC.utils import arc, arc_wg, arc_to_waveguide, points_per_circle#,layout
-import math
+from SiEPIC.utils import get_technology_by_name
+from SiEPIC.utils import points_per_circle#,layout
 
 class swg_fc(pya.PCellDeclarationHelper):
   """
@@ -85,7 +84,7 @@ class swg_fc(pya.PCellDeclarationHelper):
     LayerDevRecN = ly.layer(self.devrec)
     LayerTextN = ly.layer(self.textl)
 
-    from math import pi, cos, sin, log, sqrt, tan
+    from math import pi, cos, sin, tan
     
     lambda_0 = self.wavelength                   ##um wavelength of light
     pin_length = 0.5                 ##um extra nub for the waveguide attachment

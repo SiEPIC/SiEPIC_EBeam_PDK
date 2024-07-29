@@ -257,7 +257,6 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 shapes_wg += box3
 
         # Create the pins on the waveguides, as short paths:
-        from SiEPIC._globals import PIN_LENGTH as pin_length
 
         w1 = to_itype(self.wg1_width, dbu)
         w2 = to_itype(self.wg2_width, dbu)

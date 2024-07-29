@@ -47,12 +47,12 @@ class spiral(pya.PCellDeclarationHelper):
     LayerDevRecN = ly.layer(self.devrec)
 
     # draw spiral
-    from math import pi, cos, sin, log, sqrt
+    from math import pi, cos, sin
     
     # Archimedes spiral
     # r = b + a * theta
     b = self.min_radius
-    spacing = self.wg_spacing+self.wg_width;
+    spacing = self.wg_spacing+self.wg_width
     a = 2*spacing/(2*pi)
 
     # area, length, turn tracking for spiral
@@ -76,8 +76,8 @@ class spiral(pya.PCellDeclarationHelper):
       # draw the inside edge of spiral
       for i in range(0, npoints+1):
         t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
+        xa = (a*t + r) * cos(t)
+        ya = (a*t + r) * sin(t)
         pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
       # draw the outside edge of spiral
       r = 2*b + a * turn * 2 * pi + self.wg_width/2
@@ -85,8 +85,8 @@ class spiral(pya.PCellDeclarationHelper):
       da = 2 * pi / npoints  
       for i in range(npoints, -1, -1):
         t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
+        xa = (a*t + r) * cos(t)
+        ya = (a*t + r) * sin(t)
         pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
       polygon = Polygon(pts)
       area += polygon.area()
@@ -103,8 +103,8 @@ class spiral(pya.PCellDeclarationHelper):
       # draw the inside edge of spiral
       for i in range(0, npoints+1):
         t = i*da + pi
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
+        xa = (a*t + r) * cos(t)
+        ya = (a*t + r) * sin(t)
         pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
       # draw the outside edge of spiral
       r = 2*b + a * turn * 2 * pi + self.wg_width/2  - spacing
@@ -112,8 +112,8 @@ class spiral(pya.PCellDeclarationHelper):
       da = 2 * pi / npoints  
       for i in range(npoints, -1, -1):
         t = i*da + pi
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
+        xa = (a*t + r) * cos(t)
+        ya = (a*t + r) * sin(t)
         pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
       polygon = Polygon(pts)
       area += polygon.area()
@@ -135,8 +135,8 @@ class spiral(pya.PCellDeclarationHelper):
       # draw the inside edge of spiral
       for i in range(0, npoints+1):
         t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
+        xa = (a*t + r) * cos(t)
+        ya = (a*t + r) * sin(t)
         pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
       # draw the outside edge of spiral
       r = 2*b + a * turn * 2 * pi + self.wg_width/2
@@ -144,8 +144,8 @@ class spiral(pya.PCellDeclarationHelper):
       da = pi / npoints  
       for i in range(npoints, -1, -1):
         t = i*da
-        xa = (a*t + r) * cos(t);
-        ya = (a*t + r) * sin(t);
+        xa = (a*t + r) * cos(t)
+        ya = (a*t + r) * sin(t)
         pts.append(Point.from_dpoint(DPoint(xa/dbu, ya/dbu)))
       polygon = Polygon(pts)
       area += polygon.area()

@@ -70,7 +70,7 @@ class TestStruct_DoubleBus_Ring(pya.PCellDeclarationHelper):
     if lib == None:
       raise Exception("Unknown lib 'EBeam_Beta'")
 
-    pcell_decl = lib.layout().pcell_declaration("DoubleBus_Ring");
+    pcell_decl = lib.layout().pcell_declaration("DoubleBus_Ring")
     if pcell_decl == None:
       raise Exception("Unknown PCell 'DoubleBus_Ring'")
     param = { 

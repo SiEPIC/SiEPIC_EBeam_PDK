@@ -14,7 +14,7 @@ class ebeam_dream_PWB_edge_couplers_BB(pya.PCellDeclarationHelper):
 
         # Important: initialize the super class
         super(ebeam_dream_PWB_edge_couplers_BB, self).__init__()
-        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech, get_layout_variables
+        from SiEPIC.utils import get_technology_by_name
         self.technology_name = 'EBeam'
         TECHNOLOGY = get_technology_by_name(self.technology_name)
 
@@ -45,12 +45,9 @@ class ebeam_dream_PWB_edge_couplers_BB(pya.PCellDeclarationHelper):
         self.layout = layout
 
         # import neccessary libraries
-        from math import pi, sin, cos, tan
         from SiEPIC._globals import PIN_LENGTH as pin_length
         from SiEPIC.extend import to_itype
-        from SiEPIC.scripts import path_to_waveguide, connect_pins_with_waveguide, connect_cell
 
-        import ctypes
 
         #fetch the parameters
         dbu = self.layout.dbu

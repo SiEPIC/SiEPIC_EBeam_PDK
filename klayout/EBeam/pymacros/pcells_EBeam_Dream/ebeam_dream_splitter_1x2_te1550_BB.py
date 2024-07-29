@@ -13,7 +13,7 @@ class ebeam_dream_splitter_1x2_te1550_BB(pya.PCellDeclarationHelper):
 
         # Important: initialize the super class
         super(ebeam_dream_splitter_1x2_te1550_BB, self).__init__()
-        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+        from SiEPIC.utils import get_technology_by_name
         self.technology_name = 'EBeam'
         TECHNOLOGY = get_technology_by_name(self.technology_name)
 

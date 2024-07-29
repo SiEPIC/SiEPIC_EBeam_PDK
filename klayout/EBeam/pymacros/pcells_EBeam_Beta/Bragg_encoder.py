@@ -48,7 +48,7 @@ class Bragg_encoder(pya.PCellDeclarationHelper):
     LayerDevRecN = ly.layer(self.devrec)
 
     from SiEPIC.extend import to_itype
-    from math import pi, cos, sin, acos
+    from math import pi, sin
     
     N = int(self.N) 
     #draw the encoded bragg grating:

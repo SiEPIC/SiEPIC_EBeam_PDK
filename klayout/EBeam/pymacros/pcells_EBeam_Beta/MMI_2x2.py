@@ -36,7 +36,6 @@ class MMI_2x2(pya.PCellDeclarationHelper):
     # test by Lukas, to see if it breaks the PCell
     # print(1/0)
     
-    from math import pi, cos, sin
 
     # fetch the parameters
     dbu = self.layout.dbu

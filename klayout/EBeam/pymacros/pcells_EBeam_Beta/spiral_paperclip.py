@@ -31,7 +31,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         
         self.technology_name = 'EBeam' 
 
-        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+        from SiEPIC.utils import load_Waveguides_by_Tech
         self.TECHNOLOGY = get_technology_by_name(self.technology_name)
                         
         # Load all strip waveguides
@@ -260,7 +260,7 @@ class test_lib(Library):
 if __name__ == "__main__":
     print('Test layout for: Spiral Paperclip')
     
-    from SiEPIC.utils.layout import new_layout, floorplan
+    from SiEPIC.utils.layout import new_layout
     from SiEPIC.scripts import zoom_out
 
     # load the test library, and technology

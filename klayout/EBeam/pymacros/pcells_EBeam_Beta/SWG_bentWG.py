@@ -38,7 +38,6 @@ class SWG_bentWG(pya.PCellDeclarationHelper):
     def produce_impl(self):
       debug = False
       
-      from SiEPIC._globals import PIN_LENGTH
       from SiEPIC.extend import to_itype
       import math
       from pya import DPolygon

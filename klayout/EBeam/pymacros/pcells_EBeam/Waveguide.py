@@ -17,7 +17,7 @@ class Waveguide(pya.PCellDeclarationHelper):
     # Important: initialize the super class
     super(Waveguide, self).__init__()
     
-    from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+    from SiEPIC.utils import load_Waveguides_by_Tech
 
     '''
     # https://github.com/KLayout/klayout/issues/879

@@ -67,7 +67,7 @@ class ebeam_bragg_apodized(pya.PCellDeclarationHelper):
       for i in range(0,self.number_of_periods):
         x = (round((i * self.grating_period)/dbu))
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width/2/dbu))*profileFunction;
+        profile = int(round(self.corrugation_width/2/dbu))*profileFunction
         box1 = Box(x, 0, x + box_width, half_w+profile)
         pts1 = [Point(x,0)]
         pts3 = [Point(x + misalignment,0)]
@@ -99,7 +99,7 @@ class ebeam_bragg_apodized(pya.PCellDeclarationHelper):
         x = int(round((i * self.grating_period)/dbu))
         
         profileFunction = math.exp( -0.5*(2*GaussianIndex*(i-N/2)/(N))**2 )
-        profile = int(round(self.corrugation_width/2/dbu))*profileFunction;
+        profile = int(round(self.corrugation_width/2/dbu))*profileFunction
         box1 = Box(x, 0, x + box_width, half_w+profile)
         box2 = Box(x + box_width, 0, x + grating_period, half_w-profile)
         box3 = Box(x + misalignment, 0, x + box_width + misalignment, -half_w-profile)

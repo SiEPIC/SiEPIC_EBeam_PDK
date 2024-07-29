@@ -6,8 +6,8 @@
 
 """
 #%% import dependencies
-import cmath, math
-import sys, os, time
+import cmath
+import math
 import numpy as np
 import scipy.linalg
 

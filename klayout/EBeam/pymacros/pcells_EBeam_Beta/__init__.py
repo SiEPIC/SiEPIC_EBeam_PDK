@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import SiEPIC
 from SiEPIC.utils import get_technology, get_technology_by_name
 from pya import *

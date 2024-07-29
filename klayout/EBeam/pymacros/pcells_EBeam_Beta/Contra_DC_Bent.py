@@ -58,8 +58,7 @@ class Contra_DC_Bent(pya.PCellDeclarationHelper):
     # length units in dbu
 
     from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg, arc_wg_xy
-    from SiEPIC._globals import PIN_LENGTH
+    from SiEPIC.utils import arc_wg_xy
     
     # fetch the parameters
     dbu = self.layout.dbu
@@ -98,9 +97,9 @@ class Contra_DC_Bent(pya.PCellDeclarationHelper):
     # Bend radius of bus
     rBus = r + gap + w_bus/2 +w_ring/2
       
-    N_input = N;
+    N_input = N
     # Normalized number of corrugations to periodAngle
-    N = N*periodAngle*2;
+    N = N*periodAngle*2
 
     # Convention:   Set A is the CDC portion that is not offsetted, set B is offsetted by corrugation width
       
@@ -141,8 +140,8 @@ class Contra_DC_Bent(pya.PCellDeclarationHelper):
     
     bendAngleRad = (pi/180) * bendAngle
     # Draw Bus non-CDC Waveguide
-    y_center = rBus * cos(bendAngleRad) + busBendR * cos(bendAngleRad);
-    x_center = rBus * sin(bendAngleRad) + busBendR * sin(bendAngleRad);
+    y_center = rBus * cos(bendAngleRad) + busBendR * cos(bendAngleRad)
+    x_center = rBus * sin(bendAngleRad) + busBendR * sin(bendAngleRad)
     
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(x_center,y_center, busBendR, w_bus, 270-bendAngle,270))
     self.cell.shapes(LayerSiN).insert(arc_wg_xy(-x_center,y_center, busBendR, w_bus, 270, 270-bendAngle))
@@ -151,7 +150,7 @@ class Contra_DC_Bent(pya.PCellDeclarationHelper):
     from SiEPIC._globals import PIN_LENGTH as pin_length
     
     # Pin on the right side:
-    y_center = rBus * cos(bendAngleRad) + busBendR * cos(bendAngleRad) - busBendR;
+    y_center = rBus * cos(bendAngleRad) + busBendR * cos(bendAngleRad) - busBendR
     p2 = [Point(-pin_length/2 +x_center, y_center), Point(pin_length/2 +x_center, y_center)]
     p2c = Point(x_center, y_center)
     self.set_p2 = p2c

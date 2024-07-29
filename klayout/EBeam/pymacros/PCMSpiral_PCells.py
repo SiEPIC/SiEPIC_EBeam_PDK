@@ -2,8 +2,7 @@ import pya
 import math
 import cmath
 from pya import *
-from SiEPIC.utils import get_technology, get_technology_by_name
-from SiEPIC.scripts import path_to_waveguide
+from SiEPIC.utils import get_technology_by_name
 
 MODULE_NUMPY = True
 

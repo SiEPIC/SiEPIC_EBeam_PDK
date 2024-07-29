@@ -32,9 +32,6 @@ class Tapered_Ring(pya.PCellDeclarationHelper):
 
 
   def produce_impl(self):   
-    import pya
-    from operator import xor
-    from math import pi, cos, sin
     from pya import Region, Polygon
     import math
     

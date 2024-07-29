@@ -59,7 +59,6 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     else:
         mult = 1
     self.radius = float(params[0]['radius']) * mult
-    from SiEPIC.extend import to_itype
     self.wg_width = float(params[0]['width'])
 
 
@@ -73,7 +72,7 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     ly = self.layout
     shapes = self.cell.shapes
 
-    from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('EBeam')
     params = [t for t in self.waveguide_types if t['name'] == self.waveguide_type]
     layer = [wg['layer'] for wg in params[0]['component']]
@@ -88,8 +87,8 @@ class Waveguide_bump(pya.PCellDeclarationHelper):
     LayerDevRecN = ly.layer(self.devrec)
     LayerTextN = ly.layer(self.text)
 
-    from math import pi, cos, sin, log, sqrt
-    from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle, arc_wg
+    from math import pi, cos, sin
+    from SiEPIC.utils import arc_wg
     
     x = 0
     y = 0

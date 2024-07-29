@@ -57,7 +57,6 @@ class ebeam_PWB_surface_taper(pya.PCellDeclarationHelper):
     from math import pi, sin, cos, tan
     from SiEPIC._globals import PIN_LENGTH as pin_length
     from SiEPIC.extend import to_itype
-    import ctypes
 
     # fetch the parameters
     dbu = self.layout.dbu

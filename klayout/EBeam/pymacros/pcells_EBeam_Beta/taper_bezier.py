@@ -119,9 +119,8 @@ class test_lib(Library):
 if __name__ == "__main__":
     print('Test layout for: Taper Bezier')
     
-    from SiEPIC.utils.layout import new_layout, floorplan
-    from SiEPIC.scripts import zoom_out
     import siepic_ebeam_pdk
+    from SiEPIC.utils.layout import new_layout
 
     # load the test library, and technology
     t = test_lib()
@@ -134,7 +133,6 @@ if __name__ == "__main__":
     library = tech + 'test_lib'
 
     # Create for several combinations
-    from SiEPIC.utils import load_Waveguides_by_Tech
     params = [
        {'wg_width1':0.5, 'wg_width2':1, 'wg_length':10, 'a':0.37, 'b':0.37},
        {'wg_width1':0.5, 'wg_width2':2, 'wg_length':20, 'a':0.37, 'b':0.37},

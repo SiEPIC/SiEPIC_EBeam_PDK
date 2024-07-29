@@ -18,19 +18,16 @@ top_cell_name = 'EBeam_%s_MZI' % designer_name
 import pya
 from pya import *
 
-import SiEPIC
-from SiEPIC._globals import Python_Env
-from SiEPIC.scripts import connect_cell, connect_pins_with_waveguide, zoom_out, export_layout
-from SiEPIC.utils.layout import new_layout, floorplan
-from SiEPIC.extend import to_itype
 import siepic_ebeam_pdk
+from SiEPIC.scripts import connect_pins_with_waveguide, export_layout
+from SiEPIC.utils.layout import new_layout
 
 import os
 
 def test_sliver():
 
     tech_name = 'EBeam'
-    from SiEPIC.utils import get_technology, get_technology_by_name
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name(tech_name)
 
     cell, ly = new_layout(tech_name, top_cell_name, GUI=True, overwrite = True)

@@ -42,7 +42,7 @@ class Waveguide_SBend(pya.PCellDeclarationHelper):
     ly = self.layout
     shapes = self.cell.shapes
 
-    from SiEPIC.utils.layout import layout_waveguide_sbend, layout_waveguide_sbend_bezier
+    from SiEPIC.utils.layout import layout_waveguide_sbend_bezier
     from SiEPIC.extend import to_itype
 
     LayerSi = self.layer

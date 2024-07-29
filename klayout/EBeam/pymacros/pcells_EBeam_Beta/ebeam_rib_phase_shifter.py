@@ -67,10 +67,6 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     # w: waveguide width
     # length units in dbu
 
-    from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg, arc_wg_xy
-    from SiEPIC._globals import PIN_LENGTH
-    from SiEPIC.utils.layout import layout_waveguide2
     from SiEPIC.extend import to_itype
 
     # fetch the parameters
@@ -117,8 +113,8 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
     vc_to_npp_exclusion = to_itype(0,dbu) # VC boundary to NPP boundary distance
 
     ## define strip to slab transfer taper parameters
-    N = 100; # Number of points for the input/output slab taper
-    order = 3; # input/output slab taper curve 
+    N = 100 # Number of points for the input/output slab taper
+    order = 3 # input/output slab taper curve 
 
     wg1 = pya.Box(-l/2,-w/2,l/2,w/2)
     wg2 = pya.Box(-l/2,-ps_sl_w/2,l/2,ps_sl_w/2)
@@ -142,7 +138,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
   
       # add input slab taper
-      pts = [];
+      pts = []
       for i in range(0,N + 1):
         pts.append(Point(-l/2 - in_taper + in_taper/N * i, (in_slab-overlay_ebl*2)/2 + ((sw/2  - (in_slab-overlay_ebl*2))/(N**order))*(i**order)))
       for i in range(0,N + 1):
@@ -155,7 +151,7 @@ class ebeam_rib_phase_shifter(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
   
       # cubic taper
-      pts = [];
+      pts = []
       for i in range(0,N + 1):
         pts.append(Point(l/2 + in_taper - in_taper/N * i, (in_slab-overlay_ebl*2)/2 + ((sw/2  - (in_slab-overlay_ebl*2))/(N**order))*(i**order)))
       for i in range(0,N + 1):

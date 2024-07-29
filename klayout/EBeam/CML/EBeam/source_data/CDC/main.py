@@ -25,7 +25,9 @@
 # conda install numpy scipy matplotlib xmltodict
 
 
-import xmltodict, sys, os
+import xmltodict
+import sys
+import os
 from collections import OrderedDict
 from xml.etree import cElementTree as ET
 

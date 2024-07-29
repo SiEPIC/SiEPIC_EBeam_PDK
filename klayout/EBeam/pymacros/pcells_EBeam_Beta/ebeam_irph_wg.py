@@ -51,8 +51,6 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
 
-    from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg, arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH
     from SiEPIC.extend import to_itype
 
@@ -87,27 +85,27 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
     
     if self.io_wg_type == 0:
       ## define strip to slab transfer taper parameters
-      N = 100; # Number of points for the input/output slab taper
-      order = 3; # input/output slab taper curve 
-      in_taper = to_itype(5,dbu); # length of taper
+      N = 100 # Number of points for the input/output slab taper
+      order = 3 # input/output slab taper curve 
+      in_taper = to_itype(5,dbu) # length of taper
       taper_w = to_itype(2,dbu)
       # add input slab taper
-      pts = [];
+      pts = []
       for i in range(0,N + 1):
         pts.append(Point(- in_taper + in_taper/N * i, (w-overlay_ebl*2)/2 + ((taper_w - (w-overlay_ebl*2))/(N**order))*(i**order)))
       for i in range(0,N + 1):
         pts.append(Point(-in_taper + in_taper/N * (N - i), - (w-overlay_ebl*2)/2 - ((taper_w - (w-overlay_ebl*2))/(N**order))*((N-i)**order)))
       self.cell.shapes(LayerSiRibN).insert(Polygon(pts))
       # add output slab taper
-      pts = [];
+      pts = []
       for i in range(0,N + 1):
         pts.append(Point(length+ in_taper - in_taper/N * i, (w-overlay_ebl*2)/2 + ((taper_w - (w-overlay_ebl*2))/(N**order))*(i**order)))
       for i in range(0,N + 1):
         pts.append(Point(length+in_taper - in_taper/N * (N - i), - (w-overlay_ebl*2)/2 - ((taper_w - (w-overlay_ebl*2))/(N**order))*((N-i)**order)))
       self.cell.shapes(LayerSiRibN).insert(Polygon(pts))
     else:
-      in_taper = 0; # length of taper
-      taper_w = 0; # width of taper
+      in_taper = 0 # length of taper
+      taper_w = 0 # width of taper
 
     #draw the waveguide
     xtop = 0 - in_taper
@@ -156,7 +154,7 @@ class ebeam_irph_wg(pya.PCellDeclarationHelper):
 
     #devrec layer
     w_devrec = 2 * max(m_dw+m_w+w/2, vc_dw+w/2+vc_w, npp_dw+w/2+npp_w, w_rib/2)
-    pts = [];
+    pts = []
     pts = [ Point(0, -w_devrec/2-w), 
             Point(0, -taper_w), 
             Point(0-in_taper, -taper_w), 

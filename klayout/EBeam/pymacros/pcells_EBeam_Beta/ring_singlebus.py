@@ -13,7 +13,7 @@ class ring_singlebus(pya.PCellDeclarationHelper):
     # Important: initialize the super class
     super(ring_singlebus, self).__init__()
 
-    from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+    from SiEPIC.utils import load_Waveguides_by_Tech
 
     self.technology_name = 'EBeam'
     TECHNOLOGY = get_technology_by_name(self.technology_name)
@@ -46,7 +46,6 @@ class ring_singlebus(pya.PCellDeclarationHelper):
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
 
-    from SiEPIC.extend import to_itype
 
     # print(self.layout.technology_name)  # the technology is not assigned in a PCell, for some reason    
     self.layout.technology_name=self.technology_name

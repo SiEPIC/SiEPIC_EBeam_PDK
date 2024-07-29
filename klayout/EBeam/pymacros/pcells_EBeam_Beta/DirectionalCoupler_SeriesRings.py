@@ -35,7 +35,6 @@ class DirectionalCoupler_SeriesRings(pya.PCellDeclarationHelper):
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
 
-    from math import pi, cos, sin
     from SiEPIC._globals import PIN_LENGTH as pin_length
     from SiEPIC.utils import arc_wg_xy
 

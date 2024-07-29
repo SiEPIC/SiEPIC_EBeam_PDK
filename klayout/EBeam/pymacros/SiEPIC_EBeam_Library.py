@@ -106,13 +106,12 @@ verbose=False
 
 import pya
 from pya import *
-from SiEPIC.utils import get_technology_by_name
 import os
 import pathlib
 import sys
 
 
-from SiEPIC._globals import KLAYOUT_VERSION, KLAYOUT_VERSION_3
+from SiEPIC._globals import KLAYOUT_VERSION
 if KLAYOUT_VERSION < 28:
     question = pya.QMessageBox()
     question.setStandardButtons(pya.QMessageBox.Ok)
@@ -164,7 +163,8 @@ class SiEPIC_EBeam_Library(Library):
     self.path = os.path.dirname(os.path.realpath(__file__))
 
     # Import all the GDS files from the tech folder
-    import os, fnmatch
+    import os
+    import fnmatch
     dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/EBeam"))
     if verbose:
         print('  library path: %s' % dir_path)

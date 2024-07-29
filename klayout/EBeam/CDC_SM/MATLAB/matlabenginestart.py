@@ -5,7 +5,9 @@ Created on Sun Aug 12 15:59:58 2018
 @author: Mustafa Hammood
 """
 
-import os,time, math
+import os
+import time
+import math
 import numpy as np
 #import matplotlib.pyplot as plt
 
@@ -43,10 +45,10 @@ contraDC_fdtd_file.close()
 
 _lambda = np.linspace(1500,1600,10001)*1e-9
 
-n_eff1 = n_eff1_fit[0] + n_eff1_fit[1]*_lambda;
-n_eff2 = n_eff2_fit[0] + n_eff2_fit[1]*_lambda;
-n_g1 = n_g1_fit[0] + n_g1_fit[1]*_lambda;
-n_g2 = n_g2_fit[0] + n_g2_fit[1]*_lambda;
+n_eff1 = n_eff1_fit[0] + n_eff1_fit[1]*_lambda
+n_eff2 = n_eff2_fit[0] + n_eff2_fit[1]*_lambda
+n_g1 = n_g1_fit[0] + n_g1_fit[1]*_lambda
+n_g2 = n_g2_fit[0] + n_g2_fit[1]*_lambda
 
 def find_nearest(a, a0):
     "Element in nd array `a` closest to the scalar value `a0`"

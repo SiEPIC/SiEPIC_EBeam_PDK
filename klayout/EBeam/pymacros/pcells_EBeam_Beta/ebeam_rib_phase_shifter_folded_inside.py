@@ -68,8 +68,6 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     # w: waveguide width
     # length units in dbu
 
-    from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg, arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH
     from SiEPIC.utils.layout import layout_waveguide2
     from SiEPIC.extend import to_itype
@@ -130,8 +128,8 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
     total_waveguide_length = 0
 
     ## define strip to slab transfer taper parameters
-    N = 100; # Number of points for the input/output slab taper
-    order = 3; # input/output slab taper curve 
+    N = 100 # Number of points for the input/output slab taper
+    order = 3 # input/output slab taper curve 
 
     pts = [Point(-l/2,0), Point(l/2, 0)]
     total_waveguide_length += layout_waveguide2(TECHNOLOGY, self.layout, self.cell, ['Si'], [folding_w2*dbu], [0], pts, radius_um, adiab, bezier)
@@ -150,7 +148,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
       self.cell.shapes(LayerSiN).insert(Polygon(pts))
   
       # add input slab taper
-      pts = [];
+      pts = []
       for i in range(0,N + 1):
         pts.append(Point(-l/2 - in_taper + in_taper/N * i, (w-overlay_ebl)/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(i**order)))
       for i in range(0,N + 1):
@@ -164,7 +162,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
       total_waveguide_length += in_taper*dbu
   
       # add input slab taper
-      pts = [];
+      pts = []
       for i in range(0,N + 1):
         pts.append(Point(l/2 + in_taper - in_taper/N * i, (w-overlay_ebl)/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(i**order)))
       for i in range(0,N + 1):
@@ -194,7 +192,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
         total_waveguide_length += in_taper*dbu
         
         # slab cubic taper
-        pts = [];
+        pts = []
         for ii in range(0,N + 1):
           pts.append(Point(-l/2 - in_taper + in_taper/N * ii, (w-overlay_ebl)/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(ii**order)+y_move))
         for ii in range(0,N + 1):
@@ -211,7 +209,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
           total_waveguide_length += in_taper*dbu
           
           # slab cubic taper
-          pts = [];
+          pts = []
           for ii in range(0,N + 1):
             pts.append(Point(-l/2 - in_taper + in_taper/N * ii, (w-overlay_ebl)/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(ii**order)+
             y_move))
@@ -228,7 +226,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
           total_waveguide_length += in_taper*dbu
       
           # slab cubic taper
-          pts = [];
+          pts = []
           for ii in range(0,N + 1):
             pts.append(Point(l/2 + in_taper - in_taper/N * ii, (w-overlay_ebl)/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(ii**order) + y_move))
           for ii in range(0,N + 1):
@@ -245,7 +243,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
           total_waveguide_length += in_taper*dbu
       
           # add input slab taper
-          pts = [];
+          pts = []
           for i in range(0,N + 1):
             pts.append(Point(-l/2 - in_taper + in_taper/N * i, in_slab/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(i**order) + y_move))
           for i in range(0,N + 1):
@@ -260,7 +258,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
           total_waveguide_length += in_taper*dbu
       
           # add input slab taper
-          pts = [];
+          pts = []
           for i in range(0,N + 1):
             pts.append(Point(l/2 + in_taper - in_taper/N * i, in_slab/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(i**order) + y_move))
           for i in range(0,N + 1):
@@ -313,7 +311,7 @@ class ebeam_rib_phase_shifter_folded_inside(pya.PCellDeclarationHelper):
         #wg2 = pya.Box(-l/2,-4/2/dbu,l/2,4/2/dbu)
         self.cell.shapes(LayerSiN).insert(Polygon(pts))
         total_waveguide_length += in_taper*dbu
-        pts = [];
+        pts = []
         for ii in range(0,N + 1):
           pts.append(Point(l/2 + in_taper - in_taper/N * ii, (w-overlay_ebl)/2 + ((2/dbu - (w-overlay_ebl))/(N**order))*(ii**order) + y_move))
         for ii in range(0,N + 1):

@@ -76,7 +76,7 @@ class Grating_Coupler_FSWGC(pya.PCellDeclarationHelper):
     LayerPinRecN = ly.layer(self.pinrec)
     LayerDevRecN = ly.layer(self.devrec)
 
-    from math import pi, cos, sin, log, sqrt, tan
+    from math import pi, cos, sin, tan
     from SiEPIC.utils import points_per_circle
     
     lambda_0 = self.wavelength                   ##um wavelength of light

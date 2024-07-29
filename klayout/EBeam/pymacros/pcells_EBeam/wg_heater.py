@@ -65,7 +65,6 @@ class wg_heater(pya.PCellDeclarationHelper):
     params = [t for t in self.waveguide_types if t['name'] == self.waveguide_type]
     if not params:
         raise Exception ('Waveguides.XML not correctly configured')
-    from SiEPIC.extend import to_itype
     self.wg_width = float(params[0]['width'])
     
   def can_create_from_shape_impl(self):
@@ -93,7 +92,7 @@ class wg_heater(pya.PCellDeclarationHelper):
     ly = self.layout
     shapes = self.cell.shapes
 
-    from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+    from SiEPIC.utils import get_technology_by_name
     TECHNOLOGY = get_technology_by_name('EBeam')
     params = [t for t in self.waveguide_types if t['name'] == self.waveguide_type]
     layer = [wg['layer'] for wg in params[0]['component']]

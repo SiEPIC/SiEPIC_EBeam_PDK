@@ -6,14 +6,11 @@
 
 tech_name = 'EBeam'
 
-import pya # klayout
-import os, sys
-import SiEPIC
+import os
 from SiEPIC._globals import Python_Env
 print('KLayout running in mode: %s' % Python_Env)
-from SiEPIC.utils.layout import new_layout, floorplan
-from SiEPIC.utils import load_klayout_technology
-from SiEPIC.scripts import instantiate_all_library_cells, zoom_out, export_layout
+from SiEPIC.utils.layout import new_layout
+from SiEPIC.scripts import instantiate_all_library_cells
 
 def test_all_library_cells():
 

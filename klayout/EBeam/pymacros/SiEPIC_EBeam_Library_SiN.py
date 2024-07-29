@@ -26,10 +26,7 @@ verbose=False
 if verbose:
     print('siepic_ebeam_library_SiN')
 
-import pya
 from pya import *
-from SiEPIC.utils import get_technology_by_name
-from SiEPIC.utils.layout import make_pin
 import os
 import pathlib
 import sys
@@ -77,7 +74,8 @@ class siepic_ebeam_library_hubbard(Library):
     self.path = os.path.dirname(os.path.realpath(__file__))
                 
     # Import all the GDS files from the tech folder
-    import os, fnmatch
+    import os
+    import fnmatch
     dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/EBeam_SiN"))
     if verbose:
         print('  library path: %s' % dir_path)

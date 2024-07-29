@@ -49,7 +49,6 @@ class SWG_Ring(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
       debug = False
-      from SiEPIC._globals import PIN_LENGTH
       from SiEPIC.extend import to_itype
       import math
       from pya import DPolygon
@@ -239,7 +238,6 @@ class SWG_Ring(pya.PCellDeclarationHelper):
       dev_width = self.cell.bbox().width()/2
 
       # Create the pins on the waveguides, as short paths:
-      from SiEPIC._globals import PIN_LENGTH as pin_length
   
       bus_length = to_itype(bus_length/2,dbu)
 

@@ -11,9 +11,7 @@ verbose=False
 if verbose:
     print('EBeam-Dream')
 
-import pya
 from pya import *
-from SiEPIC.utils import get_technology_by_name
 import os
 import pathlib
 import sys

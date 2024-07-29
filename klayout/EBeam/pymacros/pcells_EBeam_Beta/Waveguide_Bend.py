@@ -48,8 +48,7 @@ class Waveguide_Bend(pya.PCellDeclarationHelper):
     # w: waveguide width
     # length units in dbu
 
-    from math import pi, cos, sin
-    from SiEPIC.utils import arc, arc_to_waveguide, points_per_circle, arc_wg
+    from SiEPIC.utils import arc, arc_to_waveguide
 
     # fetch the parameters
     dbu = self.layout.dbu

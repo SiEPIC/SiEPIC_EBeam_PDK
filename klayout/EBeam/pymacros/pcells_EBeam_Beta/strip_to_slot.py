@@ -40,9 +40,6 @@ class strip_to_slot(pya.PCellDeclarationHelper):
     def produce_impl(self):
         # This is the main part of the implementation: create the layout
      
-        from math import pi, cos, sin
-        from SiEPIC.utils import arc
-        from SiEPIC.utils import arc_xy
         from SiEPIC.extend import to_itype
         from SiEPIC.utils import arc_wg_xy
         
@@ -83,9 +80,7 @@ class strip_to_slot(pya.PCellDeclarationHelper):
         wg1 = Box(-taper, w+slot, 0, w+rails+slot)
         shapes(LayerSiN).insert(wg1)
 
-        from math import pi, cos, sin
-        from SiEPIC.utils import arc_wg, arc_wg_xy
-        from SiEPIC._globals import PIN_LENGTH as pin_length
+        from SiEPIC.utils import arc_wg_xy
         
 
         # Create the waveguide

@@ -152,7 +152,7 @@ class Contra_DC_CouplerApodized(pya.PCellDeclarationHelper):
           t = Trans(Trans.R0, 0,vertical_offset)
       
         x = (round((i * self.grating_period)/dbu))
-        deltaW2 = int(round(self.corrugation_width2/2/dbu));
+        deltaW2 = int(round(self.corrugation_width2/2/dbu))
         box1 = Box(x, 0, x + box_width, -half_w+deltaW2).transformed(t)
         pts1 = [Point(x,0)]
         pts3 = [Point(x + misalignment,0)]
@@ -190,7 +190,7 @@ class Contra_DC_CouplerApodized(pya.PCellDeclarationHelper):
         else:
           t = Trans(Trans.R0, 0,vertical_offset)
           
-        deltaW2 = int(round(self.corrugation_width2/2/dbu));
+        deltaW2 = int(round(self.corrugation_width2/2/dbu))
         box1 = Box(x, 0, x + box_width, -half_w-deltaW2).transformed(t)
         box2 = Box(x + box_width, 0, x + grating_period, -half_w+deltaW2).transformed(t)
         box3 = Box(x + misalignment, 0, x + box_width + misalignment, half_w+deltaW2).transformed(t)

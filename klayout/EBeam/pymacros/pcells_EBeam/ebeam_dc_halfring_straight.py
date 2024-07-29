@@ -34,8 +34,7 @@ class ebeam_dc_halfring_straight(pya.PCellDeclarationHelper):
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
 
-    from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg, arc_wg_xy
+    from SiEPIC.utils import arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH
 
     # fetch the parameters

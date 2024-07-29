@@ -50,7 +50,6 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
     # stop_agnle: stopping angle of the arc
     # length units in dbu
     import math
-    from math import pi, cos, sin
     from SiEPIC.utils import arc_wg
     
     # fetch the parameters

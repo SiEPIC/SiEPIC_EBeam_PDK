@@ -56,10 +56,9 @@ class ebeam_irph_mrr(pya.PCellDeclarationHelper):
   def produce_impl(self):
     # This is the main part of the implementation: create the layout
 
-    from math import pi, cos, sin
-    from SiEPIC.utils import arc_wg, arc_wg_xy, arc_xy
+    from SiEPIC.utils import arc_wg_xy, arc_xy
     from SiEPIC._globals import PIN_LENGTH
-    from SiEPIC.extend import to_itype, to_dtype
+    from SiEPIC.extend import to_itype
 
     # fetch the parameters
     dbu = self.layout.dbu

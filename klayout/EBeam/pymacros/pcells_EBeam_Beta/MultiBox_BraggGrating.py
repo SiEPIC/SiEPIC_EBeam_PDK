@@ -48,7 +48,6 @@ class MultiBox_BraggGrating(pya.PCellDeclarationHelper):
         return False
         
     def produce_impl(self):
-      from SiEPIC._globals import PIN_LENGTH
       from SiEPIC.extend import to_itype
       from pya import DPolygon
       import math

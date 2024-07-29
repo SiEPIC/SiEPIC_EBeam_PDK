@@ -18,7 +18,6 @@ class Universal_GC(pya.PCellDeclarationHelper):
 
     # Important: initialize the super class
     super(Universal_GC, self).__init__()
-    from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
     TECHNOLOGY = get_technology_by_name('EBeam')
     self.TECHNOLOGY = TECHNOLOGY
     
@@ -73,7 +72,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
     def effective_index(wl = self.wavelength, etch_depth = self.etch_depth, Si_thickness = self.Si_thickness, n_t = self.n_t, pol = self.pol, dc = self.dc, n_2 = self.n_2):
       
       from math import pi, cos, sin, log, sqrt, tan
-      from SiEPIC.utils import points_per_circle
+      from math import pi, tan
       
       point =1001
       n_0 = n_t
@@ -112,9 +111,9 @@ class Universal_GC(pya.PCellDeclarationHelper):
       for ii in range(0,point-1):
         b_0[ii] = n_1*k_0 + (n_2 - n_1)*k_0/(point-1)*ii   # copied from .ample UGC: should this be point-1?
         
-        h_0[ii] = sqrt( abs(pow(n_2*k_0,2) - pow(b_0[ii],2)));	
-        q_0[ii] = sqrt( abs(pow(b_0[ii],2) - pow(n_0*k_0,2)));
-        p_0[ii] = sqrt( abs(pow(b_0[ii],2) - pow(n_3*k_0,2)));
+        h_0[ii] = sqrt( abs(pow(n_2*k_0,2) - pow(b_0[ii],2)))	
+        q_0[ii] = sqrt( abs(pow(b_0[ii],2) - pow(n_0*k_0,2)))
+        p_0[ii] = sqrt( abs(pow(b_0[ii],2) - pow(n_3*k_0,2)))
         
         pbar_0[ii] = pow(n_2/n_3, 2)*p_0[ii]
         qbar_0[ii] = pow(n_2/n_0, 2)*q_0[ii]
@@ -176,6 +175,7 @@ class Universal_GC(pya.PCellDeclarationHelper):
     #####################################
     
     from math import pi, cos, sin, log, sqrt, tan
+    from math import pi, cos, sin, tan
     from SiEPIC.utils import points_per_circle
     
     lambda_0 = self.wavelength                   ##um wavelength of light

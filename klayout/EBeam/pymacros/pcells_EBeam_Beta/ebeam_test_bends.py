@@ -29,7 +29,7 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         
         self.technology_name = 'EBeam' 
 
-        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+        from SiEPIC.utils import load_Waveguides_by_Tech
         self.TECHNOLOGY = get_technology_by_name(self.technology_name)
                         
         # Load all waveguides
@@ -72,7 +72,7 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         '''
         Get the Waveguide Type from the PCell, and update waveguide parameters
         '''
-        from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
+        from SiEPIC.utils import load_Waveguides_by_Tech
         # Load all waveguides
         waveguide_types = load_Waveguides_by_Tech(self.technology_name)
         # Make a copy so that we don't modify the original definitions
@@ -241,7 +241,7 @@ class test_lib(Library):
 if __name__ == "__main__":
     print('Test layout for: test bends')
     
-    from SiEPIC.utils.layout import new_layout, floorplan
+    from SiEPIC.utils.layout import new_layout
     from SiEPIC.scripts import zoom_out
 
     # load the test library, and technology

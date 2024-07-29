@@ -51,7 +51,6 @@ class DirectionalCoupler_Bent(pya.PCellDeclarationHelper):
     # w: waveguide width
     # length units in dbu
     import math
-    from math import pi, cos, sin
     from SiEPIC.utils import arc_wg_xy
     from SiEPIC._globals import PIN_LENGTH as pin_length
     from SiEPIC.extend import to_itype

@@ -10,7 +10,9 @@
 
 
 #%% find lumapi 
-import sys, os, platform
+import sys
+import os
+import platform
 
 mode = None # variable for the Lumerical Python API
 
@@ -41,7 +43,7 @@ for dir_path in p:
             matches.append(root)
     if matches:
         lumapi_path = matches[0]
-if not lumapi_path in sys.path:
+if lumapi_path not in sys.path:
     sys.path.append(lumapi_path)
 #    os.chdir(lumapi_path)
 

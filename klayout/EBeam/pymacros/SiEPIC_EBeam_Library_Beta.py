@@ -131,9 +131,7 @@ verbose=False
 if verbose:
     print('SiEPIC_EBeam_Library_Beta, version %s' % version)
 
-import pya
 from pya import *
-from SiEPIC.utils import get_technology_by_name
 import os
 import pathlib
 import sys
@@ -180,7 +178,8 @@ class SiEPIC_EBeam_Library_Beta(Library):
     self.path = os.path.dirname(os.path.realpath(__file__))
                 
     # Import all the GDS files from the tech folder
-    import os, fnmatch
+    import os
+    import fnmatch
     dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/EBeam_Beta"))
     if verbose:
         print('  library path: %s' % dir_path)
