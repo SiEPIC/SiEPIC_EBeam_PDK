@@ -17,7 +17,6 @@ class ebeam_dc_SiN_TE_895(pya.PCellDeclarationHelper):
     """
 
     def __init__(self):
-
         # Important: initialize the super class
         super(ebeam_dc_SiN_TE_895, self).__init__()
         from SiEPIC.utils import get_technology_by_name
