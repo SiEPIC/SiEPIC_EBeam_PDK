@@ -48,6 +48,11 @@ class taper_bezier(pya.PCellDeclarationHelper):
     return False
 
   def produce(self, layout, layers, parameters, cell):
+    from packaging import version
+    import SiEPIC
+    if version.parse(SiEPIC.__version__) < version.parse('0.5.11'):
+        raise Exception("Errors", "This PCell requires SiEPIC-Tools version 0.5.11 or greater. You have %s" % SiEPIC.__version__)
+
     from SiEPIC.utils.geometry import bezier_cubic
     from SiEPIC.extend import to_itype
     from SiEPIC.utils.layout import make_pin
