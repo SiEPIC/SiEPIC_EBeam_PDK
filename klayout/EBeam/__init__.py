@@ -9,4 +9,7 @@ if not pya.Technology().has_technology('EBeam'):
 # then import all the technology modules
 from . import pymacros
 
+# display the registered libraries
+print('Loaded technology libraries: %s' % pya.Library.library_names())
+
 

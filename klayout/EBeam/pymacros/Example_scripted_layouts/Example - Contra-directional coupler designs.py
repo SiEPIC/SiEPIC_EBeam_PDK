@@ -50,7 +50,8 @@ tech_name = 'EBeam'
 from SiEPIC.extend import to_itype
 from SiEPIC.scripts import connect_pins_with_waveguide, connect_cell
 
-if SiEPIC.__version__ < '0.5.1':
+from packaging import version
+if version.parse(SiEPIC.__version__) < version.parse('0.5.1'):
     pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.5.1 or greater.", pya.MessageBox.Ok)
 
 # define layout parameters in the class below

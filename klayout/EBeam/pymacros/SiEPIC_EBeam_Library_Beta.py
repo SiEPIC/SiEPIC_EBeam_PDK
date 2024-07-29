@@ -128,7 +128,8 @@ version = '0.4.11'
 
 verbose=False
 
-print('SiEPIC_EBeam_Library_Beta, version %s' % version)
+if verbose:
+    print('SiEPIC_EBeam_Library_Beta, version %s' % version)
 
 import pya
 from pya import *

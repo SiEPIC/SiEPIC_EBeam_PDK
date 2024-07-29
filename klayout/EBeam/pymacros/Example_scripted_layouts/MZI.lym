@@ -58,7 +58,8 @@ if Python_Env == 'Script':
 
 tech_name = 'EBeam'
 
-if SiEPIC.__version__ &lt; '0.5.1':
+from packaging import version
+if version.parse(SiEPIC.__version__) &lt; version.parse('0.5.1'):
     raise Exception("Errors", "This example requires SiEPIC-Tools version 0.5.1 or greater.")
 
 '''

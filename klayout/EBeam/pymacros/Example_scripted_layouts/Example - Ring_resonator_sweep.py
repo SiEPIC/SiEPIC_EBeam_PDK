@@ -69,7 +69,8 @@ def dbl_bus_ring_res():
     cell, ly = new_layout(tech_name, 'top', GUI=True, overwrite = True)
     floorplan(cell, 605e3, 410e3)
 
-    if SiEPIC.__version__ < '0.5.1':
+    from packaging import version
+    if version.parse(SiEPIC.__version__) < version.parse('0.5.1'):
         pya.MessageBox.warning("Errors", "This example requires SiEPIC-Tools version 0.5.1 or greater.", pya.MessageBox.Ok)
 
     # Layer mapping:
