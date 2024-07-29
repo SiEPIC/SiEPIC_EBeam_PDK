@@ -1,21 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<klayout-macro>
- <description>KLayout Design Rule Check (DRC) - EBeam</description>
- <version/>
- <category>drc</category>
- <prolog/>
- <epilog/>
- <doc/>
- <autorun>false</autorun>
- <autorun-early>false</autorun-early>
- <priority>0</priority>
- <shortcut>D</shortcut>
- <show-in-menu>true</show-in-menu>
- <group-name/>
- <menu-path>siepic_menu.verification.begin</menu-path>
- <interpreter>dsl</interpreter>
- <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
- <text># Basic DRC deck for SiEPIC_EBeam_PDK
+
+# Basic DRC deck for SiEPIC_EBeam_PDK
 # Lukas Chrostowski, 2016
 # Mustafa Hammood, 2020 update
 # Lukas Chrostowski, 2023 update
@@ -25,7 +9,9 @@
 
 # Added SiN based on publication: https://doi.org/10.1117/12.2650447
 
-report("SiEPIC-EBeam-PDK DRC")
+source($input, $input.top_cell)
+
+report("SiEPIC-EBeam-PDK DRC", $output)
 
 # Layers:
 LayerSi=input(1,0)
@@ -48,8 +34,8 @@ LayerDeepTrench=input(201,0)
 #################
 
 # Check device overlaps (functional check)
-#overlaps = DevRec.merged(2)
-#output(overlaps, "Devices","Devices cannot be overlapping")
+overlaps = DevRec.merged(2)
+output(overlaps, "Devices","Devices cannot be overlapping")
 
 # make sure the devices are within the floor plan layer region;
 LayerSi.outside(LayerFP).output("Boundary","devices are out of boundary")
@@ -59,11 +45,11 @@ LayerSiN.outside(LayerFP).output("Boundary","devices are out of boundary")
 # physical checks
 #################
 
-tol = 2e-3  # users typically shoot for exactly the min features
+tol = 1e-3  # users typically shoot for exactly the min features
             # for curves, this leads to lots of false errors.
 
 # minimum feature size of Si is 70 nm and minimum exclusion between Si is 70 nm
-LayerSi.width(0.06-tol, angle_limit(80)).output("Si_width","Si minimum feature size violation; min 60 nm")
+LayerSi.width(0.07-tol, angle_limit(80)).output("Si_width","Si minimum feature size violation; min 60 nm")
 #LayerSip6nm.width(0.07-tol, angle_limit(80)).output("Sip6nm_width","Si minimum feature size violation; min 60 nm")
 LayerSi.space(0.07-tol, angle_limit(80)).output("Si_space","Si minimum space violation; min 60 nm")
 #LayerSip6nm.space(0.07-tol, angle_limit(80)).output("Sip6nm_space","Si minimum space violation; min 60 nm")
@@ -121,8 +107,8 @@ LayerM2.overlap(LayerM1,3.0-tol).output("M2_M1_overlap","M2 minimum overlap with
 # Waveguide checks:
 # disconnects, mismatched
 
-#PinRec.not_inside(LayerSi).and(PinRec.not_inside(LayerSiN))
-#    .output( "SiEPIC-1a" , "Warning: Possible waveguide mismatch or waveguide disconnect: PinRec must enclose only one waveguide material." )
+PinRec.not_inside(LayerSi).and(PinRec.not_inside(LayerSiN))
+    .output( "SiEPIC-1a" , "Warning: Possible waveguide mismatch or waveguide disconnect: PinRec must enclose only one waveguide material." )
 
-LayerDeepTrench.separation(LayerM2, 20.0-tol).output("DT_Metal_separation","DT-Metal minimum separation violation; min 20 µm")</text>
-</klayout-macro>
+LayerDeepTrench.separation(LayerM2, 20.0-tol).output("DT_Metal_separation","DT-Metal minimum separation violation; min 20 µm")
+
