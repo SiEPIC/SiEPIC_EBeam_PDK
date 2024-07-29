@@ -78,8 +78,8 @@ class taper_bezier(pya.PCellDeclarationHelper):
     cell.shapes(LayerSi).insert(wg_polygon)
     
     # Create the pins on the waveguides, as short paths:
-    make_pin(self.cell, "opt1", [0,0], w1, LayerPinRecN, 0)
-    make_pin(self.cell, "opt2", [length,0], w2, LayerPinRecN, 180)
+    make_pin(self.cell, "opt1", [0,0], w1, LayerPinRecN, 180)
+    make_pin(self.cell, "opt2", [length,0], w2, LayerPinRecN, 0)
 
     # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
     path = pya.Path([pya.Point(0,0),pya.Point(length,0)],w2+w1*2)
