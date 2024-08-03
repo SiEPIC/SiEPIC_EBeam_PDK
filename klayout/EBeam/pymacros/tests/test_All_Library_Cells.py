@@ -38,7 +38,7 @@ def test_all_library_cells():
     """
 
     # Check if there are any errors
-    for cell_id in topcell.called_cells():
+    for cell_id in topcell.each_child_cell():
         c = ly.cell(cell_id)
         error_shapes = c.shapes(ly.error_layer())
         for error in error_shapes.each():
