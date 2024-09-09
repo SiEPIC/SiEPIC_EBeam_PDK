@@ -283,7 +283,7 @@ class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
     pin = Path([Point(-pin_length/2,0), Point(pin_length/2,0)], self.t/dbu)
     pin_t = pin.transformed(t)
     shapes(LayerPinRecN).insert(pin_t)
-    text = Text ("pin1", t)
+    text = Text ("opt1", t)
     shape = shapes(LayerPinRecN).insert(text)
     shape.text_size = 0.4/dbu
 
