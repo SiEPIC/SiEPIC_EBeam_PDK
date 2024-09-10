@@ -5,7 +5,7 @@ packages = [
 
 [project]
 name = "siepic_ebeam_pdk"
-version = "0.4.14"
+version = "0.4.15"
 authors = [
   { name="Lukas Chrostowski", email="lukasc@ece.ubc.ca" },
 ]
