@@ -5,38 +5,42 @@ def linspace_without_numpy(low, high, length):
     step = ((high-low) * 1.0 / length)
     return [low+i*step for i in range(length)]
 
-class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
+class ebeam_GC_SiN_TE_1310_8deg(pya.PCellDeclarationHelper):
   """
-  Universal Grating Coupler PCell implementation.
-  Analytical design based on "Grating Coupler Design Based on Silicon-On-Insulator", Yun Wang (2013). Master's Thesis, University of British Columbia, Canada
-  Some PCell implementation adapted from the SiEPIC_EBeam library by Dr. Lukas Chrostowski, University of British Columbia, Canada
-  Orignal script written by Timothy Richards (Simon Fraser University, BC, Canada) and Adam DeAbreu (Simon Fraser University, BC, Canada)
-  Modified to use UGC method presented in : Yun Wang, Jonas Flueckiger, Charlie Lin, Lukas Chrostowski, "Universal grating coupler design," Proc. SPIE 8915, Photonics North 2013, 89150Y (11 October 2013), 
-  Transfered from Mentor Graphics to KLayout by Connor Mosquera (University of British Columbia, Canada)
+  This design is based on the Universal Grating Coupler PCell implementation. Which details can be found below:
+    Universal Grating Coupler PCell implementation.
+    Analytical design based on "Grating Coupler Design Based on Silicon-On-Insulator", Yun Wang (2013). Master's Thesis, University of British Columbia, Canada
+    Some PCell implementation adapted from the SiEPIC_EBeam library by Dr. Lukas Chrostowski, University of British Columbia, Canada
+    Orignal script written by Timothy Richards (Simon Fraser University, BC, Canada) and Adam DeAbreu (Simon Fraser University, BC, Canada)
+    Modified to use UGC method presented in : Yun Wang, Jonas Flueckiger, Charlie Lin, Lukas Chrostowski, "Universal grating coupler design," Proc. SPIE 8915, Photonics North 2013, 89150Y (11 October 2013), 
+    Transfered from Mentor Graphics to KLayout by Connor Mosquera (University of British Columbia, Canada)
+
+  This design was adapted by: Hang (Bobby) Zou from Si to SiN platform, with default parameters set as best device parameters with real fabrication run
+  Date Edited: 2024-08-28
   
   """
 
   def __init__(self):
 
     # Important: initialize the super class
-    super(EBeam_GC_SiN_1310_8deg, self).__init__()
+    super(ebeam_GC_SiN_TE_1310_8deg, self).__init__()
     from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
     TECHNOLOGY = get_technology_by_name('EBeam')
     self.TECHNOLOGY = TECHNOLOGY
     
     # declare the parameters  
     self.param("wavelength", self.TypeDouble, "Design Wavelength (micron)", default = 1.31)  
-    self.param("Si_thickness", self.TypeDouble, "SiN Thickness (micron)", default = 0.4)
-    self.param("etch_depth", self.TypeDouble, "Etch Depth (micron)", default = 0.4, hidden = True)
+    self.param("Si_thickness", self.TypeDouble, "SiN Thickness (micron)", default = 0.35)
+    self.param("etch_depth", self.TypeDouble, "Etch Depth (micron)", default = 0.4)
     self.param("pol", self.TypeString, "Polarization", default = "TE")
-    self.param("n_t", self.TypeDouble, "Cladding Index", default = 1.4223)
+    self.param("n_t", self.TypeDouble, "Cladding Index", default = 1.4718)
     self.param("angle_e", self.TypeDouble, "Taper Angle (deg)", default = 36.0)
     self.param("grating_length", self.TypeDouble, "Grating Length (micron)", default = 30.0)
     self.param("taper_length", self.TypeDouble, "Taper Length (micron)", default = 20)
-    self.param("dc", self.TypeDouble, "Duty Cylce", default = 0.5)
-    self.param('pitch', self.TypeDouble, "Pitch (micron)", default = 1)
+    self.param("dc", self.TypeDouble, "Duty Cylce", default = 0.55)
+    self.param('pitch', self.TypeDouble, "Pitch (micron)", default = 0.94)
     self.param("t", self.TypeDouble, "Waveguide Width (micron)", default = 0.75)
-    self.param("theta_c", self.TypeDouble, "Insertion Angle (deg)", default = 8.0)
+    self.param("theta_c", self.TypeDouble, "Insertion Angle (deg)", default = 8.121)
     
     # Layer parameters
     self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['SiN'])
@@ -45,10 +49,8 @@ class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
 
   def display_text_impl(self):
     # Provide a descriptive text for the cell
-    return "Universal_GC_%.1f-%.2f-%.2f-%.2f-%.2f-%.2f" % \
+    return "EBeam_GC_SiN_1310_8deg_%.1f-%.2f-%.2f-%.2f-%.2f-%.2f" % \
     (self.wavelength, self.theta_c, self.dc, self.angle_e, self.taper_length, self.t)
-    
-#    return "temporary placeholder"
     
   def coerce_parameters_impl(self):
     pass
@@ -78,13 +80,13 @@ class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
       from SiEPIC.utils import points_per_circle
       
       point =1001
-      n_0 = n_t
+      n_0 = n_t # Top cladding
       n_1 = 0
-      n_3 = 1.4223
-      #if 0:  # Silicon
-      #    n_2 = sqrt(7.9874+(3.68*pow(3.9328,2)*pow(10,30))/((pow(3.9328,2)*pow(10,30)-pow(2*3.14*3*pow(10,8)/(wl*pow(10,-6)),2))))  # Silicon wavelength-dependant index of refraction
-      #if 1:  # Silicon Nitride
-      n_2 = 2.0031  # approximate  
+      n_3 = 1.4718 # Bottom Cladding
+      # if 0:  # Silicon
+      #     n_2 = sqrt(7.9874+(3.68*pow(3.9328,2)*pow(10,30))/((pow(3.9328,2)*pow(10,30)-pow(2*3.14*3*pow(10,8)/(wl*pow(10,-6)),2))))  # Silicon wavelength-dependant index of refraction
+      # if 1:  # Silicon Nitride
+      n_2 = 2.001667  # approximate  
       delta = n_0 - n_3 
       t = Si_thickness
       t_slot = t - etch_depth
@@ -182,6 +184,7 @@ class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
     lambda_0 = self.wavelength                   ##um wavelength of light
     
     n_e = effective_index()
+    #n_e = 1.6975992
     ne_fiber = 1 # effective index of the mode in the air
     period = self.wavelength/(n_e - sin(pi/180*self.theta_c)*ne_fiber)
     period = self.pitch
@@ -190,13 +193,15 @@ class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
     # Geometry
     wh = period*self.dc                   ##thick grating
     
-    gc_number = int(round(self.grating_length/period)) ##number of periods by dividing the defined length and rounding it
+    gc_number = int(round(self.grating_length/period)) ##number of periods
     e = self.n_t*sin((pi/180)*self.theta_c)/n_e
     N = round(self.taper_length*(1+e)*n_e/lambda_0) ##allows room for the taper
 
     start = (pi - (pi/180)*self.angle_e/2)
     stop = (pi + (pi/180)*self.angle_e/2)
-              
+
+    radius_1 = 999 # random number so we know there is an error if radius_1 is not overwritten
+    radius_2 = 999
     # Draw coupler grating.
     for j in range(gc_number):
 
@@ -204,6 +209,13 @@ class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
         # calculate such that the vertex & edge placement error is < 0.5 nm.
         #   see "SiEPIC_EBeam_functions - points_per_circle" for more details
         radius = N*lambda_0 / (n_e*( 1 - e )) + j*period
+        
+        if j == 0:
+            radius_1 = radius
+
+        if j == 1:
+            radius_2 = radius
+
         seg_points = int(points_per_circle(radius/dbu, dbu=dbu)/360.*self.angle_e) # number of points grating arc
         theta_up = []
         for m in range(seg_points+1):    
@@ -291,13 +303,13 @@ class EBeam_GC_SiN_1310_8deg(pya.PCellDeclarationHelper):
     t = Trans(Trans.R0, 0,-4000)
     text = Text ("Ref: 'Universal grating coupler design'\nhttps://doi.org/10.1117/12.2042185\nPCell implementation by: Yun Wang, Timothy Richards, Adam DeAbreu,\nJonas Flueckiger, Charlie Lin, Lukas Chrostowski, Connor Mosquera\n Adapted by Hang Bobby Zou", t)
     shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    shape.text_size = 0.5/dbu
     shape.text_halign=2 # right alignment
 
     t = Trans(Trans.R0, 0,4000)
-    text = Text ("Wavelength: %s\nIncident Angle: %s\nPolarization: %s\nSilicon thickness: %s\nSilicon etch depth: %s\nRadius: %s" % (self.wavelength, self.theta_c, self.pol, self.Si_thickness, self.etch_depth, radius), t)
+    text = Text ("Wavelength: %s\nIncident Angle: %s\nPolarization: %s\nSiN thickness: %s\nSiN etch depth: %s\nDuty Cycle: %s\nPitch: %s\nRadius_1: %s\nRadius_2: %s\nn_eff: %s\ne: %s\nN: %s\n" % (self.wavelength, self.theta_c, self.pol, self.Si_thickness, self.etch_depth, self.dc, self.pitch, radius_1, radius_2,n_e,e,N), t)
     shape = shapes(LayerPinRecN).insert(text)
-    shape.text_size = 0.4/dbu
+    shape.text_size = 0.5/dbu
     shape.text_halign=2 # right alignment
     shape.text_valign=2 # bottom alignment
 
