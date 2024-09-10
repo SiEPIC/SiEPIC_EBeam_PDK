@@ -172,11 +172,11 @@ class SiEPIC_EBeam_Library_Beta(Library):
         library = tech_name + "_Beta"
         self.technology = tech_name
 
-        if verbose:
-            print("Initializing '%s' Library." % library)
-
         # Set the description
         self.description = "v%s, Beta components" % version
+
+        if verbose:
+            print("Initializing '%s' Library, %s" % (library, self.description))
 
         # Save the path, used for loading WAVEGUIDES.XML
         import os

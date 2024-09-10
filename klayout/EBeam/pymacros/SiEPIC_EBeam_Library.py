@@ -102,6 +102,9 @@ Lukas 2023/11
 
 """
 
+version = "0.4.12"
+print("SiEPIC_EBeam PDK, version %s" % version)
+
 verbose = False
 
 import pya
@@ -167,7 +170,7 @@ class SiEPIC_EBeam_Library(Library):
             print("Initializing '%s' Library." % library)
 
         # Set the description
-        self.description = "v0.4.12, Components with models"
+        self.description = "v%s, Components with models" % version
 
         # Save the path, used for loading WAVEGUIDES.XML
         import os

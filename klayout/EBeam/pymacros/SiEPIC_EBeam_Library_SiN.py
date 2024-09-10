@@ -20,7 +20,7 @@ Lukas Chrostowski, 2023/11
 
 """
 
-verbose = True
+verbose = False
 
 if verbose:
     print("siepic_ebeam_library_SiN")
@@ -66,11 +66,11 @@ class siepic_ebeam_library_hubbard(Library):
         library = tech_name + "-SiN"
         self.technology = tech_name
 
-        if verbose:
-            print("Initializing '%s' Library." % library)
-
         # Set the description
-        self.description = "v0.4.12, Silicon Nitride"
+        self.description = "v0.4.13, Silicon Nitride"
+
+        if verbose:
+            print("Initializing '%s' Library, %s" % (library, self.description))
 
         # Save the path, used for loading WAVEGUIDES.XML
         import os
