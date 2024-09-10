@@ -1,4 +1,4 @@
-# print('SiEPIC-EBeam-PDK Python module: pymacros')
+print('SiEPIC-EBeam-PDK v0.4.14 Python module: pymacros')
 
 from . import (
     SiEPIC_EBeam_Library,
