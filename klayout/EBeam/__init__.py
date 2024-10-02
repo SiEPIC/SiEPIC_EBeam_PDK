@@ -1,4 +1,4 @@
-print("SiEPIC-EBeam-PDK Python module: siepic_ebeam_pdk v0.4.15, KLayout technology: EBeam")
+print("SiEPIC-EBeam-PDK Python module: siepic_ebeam_pdk v0.4.17, KLayout technology: EBeam")
 
 # Load the KLayout technology, when running in Script mode
 import pya
@@ -10,6 +10,8 @@ if not pya.Technology().has_technology("EBeam"):
 
 # then import all the technology modules
 from . import pymacros
+print(pymacros.__file__)
+'''
 from .pymacros import (
     SiEPIC_EBeam_Library,
     SiEPIC_EBeam_Library_SiN,
@@ -17,7 +19,7 @@ from .pymacros import (
     SiEPIC_EBeam_Library_Beta,
     SiEPIC_EBeam_Library_ANT,
 )
-print(pymacros.__file__)
+'''
 
 # display the registered libraries
 print("Loaded technology libraries: %s" % pya.Library.library_names())

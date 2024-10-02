@@ -67,7 +67,7 @@ class siepic_ebeam_library_hubbard(Library):
         self.technology = tech_name
 
         # Set the description
-        self.description = "v0.4.15, Silicon Nitride"
+        self.description = "v0.4.17, Silicon Nitride"
 
         if verbose:
             print("Initializing '%s' Library, %s" % (library, self.description))
