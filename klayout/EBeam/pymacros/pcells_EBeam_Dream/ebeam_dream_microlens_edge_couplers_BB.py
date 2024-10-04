@@ -3,7 +3,7 @@ import math
 from pya import *
 
 
-class ebeam_dream_lens_edge_couplers_BB(pya.PCellDeclarationHelper):
+class ebeam_dream_microlens_edge_couplers_BB(pya.PCellDeclarationHelper):
     """
     The PCell declaration for the ebeam_dream_lens_edge_couplers_BB
     
@@ -13,7 +13,7 @@ class ebeam_dream_lens_edge_couplers_BB(pya.PCellDeclarationHelper):
     def __init__(self):
 
         # Important: initialize the super class
-        super(ebeam_dream_lens_edge_couplers_BB, self).__init__()
+        super(ebeam_dream_microlens_edge_couplers_BB, self).__init__()
         from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech, get_layout_variables
         self.technology_name = 'EBeam'
         TECHNOLOGY = get_technology_by_name(self.technology_name)
@@ -165,8 +165,8 @@ class ebeam_dream_lens_edge_couplers_BB(pya.PCellDeclarationHelper):
         shape.text_size = 4/dbu
 
         #BB description
-        t = Trans(Trans.R0,5/dbu,-200/dbu)
-        text = Text("     Reference Waveguide -->\n<-- 25 MFD lens",t)
+        t = Trans(Trans.R0,5/dbu,-240/dbu)
+        text = Text("     Reference Waveguide -->\n\n\n\n\n\n<-- 25 MFD lens",t)
         shape = shapes(LayerTEXTN).insert(text)
         shape.text_size = 3/dbu
 
@@ -202,4 +202,8 @@ class ebeam_dream_lens_edge_couplers_BB(pya.PCellDeclarationHelper):
 
     def display_text_impl(self):
         # Provide a descriptive text for the cell
-        return "ebeam_dream_lens_edge_couplers_BB"
+        return "ebeam_dream_microlens_edge_couplers_%s_%s_BB" % (
+            self.center_wavelength,
+            self.num_channels,
+        )
+
