@@ -30,7 +30,7 @@ This Python file implements a library called "SiEPIC-EBeam-Beta"
 
 
 NOTE: after changing the code, the macro needs to be rerun to install the new
-implementation. The macro is also set to "auto run" to install the PCell 
+implementation. The macro is also set to "auto run" to install the PCell
 when KLayout is run.
 
 Crash warning:
@@ -86,7 +86,7 @@ Lukas Chrostowski           2015/11/14
 
 Lukas Chrostowski           2015/11/15
  - fix for Python 3.4: print("xxx")
- 
+
 Lukas Chrostowski           2015/11/17
  - update "layout_waveguide_rel" to use the calculated points_per_circle(radius)
 
@@ -99,7 +99,7 @@ Lukas Chrostowski           2016/06/11
 
 S. Preble                   2016/08/26
  - Double Bus Ring Pin's shifted - text now is in the middle of the pin path
- 
+
 Timothy Richards, Adam DeAbreu, Lukas Chrostowski  2017/07/11
  -  Focusing Sub-wavelength grating coupler PCell.
 
@@ -114,9 +114,9 @@ Lukas Chrostowski 2020/04/03
 
 Lukas 2023/11
  - compatibility with PyPI usage of KLayout
-   
+
 todo:
-replace:     
+replace:
  layout_arc_wg_dbu(self.cell, Layerm1N, x0,y0, r_m1_in, w_m1_in, angle_min_doping, angle_max_doping)
 with:
  self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [Point(0, 0)]).transformed(t))
@@ -124,15 +124,14 @@ with:
 
 """
 
-version = '0.4.11'
+version = "0.4.17"
 
-verbose=False
+verbose = False
 
-print('SiEPIC_EBeam_Library_Beta, version %s' % version)
+if verbose:
+    print("SiEPIC_EBeam_Library_Beta, version %s" % version)
 
-import pya
 from pya import *
-from SiEPIC.utils import get_technology_by_name
 import os
 import pathlib
 import sys
@@ -141,77 +140,90 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 if dir_path not in sys.path:
     sys.path.append(dir_path)
 
-files = [f for f in os.listdir(os.path.join(os.path.dirname(
-    os.path.realpath(__file__)),'pcells_EBeam_Beta')) if '.py' in pathlib.Path(f).suffixes  and '__init__' not in f]
-import pcells_EBeam_Beta ### folder name ###
+files = [
+    f
+    for f in os.listdir(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), "pcells_EBeam_Beta")
+    )
+    if ".py" in pathlib.Path(f).suffixes and "__init__" not in f
+]
+import pcells_EBeam_Beta  ### folder name ###
 import importlib
+
 importlib.invalidate_caches()
-pcells_=[]
+pcells_ = []
 for f in files:
-    module = 'pcells_EBeam_Beta.%s' % f.replace('.py','')  ### folder name ###
+    module = "pcells_EBeam_Beta.%s" % f.replace(".py", "")  ### folder name ###
     if verbose:
-        print(' - found module: %s' % module)
-    m = importlib.import_module(module) 
+        print(" - found module: %s" % module)
+    m = importlib.import_module(module)
     if verbose:
         print(m)
     pcells_.append(importlib.reload(m))
 
 
 class SiEPIC_EBeam_Library_Beta(Library):
-  """
-  The library where we will put the PCells and GDS into 
-  """
+    """
+    The library where we will put the PCells and GDS into
+    """
 
-  def __init__(self):
-  
-    tech_name = 'EBeam'
-    library = tech_name +'_Beta'
-    self.technology=tech_name
+    def __init__(self):
+        tech_name = "EBeam"
+        library = tech_name + "_Beta"
+        self.technology = tech_name
 
-    if verbose:
-        print("Initializing '%s' Library." % library)
+        # Set the description
+        self.description = "v%s, Beta components" % version
 
-    # Set the description
-    self.description = "v%s, Beta components" % version
-
-    # Save the path, used for loading WAVEGUIDES.XML
-    import os
-    self.path = os.path.dirname(os.path.realpath(__file__))
-                
-    # Import all the GDS files from the tech folder
-    import os, fnmatch
-    dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/EBeam_Beta"))
-    if verbose:
-        print('  library path: %s' % dir_path)
-    search_str = '*.[Oo][Aa][Ss]' # OAS
-    for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter(filenames, search_str):
-            file1=os.path.join(root, filename)
-            if verbose:
-                print(" - reading %s" % file1 )
-            self.layout().read(file1)
-    search_str = '*.[Gg][Dd][Ss]' # GDS
-    for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
-        for filename in fnmatch.filter(filenames, search_str):
-            file1=os.path.join(root, filename)
-            if verbose:
-                print(" - reading %s" % file1 )
-            self.layout().read(file1)
-        
-    # Create the PCell declarations
-    for m in pcells_:
-        mm = m.__name__.replace('pcells_EBeam_Beta.','')
-        mm2 = m.__name__+'.'+mm+'()'
         if verbose:
-            print(' - register_pcell %s, %s' % (mm,mm2))
-        self.layout().register_pcell(mm, eval(mm2))
-                
-    if verbose:
-        print(' done with pcells')
-    
-    # Register us the library with the technology name
-    # If a library with that name already existed, it will be replaced then.
-    self.register(library)
- 
+            print("Initializing '%s' Library, %s" % (library, self.description))
+
+        # Save the path, used for loading WAVEGUIDES.XML
+        import os
+
+        self.path = os.path.dirname(os.path.realpath(__file__))
+
+        # Import all the GDS files from the tech folder
+        import os
+        import fnmatch
+
+        dir_path = os.path.normpath(
+            os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "../gds/EBeam_Beta"
+            )
+        )
+        if verbose:
+            print("  library path: %s" % dir_path)
+        search_str = "*.[Oo][Aa][Ss]"  # OAS
+        for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+            for filename in fnmatch.filter(filenames, search_str):
+                file1 = os.path.join(root, filename)
+                if verbose:
+                    print(" - reading %s" % file1)
+                self.layout().read(file1)
+        search_str = "*.[Gg][Dd][Ss]"  # GDS
+        for root, dirnames, filenames in os.walk(dir_path, followlinks=True):
+            for filename in fnmatch.filter(filenames, search_str):
+                file1 = os.path.join(root, filename)
+                if verbose:
+                    print(" - reading %s" % file1)
+                self.layout().read(file1)
+
+        # Create the PCell declarations
+        for m in pcells_:
+            mm = m.__name__.replace("pcells_EBeam_Beta.", "")
+            mm2 = m.__name__ + "." + mm + "()"
+            if verbose:
+                print(" - register_pcell %s, %s" % (mm, mm2))
+            self.layout().register_pcell(mm, eval(mm2))
+
+        if verbose:
+            print(" done with pcells")
+
+        # Register us the library with the technology name
+        # If a library with that name already existed, it will be replaced then.
+        self.register(library)
+
+
 # Instantiate and register the library
 SiEPIC_EBeam_Library_Beta()

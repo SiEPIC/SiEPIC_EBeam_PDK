@@ -3,9 +3,10 @@ packages = [
   "siepic_ebeam_pdk",
 ]
 
+
 [project]
 name = "siepic_ebeam_pdk"
-version = "0.4.11"
+version = "0.4.17"
 authors = [
   { name="Lukas Chrostowski", email="lukasc@ece.ubc.ca" },
 ]
@@ -20,6 +21,7 @@ classifiers = [
 dependencies = [
   "SiEPIC>=0.5.4",
   "numpy",
+  "packaging",
 ]
 
 

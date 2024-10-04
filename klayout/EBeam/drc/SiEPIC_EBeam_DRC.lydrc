@@ -59,7 +59,7 @@ LayerSiN.outside(LayerFP).output("Boundary","devices are out of boundary")
 # physical checks
 #################
 
-tol = 1e-3  # users typically shoot for exactly the min features
+tol = 2e-3  # users typically shoot for exactly the min features
             # for curves, this leads to lots of false errors.
 
 # minimum feature size of Si is 70 nm and minimum exclusion between Si is 70 nm

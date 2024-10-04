@@ -1,5 +1,5 @@
 
-global-include *.gds *.oas *.lydrc *.lyp *.lyt *.xml 
+global-include *.gds *.oas *.lydrc *.lyp *.lyt *.xml *.py
 
 graft siepic_ebeam_pdk/pymacros/opics_ebeam
 

@@ -1,75 +1,78 @@
 import pya
 from pya import *
-from SiEPIC.utils import get_technology, get_technology_by_name
-from SiEPIC.utils import arc, arc_wg, arc_to_waveguide, points_per_circle#,layout
+from SiEPIC.utils import get_technology_by_name
 import math
 
+
 class phc_test(pya.PCellDeclarationHelper):
-  """
-  Input: length, width
-  """
-  import numpy
-    
-  def __init__(self):
+    """
+    Input: length, width
+    """
 
-    # Important: initialize the super class
-    super(phc_test, self).__init__()
+    import numpy
 
-    self.param("a", self.TypeDouble, "lattice constant (microns)", default = 0.744)     
-    self.param("n", self.TypeInt, "Number of holes in x and y direction", default = 5)     
-    self.param("r", self.TypeDouble, "hole radius (microns)", default = 0.179)
-    self.param("n_sweep", self.TypeInt, "Different sizes of holes", default = 13)
-    self.param("n_vertices", self.TypeInt, "Vertices of a hole", default = 32)                                
-    TECHNOLOGY = get_technology_by_name('EBeam')
-    self.param("layer", self.TypeLayer, "Layer", default = TECHNOLOGY['Si'])
-    self.param("pinrec", self.TypeLayer, "PinRec Layer", default = TECHNOLOGY['PinRec'])
-    self.param("devrec", self.TypeLayer, "DevRec Layer", default = TECHNOLOGY['DevRec'])
-    self.param("textl", self.TypeLayer, "Text Layer", default = TECHNOLOGY['Text'])
-    self.param("etch", self.TypeLayer, "oxide etch layer", default = pya.LayerInfo(12, 0))
+    def __init__(self):
+        # Important: initialize the super class
+        super(phc_test, self).__init__()
 
+        self.param("a", self.TypeDouble, "lattice constant (microns)", default=0.744)
+        self.param("n", self.TypeInt, "Number of holes in x and y direction", default=5)
+        self.param("r", self.TypeDouble, "hole radius (microns)", default=0.179)
+        self.param("n_sweep", self.TypeInt, "Different sizes of holes", default=13)
+        self.param("n_vertices", self.TypeInt, "Vertices of a hole", default=32)
+        TECHNOLOGY = get_technology_by_name("EBeam")
+        self.param("layer", self.TypeLayer, "Layer", default=TECHNOLOGY["Si"])
+        self.param(
+            "pinrec", self.TypeLayer, "PinRec Layer", default=TECHNOLOGY["PinRec"]
+        )
+        self.param(
+            "devrec", self.TypeLayer, "DevRec Layer", default=TECHNOLOGY["DevRec"]
+        )
+        self.param("textl", self.TypeLayer, "Text Layer", default=TECHNOLOGY["Text"])
+        self.param(
+            "etch", self.TypeLayer, "oxide etch layer", default=pya.LayerInfo(12, 0)
+        )
 
-  #def display_text_impl(self):
+    # def display_text_impl(self):
     # Provide a descriptive text for the cell
-   # return "PhC resolution test_a%s-r%.3f-n%.3f" % \
-    #(self.a, self.r, self.n)
-  
-  def coerce_parameters_impl(self):
-    pass
+    # return "PhC resolution test_a%s-r%.3f-n%.3f" % \
+    # (self.a, self.r, self.n)
 
-  def can_create_from_shape(self, layout, shape, layer):
-    return False
-    
-  def produce_impl(self):
-  
-    # fetch the parameters
-    dbu = self.layout.dbu
-    ly = self.layout
+    def coerce_parameters_impl(self):
+        pass
 
-    LayerSi = self.layer
-    LayerSiN = ly.layer(self.layer)
-    LayerPinRecN = ly.layer(self.pinrec)
-    LayerDevRecN = ly.layer(self.devrec)
-    LayerTextN = ly.layer(self.textl)
-    LayerEtch = ly.layer(self.etch)
-    TextLayerN = ly.layer(self.textl)
+    def can_create_from_shape(self, layout, shape, layer):
+        return False
 
-    # Fetch all the parameters:
-    a = self.a/dbu
-    r = self.r/dbu
-    n_vertices = self.n_vertices
-    n = int(math.ceil(self.n/2))
-    #print(n)
-    n_sweep = self.n_sweep
-    n_x = n
-    n_y = n
-  
+    def produce_impl(self):
+        # fetch the parameters
+        dbu = self.layout.dbu
+        ly = self.layout
 
-    # Define Si slab and hole region for future subtraction
-    Si_slab = pya.Region()
-    hole = pya.Region()
-    ruler = pya.Region()
-    #hole_r = [r+50,r}
-    '''
+        LayerSi = self.layer
+        LayerSiN = ly.layer(self.layer)
+        LayerPinRecN = ly.layer(self.pinrec)
+        LayerDevRecN = ly.layer(self.devrec)
+        LayerTextN = ly.layer(self.textl)
+        LayerEtch = ly.layer(self.etch)
+        TextLayerN = ly.layer(self.textl)
+
+        # Fetch all the parameters:
+        a = self.a / dbu
+        r = self.r / dbu
+        n_vertices = self.n_vertices
+        n = int(math.ceil(self.n / 2))
+        # print(n)
+        n_sweep = self.n_sweep
+        n_x = n
+        n_y = n
+
+        # Define Si slab and hole region for future subtraction
+        Si_slab = pya.Region()
+        hole = pya.Region()
+        ruler = pya.Region()
+        # hole_r = [r+50,r}
+        """
       # translate to array (to pv)
       pv = []
       for p in pcell_decl.get_parameters():
@@ -110,4 +113,4 @@ class phc_test(pya.PCellDeclarationHelper):
     phc = Si_slab - hole
     phc = phc + ruler
     self.cell.shapes(LayerSiN).insert(phc)
-'''
+"""

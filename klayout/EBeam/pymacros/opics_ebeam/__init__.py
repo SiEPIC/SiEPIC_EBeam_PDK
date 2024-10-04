@@ -1,5 +1,4 @@
-""" OID: orthogonal ID for polarization, 1=TE (first mode)
-"""
+"""OID: orthogonal ID for polarization, 1=TE (first mode)"""
 
 from copy import deepcopy
 from pathlib import Path
@@ -12,10 +11,9 @@ from pathlib import PosixPath
 datadir = Path(str(Path(__file__).parent.parent.parent)) / "CML/EBeam/source_data"
 
 
-
 class contra_directional_coupler(componentModel):
     """
-    Bragg Grating-assisted Contra Directional Coupler. 
+    Bragg Grating-assisted Contra Directional Coupler.
     This component operates as an optical add-drop multiplexer (AODM) or filter.
 
     Model schematic:
@@ -30,10 +28,20 @@ class contra_directional_coupler(componentModel):
     1 └───┘             └───┘ 3
     """
 
-    cls_attrs = {"wg1_width": 0, "wg2_width": 0, "corrugation1_width": 0, "corrugation2_width": 0, "gap": 0, "grating_period": 0, "number_of_periods": 0, "sinusoidal": 0, "apodization_index": 0, "rib": 0}
+    cls_attrs = {
+        "wg1_width": 0,
+        "wg2_width": 0,
+        "corrugation1_width": 0,
+        "corrugation2_width": 0,
+        "gap": 0,
+        "grating_period": 0,
+        "number_of_periods": 0,
+        "sinusoidal": 0,
+        "apodization_index": 0,
+        "rib": 0,
+    }
     valid_OID = [1]
     ports = 4
-
 
     def __init__(
         self,
@@ -52,7 +60,7 @@ class contra_directional_coupler(componentModel):
     ) -> None:
         data_folder = datadir / "contraDC"
         filename = "contraDC.xml"
-        '''
+        """
         file_search =  "w1=" + "%.0f"%(wg1_width*1e9) + ",w2=" + "%.0f"%(wg2_width*1e9) + ",dW1=" + "%.0f"%(corrugation1_width*1e9) + ",dW2=" + "%.0f"%(corrugation2_width*1e9) +  ",gap=" + "%.0f"%(gap*1e9) + ",p=" + "%.1f"%(grating_period*1e9) + ",N=" + "%.0f"%(number_of_periods) + ",s=" + str(1 if sinusoidal else 0) +  ",a=" + "%.2f"%apodization_index +  ",rib=" + str(1 if rib else 0) + ",pol=" + str(OID-1)
         import os, fnmatch
         files = fnmatch.filter(os.listdir(data_folder), file_search + '*')
@@ -61,7 +69,7 @@ class contra_directional_coupler(componentModel):
         else:
             filename = files[0] # pick the first one. Could be improved to pick the one with the highest resolution, etc., or give people the choice.
             print('contra directional coupler, data file: %s' % filename)    
-        '''
+        """
         LUT_attrs_ = deepcopy(self.cls_attrs)
         LUT_attrs_["wg1_width"] = wg1_width
         LUT_attrs_["wg2_width"] = wg2_width
@@ -70,8 +78,8 @@ class contra_directional_coupler(componentModel):
         LUT_attrs_["gap"] = gap
         LUT_attrs_["grating_period"] = grating_period
         LUT_attrs_["number_of_periods"] = number_of_periods
-        LUT_attrs_["sinusoidal" ] = sinusoidal
-        LUT_attrs_["apodization_index" ] = apodization_index
+        LUT_attrs_["sinusoidal"] = sinusoidal
+        LUT_attrs_["apodization_index"] = apodization_index
         LUT_attrs_["rib"] = rib
 
         super().__init__(
@@ -80,15 +88,14 @@ class contra_directional_coupler(componentModel):
             filename=filename,
             nports=4,
             sparam_attr="contra_directional_coupler",
-            **LUT_attrs_
+            **LUT_attrs_,
         )
 
         if OID in self.valid_OID:
-            self.s = self.load_sparameters(data_folder, filename, verbose = True)
+            self.s = self.load_sparameters(data_folder, filename, verbose=True)
         else:
             self.s = np.zeros((self.f.shape[0], self.ports, self.ports))
         self.component_id = "contra_directional_coupler"
-
 
 
 class ebeam_bdc_te1550(componentModel):
@@ -132,7 +139,7 @@ class ebeam_bdc_te1550(componentModel):
             filename=filename,
             nports=4,
             sparam_attr="bdc_sparam",
-            **LUT_attrs_
+            **LUT_attrs_,
         )
         if OID in self.valid_OID:
             self.s = self.load_sparameters(data_folder, filename)
@@ -176,7 +183,7 @@ class DC_temp(componentModel):
             filename=filename,
             nports=4,
             sparam_attr="s-param",
-            **LUT_attrs_
+            **LUT_attrs_,
         )
         if OID in self.valid_OID:
             self.s = self.load_sparameters(data_folder, filename)
@@ -232,8 +239,14 @@ class DC_halfring(componentModel):
         LUT_attrs_["thickness"] = thickness
         LUT_attrs_["width"] = width
 
-        super().__init__(f=f, data_folder=data_folder, filename=filename,
-                         nports=4, sparam_attr="s-param", **LUT_attrs_)
+        super().__init__(
+            f=f,
+            data_folder=data_folder,
+            filename=filename,
+            nports=4,
+            sparam_attr="s-param",
+            **LUT_attrs_,
+        )
         if OID in self.valid_OID:
             self.s = self.load_sparameters(data_folder, filename)
         else:
@@ -266,7 +279,6 @@ class GC(componentModel):
     def __init__(
         self, f: ndarray = None, deltaw: int = 0, height: float = 2.2e-07, OID: int = 1
     ) -> None:
-
         data_folder = datadir / "gc_source"
         filename = "GC_TE_lookup_table.xml"
 
@@ -279,7 +291,7 @@ class GC(componentModel):
             data_folder=data_folder,
             filename=filename,
             sparam_attr="gc_sparam",
-            **LUT_attrs_
+            **LUT_attrs_,
         )
         if OID in self.valid_OID:
             self.s = self.load_sparameters(data_folder, filename)
@@ -367,7 +379,6 @@ class TunableWG(componentModel):
         loss: int = 700,
         OID: int = 1,
     ) -> None:
-
         data_folder = datadir / "tunable_wg"
         filename = "wg_strip_tunable.xml"
         LUT_attrs_ = deepcopy(self.cls_attrs)
@@ -375,13 +386,25 @@ class TunableWG(componentModel):
 
         if OID in self.valid_OID:
             self.s = self.load_sparameters(
-                length=length, data_folder=data_folder, filename=filename, neff=None, ng=None, loss=loss)
+                length=length,
+                data_folder=data_folder,
+                filename=filename,
+                neff=None,
+                ng=None,
+                loss=loss,
+            )
         else:
             self.s = np.zeros((self.f.shape[0], self.ports, self.ports))
         self.component_id = "Ebeam_TunableWG"
 
     def load_sparameters(
-        self, length: float, data_folder: PosixPath, filename: str, neff: float, ng: float, loss: int
+        self,
+        length: float,
+        data_folder: PosixPath,
+        filename: str,
+        neff: float,
+        ng: float,
+        loss: int,
     ) -> ndarray:
         """overrides read s_parameters"""
 
@@ -409,9 +432,9 @@ class TunableWG(componentModel):
             float(coeffs[5]),
         )
 
-        if(neff):
+        if neff:
             ne = neff
-        if(ng):
+        if ng:
             ng = ng
         else:
             ng = ng_
@@ -483,19 +506,31 @@ class Waveguide(componentModel):
             data_folder=data_folder,
             filename=filename,
             loss=loss,
-            **LUT_attrs_
+            **LUT_attrs_,
         )
 
         if OID in self.valid_OID:
             self.s = self.load_sparameters(
-                length=length, data_folder=data_folder, filename=filename, neff=None, ng=None, loss=loss)
+                length=length,
+                data_folder=data_folder,
+                filename=filename,
+                neff=None,
+                ng=None,
+                loss=loss,
+            )
         else:
             self.s = np.zeros((self.f.shape[0], self.ports, self.ports))
 
         self.component_id = "Ebeam_WG"
 
     def load_sparameters(
-        self, length: float, data_folder: PosixPath, filename: str, neff: float, ng: float, loss: int
+        self,
+        length: float,
+        data_folder: PosixPath,
+        filename: str,
+        neff: float,
+        ng: float,
+        loss: int,
     ) -> ndarray:
         """overrides read s_parameters"""
 
@@ -523,9 +558,9 @@ class Waveguide(componentModel):
             float(coeffs[5]),
         )
 
-        if(neff):
+        if neff:
             ne = neff
-        if(ng):
+        if ng:
             ng = ng
         else:
             ng = ng_
@@ -584,7 +619,6 @@ class Y(componentModel):
         width: float = 500e-9,
         OID: int = 1,
     ) -> None:
-
         data_folder = datadir / "y_branch_source"
         filename = "y_lookup_table.xml"
         LUT_attrs_ = deepcopy(self.cls_attrs)
@@ -598,7 +632,7 @@ class Y(componentModel):
             data_folder=data_folder,
             filename=filename,
             sparam_attr="y_sparam",
-            **LUT_attrs_
+            **LUT_attrs_,
         )
         if OID in self.valid_OID:
             self.s = self.load_sparameters(data_folder, filename)
@@ -671,19 +705,31 @@ class ebeam_wg_integral_1550(componentModel):
             data_folder=data_folder,
             filename=filename,
             loss=loss,
-            **LUT_attrs_
+            **LUT_attrs_,
         )
 
         if OID in self.valid_OID:
             self.s = self.load_sparameters(
-                length=wg_length, data_folder=data_folder, filename=filename, neff=None, ng=None, loss=loss)
+                length=wg_length,
+                data_folder=data_folder,
+                filename=filename,
+                neff=None,
+                ng=None,
+                loss=loss,
+            )
         else:
             self.s = np.zeros((self.f.shape[0], self.ports, self.ports))
 
         self.component_id = "Ebeam_WG"
 
     def load_sparameters(
-        self, length: float, data_folder: PosixPath, filename: str, neff: float, ng: float, loss: int
+        self,
+        length: float,
+        data_folder: PosixPath,
+        filename: str,
+        neff: float,
+        ng: float,
+        loss: int,
     ) -> ndarray:
         """overrides read s_parameters"""
 
@@ -711,9 +757,9 @@ class ebeam_wg_integral_1550(componentModel):
             float(coeffs[5]),
         )
 
-        if(neff):
+        if neff:
             ne = neff
-        if(ng):
+        if ng:
             ng = ng
         else:
             ng = ng_
@@ -743,9 +789,9 @@ class ebeam_wg_integral_1550(componentModel):
 
 
 component_factory = dict(
-    contra_directional_coupler = contra_directional_coupler,
-    BDC = ebeam_bdc_te1550,
-    ebeam_bdc_te1550 = ebeam_bdc_te1550,
+    contra_directional_coupler=contra_directional_coupler,
+    BDC=ebeam_bdc_te1550,
+    ebeam_bdc_te1550=ebeam_bdc_te1550,
     DC_halfring=DC_halfring,
     # DC_temp=DC_temp,
     GC=GC,
@@ -758,7 +804,7 @@ component_factory = dict(
     Y=Y,
     ebeam_y_1550=Y,
     ebeam_gc_te1550=GC,
-    GC_TE_1550_8degOxide_BB = GC,
+    GC_TE_1550_8degOxide_BB=GC,
     ebeam_wg_integral_1550=ebeam_wg_integral_1550,
 )
 
