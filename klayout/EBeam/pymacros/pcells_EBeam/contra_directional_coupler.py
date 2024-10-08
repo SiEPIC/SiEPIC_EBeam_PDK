@@ -4,7 +4,6 @@ Author:   Mustafa Hammood, 2022
 """
 
 import pya
-from pya import *
 from SiEPIC.utils import get_technology_by_name
 from SiEPIC.utils.layout import make_pin, make_devrec_label
 
@@ -110,7 +109,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         """
         if name == "documentation":
             # Mustafa Hammood's repository for simulations of CDCs
-            url = "https://github.com/SiEPIC/contraDC"
+            url = "https://github.com/SiEPIC/SiEPIC_Bragg_workshop"
             import webbrowser
 
             webbrowser.open_new(url)
@@ -185,35 +184,35 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 profile = (
                     int(round(self.corrugation1_width / 2 / dbu)) * profileFunction
                 )
-                box1 = Box(
+                box1 = pya.Box(
                     x, y_offset_top, x + box_width, y_offset_top + half_w + profile
                 )
-                pts1 = [Point(x, y_offset_top)]
-                pts3 = [Point(x + misalignment, y_offset_top)]
+                pts1 = [pya.Point(x, y_offset_top)]
+                pts3 = [pya.Point(x + misalignment, y_offset_top)]
 
                 for i1 in range(0, npoints_sin + 1):
                     x1 = i1 * 2 * math.pi / npoints_sin
                     y1 = round(profile * math.sin(x1))
                     x1 = round(x1 / 2 / math.pi * grating_period)
-                    pts1.append(Point(x + x1, y_offset_top + half_w + y1))
+                    pts1.append(pya.Point(x + x1, y_offset_top + half_w + y1))
                     pts3.append(
-                        Point(x + misalignment + x1, y_offset_top - half_w - y1)
+                        pya.Point(x + misalignment + x1, y_offset_top - half_w - y1)
                     )
 
-                pts1.append(Point(x + grating_period, y_offset_top))
-                pts3.append(Point(x + grating_period + misalignment, y_offset_top))
+                pts1.append(pya.Point(x + grating_period, y_offset_top))
+                pts3.append(pya.Point(x + grating_period + misalignment, y_offset_top))
 
-                shapes_wg += Polygon(pts1)
-                shapes_wg += Polygon(pts3)
+                shapes_wg += pya.Polygon(pts1)
+                shapes_wg += pya.Polygon(pts3)
 
             length = x + grating_period + misalignment
             if misalignment > 0:
                 # extra piece at the end:
-                box2 = Box(
+                box2 = pya.Box(
                     x + grating_period, y_offset_top, length, y_offset_top + half_w
                 )
                 # extra piece at the beginning:
-                box3 = Box(0, y_offset_top, misalignment, y_offset_top - half_w)
+                box3 = pya.Box(0, y_offset_top, misalignment, y_offset_top - half_w)
 
                 shapes_wg += box2
                 shapes_wg += box3
@@ -229,25 +228,25 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                     int(round(self.corrugation1_width / 2 / dbu)) * profileFunction
                 )
 
-                box1 = Box(
+                box1 = pya.Box(
                     x,
                     y_offset_top,
                     x + box_width,
                     y_offset_top + to_itype(half_w + profile, dbu * 1000),
                 )
-                box2 = Box(
+                box2 = pya.Box(
                     x + box_width,
                     y_offset_top,
                     x + grating_period,
                     y_offset_top + to_itype(half_w - profile, dbu * 1000),
                 )
-                box3 = Box(
+                box3 = pya.Box(
                     x + misalignment,
                     y_offset_top,
                     x + box_width + misalignment,
                     y_offset_top + to_itype(-half_w - profile, dbu * 1000),
                 )
-                box4 = Box(
+                box4 = pya.Box(
                     x + box_width + misalignment,
                     y_offset_top,
                     x + grating_period + misalignment,
@@ -261,12 +260,12 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             length = x + grating_period + misalignment
             if misalignment > 0:
                 # extra piece at the end:
-                box2 = Box(
+                box2 = pya.Box(
                     x + grating_period, y_offset_top, length, y_offset_top + half_w
                 )
                 shapes_wg += box2
                 # extra piece at the beginning:
-                box3 = Box(0, y_offset_top, misalignment, y_offset_top - half_w)
+                box3 = pya.Box(0, y_offset_top, misalignment, y_offset_top - half_w)
                 shapes_wg += box3
 
         vertical_offset = int(round(self.wg2_width / 2 / dbu)) + int(
@@ -274,9 +273,9 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         )
 
         if misalignment > 0:
-            t = Trans(Trans.R0, 0, vertical_offset)
+            t = pya.Trans(pya.Trans.R0, 0, vertical_offset)
         else:
-            t = Trans(Trans.R0, 0, vertical_offset)
+            t = pya.Trans(pya.Trans.R0, 0, vertical_offset)
 
         # Draw the Bragg grating (top):
         box_width = int(round(self.grating_period / 2 / dbu))
@@ -296,28 +295,28 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 profile = (
                     int(round(self.corrugation2_width / 2 / dbu)) * profileFunction
                 )
-                box1 = Box(x, 0, x + box_width, -half_w + profile).transformed(t)
-                pts1 = [Point(x, 0)]
-                pts3 = [Point(x + misalignment, 0)]
+                box1 = pya.Box(x, 0, x + box_width, -half_w + profile).transformed(t)
+                pts1 = [pya.Point(x, 0)]
+                pts3 = [pya.Point(x + misalignment, 0)]
                 for i1 in range(0, npoints_sin + 1):
                     x1 = i1 * 2 * math.pi / npoints_sin
                     y1 = round(profile * math.sin(x1))
                     x1 = round(x1 / 2 / math.pi * grating_period)
                     #          print("x: %s, y: %s" % (x1,y1))
-                    pts1.append(Point(x + x1, -half_w - y1))
-                    pts3.append(Point(x + misalignment + x1, +half_w + y1))
-                pts1.append(Point(x + grating_period, 0))
-                pts3.append(Point(x + grating_period + misalignment, 0))
+                    pts1.append(pya.Point(x + x1, -half_w - y1))
+                    pts3.append(pya.Point(x + misalignment + x1, +half_w + y1))
+                pts1.append(pya.Point(x + grating_period, 0))
+                pts3.append(pya.Point(x + grating_period + misalignment, 0))
 
-                shapes_wg += Polygon(pts1).transformed(t)
-                shapes_wg += Polygon(pts3).transformed(t)
+                shapes_wg += pya.Polygon(pts1).transformed(t)
+                shapes_wg += pya.Polygon(pts3).transformed(t)
             length = x + grating_period + misalignment
             if misalignment > 0:
                 # extra piece at the end:
-                box2 = Box(x + grating_period, 0, length, -half_w).transformed(t)
+                box2 = pya.Box(x + grating_period, 0, length, -half_w).transformed(t)
                 shapes_wg += box2
                 # extra piece at the beginning:
-                box3 = Box(0, 0, misalignment, half_w).transformed(t)
+                box3 = pya.Box(0, 0, misalignment, half_w).transformed(t)
                 shapes_wg += box3
 
         else:
@@ -329,14 +328,14 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 profile = (
                     int(round(self.corrugation2_width / 2 / dbu)) * profileFunction
                 )
-                box1 = Box(x, 0, x + box_width, -half_w - profile).transformed(t)
-                box2 = Box(
+                box1 = pya.Box(x, 0, x + box_width, -half_w - profile).transformed(t)
+                box2 = pya.Box(
                     x + box_width, 0, x + grating_period, -half_w + profile
                 ).transformed(t)
-                box3 = Box(
+                box3 = pya.Box(
                     x + misalignment, 0, x + box_width + misalignment, half_w + profile
                 ).transformed(t)
-                box4 = Box(
+                box4 = pya.Box(
                     x + box_width + misalignment,
                     0,
                     x + grating_period + misalignment,
@@ -351,10 +350,10 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             length = x + grating_period + misalignment
             if misalignment > 0:
                 # extra piece at the end:
-                box2 = Box(x + grating_period, 0, length, -half_w).transformed(t)
+                box2 = pya.Box(x + grating_period, 0, length, -half_w).transformed(t)
                 shapes_wg += box2
                 # extra piece at the beginning:
-                box3 = Box(0, 0, misalignment, half_w).transformed(t)
+                box3 = pya.Box(0, 0, misalignment, half_w).transformed(t)
                 shapes_wg += box3
 
         # Create the pins on the waveguides, as short paths:
@@ -370,7 +369,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             )
             taper_length = 50 * max(abs(w1 - port_w), abs(w2 - port_w))
 
-            t = Trans(Trans.R180, 0, y_offset_top)
+            t = pya.Trans(pya.Trans.R180, 0, y_offset_top)
             shapes_wg += layout_waveguide_sbend(
                 self.cell,
                 LayerSiN,
@@ -382,8 +381,8 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 insert=False,
                 dbu=dbu,
             )
-            t = Trans(
-                Trans.R0, -sbend_length - taper_length, y_offset_top - sbend_offset
+            t = pya.Trans(
+                pya.Trans.R0, -sbend_length - taper_length, y_offset_top - sbend_offset
             )
             shapes_wg += layout_taper(
                 self.cell, LayerSiN, t, port_w, w1, taper_length, insert=False
@@ -406,11 +405,11 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             y = vertical_offset
             make_pin(self.cell, "opt4", [int(x), y], port_w, LayerPinRecN, 0)
 
-            t = Trans(Trans.R180, 0, vertical_offset)
+            t = pya.Trans(pya.Trans.R180, 0, vertical_offset)
             shapes_wg += layout_taper(
                 self.cell, LayerSiN, t, w2, w2, sbend_length / 2, insert=False
             )
-            t = Trans(Trans.R180, -sbend_length / 2, vertical_offset)
+            t = pya.Trans(pya.Trans.R180, -sbend_length / 2, vertical_offset)
             shapes_wg += layout_taper(
                 self.cell,
                 LayerSiN,
@@ -421,7 +420,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 insert=False,
             )
 
-            t = Trans(Trans.R0, length, y_offset_top)
+            t = pya.Trans(pya.Trans.R0, length, y_offset_top)
             shapes_wg += layout_waveguide_sbend(
                 self.cell,
                 LayerSiN,
@@ -433,16 +432,16 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
                 insert=False,
                 dbu=dbu,
             )
-            t = Trans(Trans.R0, length + sbend_length, y_offset_top - sbend_offset)
+            t = pya.Trans(pya.Trans.R0, length + sbend_length, y_offset_top - sbend_offset)
             shapes_wg += layout_taper(
                 self.cell, LayerSiN, t, w1, port_w, taper_length, insert=False
             )
 
-            t = Trans(Trans.R0, length, vertical_offset)
+            t = pya.Trans(pya.Trans.R0, length, vertical_offset)
             shapes_wg += layout_taper(
                 self.cell, LayerSiN, t, w2, w2, sbend_length / 2, insert=False
             )
-            t = Trans(Trans.R0, length + sbend_length / 2, vertical_offset)
+            t = pya.Trans(pya.Trans.R0, length + sbend_length / 2, vertical_offset)
             shapes_wg += layout_taper(
                 self.cell,
                 LayerSiN,
@@ -474,7 +473,7 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
             self.cell, "EBeam", "contra_directional_coupler", ly.layer(self.devrec)
         )
 
-        text = Text(
+        text = pya.Text(
             "Spice_param:number_of_periods=%s grating_period=%.4fu wg1_width=%.3fu wg2_width=%.3fu corrugation1_width=%.3fu corrugation2_width=%.3fu gap=%.3fu apodization_index=%.3f AR=%s sinusoidal=%s accuracy=%s"
             % (
                 self.number_of_periods,
@@ -547,8 +546,8 @@ class contra_directional_coupler(pya.PCellDeclarationHelper):
         if self.rib == False:
             shapes(LayerSiN).insert(shapes_wg)
         else:  # turn shape into a rib waveguide
-            region_devrec = Region(DevRecBox)
-            region_devrec2 = Region(DevRecBox).size(1500)
+            region_devrec = pya.Region(DevRecBox)
+            region_devrec2 = pya.Region(DevRecBox).size(1500)
             shapes_rib += shapes_wg
             shapeRib = (
                 shapes_rib.size(1400) - shapes_wg - (region_devrec2 - region_devrec)
