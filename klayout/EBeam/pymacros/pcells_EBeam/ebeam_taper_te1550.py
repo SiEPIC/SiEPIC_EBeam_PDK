@@ -32,7 +32,7 @@ class ebeam_taper_te1550(pya.PCellDeclarationHelper):
             "wg_length",
             self.TypeDouble,
             "Waveguide Length (CML only supports a range of 1-10)",
-            default=10,
+            default=50,
         )
         self.param(
             "pinrec", self.TypeLayer, "PinRec Layer", default=TECHNOLOGY["PinRec"]
