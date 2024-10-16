@@ -102,7 +102,7 @@ Lukas 2023/11
 
 """
 
-version = "0.4.17"
+version = "0.4.19"
 print("SiEPIC_EBeam PDK, version %s" % version)
 
 verbose = False

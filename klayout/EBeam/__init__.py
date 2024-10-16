@@ -1,4 +1,4 @@
-print("SiEPIC-EBeam-PDK Python module: siepic_ebeam_pdk v0.4.17, KLayout technology: EBeam")
+print("SiEPIC-EBeam-PDK Python module: siepic_ebeam_pdk v0.4.19, KLayout technology: EBeam")
 
 # Load the KLayout technology, when running in Script mode
 import pya
