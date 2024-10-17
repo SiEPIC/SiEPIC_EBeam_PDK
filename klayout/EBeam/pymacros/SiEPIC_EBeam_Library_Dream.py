@@ -57,7 +57,7 @@ class EBeam_Dream(Library):
             print("Initializing '%s' Library." % library)
 
         # Set the description
-        self.description = "v0.4.21, Dream Photonics"
+        self.description = "v0.4.22, Dream Photonics"
 
         # Save the path, used for loading WAVEGUIDES.XML
         import os
