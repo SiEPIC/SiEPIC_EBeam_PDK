@@ -21,6 +21,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Check status of 'run-layout-tests.yml' workflow
+      id: check-status
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          owner=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)
+          repo=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
+          workflow_name="Run SiEPIC-Tools Layout tests"
+          
+          # Fetch the latest workflow run for 'Run SiEPIC-Tools Layout tests'
+          run_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$owner/$repo/actions/workflows/run-layout-tests.yml/runs?status=completed&per_page=1" \
+            | jq -r '.workflow_runs[0].conclusion')
+
+          echo "Workflow status: $run_id"
+          if [[ "$run_id" != "success" ]]; then
+            echo "Previous workflow did not succeed. Exiting."
+            exit 1
+          fi
+
     - uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v3
