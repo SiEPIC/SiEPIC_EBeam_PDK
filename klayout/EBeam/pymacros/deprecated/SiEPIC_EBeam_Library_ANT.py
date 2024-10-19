@@ -1,4 +1,3 @@
-# $autorun
 """
 This file is part of the SiEPIC_EBeam_PDK
 by Lukas Chrostowski, et al., (c) 2015-2023

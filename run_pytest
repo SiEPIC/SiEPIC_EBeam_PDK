@@ -1,0 +1,2 @@
+pytest --cov=klayout/siepic_ebeam_pdk klayout/siepic_ebeam_pdk  --cov-report=xml
+
