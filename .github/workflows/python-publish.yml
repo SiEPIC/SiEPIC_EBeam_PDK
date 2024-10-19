@@ -61,3 +61,15 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+        
+    - name: Publish on KLayout Salt server
+      run: |
+          # Extract the tag from GITHUB_REF (e.g., 'refs/tags/v1.0.0' -> 'v1.0.0')
+          RELEASE_TAG=${GITHUB_REF#refs/tags/}
+          echo "Release tag: $RELEASE_TAG"
+          
+          # Use the tag in your script
+          # ./your-script.sh "$RELEASE_TAG"
+      
+          curl "https://sami.klayout.org/register_request?user=Lukas+Chrostowski&mail=lukasc%40ece.ubc.ca&provider=5&url_path=siepic%2FSiEPIC_EBeam_PDK.git%2Ftags%2F$RELEASE_TAG%2Fklayout&agree_terms=1"
+      
