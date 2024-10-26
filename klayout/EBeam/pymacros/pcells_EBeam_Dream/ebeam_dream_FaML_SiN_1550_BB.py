@@ -24,9 +24,9 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
         TECHNOLOGY = get_technology_by_name(self.technology_name)
 
         # declare the parameters
-        self.param("num_channels", self.TypeInt, "Number of Channels (1 - 16)", default = 1)
+        self.param("num_channels", self.TypeInt, "Number of Channels (0 - 16)", default = 2)
 
-        self.param("ref_wg", self.TypeBoolean, "Include reference waveguide", default=True)
+        self.param("ref_wg", self.TypeBoolean, "Include reference waveguide", default=False)
 
         #declare the layers
         self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['SiN'], hidden=False)
@@ -70,8 +70,8 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
         waveguide_type = 'SiN Strip TE 1550 nm, w=750 nm'
         w_waveguide = 750 # nm
 
-        if num_channels < 1:
-            num_channels = 1
+        if num_channels < 0:
+            num_channels = 0
         if num_channels > 16:
             num_channels = 16
 
@@ -107,6 +107,7 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
 
         ##########################################################################################################################################################################
         #draw N tapers
+        x = offset + l_taper + Lw3
         for n_ch in range(int(num_channels)):
 
             #draw the taper
@@ -116,7 +117,6 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
             shapes(LayerBBN).insert(pya.Polygon(taper_pts))
 
             #draw and place pin on the waveguide:
-            x = offset + l_taper + Lw3
             t = pya.Trans(pya.Trans.R0, x, pitch*n_ch)
             pin = pya.Path([pya.Point(-pin_length/2,0),pya.Point(pin_length/2,0)], w_waveguide)
             pin_t = pin.transformed(t)
@@ -132,6 +132,7 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
             shapes(LayerFbrTgtN).insert(pya.Polygon(align_circle))
 
         #draw devrec box
+        n_ch = (num_channels-1)
         if self.ref_wg:
             devrec_pts = [pya.Point(0,pitch*n_ch+30/dbu),pya.Point(x,pitch*n_ch+30/dbu),pya.Point(x,-pitch*2-30/dbu),pya.Point(0,-pitch*2-30/dbu)]
         else:
