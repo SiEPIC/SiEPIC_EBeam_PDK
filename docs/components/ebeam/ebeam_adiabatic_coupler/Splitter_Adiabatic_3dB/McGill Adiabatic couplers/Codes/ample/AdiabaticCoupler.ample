@@ -1,0 +1,210 @@
+function AdiabaticCoupler(query: optional boolean {default = false}),INVISIBLE
+{
+   if(query) { return[@point, @block, []] } 
+    local device = $get_device_iobj();   
+	local wg_spacing = $get_property_value(device,"wg_spacing");
+    local wg_width = $get_property_value(device,"wg_width");
+    local wg1_width = $get_property_value(device,"wg1_width");
+    local wg2_width = $get_property_value(device,"wg2_width");
+    local wg3_width = $get_property_value(device,"wg3_width");
+    local wg4_width = $get_property_value(device,"wg4_width");
+    local taperL = $get_property_value(device,"taperL");
+	local SbendL_in = $get_property_value(device,"SbendL_in");
+        local SbendL_out = $get_property_value(device,"SbendL_out");
+	local gap = $get_property_value(device,"gap");
+	local couplingL = $get_property_value(device,"couplingL");
+	
+	build_AdiabaticCoupler(wg_spacing,wg_width,wg1_width,wg2_width,wg3_width,wg4_width,taperL,SbendL_in,SbendL_out,gap,couplingL);
+}
+function build_AdiabaticCoupler(wg_spacing: number, wg_width: number, wg1_width: number, wg2_width: number, wg3_width: number, wg4_width: number,taperL: number, SbendL_in: number, SbendL_out: number,gap: number, couplingL: number)
+{
+   
+
+   //add upper taper
+     $add_shape([[0,wg_spacing/2-wg_width/2],[0,wg_spacing/2+wg_width/2],[taperL,wg_spacing/2+wg1_width/2],[taperL,wg_spacing/2-wg1_width/2]],'Si');
+   //add lower taper  
+     $add_shape([[0,-wg_spacing/2-wg_width/2],[0,-wg_spacing/2+wg_width/2],[taperL,-wg_spacing/2+wg2_width/2],[taperL,-wg_spacing/2-wg2_width/2]],'Si');
+   
+   
+   //add upper input sbend
+     local arc1, arc2, arc3, arc4, i;
+     
+    local count = 0;
+	local count2 = 0;
+	local count3 = 0;
+	local count4 = 0;
+	
+	
+    local L_in = SbendL_in;
+    local h = wg_spacing/2-wg1_width/2-gap/2;
+	local slope;
+	local myx = $create_vector(100+1);
+	local myy = $create_vector(100+1);
+	local vec1 = $create_vector(100+1);
+	local vec2 = $create_vector(100+1);
+	for (i=0;i<=100;i=i+1)
+	{
+
+	arc1 = h/2*cos(pi*i/100)-h/2;
+		//arc1 = (h-wg_width)/2*cos(pi*i/100)-(h-wg_width)/2;
+		slope = -(h-wg1_width)/2*pi/L_in*sin(pi*i/100);
+
+
+//$writeln(arc1);
+		vec1[i] = [L_in*i/100+taperL,arc1+wg_spacing/2-wg1_width/2];
+		if (i==0 || i == 100)
+		{
+			myx[i] = 0.00;
+			myy[i] = wg1_width;
+		}
+		else
+		{
+			myx[i] = pow(pow(wg1_width,2)/(1+(1/pow(abs(slope),2))),0.5);
+			myy[i] = pow((pow(wg1_width,2)-pow(myx[count],2)),0.5);
+		}
+	}
+	for (i=0;i<=100;i=i+1)
+	{
+		vec2[i] = vec1[100-i]+[myx[100-i],myy[100-i]];
+	}
+//	$writeln(vec2);
+//	 $add_shape([[0,0],[10,10]],1);
+	//$add_path(vec1, ic_process@@Si, @both);
+	$add_shape(append(vec1,vec2), 'Si', @both);
+     
+	     
+	   
+	   // add lower input sbend
+	   
+    
+    local h2 = wg_spacing/2-wg2_width/2-gap/2;
+	local slope2;
+	local myx2 = $create_vector(100+1);
+	local myy2 = $create_vector(100+1);
+	local vec1_2 = $create_vector(100+1);
+	local vec2_2 = $create_vector(100+1);
+	for (i=0;i<=100;i=i+1)
+	{
+
+	arc2 = -h2/2*cos(pi*i/100)+h2/2;
+		//arc1 = (h-wg_width)/2*cos(pi*i/100)-(h-wg_width)/2;
+		slope2 = (h2-wg2_width)/2*pi/L_in*sin(pi*i/100);
+
+
+//$writeln(arc1);
+		vec1_2[i] = [L_in*i/100+taperL,arc2-wg_spacing/2+wg2_width/2];
+		if (i==0 || i == 100)
+		{
+			myx2[i] = 0.00;
+			myy2[i] = wg2_width;
+		}
+		else
+		{
+			myx2[i] = pow(pow(wg2_width,2)/(1+(1/pow(abs(slope),2))),0.5);
+			myy2[i] = pow((pow(wg2_width,2)-pow(myx[count2],2)),0.5);
+		}
+	}
+	for (i=0;i<=100;i=i+1)
+	{
+		vec2_2[i] = vec1_2[100-i]+[myx2[100-i],-myy2[100-i]];
+	}
+//	$writeln(vec2);
+//	 $add_shape([[0,0],[10,10]],1);
+	//$add_path(vec1, ic_process@@Si, @both);
+	$add_shape(append(vec1_2,vec2_2), 'Si', @both);
+	   
+	   
+	   //add upper coupling waveguide
+	   $add_shape([[taperL+SbendL_in,gap/2],[taperL+SbendL_in,gap/2+wg1_width],[taperL+SbendL_in+couplingL,gap/2+wg3_width],[taperL+SbendL_in+couplingL,gap/2]],'Si');
+	   
+	   //add lower coupling waveguide
+	  $add_shape([[taperL+SbendL_in,-gap/2-wg2_width],[taperL+SbendL_in,-gap/2],[taperL+SbendL_in+couplingL,-gap/2],[taperL+SbendL_in+couplingL,-gap/2-wg4_width]],'Si');
+	   
+	   
+	   
+	   
+	   
+	   //add upper output sbend
+
+        local L_out=SbendL_out;
+	   local h3 = wg_spacing/2-wg3_width/2-gap/2;
+	local slope3;
+	local myx3 = $create_vector(100+1);
+	local myy3 = $create_vector(100+1);
+	local vec1_3 = $create_vector(100+1);
+	local vec2_3 = $create_vector(100+1);
+	for (i=0;i<=100;i=i+1)
+	{
+
+	arc3 = -h3/2*cos(pi*i/100)+h3/2;
+		//arc1 = (h-wg_width)/2*cos(pi*i/100)-(h-wg_width)/2;
+		slope3 = (h3-wg3_width)/2*pi/L_out*sin(pi*i/100);
+
+
+//$writeln(arc1);
+		vec1_3[i] = [L_out*i/100+taperL+SbendL_in+couplingL,arc3+gap/2+wg3_width];
+		if (i==0 || i == 100)
+		{
+			myx3[i] = 0.00;
+			myy3[i] = wg3_width;
+		}
+		else
+		{
+			myx3[i] = pow(pow(wg3_width,2)/(1+(1/pow(abs(slope),2))),0.5);
+			myy3[i] = pow((pow(wg3_width,2)-pow(myx[count3],2)),0.5);
+		}
+	}
+	for (i=0;i<=100;i=i+1)
+	{
+		vec2_3[i] = vec1_3[100-i]+[myx3[100-i],-myy3[100-i]];
+	}
+//	$writeln(vec2);
+//	 $add_shape([[0,0],[10,10]],1);
+	//$add_path(vec1, ic_process@@Si, @both);
+	$add_shape(append(vec1_3,vec2_3), 'Si', @both);
+	   
+	   
+	   
+	   //add output lower sbend
+	   local h4 = wg_spacing/2-wg4_width/2-gap/2;
+	local slope4;
+	local myx4 = $create_vector(100+1);
+	local myy4 = $create_vector(100+1);
+	local vec1_4 = $create_vector(100+1);
+	local vec2_4 = $create_vector(100+1);
+	for (i=0;i<=100;i=i+1)
+	{
+
+	arc1 = h4/2*cos(pi*i/100)-h4/2;
+		//arc1 = (h-wg_width)/2*cos(pi*i/100)-(h-wg_width)/2;
+		slope4 = -(h4-wg4_width)/2*pi/L_out*sin(pi*i/100);
+
+
+//$writeln(arc1);
+		vec1_4[i] = [L_out*i/100+taperL+SbendL_in+couplingL,arc1-gap/2-wg4_width];
+		if (i==0 || i == 100)
+		{
+			myx4[i] = 0.00;
+			myy4[i] = wg4_width;
+		}
+		else
+		{
+			myx4[i] = pow(pow(wg4_width,2)/(1+(1/pow(abs(slope),2))),0.5);
+			myy4[i] = pow((pow(wg4_width,2)-pow(myx[count4],2)),0.5);
+		}
+	}
+	for (i=0;i<=100;i=i+1)
+	{
+		vec2_4[i] = vec1_4[100-i]+[myx4[100-i],myy4[100-i]];
+	}
+//	$writeln(vec2);
+//	 $add_shape([[0,0],[10,10]],1);
+	//$add_path(vec1, ic_process@@Si, @both);
+	$add_shape(append(vec1_4,vec2_4), 'Si', @both);
+	  
+	   
+    
+}
+
+function AdiabaticCoupler_parameters(  wg_spacing: optional number {default=3}, wg_width:optional number {default=0.45},wg1_width:optional number {default=0.6}, wg2_width:optional number {default=0.3},wg3_width:optional number {default=0.45}, wg4_width:optional number {default=0.45},taperL: optional number {default=10},SbendL_in: optional number {default=30},SbendL_out: optional number {default=10},gap: optional number {default=0.1},couplingL: optional number {default=100})
+{ return [ ["wg_spacing",$g(wg_spacing)],["wg_width",$g(wg_width)],["wg1_width",$g(wg1_width)],["wg2_width",$g(wg2_width)],["wg3_width",$g(wg3_width)],["wg4_width",$g(wg4_width)],["taperL",$g(taperL)],["SbendL_in",$g(SbendL_in)],["SbendL_out",$g(SbendL_out)],["gap",$g(gap)] ,["couplingL",$g(couplingL)]   ]; }
