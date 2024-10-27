@@ -5,10 +5,10 @@ from SiEPIC.extend import to_itype
 from SiEPIC.scripts import path_to_waveguide, connect_pins_with_waveguide, connect_cell
 from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech, get_layout_variables
 
-class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
+class ebeam_dream_FAVE_SiN_1550_BB(pya.PCellDeclarationHelper):
     """
     The PCell declaration for the Dream Photonics 
-    Facet-attached Micro-Lens (FaML)
+    Facet-attached Vertical Emitter(FAVE)
     for Silicon Nitride
     for 1550 nm operation
     
@@ -18,15 +18,10 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
     def __init__(self):
 
         # Important: initialize the super class
-        super(ebeam_dream_FaML_SiN_1550_BB, self).__init__()
+        super(ebeam_dream_FAVE_SiN_1550_BB, self).__init__()
 
         self.technology_name = 'EBeam'
         TECHNOLOGY = get_technology_by_name(self.technology_name)
-
-        # declare the parameters
-        self.param("num_channels", self.TypeInt, "Number of Channels (0 - 16)", default = 2)
-
-        self.param("ref_wg", self.TypeBoolean, "Include reference waveguide", default=False)
 
         #declare the layers
         self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['SiN'], hidden=False)
@@ -59,7 +54,6 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
         LayerTEXTN = ly.layer(self.textl)
         LayerBBN = ly.layer(self.bb)
 
-        num_channels = self.num_channels
         offset = to_itype(0,dbu)
         pitch = to_itype(127,dbu)
         l_taper = 60e3
@@ -71,45 +65,19 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
         waveguide_type = 'SiN Strip TE 1550 nm, w=750 nm'
         w_waveguide = 750 # nm
 
-        if num_channels < 0:
-            num_channels = 0
-        if num_channels > 16:
-            num_channels = 16
-
         def circle(x,y,r):
-            npts = 180
+            npts = 50
             theta = 2*math.pi/npts
             pts = []
             for i in range(0,npts):
               pts.append(pya.Point.from_dpoint(pya.DPoint((x+r*math.cos(i*theta))/1,(y+r*math.sin(i*theta))/1)))
             return pts
 
-        #draw one loopback device
-        if self.ref_wg:
-            for ref_loop in range(2):
-                #draw fibre target circle
-                align_circle = circle(offset,-pitch*(ref_loop+1),2/dbu)
-                #place fibre target circle
-                shapes(LayerFbrTgtN).insert(pya.Polygon(align_circle))
-
-        if self.ref_wg:
-            #create waveguide to for loopback
-            loopback_path = pya.DPath([pya.DPoint(0,-127),pya.DPoint((offset + l_taper + Lw2)*dbu+15,-127),pya.DPoint((offset + l_taper + Lw2)*dbu+15,-254),pya.DPoint(0,-254)],0.5)
-            self.layout.technology_name = self.technology_name #required otherwise "create_cell" doesn't load
-            pcell = self.layout.create_cell("Waveguide",self.technology_name,{"path": loopback_path, "waveguide_type": waveguide_type})
-            t = pya.Trans(pya.Trans.R0,0,0)
-            self.cell.copy(pcell,LayerSiN,LayerBBN)
-            wg = self.cell.insert(pya.CellInstArray(pcell.cell_index(),t))
-            wg.flatten()
-            self.cell.clear(LayerDevRecN)
-            self.cell.clear(LayerPinRecN)
-            self.cell.clear(LayerSiN)
-
 
         ##########################################################################################################################################################################
         #draw N tapers
         x = offset + l_taper + Lw3
-        for n_ch in range(int(num_channels)):
+        for n_ch in range(1):
 
             #draw the taper
             taper_pts = [pya.Point(0,-w_waveguide/2+pitch*n_ch),pya.Point(0,w_waveguide/2+pitch*n_ch),pya.Point(offset + l_taper + Lw3,w_waveguide/2+pitch*n_ch),pya.Point(offset + l_taper + Lw3,-w_waveguide/2+pitch*n_ch)]
@@ -133,67 +101,77 @@ class ebeam_dream_FaML_SiN_1550_BB(pya.PCellDeclarationHelper):
             shapes(LayerFbrTgtN).insert(pya.Polygon(align_circle))
 
         #draw devrec box
-        n_ch = (num_channels-1)
-        if self.ref_wg:
-            devrec_pts = [pya.Point(0,pitch*n_ch+30/dbu),pya.Point(x,pitch*n_ch+30/dbu),pya.Point(x,-pitch*2-30/dbu),pya.Point(0,-pitch*2-30/dbu)]
-        else:
-            devrec_pts = [pya.Point(0,pitch*n_ch+30/dbu),pya.Point(x,pitch*n_ch+30/dbu),pya.Point(x,-30/dbu),pya.Point(0,-30/dbu)]
+        devrec_pts = [
+            pya.Point(-100/dbu,50/dbu),
+            pya.Point(0,50/dbu),
+            pya.Point(0,25/dbu),
+            pya.Point(x,1/dbu),
+            pya.Point(x,-1/dbu),
+            pya.Point(0,-25/dbu),
+            pya.Point(0,-50/dbu),
+            pya.Point(-100/dbu,-50/dbu),
+            ]
         
         #place devrec box
         shapes(LayerDevRecN).insert(pya.Polygon(devrec_pts))
 
-        #edge of chip text
-        t = pya.Trans(pya.Trans.R0,0,1/dbu)
-        text = pya.Text("<- Edge of chip",t)
-        shape = shapes(LayerTEXTN).insert(text)
-        shape.text_size = 3/dbu
 
         #BB description
         t = pya.Trans(pya.Trans.R0,0,-15/dbu)
-        text = pya.Text("  Number of Channel(s): " + str(num_channels) + "\n  Center Wavelength: " + str(wavelength) + " nm",t)
+        text = pya.Text("  Waveguide type: " + 'SiN' + "\n  Wavelength: " + str(wavelength) + " nm",t)
         shape = shapes(LayerTEXTN).insert(text)
         shape.text_size = 3/dbu
 
         #BB description
         t = pya.Trans(pya.Trans.R0, 0,-25/dbu)
-        text = pya.Text("<- 25 MFD lens",t)
+        text = pya.Text("  25 micron MFD Facet-attached\n  Vertical Emitter (FAVE)",t)
         shape = shapes(LayerTEXTN).insert(text)
         shape.text_size = 3/dbu
 
         #draw DP BB logo
         import os
         dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../gds/EBeam_Dream/"))
-        filename = os.path.join(dir_path, 'DP_lens_BB_logo.gds')
+        filename = os.path.join(dir_path, 'DP_logo.gds')
+        
+        '''
+        cell_text = ly.create_cell('TEXT', 'Basic',
+            {'text':'FAVE:\\nFacet-attached\\nVertical Emitter',
+            'layer':self.bb,
+            'lspacing':3,
+            'mag':9})
+        t = pya.Trans(pya.Trans.R0, -98e3, -26e3)
+        '''
+        cell_text = ly.create_cell('TEXT', 'Basic',
+            {'text':'Facet-attached\\nVertical Emitter',
+            'layer':self.bb,
+            'lspacing':3,
+            'mag':9})
+        t = pya.Trans(pya.Trans.R0, -98e3, -36e3)
+        inst_text = cell.insert(pya.CellInstArray(cell_text.cell_index(), t))
 
         ly2=pya.Layout()
         ly2.read(filename)
         top_cell = ly2.top_cell()
         top_cell.flatten(True)
+        top_cell.transform(pya.Trans(-90e3,28e3))
         self.cell.copy_shapes(top_cell)
 
         #draw lenses
         width_lens = to_itype(50, dbu)
         length_lens = to_itype(50, dbu)
 
-        if self.ref_wg:
-            for n_ch in range(int(num_channels+2)):
-                lens_pts = [pya.Point(0,-width_lens/2+pitch*n_ch-2*pitch), pya.Point(0,width_lens/2+pitch*n_ch-2*pitch), pya.Point(-length_lens,width_lens/2+pitch*n_ch-2*pitch),pya.Point(-length_lens,-width_lens/2+pitch*n_ch-2*pitch)]
-                shapes(LayerBBN).insert(pya.Polygon(lens_pts))
-                lens = circle(-length_lens,pitch*n_ch-2*pitch,25/dbu)
-                shapes(LayerBBN).insert(pya.Polygon(lens))
-                shapes(ly.layer(self.dt)).insert(pya.Box(-100e3,-50e3+pitch*n_ch,0,50e3+pitch*n_ch))
-        else:
-            for n_ch in range(int(num_channels)):
-                lens_pts = [pya.Point(0,-width_lens/2+pitch*n_ch), pya.Point(0,width_lens/2+pitch*n_ch), pya.Point(-length_lens,width_lens/2+pitch*n_ch),pya.Point(-length_lens,-width_lens/2+pitch*n_ch)]
-                shapes(LayerBBN).insert(pya.Polygon(lens_pts))
-                lens = circle(-length_lens,pitch*n_ch,25/dbu)
-                shapes(LayerBBN).insert(pya.Polygon(lens))
-                
-                shapes(ly.layer(self.dt)).insert(pya.Box(-100e3,-50e3+pitch*n_ch,0,50e3+pitch*n_ch))
+        for n_ch in range(int(1)):
+            lens_pts = [pya.Point(0,-width_lens/2+pitch*n_ch), pya.Point(0,width_lens/2+pitch*n_ch), pya.Point(-length_lens,width_lens/2+pitch*n_ch),pya.Point(-length_lens,-width_lens/2+pitch*n_ch)]
+            shapes(LayerBBN).insert(pya.Polygon(lens_pts))
+            lens = circle(-length_lens,pitch*n_ch,25/dbu)
+            shapes(LayerBBN).insert(pya.Polygon(lens))
+
+            shapes(ly.layer(self.dt)).insert(pya.Box(-100e3,-50e3,0,50e3))
+
+        # Shift cell origin, so that (0,0) is at the pin
+        self.cell.transform(pya.Trans(-95e3,0))
 
     def display_text_impl(self):
         # Provide a descriptive text for the cell
-        return "ebeam_dream_FaML_SiN_1550_BB_%s" % (
-            self.num_channels,
-        )
+        return "ebeam_dream_FAVE_SiN_1550_BB"
 
