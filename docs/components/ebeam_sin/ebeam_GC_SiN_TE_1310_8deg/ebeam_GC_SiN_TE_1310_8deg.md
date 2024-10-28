@@ -1,11 +1,8 @@
-# ebeam_bdc
-
-- ebeam_GC_SiN_TE_1310_8deg
+# ebeam_GC_SiN_TE_1310_8deg
 
 ## Description
 
-A grating coupler is used to couple light straight from a fibre to on-chip photonic components
-without the need for micro-mechanics etch coupling techniques. The design is a compact
+A grating coupler is used to vertically couple light from a fibre to on-chip photonic components. The design is a compact
 focusing grating coupler used for TE polarization at O-band with 8 degree insertion angle on the
 SiN platform offered by ANT.
 
