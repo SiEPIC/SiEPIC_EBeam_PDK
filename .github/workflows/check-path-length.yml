@@ -1,5 +1,5 @@
 # .github/workflows/check-path-length.yml
-name: Check Path Length
+name: Check Path Length (200 limit)
 
 on: 
   push:
@@ -20,12 +20,14 @@ jobs:
           # Find all files in the repository and check their path lengths
           too_long_paths=0
 
+          # Loop through each file path found by find
+          IFS=$'\n'  # Set Internal Field Separator to newline to handle spaces in filenames
           for file in $(find . -type f); do
-            length=${#file}
-            if (( length > MAX_LENGTH )); then
-              echo "Path too long: $file ($length characters)"
-              too_long_paths=$((too_long_paths + 1))
-            fi
+              length=${#file}
+              if (( length > MAX_LENGTH )); then
+                  echo "Path too long: $file ($length characters)"
+                  too_long_paths=$((too_long_paths + 1))
+              fi
           done
 
           if (( too_long_paths > 0 )); then
