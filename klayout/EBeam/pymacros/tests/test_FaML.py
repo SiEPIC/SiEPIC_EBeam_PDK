@@ -90,6 +90,7 @@ def test_FaML_two():
     # draw two edge couplers for facet-attached micro-lenses
     inst_faml = FaML_two(cell, 
             label = "opt_in_TE_1550_FaML_mzi2_%s" % designer_name,
+            cell_params = None
             )    
     # Y branches:
     instY2 = connect_cell(inst_faml[0], 'opt1', cell_ebeam_y, 'pin1')
