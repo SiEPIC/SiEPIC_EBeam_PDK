@@ -14,6 +14,7 @@
 			<ebeam_gc_te1550>0</ebeam_gc_te1550>
 			<ebeam_gc_tm1550>0</ebeam_gc_tm1550>
 			<ebeam_dream_FaML_SiN_1550_BB>0</ebeam_dream_FaML_SiN_1550_BB>
+			<ebeam_dream_FAVE_SiN_1550_BB>0</ebeam_dream_FAVE_SiN_1550_BB>
 		</gc-orientation>
 	</grating-couplers>
 	<opt_in>
