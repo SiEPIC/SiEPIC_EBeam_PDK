@@ -129,7 +129,8 @@
   <CML>None</CML>
   <model>None</model>
   <sbends>true</sbends>
-  <radius>110</radius>
+  <bezier>0.3</bezier>
+  <radius>50.0</radius>
   <width>0.75</width>
   <component>
     <layer>SiN</layer>
