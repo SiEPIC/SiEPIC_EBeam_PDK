@@ -224,11 +224,7 @@ class ebeam_dream_PWB_edge_couplers_BB(pya.PCellDeclarationHelper):
         # draw DP BB logo
         import os
 
-        dir_path = os.path.normpath(
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)), "../../gds/EBeam_Dream/"
-            )
-        )
+        dir_path = os.path.realpath(__file__)
         filename = os.path.join(dir_path, "DP_Edge_coupler_for_PWB_BB_logo.gds")
         tech_name = "EBeam"
         ly2 = pya.Layout()

@@ -52,7 +52,7 @@ class ebeam_sin_dream_splitter1x2_te1550(pya.PCellDeclarationHelper):
                 os.path.dirname(os.path.realpath(__file__)), "../../gds/EBeam_Dream/"
             )
         )
-        filename = os.path.join(dir_path, "ebeam_sin_dream_splitter1x2_te1550.gds")
+        filename = os.path.join(dir_path, "ebeam_sin_dream_splitter1x2_te1550_BB.gds")
         tech_name = "EBeam"
         ly2 = pya.Layout()
         ly2.read(filename)
