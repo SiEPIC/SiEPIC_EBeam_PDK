@@ -2,7 +2,7 @@
 
 version = "0.4.27"
 
-print('SiEPIC-EBeam-PDK Python module: pymacros')
+print('SiEPIC-EBeam-PDK Python module: pymacros, v%s' % version)
 
 from SiEPIC.scripts import load_klayout_library
 

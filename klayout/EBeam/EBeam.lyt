@@ -4,6 +4,7 @@
  <description/>
  <group/>
  <dbu>0.001</dbu>
+ <default-grids/>
  <base-path/>
  <original-base-path>/Users/lukasc/Documents/GitHub/SiEPIC_EBeam_PDK/klayout/EBeam</original-base-path>
  <layer-properties_file>EBeam.lyp</layer-properties_file>
@@ -37,17 +38,17 @@
    <produce-regions>true</produce-regions>
    <region-layer>REGIONS</region-layer>
    <produce-via-geometry>true</produce-via-geometry>
-   <special-via_geometry-suffix-string/>
-   <special-via_geometry-datatype-string>0</special-via_geometry-datatype-string>
+   <via_geometry-suffix-string/>
+   <via_geometry-datatype-string>0</via_geometry-datatype-string>
    <produce-pins>true</produce-pins>
-   <special-pins-suffix-string>.PIN</special-pins-suffix-string>
-   <special-pins-datatype-string>2</special-pins-datatype-string>
+   <pins-suffix-string>.PIN</pins-suffix-string>
+   <pins-datatype-string>2</pins-datatype-string>
    <produce-lef-pins>true</produce-lef-pins>
-   <special-lef_pins-suffix-string>.PIN</special-lef_pins-suffix-string>
-   <special-lef_pins-datatype-string>2</special-lef_pins-datatype-string>
+   <lef_pins-suffix-string>.PIN</lef_pins-suffix-string>
+   <lef_pins-datatype-string>2</lef_pins-datatype-string>
    <produce-fills>true</produce-fills>
-   <special-fills-suffix-string>.FILL</special-fills-suffix-string>
-   <special-fills-datatype-string>5</special-fills-datatype-string>
+   <fills-suffix-string>.FILL</fills-suffix-string>
+   <fills-datatype-string>5</fills-datatype-string>
    <produce-obstructions>true</produce-obstructions>
    <obstructions-suffix>.OBS</obstructions-suffix>
    <obstructions-datatype>3</obstructions-datatype>
@@ -61,8 +62,8 @@
    <lef-labels-suffix>.LABEL</lef-labels-suffix>
    <lef-labels-datatype>1</lef-labels-datatype>
    <produce-routing>true</produce-routing>
-   <special-routing-suffix-string/>
-   <special-routing-datatype-string>0</special-routing-datatype-string>
+   <routing-suffix-string/>
+   <routing-datatype-string>0</routing-datatype-string>
    <produce-special-routing>true</produce-special-routing>
    <special-routing-suffix-string/>
    <special-routing-datatype-string>0</special-routing-datatype-string>
@@ -70,6 +71,7 @@
    <read-lef-with-def>true</read-lef-with-def>
    <macro-resolution-mode>default</macro-resolution-mode>
    <separate-groups>false</separate-groups>
+   <joined-paths>false</joined-paths>
    <map-file/>
   </lefdef>
   <dxf>
@@ -105,6 +107,7 @@
   </mag>
  </reader-options>
  <writer-options>
+  <format>GDS2</format>
   <gds2>
    <write-timestamps>true</write-timestamps>
    <write-cell-properties>true</write-cell-properties>
@@ -117,12 +120,12 @@
    <libname>EBeam</libname>
   </gds2>
   <oasis>
-   <compression-level>2</compression-level>
-   <write-cblocks>false</write-cblocks>
+   <compression-level>10</compression-level>
+   <write-cblocks>true</write-cblocks>
    <strict-mode>false</strict-mode>
    <write-std-properties>1</write-std-properties>
    <subst-char>*</subst-char>
-   <permissive>false</permissive>
+   <permissive>true</permissive>
   </oasis>
   <cif>
    <polygon-mode>0</polygon-mode>
@@ -137,55 +140,6 @@
    <write-timestamp>true</write-timestamp>
   </mag>
  </writer-options>
- <d25>
-  <src># Provide z stack information here
-#
-# Each line is one layer. The specification consists of a layer specification, a colon and arguments.
-# The arguments are named (like "x=...") or in serial. Parameters are separated by comma or blanks.
-# Named arguments are:
-#
-#   zstart   The lower z position of the extruded layer in µm
-#   zstop    The upper z position of the extruded layer in µm
-#   height   The height of the extruded layer in µm
-#
-# 'height', 'zstart' and 'zstop' can be used in any combination. If no value is given for 'zstart',
-# the upper level of the previous layer will be used.
-#
-# If a single unnamed parameter is given, it corresponds to 'height'. Two parameters correspond to
-# 'zstart' and 'zstop'.
-#
-# Examples:
-#   1: 0.5 1.5                    # extrude layer 1/0 from 0.5 to 1.5 vertically
-#   1/0: 0.5 1.5                  # same with explicit datatype
-#   1: zstop=1.5, zstart=0.5      # same with named parameters
-#   1: height=1.0, zstop=1.5      # same with z stop minus height
-#   1: 1.0 zstop=1.5              # same with height as unnamed parameter
-#
-# VARIABLES
-#
-# You can declare variables with:
-#   var name = value
-#
-# You can use variables inside numeric expressions.
-# Example:
-#   var hmetal = 0.48
-#   7/0: 0.5 0.5+hmetal*2        # 2x thick metal
-#
-# You cannot use variables inside layer specifications currently.
-#
-# CONDITIONALS
-#
-# You can enable or disable branches of the table using 'if', 'else', 'elseif' and 'end':
-# Example:
-#   var thick_m1 = true
-#   if thickm1
-#     1: 0.5 1.5
-#   else
-#     1: 0.5 1.2
-#   end
-
-</src>
- </d25>
  <connectivity>
  </connectivity>
 </technology>
