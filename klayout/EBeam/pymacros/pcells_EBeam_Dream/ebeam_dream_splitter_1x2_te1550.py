@@ -2,7 +2,7 @@ import pya
 from pya import *
 
 
-class ebeam_dream_splitter_1x2_te1550_BB(pya.PCellDeclarationHelper):
+class ebeam_dream_splitter_1x2_te1550(pya.PCellDeclarationHelper):
     """
     The PCell declaration for the ebeam_dream_splitter_1x2_te1550_BB
 
@@ -11,7 +11,7 @@ class ebeam_dream_splitter_1x2_te1550_BB(pya.PCellDeclarationHelper):
 
     def __init__(self):
         # Important: initialize the super class
-        super(ebeam_dream_splitter_1x2_te1550_BB, self).__init__()
+        super(ebeam_dream_splitter_1x2_te1550, self).__init__()
         from SiEPIC.utils import get_technology_by_name
 
         self.technology_name = "EBeam"
