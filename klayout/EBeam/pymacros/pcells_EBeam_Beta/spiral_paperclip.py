@@ -290,8 +290,8 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         # spiral points
         points = [
             DPoint(-length0, offset),
-            DPoint(0.0, offset),
-            DPoint(0.0, -offset),
+            DPoint(-length0+radius*2, offset),
+            DPoint(-length0+radius*2, -offset),
             DPoint(length0, -offset),
         ]
         for i in range(1, self.loops * 2, 2):
@@ -447,6 +447,11 @@ if __name__ == "__main__":
     from SiEPIC.utils.layout import new_layout
     from SiEPIC.scripts import zoom_out
 
+    from SiEPIC._globals import Python_Env
+    if Python_Env == 'Script':
+        # For external Python mode, when installed using pip install siepic_ebeam_pdk
+        import siepic_ebeam_pdk
+
     # load the test library, and technology
     t = test_lib()
     tech = t.technology
@@ -505,3 +510,12 @@ if __name__ == "__main__":
                 xmax = max(xmax, x + inst.bbox().width())
 
     zoom_out(topcell)
+
+
+    # Display the layout in KLayout, using KLayout Package "klive", which needs to be installed in the KLayout Application
+    if Python_Env == 'Script':
+        from SiEPIC.scripts import export_layout
+        path = os.path.dirname(os.path.realpath(__file__))
+        file_out = export_layout (topcell, path, filename='spiral_paperclip', relative_path='', format='oas')
+        from SiEPIC.utils import klive
+        klive.show(file_out, technology=tech)
