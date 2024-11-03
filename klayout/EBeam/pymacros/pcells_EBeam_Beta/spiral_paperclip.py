@@ -352,7 +352,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             points.pop(-1)
             points.append(
                 DPoint(-length0 - devrec * i, 
-                       0)
+                       radius - offset + devrec * (i - 1) + extra)
             )
         if not self.ports_opposite and not self.port_vertical:
             points.append(
@@ -399,7 +399,11 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             self.cell.clear(self.layout.layer(self.TECHNOLOGY["Waveguide"]))
             devrec_box = self.cell.bbox()
             if self.port_vertical:
-                devrec_box = (pya.Region(devrec_box) - pya.Region(pya.DBox(-length0 - devrec * (i+1), 0, -length0 - devrec * (i-0.5), -radius * 2 + offset - devrec * (i+3) - extra).to_itype(ly.dbu))).merged()
+                devrec_box = (pya.Region(devrec_box) - pya.Region(pya.DBox(
+                    -length0 - devrec * (i+1), 
+                    radius - offset + devrec * (i - 1) + extra, 
+                    -length0 - devrec * (i-0.5), 
+                    -radius * 2 + offset - devrec * (i+3) - extra).to_itype(self.layout.dbu))).merged()
             self.cell.shapes(LayerDevRecN).insert(devrec_box)
 
             # Create the pins on the input & output waveguides
@@ -411,7 +415,7 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
                     "optA",
                     [
                         -length0 - devrec * (i),
-                        0,
+                        radius - offset + devrec * (i - 1) + extra,
                     ],
                     self.wg_width,
                     LayerPinRecN,
