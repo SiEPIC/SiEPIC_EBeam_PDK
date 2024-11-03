@@ -19,7 +19,7 @@ by Lukas Chrostowski, 2023-2024
 import pya
 from pya import *
 from SiEPIC.utils import get_technology_by_name
-
+from pya import DPoint
 
 class spiral_paperclip(pya.PCellDeclarationHelper):
     def __init__(self):
@@ -49,6 +49,12 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             "ports_opposite",
             self.TypeBoolean,
             "Waveguide ports on opposite sides",
+            default=False,
+        )
+        self.param(
+            "port_vertical",
+            self.TypeBoolean,
+            "One waveguide port pointing vertically",
             default=False,
         )
         self.param("loops", self.TypeInt, "Number of loops", default=2)
@@ -332,7 +338,8 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
                 )
             )
             points.append(
-                DPoint(-length0 - devrec * i, -radius * 2 + offset - devrec * i - extra)
+                DPoint(-length0 - devrec * i, 
+                       -radius * 2 + offset - devrec * i - extra)
             )
             points.append(
                 DPoint(
@@ -340,7 +347,14 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
                     -radius * 2 + offset - devrec * i - extra,
                 )
             )
-        if not self.ports_opposite:
+        if self.port_vertical:
+            points.pop(-1)
+            points.pop(-1)
+            points.append(
+                DPoint(-length0 - devrec * i, 
+                       radius - offset + devrec * (i - 1) + extra)
+            )
+        if not self.ports_opposite and not self.port_vertical:
             points.append(
                 DPoint(
                     length0 + devrec * (i + 1),
@@ -381,38 +395,57 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
             LayerPinRecN = self.layout.layer(self.TECHNOLOGY["PinRec"])
             LayerDevRecN = self.layout.layer(self.TECHNOLOGY["DevRec"])
             self.cell.clear(LayerPinRecN)
-            bbox = self.cell.bbox()
             self.cell.clear(LayerDevRecN)
             self.cell.clear(self.layout.layer(self.TECHNOLOGY["Waveguide"]))
-            self.cell.shapes(LayerDevRecN).insert(bbox)
+            devrec_box = self.cell.bbox()
+            if self.port_vertical:
+                devrec_box = (pya.Region(devrec_box) - pya.Region(pya.DBox(
+                    -length0 - devrec * (i+1), 
+                    radius - offset + devrec * (i - 1) + extra, 
+                    -length0 - devrec * (i-0.5), 
+                    -radius * 2 + offset - devrec * (i+3) - extra).to_itype(self.layout.dbu))).merged()
+            self.cell.shapes(LayerDevRecN).insert(devrec_box)
 
             # Create the pins on the input & output waveguides
             from SiEPIC.utils.layout import make_pin
 
-            if self.ports_opposite:
+            if self.port_vertical:
                 make_pin(
                     self.cell,
                     "optA",
                     [
-                        length0 + devrec * (i + 1),
-                        -radius * 2 + offset - devrec * i - extra,
+                        -length0 - devrec * (i),
+                        radius - offset + devrec * (i - 1) + extra,
                     ],
                     self.wg_width,
                     LayerPinRecN,
-                    0,
+                    270,
                 )
             else:
-                make_pin(
-                    self.cell,
-                    "optA",
-                    [
-                        -length0 - devrec * (i + 1),
-                        radius * 2 - offset + devrec * (i + 1) + extra,
-                    ],
-                    self.wg_width,
-                    LayerPinRecN,
-                    180,
-                )
+                if self.ports_opposite:
+                    make_pin(
+                        self.cell,
+                        "optA",
+                        [
+                            length0 + devrec * (i + 1),
+                            -radius * 2 + offset - devrec * i - extra,
+                        ],
+                        self.wg_width,
+                        LayerPinRecN,
+                        0,
+                    )
+                else:
+                    make_pin(
+                        self.cell,
+                        "optA",
+                        [
+                            -length0 - devrec * (i + 1),
+                            radius * 2 - offset + devrec * (i + 1) + extra,
+                        ],
+                        self.wg_width,
+                        LayerPinRecN,
+                        180,
+                    )
             make_pin(
                 self.cell,
                 "optB",
@@ -486,13 +519,30 @@ if __name__ == "__main__":
     from SiEPIC.utils import load_Waveguides_by_Tech
 
     waveguide_types = load_Waveguides_by_Tech(tech)
+
+    # test vertical waveguide
+    pcell = ly.create_cell(
+        "spiral_paperclip",
+        library,
+        {
+            "waveguide_type": waveguide_types[-1]["name"],
+            "length": 100,
+            "loops": 1,
+            "flatten": True,
+            "port_vertical": True,
+        },
+    )
+    t = Trans(Trans.R0, -pcell.bbox().width(), 0)
+    inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
+
+    # loop through many permutations
     xmax = 0
     for ports_opposite in [True, False]:
         for flatten in [True, False]:
             y = 0
             x = xmax
             for wg in waveguide_types:
-                print(wg)
+                # print(wg)
                 pcell = ly.create_cell(
                     "spiral_paperclip",
                     library,
@@ -508,6 +558,7 @@ if __name__ == "__main__":
                 inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
                 y += pcell.bbox().height() + 2000
                 xmax = max(xmax, x + inst.bbox().width())
+
 
     zoom_out(topcell)
 
