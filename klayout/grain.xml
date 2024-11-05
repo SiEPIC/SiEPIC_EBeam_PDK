@@ -4,7 +4,7 @@
  <version>0.4.29</version>
  <api-version>0.27</api-version>
  <title>SiEPIC EBeam PDK</title>
- <doc>A Process Design Kit for Silicon Photonics fabricated using Electron Beam Lithography (ANT, UW, SiEPICfab)</doc>
+ <doc>A Process Design Kit for Silicon Photonics fabricated using Electron Beam Lithography, at Applied Nanotools (ANT)</doc>
  <doc-url>https://github.com/siepic/SiEPIC_EBeam_PDK/blob/master/README.md</doc-url>
  <url>https://github.com/siepic/SiEPIC_EBeam.git/trunk/klayout</url>
  <author>Lukas Chrostowski, Jaspreet Jhoja, Mustafa Hammood, Brett Poulsen, Jonas Flueckiger, Rounak Singh Narde, Chris Zeqin Lu, Nathan Smith, Stefan Preble, Claudio Alarcon-Reyes</author>
