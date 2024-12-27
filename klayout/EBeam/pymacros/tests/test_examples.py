@@ -11,7 +11,8 @@ newpath = os.path.join(filepath,'../Example_scripted_layouts')
 sys.path.append(newpath)
 
 
-if __name__ == "__main__":
+def test_examples():
+    
     import MZI
     MZI.MZI()
 
@@ -21,3 +22,5 @@ if __name__ == "__main__":
     import Contra_directional_coupler_design
     Contra_directional_coupler_design.Contra_directional_coupler_design()
     
+if __name__ == "__main__":
+    test_examples()
