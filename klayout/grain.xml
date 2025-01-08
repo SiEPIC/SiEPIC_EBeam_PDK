@@ -14,7 +14,7 @@
  <depends>
   <name>siepic_tools</name>
   <url/>
-  <version>0.5.19</version>
+  <version>0.5.20</version>
  </depends>
  <depends>
   <name>xsection</name>
