@@ -3,7 +3,7 @@
 ## Component Name
 
 - ebeam_y_1550
-- ebeam_y_1310 (EBeam_Beta)
+- ebeam_y_1310
 
 ## Description
 
@@ -24,8 +24,10 @@ device were taken from the journal paper below, and implemented in EBeam lithogr
 
 - Support for TE polarization
 - Operating at 1550 nm wavelength
-- Performance:
-  - Excess Loss is < 1 dB
+  - Performance:
+    - Excess Loss is < 1 dB
+- Operating at 1310 nm wavelength: model excess loss set at 0.2 dB
+
 
 ## Parameters
 
