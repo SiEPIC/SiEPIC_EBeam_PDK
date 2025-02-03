@@ -16,6 +16,7 @@ unused ports on components to avoid reflections, refer to Disconnected Waveguide
 *Fig. 1: Layout of waveguide terminators*
 
 ## Compact Model Information
+
 ![alt text](imgs/cml.png)
 
 *Fig. 2: Compact Model*
@@ -32,4 +33,7 @@ unused ports on components to avoid reflections, refer to Disconnected Waveguide
 - **Design tools & methodology:**
   - 3D-FDTD (Lumerical FDTD Solutions)
   - Eigenmode expansion propagator (MODE Solutions)
+
+  - ebeam_terminator_te1550: Simulated using 3D-FDTD
+  - ebeam_terminator_te1310: estimated reflection set at -30 dB
 
