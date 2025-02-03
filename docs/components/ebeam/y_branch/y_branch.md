@@ -26,7 +26,7 @@ device were taken from the journal paper below, and implemented in EBeam lithogr
 - Operating at 1550 nm wavelength
   - Performance:
     - Excess Loss is < 1 dB
-- Operating at 1310 nm wavelength: model excess loss set at 0.2 dB
+- Operating at 1310 nm wavelength: model excess loss set at 0.2 dB, with no back reflections
 
 
 ## Parameters
