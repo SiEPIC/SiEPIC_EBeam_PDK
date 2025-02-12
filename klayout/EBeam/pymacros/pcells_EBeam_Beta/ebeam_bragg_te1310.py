@@ -22,7 +22,7 @@ class ebeam_bragg_te1310(pya.PCellDeclarationHelper):
         self.param(
             "grating_period", self.TypeDouble, "Grating period (microns)", default=0.270
         )
-        self.param("fill_factor", self.TypeDouble, "Grating fill factor", default=0.35)
+        # self.param("fill_factor", self.TypeDouble, "Grating fill factor", default=0.35)
         self.param(
             "corrugation_width",
             self.TypeDouble,
