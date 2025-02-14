@@ -1,9 +1,26 @@
-import pya
-from SiEPIC.utils import get_technology_by_name
-from pya import *
+import os
+from pya import (
+    PCellDeclarationHelper,
+    Point,
+    DPoint,
+    Path,
+    Polygon,
+    Text,
+    Box,
+    LayerInfo,
+    Trans,
+    CellInstArray,
+    Library,
+)
+from math import pi, acos, sqrt
+from SiEPIC.extend import to_itype
+from SiEPIC.utils import arc_wg_xy, get_technology_by_name
+from SiEPIC.utils.layout import new_layout
+from SiEPIC.scripts import zoom_out
+from SiEPIC._globals import PIN_LENGTH as pin_length, Python_Env
 
 
-class strip_to_slot(pya.PCellDeclarationHelper):
+class strip_to_slot(PCellDeclarationHelper):
     """
     The PCell declaration for the strip_to_slot.
     draft by Lukas Chrostowski july 24, 2017
@@ -13,12 +30,16 @@ class strip_to_slot(pya.PCellDeclarationHelper):
     updated by Lukas Chrostowski, 2021/12
       - reduce the curved waveguide section, longer device for lower loss
       - simulated using EME to give 99% efficiency
+
+    updated by Mustafa Hammood, 2025/02
+      - refactored redundant code, added in-cell execution
+      - added optional theta for slot curve (via *radius*)
     """
 
     def __init__(self):
         super(strip_to_slot, self).__init__()
         TECHNOLOGY = get_technology_by_name("EBeam")
-        # declare the parameters
+        # declare parameters
         self.param("silayer", self.TypeLayer, "Si Layer", default=TECHNOLOGY["Si"])
         self.param("r", self.TypeDouble, "Radius", default=15)
         self.param("w", self.TypeDouble, "Waveguide Width", default=0.5)
@@ -38,12 +59,11 @@ class strip_to_slot(pya.PCellDeclarationHelper):
         self.param("textl", self.TypeLayer, "Text Layer", default=LayerInfo(10, 0))
 
     def display_text_impl(self):
-        # Provide a descriptive text for the cell
         return (
             "Strip_To_Slot(rails="
             + ("%.3f" % self.rails)
-            + ",slot="
-            + ("%g" % (self.slot))
+            + ", slot="
+            + ("%g" % self.slot)
             + ")"
         )
 
@@ -51,82 +71,126 @@ class strip_to_slot(pya.PCellDeclarationHelper):
         return False
 
     def produce_impl(self):
-        # This is the main part of the implementation: create the layout
 
-        from SiEPIC.extend import to_itype
-        from SiEPIC.utils import arc_wg_xy
-
-        # fetch the parameters
         dbu = self.layout.dbu
         ly = self.layout
-        cell = self.cell
         shapes = self.cell.shapes
 
-        LayerSi = self.silayer
-        LayerSiN = ly.layer(LayerSi)
+        LayerSiN = ly.layer(self.silayer)
         LayerPinRecN = ly.layer(self.pinrec)
         LayerDevRecN = ly.layer(self.devrec)
 
-        # Use to_itype() to prevent rounding errors
+        # Convert parameters to internal units
         w = to_itype(self.w, dbu)
         r = to_itype(self.r, dbu)
         slot = to_itype(self.slot, dbu)
         rails = to_itype(self.rails, dbu)
         taper = to_itype(self.taper, dbu)
-        # draw the quarter-circle
+        wt = to_itype(self.wt, dbu)
+        offset = to_itype(self.offset, dbu)
+
+        # Draw the **curved arc** for the slot converter
         x = 0
         y = r + rails / 2 + w + slot
+        theta = (acos((r - offset) / r) / (2 * pi)) * 360
+        arc_width = sqrt(r**2 - (r - offset) ** 2)
+        self.cell.shapes(LayerSiN).insert(
+            arc_wg_xy(x, y, r + rails / 2 - wt / 2, wt, 270, 270 + theta)
+        )
 
-        t = Trans(Trans.R0, x, y)
-        # self.cell.shapes(LayerSiN).insert(Path(arc(r, 270, 360), rails).transformed(t).simple_polygon())
-        self.cell.shapes(LayerSiN).insert(arc_wg_xy(x, y, r, rails, 270, 360))
+        # **Taper polygon**
+        pts = [
+            Point.from_dpoint(DPoint(0, w)),
+            Point.from_dpoint(DPoint(0, 0)),
+            Point.from_dpoint(DPoint(-taper, w - rails)),
+            Point.from_dpoint(DPoint(-taper, w)),
+        ]
+        shapes(LayerSiN).insert(Polygon(pts))
 
-        pts = []
-        pts.append(Point.from_dpoint(DPoint(0, w)))
-        pts.append(Point.from_dpoint(DPoint(0, 0)))
-        pts.append(Point.from_dpoint(DPoint(-taper, w - rails)))
-        pts.append(Point.from_dpoint(DPoint(-taper, w)))
-        polygon = Polygon(pts)
-        shapes(LayerSiN).insert(polygon)
-
-        # Create the top left 1/2 waveguide
-        wg1 = Box(-taper, w + slot, 0, w + rails + slot)
+        # **Top left half waveguide** (slot side)
+        wg1 = Polygon(
+            [
+                Point.from_dpoint(DPoint(-taper, w + slot)),
+                Point.from_dpoint(DPoint(-taper, w + slot + rails)),
+                Point.from_dpoint(DPoint(0, w + slot + wt)),
+                Point.from_dpoint(DPoint(0, w + slot)),
+            ]
+        )
         shapes(LayerSiN).insert(wg1)
 
-        from SiEPIC.utils import arc_wg_xy
+        # **Bus waveguide**
+        wg2 = Box(0, 0, arc_width + wt, w)
+        shapes(LayerSiN).insert(wg2)
 
-        # Create the waveguide
-        wg1 = Box(0, 0, r + w, w)
-        shapes(LayerSiN).insert(wg1)
-
-        # Pin on the slot waveguide side:
-        shapes(LayerPinRecN).insert(
-            pya.Path(
-                [
-                    pya.Point(-taper + 0.05 / dbu, w + slot / 2),
-                    pya.Point(-taper - 0.05 / dbu, w + slot / 2),
-                ],
-                2 * rails + slot,
-            )
+        # **Pins**
+        pin_path1 = Path(
+            [
+                Point(-taper + pin_length, w + slot / 2),
+                Point(-taper - pin_length, w + slot / 2),
+            ],
+            2 * rails + slot,
         )
-        shapes(LayerPinRecN).insert(
-            pya.Text("opt1", pya.Trans(pya.Trans.R0, -taper, w))
-        ).text_size = 0.5 / dbu
+        shapes(LayerPinRecN).insert(pin_path1)
+        text1 = Text("opt1", Trans(Trans.R0, -taper, w))
+        text1.text_size = 0.5 / dbu
+        shapes(LayerPinRecN).insert(text1)
 
-        # Pin on the bus waveguide side:
-        shapes(LayerPinRecN).insert(
-            pya.Path(
-                [
-                    pya.Point(r + w - 0.05 / dbu, w / 2),
-                    pya.Point(r + w + 0.05 / dbu, w / 2),
-                ],
-                w,
-            )
+        pin_path2 = Path(
+            [
+                Point(arc_width + wt - pin_length, w / 2),
+                Point(arc_width + wt + pin_length, w / 2),
+            ],
+            w,
         )
-        shapes(LayerPinRecN).insert(
-            pya.Text("opt2", pya.Trans(pya.Trans.R0, r + w, w / 2))
-        ).text_size = 0.5 / dbu
+        shapes(LayerPinRecN).insert(pin_path2)
+        text2 = Text("opt2", Trans(Trans.R0, arc_width + wt, w / 2))
+        text2.text_size = 0.5 / dbu
+        shapes(LayerPinRecN).insert(text2)
 
-        # Create the device recognition layer -- make it 1 * wg_width away from the waveguides.
-        dev = Box(-taper, -w / 2 - w, r + w, y)
+        # **Device recognition layer**
+        dev = Box(-taper, -w / 2 - w, arc_width + wt, y - r + offset)
         shapes(LayerDevRecN).insert(dev)
+
+
+class test_lib(Library):
+    def __init__(self):
+        tech = "EBeam"
+        library = tech + "test_lib"
+        self.technology = tech
+        self.layout().register_pcell("strip_to_slot", strip_to_slot())
+        self.register(library)
+
+
+if __name__ == "__main__":
+    print("Test layout for: Strip to Slot")
+
+    if Python_Env == "Script":
+        # For external Python mode, when installed using pip install siepic_ebeam_pdk
+        import siepic_ebeam_pdk
+
+    # load the test library, and technology
+    t = test_lib()
+    tech = t.technology
+
+    # Create a new layout for the chip floor plan
+    topcell, ly = new_layout(tech, "test", GUI=True, overwrite=True)
+
+    # instantiate the cell
+    library = tech + "test_lib"
+
+    # Create a strip_to_slot PCell
+    pcell = ly.create_cell("strip_to_slot", library, {})
+    t = Trans(Trans.R0, 0, 0)
+    topcell.insert(CellInstArray(pcell.cell_index(), t))
+
+    # Display the layout in KLayout, using KLayout Package "klive", which needs to be installed in the KLayout Application
+    if Python_Env == "Script":
+        from SiEPIC.scripts import export_layout
+
+        path = os.path.dirname(os.path.realpath(__file__))
+        file_out = export_layout(
+            topcell, path, filename="strip_to_slot", relative_path="", format="oas"
+        )
+        from SiEPIC.utils import klive
+
+        klive.show(file_out, technology=tech)
