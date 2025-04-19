@@ -54,6 +54,8 @@ class PWB_edge_coupler(pya.PCellDeclarationHelper):
         self.param("trench_width", self.TypeDouble, "Trench width (microns)", default=100)
         self.param("trench_height", self.TypeDouble, "Trench height (microns)", default=100)
 
+        self.param("include_DevRec", self.TypeBoolean, "Draw the DevRec layer?", default=True)
+
     def get_waveguide_parameters(self):
         """
         Get the Waveguide Type from the PCell, and update waveguide parameters
@@ -160,9 +162,10 @@ class PWB_edge_coupler(pya.PCellDeclarationHelper):
         self.cell.shapes(layer).insert(DPolygon(pts).transformed(DTrans(DTrans.R0, -self.taper_length+self.pitch_align,0)))
  
         # DevRec
-        box = DBox (-self.taper_length-self.taper_extension, -17, 0, 17)
-        layer = self.layout.layer(self.TECHNOLOGY['DevRec'])
-        self.cell.shapes(layer).insert(box)
+        if self.include_DevRec:
+            box = DBox (-self.taper_length-self.taper_extension, -17, 0, 17)
+            layer = self.layout.layer(self.TECHNOLOGY['DevRec'])
+            self.cell.shapes(layer).insert(box)
 
 
 
@@ -202,7 +205,6 @@ if __name__ == "__main__":
 
     waveguide_types = load_Waveguides_by_Tech(tech)
 
-    # test vertical waveguide
     pcell = ly.create_cell(
         "PWB_edge_coupler",
         library,
@@ -211,6 +213,17 @@ if __name__ == "__main__":
         },
     )
     t = Trans(Trans.R0, -pcell.bbox().width(), 0)
+    inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
+
+    pcell = ly.create_cell(
+        "PWB_edge_coupler",
+        library,
+        {
+            "waveguide_type": waveguide_types[-1]["name"],
+            "include_DevRec":False
+        },
+    )
+    t = Trans(Trans.R0, -pcell.bbox().width(), pcell.bbox().height())
     inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
 
     zoom_out(topcell)
