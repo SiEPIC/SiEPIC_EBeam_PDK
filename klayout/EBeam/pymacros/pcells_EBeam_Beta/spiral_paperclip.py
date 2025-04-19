@@ -107,6 +107,13 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         """
         Get the Waveguide Type from the PCell, and update waveguide parameters
         """
+
+        from SiEPIC.utils import load_Waveguides_by_Tech
+        # Load all waveguides
+        self.TECHNOLOGY = get_technology_by_name(self.technology_name)
+        self.waveguide_types = load_Waveguides_by_Tech(self.technology_name)
+        # print(self.waveguide_types)
+
         self.waveguide_params = [
             t for t in self.waveguide_types if t["name"] == self.waveguide_type
         ]
@@ -387,6 +394,10 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         )
         t = Trans(Trans.R0, 0, 0)
         self.cell.insert(CellInstArray(pcell.cell_index(), t))
+
+        # Flatten the PCell and remove the DevRec and PinRec layers
+        if not "compound_waveguide" in self.waveguide_params and self.flatten:
+            self.cell.flatten(True)
 
         # If the waveguide is a Compound type:
         # Flatten the PCell and remove the DevRec and PinRec layers
