@@ -51,10 +51,13 @@ class PWB_edge_coupler(pya.PCellDeclarationHelper):
         self.param("pitch_align", self.TypeDouble, "Alignment marker: pitch of the two markers (microns)", default=50)
 
         # Trench
-        self.param("trench_width", self.TypeDouble, "Trench width (microns)", default=100)
-        self.param("trench_height", self.TypeDouble, "Trench height (microns)", default=100)
+        self.param("trench_width", self.TypeDouble, "Trench width (microns)", default=10)
+        self.param("trench_height", self.TypeDouble, "Trench height (microns)", default=50)
+        self.param("layer_deep_etch", self.TypeLayer, "Trench layer", default=self.TECHNOLOGY["Deep Trench"])
 
         self.param("include_DevRec", self.TypeBoolean, "Draw the DevRec layer?", default=True)
+
+        
 
     def get_waveguide_parameters(self):
         """
@@ -161,13 +164,24 @@ class PWB_edge_coupler(pya.PCellDeclarationHelper):
         self.cell.shapes(layer).insert(DPolygon(pts).transformed(DTrans(DTrans.R0, -self.taper_length+self.offset_align_tip,0)))
         self.cell.shapes(layer).insert(DPolygon(pts).transformed(DTrans(DTrans.R0, -self.taper_length+self.pitch_align,0)))
  
+        # Trench layer
+        if self.layer_deep_etch:
+            box_trench = DBox (-self.taper_length-self.taper_extension, 
+                               -self.trench_height/2, 
+                               -self.taper_length-self.taper_extension+self.trench_width, 
+                               self.trench_height/2)
+            layer = self.layout.layer(self.layer_deep_etch)
+            self.cell.shapes(layer).insert(box_trench)
+                    
         # DevRec
         if self.include_DevRec:
             box = DBox (-self.taper_length-self.taper_extension, -17, 0, 17)
             layer = self.layout.layer(self.TECHNOLOGY['DevRec'])
+            if self.layer_deep_etch:
+                dbu = self.layout.dbu
+                box = pya.Region(box.to_itype(dbu)) + pya.Region(box_trench.to_itype(dbu))
+                box.merge()
             self.cell.shapes(layer).insert(box)
-
-
 
 class test_lib(Library):
     def __init__(self):
@@ -205,16 +219,19 @@ if __name__ == "__main__":
 
     waveguide_types = load_Waveguides_by_Tech(tech)
 
+    y = 0
     pcell = ly.create_cell(
         "PWB_edge_coupler",
         library,
         {
             "waveguide_type": waveguide_types[-1]["name"],
+            "include_DevRec":True
         },
     )
-    t = Trans(Trans.R0, -pcell.bbox().width(), 0)
+    t = Trans(Trans.R0, -pcell.bbox().width(), y)
     inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
-
+    y += pcell.bbox().height() + 10e3
+    
     pcell = ly.create_cell(
         "PWB_edge_coupler",
         library,
@@ -223,15 +240,28 @@ if __name__ == "__main__":
             "include_DevRec":False
         },
     )
-    t = Trans(Trans.R0, -pcell.bbox().width(), pcell.bbox().height())
+    t = Trans(Trans.R0, -pcell.bbox().width(), y)
+    inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
+    y += pcell.bbox().height() + 10e3
+
+    pcell = ly.create_cell(
+        "PWB_edge_coupler",
+        library,
+        {
+            "waveguide_type": waveguide_types[-1]["name"],
+            "layer_deep_etch":None,
+            "include_DevRec":True,
+        },
+    )
+    t = Trans(Trans.R0, -pcell.bbox().width(), y)
     inst = topcell.insert(CellInstArray(pcell.cell_index(), t))
 
-    zoom_out(topcell)
+    topcell.show()
 
-    # Display the layout in KLayout, using KLayout Package "klive", which needs to be installed in the KLayout Application
-    if Python_Env == 'Script':
-        from SiEPIC.scripts import export_layout
-        path = os.path.dirname(os.path.realpath(__file__))
-        file_out = export_layout (topcell, path, filename='PWB_edge_coupler', relative_path='', format='oas')
-        from SiEPIC.utils import klive
-        klive.show(file_out, technology=tech)
+    # # Display the layout in KLayout, using KLayout Package "klive", which needs to be installed in the KLayout Application
+    # if Python_Env == 'Script':
+    #     from SiEPIC.scripts import export_layout
+    #     path = os.path.dirname(os.path.realpath(__file__))
+    #     file_out = export_layout (topcell, path, filename='PWB_edge_coupler', relative_path='', format='oas')
+    #     from SiEPIC.utils import klive
+    #     klive.show(file_out, technology=tech)
