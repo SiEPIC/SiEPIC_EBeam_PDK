@@ -51,7 +51,7 @@ class PWB_edge_coupler(pya.PCellDeclarationHelper):
         self.param("pitch_align", self.TypeDouble, "Alignment marker: pitch of the two markers (microns)", default=50)
 
         # Trench
-        self.param("trench_width", self.TypeDouble, "Trench width (microns)", default=10)
+        self.param("trench_width", self.TypeDouble, "Trench width (microns)", default=100)
         self.param("trench_height", self.TypeDouble, "Trench height (microns)", default=50)
         self.param("layer_deep_etch", self.TypeLayer, "Trench layer", default=self.TECHNOLOGY["Deep Trench"])
 
@@ -166,9 +166,9 @@ class PWB_edge_coupler(pya.PCellDeclarationHelper):
  
         # Trench layer
         if self.layer_deep_etch:
-            box_trench = DBox (-self.taper_length-self.taper_extension, 
+            box_trench = DBox (-self.taper_length, 
                                -self.trench_height/2, 
-                               -self.taper_length-self.taper_extension+self.trench_width, 
+                               -self.taper_length-self.trench_width, 
                                self.trench_height/2)
             layer = self.layout.layer(self.layer_deep_etch)
             self.cell.shapes(layer).insert(box_trench)
