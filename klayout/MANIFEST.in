@@ -5,6 +5,8 @@ graft siepic_ebeam_pdk/pymacros/opics_ebeam
 
 # Include the compact models, for post-layout simulation verification
 # prune siepic_ebeam_pdk/CML
+recursive-include siepic_ebeam_pdk/CML *
+
 
 prune siepic_ebeam_pdk/CDC_SM
 prune siepic_ebeam_pdk/fdtd
