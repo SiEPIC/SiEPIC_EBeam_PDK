@@ -1,6 +1,6 @@
 # $autorun
 
-version = "0.4.38"
+version = "0.4.39"
 
 print('SiEPIC-EBeam-PDK Python module: pymacros, v%s' % version)
 
@@ -20,7 +20,8 @@ load_klayout_library(tech, 'EBeam-ANT', "v%s, ANT components" % version, 'gds/AN
 
 
 # Load OPICS simulation library
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import opics_ebeam
+# Users should load opics manually
+#import sys, os
+#sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+#import opics_ebeam
 
