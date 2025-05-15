@@ -90,7 +90,7 @@ def Ring_resonator_sweep():
         dbu = ly.dbu
         cell = cell.layout().create_cell("RingResonator")
         if pol == "TE":
-            t = Trans(Trans.R0, 40 / dbu, 12 / dbu)
+            t = Trans(Trans.R0, 40 / dbu, 14 / dbu)
         else:
             # rotate the layout since EBeam TM grating couplers have an angle that is negative
             t = Trans(Trans.R180, 560 / dbu, 393 / dbu)
