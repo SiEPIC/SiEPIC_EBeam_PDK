@@ -6,7 +6,6 @@ if Python_Env == 'Script':
     # For external Python mode, when installed using pip install siepic_ebeam_pdk
     import EBeam
 
-
 from SiEPIC.utils.layout import new_layout, make_pin
 from SiEPIC.utils import translate_from_normal, get_technology_by_name
 from SiEPIC.scripts import zoom_out, export_layout, connect_pins_with_waveguide
@@ -67,6 +66,8 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         optional radius and with a user-specified bend parameter 'p'.
         Inspired from GDS factory code [1] and the 2019 Vogelbacher et al. paper:
         'Analysis of silicon nitride partial Euler waveguide bends' [2].
+        
+        Developped by Evan Jonker, May 2025
         
         [1] https://github.com/gdsfactory/gdsfactory/blob/main/gdsfactory/path.py
         [2] https://dx.doi.org/10.1364/oe.27.031394
