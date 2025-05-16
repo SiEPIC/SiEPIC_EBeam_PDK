@@ -81,7 +81,7 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         import scipy.integrate as integrate
         import pya
 
-        N = points_per_circle(radius/1000, dbu=dbu)*4
+        N = points_per_circle(radius/1000, dbu=dbu)
         if DevRec:
             N = int(N / 3)
         else:
@@ -175,10 +175,11 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         # Create array of "Point" types
         pts = []
         for i in range(len(points)):
-            pts.append(pya.Point(points[i,0], points[i,1]))
+            pts.append(pya.Point(round(points[i,0]), round(points[i,1])))
 
         if debug:
-            print("Euler pts: {}".format(pts))
+            print("Euler pts (float): {}".format(points))
+            print("Euler pts (Point): {}".format(pts))
         
         return pts
 
