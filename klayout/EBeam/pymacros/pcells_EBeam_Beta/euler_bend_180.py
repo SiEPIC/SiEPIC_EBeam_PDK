@@ -4,7 +4,7 @@ from pya import *
 from SiEPIC._globals import Python_Env
 if Python_Env == 'Script':
     # For external Python mode, when installed using pip install siepic_ebeam_pdk
-    import EBeam
+    import siepic_ebeam_pdk
 
 from SiEPIC.utils.layout import new_layout, make_pin
 from SiEPIC.utils import translate_from_normal, get_technology_by_name
@@ -62,12 +62,12 @@ class euler_bend_180(pya.PCellDeclarationHelper):
     
     @staticmethod
     def euler_points(radius=5e3, p_in=0.25, DevRec=None, dbu=0.001, debug=False):
-        '''Function to create points for a 90 degree euler bend of 
-        optional radius and with a user-specified bend parameter 'p'.
+        '''Function to create points for a 180 degree Euler bend with 
+        radius and a user-specified bend parameter 'p'.
         Inspired from GDS factory code [1] and the 2019 Vogelbacher et al. paper:
         'Analysis of silicon nitride partial Euler waveguide bends' [2].
         
-        Developped by Evan Jonker, May 2025
+        Developed by Evan Jonker, May 2025
         
         [1] https://github.com/gdsfactory/gdsfactory/blob/main/gdsfactory/path.py
         [2] https://dx.doi.org/10.1364/oe.27.031394
