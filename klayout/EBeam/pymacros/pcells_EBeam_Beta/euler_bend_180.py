@@ -1,5 +1,6 @@
 import pya
 from pya import *
+from pya import Text
 
 from SiEPIC._globals import Python_Env
 if Python_Env == 'Script':
@@ -18,9 +19,10 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         self.technology_name = "EBeam"
         self.TECHNOLOGY = get_technology_by_name(self.technology_name)
         
-        self.param("radius",self.TypeDouble,"Effective Radius",default=10)
+        self.param("radius",self.TypeDouble,"Effective Radius",default=5)
         self.param("p",self.TypeDouble,"Euler Parameter",default=0.25)
         self.param("ww",self.TypeDouble,"Waveguide Width",default=0.5)
+        self.param("layer", self.TypeLayer, "Layer", default=self.TECHNOLOGY["Si"])
     
     def display_text_impl(self):
         # Provide a descriptive text for the cell
@@ -41,21 +43,47 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         ww = (self.ww)/dbu
         
         DevRec_lay = TECHNOLOGY["DevRec"]
-        Si_lay = TECHNOLOGY["Si"]
+        Si_lay = self.layer
         PinRec_lay = TECHNOLOGY["PinRec"]
         
-        path = self.euler_points(radius,p)
-
+        path, Rmin = self.euler_points(radius,p)
         wg_pts = pya.Path(path, 0).unique_points().get_points()
         
         wg_polygon = pya.Polygon(translate_from_normal(wg_pts, ww/2) + translate_from_normal(wg_pts, -ww/2)[::-1])
         shapes(ly.layer(Si_lay)).insert(wg_polygon)
         
+        path, Rmin = self.euler_points(radius,p, DevRec=True)
+        wg_pts = pya.Path(path, 0).unique_points().get_points()
         wg_polygon = pya.Polygon(translate_from_normal(wg_pts, 1.5*ww) + translate_from_normal(wg_pts, -1.5*ww)[::-1])
+        waveguide_length = wg_polygon.area()/ww
         shapes(ly.layer(DevRec_lay)).insert(wg_polygon)
         
         make_pin(self.cell,"opt1",[0,0],ww/1000,ly.layer(PinRec_lay),180)
         make_pin(self.cell,"opt2",[0,radius*2],ww/1000,ly.layer(PinRec_lay),180)
+
+        # Compact model information
+        t = pya.Trans(pya.Trans.R0, 0, 0)
+        text = Text("Lumerical_INTERCONNECT_library=EBeam", t, ww/10, -1)
+        shape = shapes(DevRec_lay).insert(text)
+        shape.text_size = ww / 10
+        t = pya.Trans(pya.Trans.R0, 0, ww / 4)
+        text = pya.Text("Component=ebeam_wg_integral_1550", t, ww/10, -1)
+        shape = shapes(DevRec_lay).insert(text)
+        shape.text_size = ww / 10
+        t = pya.Trans(pya.Trans.R0, 0, ww / 2)
+        text = Text(
+            "Spice_param:wg_length=%.3fu wg_width=%.3fu"
+            % (waveguide_length * dbu, ww*dbu), t, ww / 10, -1
+        )
+        shape = shapes(DevRec_lay).insert(text)
+        t = pya.Trans(pya.Trans.R0, 0, -ww)
+        text = Text(
+            'Length=%.3f (microns)' % (waveguide_length*dbu), t, ww / 3, -1)
+        shape = shapes(DevRec_lay).insert(text)
+        t = pya.Trans(pya.Trans.R0, 0, ww)
+        text = Text(
+            'Minimum bend radius=%.2f (microns)' % (Rmin), t, ww * .2, -1)
+        shape = shapes(DevRec_lay).insert(text)
         
     def can_create_from_shape(self, layout, shape, layer):
         return False
@@ -81,20 +109,19 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         import scipy.integrate as integrate
         import pya
 
-        N = points_per_circle(radius/1000, dbu=dbu)
+        # number of points for a quarter circle
+        N = points_per_circle(radius/1000, dbu=dbu)/4
         if DevRec:
-            N = int(N / 3)
+            npoints = int(N / 3)
         else:
-            N = int(N)
-        if N < 5:
-            N = 100
+            npoints = int(N)
+        if npoints < 5:
+            npoints = 100
 
         # Internal variables
         angle = 180
-        npoints = 300
-        npoints = int(N)
         if debug:
-            print("N = {}".format(npoints))
+            print("npoints = {}".format(npoints))
         R0 = 1
         alpha = np.radians(angle)
         Rp = R0 / np.sqrt(p_in * alpha)
@@ -104,6 +131,15 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         # Allocate points for euler-bend and circular sections
         num_pts_euler = int(np.round(sp / (s0 / 2) * npoints))
         num_pts_arc = npoints - num_pts_euler
+        # For low number of points (DevRec) there may not be any circular section
+        # Make sure there are at least 2 points allocated for the circle
+        if debug:
+            print(f'num_pts_arc: {num_pts_arc}, euler {num_pts_euler}, total {npoints}')
+        if num_pts_arc < 2:
+            num_pts_euler = npoints-2
+            num_pts_arc = 2
+            if debug:
+                print(f'num_pts_arc: {num_pts_arc}, euler {num_pts_euler}, total {npoints}')
 
         # Calculate [x,y] of euler-bend by numerically solving fresnel integrals
         s_euler = np.linspace(0, sp, num_pts_euler)
@@ -138,9 +174,9 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         points = np.concatenate([np.array([x, y]).T[:-1], points2]) * scale
         
         # The minimum radius is Rp
-        Rmin = Rp * scale
+        Rmin = round(Rp * scale/1000,3)
         if debug:
-            print(f"   [euler_bend_180] minimum bend radius: {round(Rmin/1000,3)} microns")
+            print(f"   [euler_bend_180] minimum bend radius: {Rmin} microns")
 
         # Code to plot bend curvatures
         if False:
@@ -181,7 +217,7 @@ class euler_bend_180(pya.PCellDeclarationHelper):
             print("Euler pts (float): {}".format(points))
             print("Euler pts (Point): {}".format(pts))
         
-        return pts
+        return pts, Rmin
 
         
 # Code to display in klayout
@@ -221,7 +257,7 @@ if __name__ == "__main__":
     pcell = ly.create_cell(
         "euler_bend_180",
         library,{
-                "p": 0.5,
+                "p": 0.25,
                 "ww": 0.5,
                 "radius": 5,
         })
