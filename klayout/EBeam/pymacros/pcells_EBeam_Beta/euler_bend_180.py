@@ -81,7 +81,7 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         import scipy.integrate as integrate
         import pya
 
-        N = points_per_circle(radius/1000, dbu=dbu)/4
+        N = points_per_circle(radius/1000, dbu=dbu)*4
         if DevRec:
             N = int(N / 3)
         else:
@@ -142,6 +142,36 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         if debug:
             print(f"   [euler_bend_180] minimum bend radius: {round(Rmin/1000,3)} microns")
 
+        # Code to plot bend curvatures
+        if False:
+            dx = np.gradient(points[:,0])
+            dy = np.gradient(points[:,1])
+            ddx = np.gradient(dx)
+            ddy = np.gradient(dy)
+            curvature = (dx * ddy - dy * ddx) / (dx**2 + dy**2)**1.5
+            ptnums = np.arange(len(points[:,0]))
+            arr = points[:,0]
+            
+            half = arr[:len(arr)//2]
+            second_half = arr[len(arr)//2:]
+            
+            half_c = curvature[:len(curvature)//2]
+            second_half_c = curvature[len(curvature)//2:]
+
+            import matplotlib.pyplot as plt
+            plt.figure(1)
+            plt.plot(ptnums,curvature)
+            plt.xlabel("pt number")
+            plt.ylabel("curvature")
+            
+            plt.figure(2)
+            plt.plot(half,half_c,linestyle='--')
+            plt.plot(second_half,second_half_c,linestyle='--')
+            plt.xlabel("pt x-coord")
+            plt.ylabel("curvature")
+            plt.legend(["bottom half","top half"])
+            plt.show()
+        
         # Create array of "Point" types
         pts = []
         for i in range(len(points)):
@@ -190,9 +220,9 @@ if __name__ == "__main__":
     pcell = ly.create_cell(
         "euler_bend_180",
         library,{
-                "p": 0.25,
+                "p": 0.5,
                 "ww": 0.5,
-                "radius": 20,
+                "radius": 5,
         })
     t = pya.Trans(pya.Trans.R0, x, y - pcell.bbox().bottom)
     inst = topcell.insert(pya.CellInstArray(pcell.cell_index(), t))
