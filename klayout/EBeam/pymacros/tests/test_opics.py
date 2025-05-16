@@ -3,6 +3,8 @@
 #  Unit test for simulation using OPICS
 
 
+import pytest
+@pytest.mark.skip(reason="Running this test modifies the compact models, breaking them.")
 def test_opics():
     import SiEPIC
 
