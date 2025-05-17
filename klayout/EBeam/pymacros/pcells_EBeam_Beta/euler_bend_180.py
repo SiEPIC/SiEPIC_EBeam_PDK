@@ -9,7 +9,6 @@ if Python_Env == 'Script':
 
 from SiEPIC.utils.layout import new_layout, make_pin
 from SiEPIC.utils import translate_from_normal, get_technology_by_name
-from SiEPIC.scripts import zoom_out, export_layout, connect_pins_with_waveguide
 
 class euler_bend_180(pya.PCellDeclarationHelper):
     def __init__(self):
@@ -229,10 +228,6 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         return pts, Rmin, fraction_circular
 
         
-# Code to display in klayout
-import os
-filepath = os.path.dirname(os.path.realpath(__file__))
-
 class test_lib(Library):
     def __init__(self):
         tech = "EBeam"
@@ -243,7 +238,6 @@ class test_lib(Library):
 
 if __name__ == "__main__":
     print("Test layout for: euler_bend_180")
-    from SiEPIC.scripts import zoom_out, export_layout
 
     # load the test library, and technology
     t = test_lib()

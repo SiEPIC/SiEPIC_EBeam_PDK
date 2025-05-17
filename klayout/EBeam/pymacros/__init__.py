@@ -1,6 +1,6 @@
 # $autorun
 
-version = "0.4.43"
+version = "0.4.44"
 
 print('SiEPIC-EBeam-PDK Python module: pymacros, v%s' % version)
 
