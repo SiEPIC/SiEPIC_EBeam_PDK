@@ -185,6 +185,7 @@ if __name__ == "__main__":
     params = [
         {"w": 0.5, "g": 0.5, "Lc": 151, "p": 0.25, "r":5}, # 19 micron long bend
         {"w": 0.5, "g": 0.6, "Lc": 131, "p": 0.3, "r":10}, # 39 micron long bend
+        {"w": 0.5, "g": 0.6, "Lc": 131, "p": 0.5, "r":10}, # 39 micron long bend
     ]
     xmax = 0
     y = 0

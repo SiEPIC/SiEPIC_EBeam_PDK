@@ -44,9 +44,9 @@ class ebeam_test_uturn_euler(pya.PCellDeclarationHelper):
         p = self.param("waveguide_type", self.TypeList, "Waveguide Type", default=self.waveguide_types[0]["name"])
         for wa in self.waveguide_types:
             p.add_choice(wa["name"], wa["name"])
-        self.param("override_width", self.TypeDouble, "Override waveguide width", default=0 )
-        self.param("override_radius", self.TypeDouble, "Override waveguide radius", default=0)
-        self.param("override_bezier", self.TypeDouble, "Override waveguide Bezier parameter", default=0)
+        #self.param("override_width", self.TypeDouble, "Override waveguide width", default=0 )
+        #self.param("override_radius", self.TypeDouble, "Override waveguide radius", default=0)
+        #self.param("override_bezier", self.TypeDouble, "Override waveguide Bezier parameter", default=0)
         self.param("columns", self.TypeInt, "Number of columns", default=5)
         self.param("rows", self.TypeInt, "Number of double rows", default=5)
         self.param("radius", self.TypeDouble, "Radius", default=5)
@@ -59,13 +59,12 @@ class ebeam_test_uturn_euler(pya.PCellDeclarationHelper):
 
     def display_text_impl(self):
         # Provide a descriptive text for the cell
-        return "%s_%s_%s_override:%s_%s_%s" % (
+        return "%s_%s_%s_%s_%s" % (
             self.cellName,
             self.tot_bends,
             self.waveguide_type.replace(" ", "_"),
-            self.override_width,
-            self.override_radius,
-            round(self.override_bezier, 3),
+            self.p,
+            self.radius,
         )
 
     def get_waveguide_parameters(self):
@@ -89,21 +88,26 @@ class ebeam_test_uturn_euler(pya.PCellDeclarationHelper):
         self.waveguide_params = self.waveguide_params[0]
 
         wg_params = self.waveguide_params
-
+        '''
         if self.override_width > 0:
             delta_width = self.override_width - float(self.waveguide_params["width"])
             self.waveguide_params["width"] = str(self.override_width)
         else:
             delta_width = 0
+        '''
+        delta_width = 0
+        
         # Adjust all the width parameters
         for wg in wg_params["component"]:
             wg["width"] = str(float(wg["width"]) + delta_width)
 
+        '''
         if self.override_radius > 0:
             self.waveguide_params["radius"] = str(self.override_radius)
         if self.override_bezier > 0:
             self.waveguide_params["bezier"] = str(self.override_bezier)
-
+        '''
+        
         # DevRec width
         if "DevRec" not in [wg["layer"] for wg in wg_params["component"]]:
             from SiEPIC import _globals
@@ -120,7 +124,7 @@ class ebeam_test_uturn_euler(pya.PCellDeclarationHelper):
             )
 
         # Radius
-        self.radius = float(wg_params["radius"])
+        # self.radius = float(wg_params["radius"])
 
         # Waveguide pin width
         self.wg_width = float(wg_params["width"])
@@ -238,9 +242,15 @@ if __name__ == "__main__":
 
     # Add the u-turn
     print(waveguide_type)
+    columns = 13
+    rows = 10
+    radius = 10
+    p = 0.25
+    '''
     columns = 27
     rows = 20
     radius = 5
+    '''
     pcell = ly.create_cell(
         "ebeam_test_uturn_euler",
         library,
@@ -249,6 +259,7 @@ if __name__ == "__main__":
             "columns": columns,
             "rows": rows,
             "radius": radius,
+            "p": p,
             "tot_bends": 2 * columns * rows,
         },
     )
