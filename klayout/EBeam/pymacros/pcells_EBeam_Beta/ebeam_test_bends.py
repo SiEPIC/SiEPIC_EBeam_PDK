@@ -1,5 +1,5 @@
 """
-Create a layout with band bends
+Create a layout with many bends
 uses: waveguide bend cutback structure
 
 - this can be executed directly, or loaded by the technology library
@@ -165,130 +165,29 @@ class ebeam_test_bends(pya.PCellDeclarationHelper):
         devrec = self.devrec
         radius = self.radius
 
-        if 0:
-            # Spiral
 
-            # SBend offset in the middle of the spiral
-            if "sbends" in self.waveguide_params:
-                # Use the Bezier S-Bend (more space efficient)
-                # if sbends=True in Waveguide.xml
-                offset = radius - devrec / 2
-                extra = 0
-            else:
-                # Use 2 x 90 degree bends
-                offset = radius
-                extra = devrec
-
-            # Ensure the length is sufficient
-            self.minlength = 2 * radius
-            length0 = max(self.minlength, self.length)
-
-            # min loops
-            self.loops = max(self.loops, 1)
-
-            # spiral points
-            points = [
-                DPoint(-length0, offset),
-                DPoint(0.0, offset),
-                DPoint(0.0, -offset),
-                DPoint(length0, -offset),
-            ]
-            for i in range(1, self.loops * 2, 2):
-                points.insert(
-                    0,
-                    DPoint(
-                        -length0 - devrec * (i - 1),
-                        offset - radius * 2 - devrec * (i - 1) - extra,
-                    ),
-                )
-                points.insert(
-                    0,
-                    DPoint(
-                        length0 + devrec * i,
-                        offset - radius * 2 - devrec * (i - 1) - extra,
-                    ),
-                )
-                points.insert(
-                    0,
-                    DPoint(
-                        length0 + devrec * i, -offset + radius * 2 + devrec * i + extra
-                    ),
-                )
-                points.insert(
-                    0,
-                    DPoint(
-                        -length0 - devrec * (i + 1),
-                        -offset + radius * 2 + devrec * i + extra,
-                    ),
-                )
-                points.append(
-                    DPoint(
-                        length0 + devrec * (i - 1),
-                        radius * 2 - offset + devrec * (i - 1) + extra,
-                    )
-                )
-                points.append(
-                    DPoint(
-                        -length0 - devrec * i,
-                        radius * 2 - offset + devrec * (i - 1) + extra,
-                    )
-                )
-                points.append(
-                    DPoint(
-                        -length0 - devrec * i, -radius * 2 + offset - devrec * i - extra
-                    )
-                )
-                points.append(
-                    DPoint(
-                        length0 + devrec * (i + 1),
-                        -radius * 2 + offset - devrec * i - extra,
-                    )
-                )
-            if not self.ports_opposite:
-                points.append(
-                    DPoint(
-                        length0 + devrec * (i + 1),
-                        radius * 2 - offset + devrec * (i + 1) + extra,
-                    )
-                )
-                points.append(
-                    DPoint(
-                        -length0 - devrec * (i + 1),
-                        radius * 2 - offset + devrec * (i + 1) + extra,
-                    )
-                )
-            points.pop(0)
-            points.insert(
-                0,
-                DPoint(
-                    -length0 - devrec * (i + 1),
-                    -offset + radius * 2 + devrec * i + extra,
-                ),
-            )
-
-        else:
-            # bend test structure
-            points = [DPoint(0, 0)]
-            for j in range(0, self.rows):
-                dy = radius * 4 * j
-                for i in range(1, self.columns * 2 + 1, 2):
-                    points.append(DPoint(radius * 2 * (i), dy))
-                    points.append(DPoint(radius * 2 * (i), radius * 2 + dy))
-                    points.append(DPoint(radius * 2 * (i + 1), radius * 2 + dy))
-                    points.append(DPoint(radius * 2 * (i + 1), dy))
-                points.append(DPoint(radius * 2 * (i + 2), dy))
-                points.append(DPoint(radius * 2 * (i + 2), radius * 2 + dy))
-                for i in range(self.columns * 2 - 1, 0, -2):
-                    points.append(DPoint(radius * 2 * (i + 1), radius * 2 + dy))
-                    points.append(DPoint(radius * 2 * (i + 1), radius * 4 + dy))
-                    points.append(DPoint(radius * 2 * (i), radius * 4 + dy))
-                    points.append(DPoint(radius * 2 * (i), radius * 2 + dy))
-                points.pop(-1)
-                points.pop(-1)
-            #            points.append(DPoint(radius*2*(i+2),radius*2*self.rows))
-            points.append(DPoint(0, radius * 4 * self.rows))
-            self.tot_bends1 = len(points)
-            print("Number of bends: %s" % self.tot_bends)
+        # bend test structure
+        points = [DPoint(0, 0)]
+        for j in range(0, self.rows):
+            dy = radius * 4 * j
+            for i in range(1, self.columns * 2 + 1, 2):
+                points.append(DPoint(radius * 2 * (i), dy))
+                points.append(DPoint(radius * 2 * (i), radius * 2 + dy))
+                points.append(DPoint(radius * 2 * (i + 1), radius * 2 + dy))
+                points.append(DPoint(radius * 2 * (i + 1), dy))
+            points.append(DPoint(radius * 2 * (i + 2), dy))
+            points.append(DPoint(radius * 2 * (i + 2), radius * 2 + dy))
+            for i in range(self.columns * 2 - 1, 0, -2):
+                points.append(DPoint(radius * 2 * (i + 1), radius * 2 + dy))
+                points.append(DPoint(radius * 2 * (i + 1), radius * 4 + dy))
+                points.append(DPoint(radius * 2 * (i), radius * 4 + dy))
+                points.append(DPoint(radius * 2 * (i), radius * 2 + dy))
+            points.pop(-1)
+            points.pop(-1)
+        #            points.append(DPoint(radius*2*(i+2),radius*2*self.rows))
+        points.append(DPoint(0, radius * 4 * self.rows))
+        self.tot_bends1 = len(points)
+        print("Number of bends: %s" % self.tot_bends)
 
         # Create a path and waveguide
         path = DPath(points, 0.5)
@@ -350,6 +249,8 @@ if __name__ == "__main__":
 
     from SiEPIC.utils.layout import new_layout
     from SiEPIC.scripts import zoom_out
+    
+    import siepic_ebeam_pdk
 
     # load the test library, and technology
     t = test_lib()
@@ -373,7 +274,7 @@ if __name__ == "__main__":
     x = xmax
     if 1:
         # only run the first type
-        waveguide_types = [waveguide_types[0]]
+        waveguide_types = [waveguide_types[1]]
     for wg in waveguide_types:
         pcell = ly.create_cell(
             "ebeam_test_bends",
@@ -391,4 +292,4 @@ if __name__ == "__main__":
         y += pcell.bbox().height() + 2000
         xmax = max(xmax, x + inst.bbox().width())
 
-    zoom_out(topcell)
+    topcell.show(os.path.dirname(__file__))

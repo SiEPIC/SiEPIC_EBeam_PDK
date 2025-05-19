@@ -44,20 +44,20 @@ class euler_bend_180(pya.PCellDeclarationHelper):
         
         DevRec_lay = TECHNOLOGY["DevRec"]
         Si_lay = self.layer
-        PinRec_lay = TECHNOLOGY["PinRec"]
+        PinRec_lay = TECHNOLOGY["PinRec"]        
         
         path, Rmin, fraction_circular = self.euler_points(radius,p)
         wg_pts = pya.Path(path, 0).unique_points().get_points()
         wg_polygon = pya.Polygon(translate_from_normal(wg_pts, ww/2) + translate_from_normal(wg_pts, -ww/2)[::-1])
         waveguide_length = wg_polygon.area()/ww
-        shapes(ly.layer(Si_lay)).insert(wg_polygon)
+        shapes(Si_lay).insert(wg_polygon)
         
         if not self.shape_only:
             # Device Recognition layer:
             path, Rmin, fraction_circular = self.euler_points(radius,p, DevRec=True)
             wg_pts = pya.Path(path, 0).unique_points().get_points()
             wg_polygon = pya.Polygon(translate_from_normal(wg_pts, 1.5*ww) + translate_from_normal(wg_pts, -1.5*ww)[::-1])
-            shapes(ly.layer(DevRec_lay)).insert(wg_polygon)
+            shapes(DevRec_lay).insert(wg_polygon)
 
             # Pins        
             make_pin(self.cell,"opt1",[0,0],ww/1000,ly.layer(PinRec_lay),180)
