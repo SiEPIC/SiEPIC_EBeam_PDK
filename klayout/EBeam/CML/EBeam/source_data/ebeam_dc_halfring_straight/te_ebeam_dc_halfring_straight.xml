@@ -9,7 +9,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=100nm_radius=3um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=100nm_radius=3000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -21,7 +21,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=50nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=50nm_radius=5000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -33,7 +33,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=60nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=60nm_radius=5000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -45,7 +45,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=100nm_radius=5um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=100nm_radius=5000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -57,7 +57,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=50nm_radius=3um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=50nm_radius=3000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -69,7 +69,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=60nm_radius=3um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=60nm_radius=3000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -81,7 +81,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=80nm_radius=3um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=80nm_radius=3000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -93,7 +93,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=100nm_radius=10um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=100nm_radius=10000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -105,7 +105,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=150nm_radius=10um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=150nm_radius=10000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -117,7 +117,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=200nm_radius=18um_width=500nm_thickness=220nm_CoupleLength=0um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=200nm_radius=18000nm_width=500nm_thickness=220nm_CoupleLength=0nm.dat</value>
         </extracted>
     </association>
     <association>
@@ -129,7 +129,7 @@
             <value name="width" type="double">5e-07</value>
         </design>
         <extracted>
-            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=200nm_radius=10um_width=500nm_thickness=220nm_CoupleLength=4um.dat</value>
+            <value name="s-param" type="string">te_ebeam_dc_halfring_straight_gap=200nm_radius=10000nm_width=500nm_thickness=220nm_CoupleLength=4000nm.dat</value>
         </extracted>
     </association>
 </lumerical_lookup_table>

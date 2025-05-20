@@ -1,3 +1,8 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
 [tool.setuptools]
 packages = [
   "siepic_ebeam_pdk",
@@ -6,7 +11,7 @@ packages = [
 
 [project]
 name = "siepic_ebeam_pdk"
-version = "0.4.34"
+version = "0.4.45"
 authors = [
   { name="Lukas Chrostowski", email="lukasc@ece.ubc.ca" },
 ]

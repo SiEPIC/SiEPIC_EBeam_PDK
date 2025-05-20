@@ -17,6 +17,7 @@
  <dsl-interpreter-name/>
  <text>
 import pya
+import os
 
 def export_for_fabrication():
  

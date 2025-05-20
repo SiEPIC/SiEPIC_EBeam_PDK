@@ -3,7 +3,14 @@ global-include *.gds *.GDS *.oas *.OAS *.lydrc *.lyp *.lyt *.xml *.py
 
 graft siepic_ebeam_pdk/pymacros/opics_ebeam
 
-prune siepic_ebeam_pdk/CML
+# Include the compact models, for post-layout simulation verification
+# prune siepic_ebeam_pdk/CML
+recursive-include siepic_ebeam_pdk/CML *
+# This increases the PyPI package by 5X. Consider having a function that downloads it separately
+# https://chatgpt.com/share/681c3633-bd98-8005-989b-bce8c95d0bc7
+
+
+
 prune siepic_ebeam_pdk/CDC_SM
 prune siepic_ebeam_pdk/fdtd
 prune siepic_ebeam_pdk/pymacros/broken

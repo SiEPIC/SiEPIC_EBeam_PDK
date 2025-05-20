@@ -220,5 +220,7 @@ def MZI():
     # Export for fabrication:
     file_out = export_layout(cell, path, filename, relative_path = '..', format='oas', screenshot=True)
 
+    return ly
+
 if __name__ == "__main__":
     MZI()

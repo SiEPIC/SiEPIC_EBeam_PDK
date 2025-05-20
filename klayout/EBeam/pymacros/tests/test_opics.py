@@ -3,6 +3,8 @@
 #  Unit test for simulation using OPICS
 
 
+import pytest
+@pytest.mark.skip(reason="Running this test modifies the compact models, breaking them.")
 def test_opics():
     import SiEPIC
 
@@ -14,7 +16,10 @@ def test_opics():
 
     import siepic_ebeam_pdk
 
+    import sys, os
+    sys.path.append( os.path.abspath (os.path.join( os.path.dirname( os.path.abspath(__file__)), '..')))
     import opics_ebeam
+    
     ebeam_lib = opics_ebeam
 
     print(f"Components: {ebeam_lib.components_list}")

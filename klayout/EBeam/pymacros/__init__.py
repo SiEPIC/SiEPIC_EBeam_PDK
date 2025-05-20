@@ -1,9 +1,10 @@
 # $autorun
 
-version = "0.4.34"
+version = "0.4.45"
 
 print('SiEPIC-EBeam-PDK Python module: pymacros, v%s' % version)
 
+import pya
 from SiEPIC.scripts import load_klayout_library
 
 verbose=False
@@ -18,9 +19,13 @@ load_klayout_library(tech, 'EBeam-Dream', "v%s, Dream Photonics" % version, 'gds
 load_klayout_library(tech, 'EBeam-SiN', "v%s, Silicon Nitride" % version, 'gds/EBeam_SiN','pymacros/pcells_SiN', verbose=verbose)
 load_klayout_library(tech, 'EBeam-ANT', "v%s, ANT components" % version, 'gds/ANT','', verbose=verbose)
 
+# Add version number to the technology Description
+pya.Technology.technology_by_name(tech).description = f'v{version}'
+
 
 # Load OPICS simulation library
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import opics_ebeam
+# Users should load opics manually
+#import sys, os
+#sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+#import opics_ebeam
 

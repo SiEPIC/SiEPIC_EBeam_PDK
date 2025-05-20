@@ -1,6 +1,16 @@
 import pya
 from pya import *
 from SiEPIC.utils import get_technology_by_name
+from pya import Text, Trans, Point
+
+from SiEPIC._globals import Python_Env
+if Python_Env == 'Script':
+    # For external Python mode, when installed using pip install siepic_ebeam_pdk
+    import siepic_ebeam_pdk
+
+from SiEPIC.utils.layout import new_layout, make_pin
+from SiEPIC.extend import to_itype
+from SiEPIC.utils import arc_wg
 
 
 class Waveguide_Arc(pya.PCellDeclarationHelper):
@@ -20,7 +30,7 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
         self.param("radius", self.TypeDouble, "Radius", default=10)
         self.param("wg_width", self.TypeDouble, "Waveguide Width", default=0.5)
         self.param("start_angle", self.TypeDouble, "Start Angle", default=0)
-        self.param("stop_angle", self.TypeDouble, "Stop Angle", default=45)
+        self.param("stop_angle", self.TypeDouble, "Stop Angle", default=180)
         self.param(
             "pinrec", self.TypeLayer, "PinRec Layer", default=TECHNOLOGY["PinRec"]
         )
@@ -66,7 +76,6 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
         # stop_agnle: stopping angle of the arc
         # length units in dbu
         import math
-        from SiEPIC.utils import arc_wg
 
         # fetch the parameters
         dbu = self.layout.dbu
@@ -78,7 +87,6 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
         LayerPinRecN = ly.layer(self.pinrec)
         LayerDevRecN = ly.layer(self.devrec)
 
-        from SiEPIC.extend import to_itype
 
         w = to_itype(self.wg_width, dbu)
         r = to_itype(self.radius, dbu)
@@ -91,14 +99,15 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
 
         deg_to_rad = math.pi / 180.0
 
-        # draw the arc
+        # draw the arc waveguide
         x = 0
         y = 0
-
-        from SiEPIC._globals import PIN_LENGTH as pin_length
-
-        self.cell.shapes(LayerSiN).insert(arc_wg(r, w, start_angle, stop_angle))
+        wg_polygon = arc_wg(r, w, start_angle, stop_angle)
+        self.cell.shapes(LayerSiN).insert(wg_polygon)
+        waveguide_length = wg_polygon.area()/w
+        
         # Create the pins, as short paths:
+        from SiEPIC._globals import PIN_LENGTH as pin_length
 
         # Pin on the right side:
         x = r * math.cos(start_angle * deg_to_rad)
@@ -141,3 +150,62 @@ class Waveguide_Arc(pya.PCellDeclarationHelper):
         y = 0
         # layout_arc_wg_dbu(self.cell, LayerDevRecN, x, y, r, w*3, start_angle, stop_angle)
         self.cell.shapes(LayerDevRecN).insert(arc_wg(r, w * 3, start_angle, stop_angle))
+
+
+        # Compact model information
+        t = pya.Trans(pya.Trans.R0, r, 0)
+        text = Text("Lumerical_INTERCONNECT_library=EBeam", t, w/10, -1)
+        shape = self.cell.shapes(LayerDevRecN).insert(text)
+        shape.text_size = w / 10
+        t = pya.Trans(pya.Trans.R0, r, w / 4)
+        text = pya.Text("Component=ebeam_wg_integral_1550", t, w/10, -1)
+        shape = self.cell.shapes(LayerDevRecN).insert(text)
+        shape.text_size = w / 10
+        t = pya.Trans(pya.Trans.R0, r, w / 2)
+        text = Text(
+            "Spice_param:wg_length=%.3fu wg_width=%.3fu"
+            % (waveguide_length * dbu, w*dbu), t, w / 10, -1
+        )
+        shape = self.cell.shapes(LayerDevRecN).insert(text)
+        
+
+
+
+class test_lib(pya.Library):
+    def __init__(self):
+        tech = "EBeam"
+        library = tech + "test_lib"
+        self.technology = tech
+        self.layout().register_pcell("Waveguide_Arc", Waveguide_Arc())
+        self.register(library)
+
+if __name__ == "__main__":
+    print("Test layout for: Waveguide_Arc")
+
+    # load the test library, and technology
+    t = test_lib()
+    tech = t.technology
+
+    # Create a new layout for the chip floor plan
+    topcell, ly = new_layout(tech, "test", GUI=True, overwrite=True)
+
+    # instantiate the cell
+    library = tech + "test_lib"
+
+    # Create spirals for all the types of waveguides
+    from SiEPIC.utils import load_Waveguides_by_Tech
+
+    waveguide_types = load_Waveguides_by_Tech(tech)
+    technology = get_technology_by_name('EBeam')
+    xmax = 0
+    y = 0
+    x = xmax
+    pcell = ly.create_cell(
+        "Waveguide_Arc",
+        library,{})
+    t = pya.Trans(pya.Trans.R0, x, y - pcell.bbox().bottom)
+    inst = topcell.insert(pya.CellInstArray(pcell.cell_index(), t))
+
+    # Display in KLayout, saving the layout in the PCell's folder
+    import os
+    topcell.show(os.path.dirname(__file__))

@@ -284,7 +284,7 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
             + (gap / 2) / dbu
         ) / 2
         half_r = self.cell.bbox().width() - half_l
-        dev = Box(-half_l, ystdd[-1] / dbu - 1, half_r, ystdu[-1] / dbu + 1)
+        dev = Box(-half_l, ystdd[-1] / dbu, half_r, ystdu[-1] / dbu)
         shapes(LayerDevRecN).insert(dev)
         dev_width = self.cell.bbox().width() / 2
 
@@ -312,7 +312,7 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
 
         # Pin1
         # t = Trans(Trans.R0, dev_width-w/2,dev_up)
-        t = Trans(Trans.R0, xstdu[-1] / dbu + 251, dev_up + 1)
+        t = Trans(Trans.R0, xstdu[-1] / dbu + 251, dev_up)
         pin = Path(
             [Point(0, -pin_length / 2), Point(0, pin_length / 2)], 500
         )  # 500 is width of std WG
@@ -325,10 +325,60 @@ class SWG_MultiBox_Ring(pya.PCellDeclarationHelper):
             print(dev_up)
             print(dev_up * dbu)
         # Pin2
-        t = Trans(Trans.R0, xstdu[-1] / dbu + 251, dev_down - 1)
+        t = Trans(Trans.R0, xstdu[-1] / dbu + 251, dev_down)
         pin = Path([Point(0, pin_length / 2), Point(0, -pin_length / 2)], 500)
         pin_t = pin.transformed(t)
         shapes(LayerPinRecN).insert(pin_t)
         text = Text("opt2", t)
         shape = shapes(LayerPinRecN).insert(text)
         shape.text_size = 0.4 / dbu
+
+
+
+class test_lib(Library):
+    def __init__(self):
+        tech = "EBeam"
+        library = tech + "test_lib"
+        self.technology = tech
+        self.layout().register_pcell("SWG_MultiBox_Ring", SWG_MultiBox_Ring())
+        self.register(library)
+
+
+if __name__ == "__main__":
+    print("Test layout for: SWG_MultiBox_Ring")
+
+    import siepic_ebeam_pdk
+    from SiEPIC.utils.layout import new_layout
+
+    # load the test library, and technology
+    t = test_lib()
+    tech = t.technology
+
+    # Create a new layout for the chip floor plan
+    topcell, ly = new_layout(tech, "test", GUI=True, overwrite=True)
+
+    # instantiate the cell
+    library = tech + "test_lib"
+
+    xmax = 0
+    y = 0
+    x = xmax
+    pcell = ly.create_cell("SWG_MultiBox_Ring", library, {})
+    t = pya.Trans(pya.Trans.R0, x, y - pcell.bbox().bottom)
+    inst = topcell.insert(pya.CellInstArray(pcell.cell_index(), t))
+
+    # Save
+    import os
+    from SiEPIC.scripts import export_layout
+
+    path = os.path.dirname(os.path.realpath(__file__))
+    filename = os.path.splitext(os.path.basename(__file__))[0]
+    file_out = export_layout(topcell, path, filename, format="oas", screenshot=True)
+
+    # Display in KLayout
+    from SiEPIC._globals import Python_Env
+
+    if Python_Env == "Script":
+        from SiEPIC.utils import klive
+
+        klive.show(file_out, technology=tech, keep_position=True)
