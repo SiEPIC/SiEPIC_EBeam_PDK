@@ -7,7 +7,7 @@
 # input layers:
 
 si = layer("1/0")
-sin = layer("1/5")
+sin = layer("4/0")
 sietch1 = layer("11/0")
 sietch2 = layer("12/0")
 
@@ -27,7 +27,7 @@ substrate = bulk
 x_oxide = grow(2.0)
 
 # silicon layer, and etching
-x_si = grow(0.22)
+x_si = mask(si).grow(0.22)
 etch_si = si.inverted 
 # waveguide, assume 3 degree sidewall, with mid-point being the desired width; bias = sin(3)*220.
 etch_angle = 3
@@ -35,7 +35,7 @@ mask(etch_si).etch(0.22, :taper => etch_angle, :bias =>  0, :into => x_si)
 x_si1 = x_si.dup
 
 # silicon nitride layer, and etching
-x_sin = grow(0.4)
+x_sin = mask(sin).grow(0.4)
 etch_sin = sin.inverted 
 # waveguide, assume 5 degree sidewall, with mid-point being the desired width; bias = sin(10)*220.
 etch_angle = 5
