@@ -27,7 +27,7 @@
 | Euler Parameter  | 0.25     |
 | Waveguide width  | 500 nm     |
 
-## Experimental Results for r_eff = 5μm, 10μm
+## Experimental Results for r_eff = 5μm, 10μm with p = 0.25 (default/not-optimized)
 ![alt text](imgs/exp_5um.png)
 *Fig. 2: 5μm Experimental Results*
 
