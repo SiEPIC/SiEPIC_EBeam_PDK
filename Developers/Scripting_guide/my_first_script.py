@@ -25,7 +25,7 @@ class ebeam_Bent_Bragg(PCellDeclarationHelper):
 
     # declare the parameters
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Waveguide'])
-    self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = TECHNOLOGY['31_Si_p6nm'])
+    self.param("silayer_gratings", self.TypeLayer, "Si Gratings Layer", default = TECHNOLOGY['Si'])
     self.param("radius", self.TypeDouble, "Radius (um)", default = 25)
     self.param("width", self.TypeDouble, "Width (um)", default = 0.5)
     
