@@ -41,7 +41,6 @@ class spiral_paperclip(pya.PCellDeclarationHelper):
         wg_type = None
         for w in self.waveguide_types:
             if 'SiN' in w['name']:
-                print(f"  {w['name']}")
                 if '1310' in w['name'] and 'w=800' in w['name']:
                     wg_type = w['name']
         if not wg_type:
