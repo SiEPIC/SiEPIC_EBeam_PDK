@@ -17,6 +17,8 @@ using SiEPIC-Tools function including connect_pins_with_waveguide and connect_ce
 
 usage:
  - run this script in Python
+ 
+2025: added DFT as a variable
 '''
 
 def MZI():
@@ -74,6 +76,13 @@ def MZI():
         cell_ebeam_gc = ly.create_cell2('GC_TE_1550_8degOxide_BB', tech_name)
         cell_ebeam_y = ly.create_cell2('ebeam_y_1550', tech_name)
         cell_ebeam_y_dream = ly.create_cell2('ebeam_dream_splitter_1x2_te1550_BB', 'EBeam-Dream')
+
+    # Design for Test rules
+    x,y = 0, 410e3
+    t = pya.Trans(Trans.R0,x,y)
+    text = pya.Text ("DFT=DFT_Phot1x", t)
+    text.valign = pya.Text.VAlignTop
+    cell.shapes(ly.layer(ly.TECHNOLOGY['Text'])).insert(text).text_size = 10/dbu
 
     # grating couplers, place at absolute positions
     x,y = 60000, 15000
@@ -180,7 +189,7 @@ def MZI():
                             'length':200,
                             'loops':4,
                             'flatten':True})
-    x,y = 60000, 175000
+    x,y = 60000, 220000
     t = Trans(Trans.R0,x,y)
     instGC1 = cell.insert(CellInstArray(cell_ebeam_gc.cell_index(), t))
     t = Trans(Trans.R0,x,y+127000)
@@ -207,8 +216,6 @@ def MZI():
     connect_pins_with_waveguide(instY2, 'opt2', instSpiral, 'optA', waveguide_type=waveguide_type)
     connect_pins_with_waveguide(instY1, 'opt3', instSpiral, 'optB', waveguide_type=waveguide_type,turtle_B=[5,-90])
 
-
-
     # Zoom out
     zoom_out(cell)
 
@@ -219,6 +226,13 @@ def MZI():
 
     # Export for fabrication:
     file_out = export_layout(cell, path, filename, relative_path = '..', format='oas', screenshot=True)
+
+    # Verification
+    from SiEPIC.verification import layout_check
+    file_lyrdb = os.path.join(path, filename + ".lyrdb")
+    num_errors = layout_check(cell=cell, verbose=False, GUI=True, file_rdb=file_lyrdb)
+
+
 
     return ly
 
