@@ -151,8 +151,8 @@
 
   <waveguide>
   <name>SiN Strip TE 1310 nm, w=800 nm</name>
-  <CML>None</CML>
-  <model>None</model>
+  <CML>EBeam-SiN</CML>
+  <model>Waveguide_SiN_TE_1310_w800</model>
   <sbends>true</sbends>
   <radius>60</radius>
   <width>0.8</width>
