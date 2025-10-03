@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <technology>
  <name>EBeam</name>
- <description>v0.4.51</description>
+ <description>v0.4.52</description>
  <group/>
  <dbu>0.001</dbu>
  <default-grids/>
