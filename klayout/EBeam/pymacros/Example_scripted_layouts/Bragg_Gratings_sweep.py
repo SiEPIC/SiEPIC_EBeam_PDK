@@ -24,7 +24,7 @@ The layout includes:
 
 2. Grating coupler array for fiber testing
    - Automatically generated based on number of devices
-   - 127µm pitch matching standard fiber arrays
+   - 127um pitch matching standard fiber arrays
    - TE or TM polarization support
 
 3. Simple waveguide routing
@@ -40,8 +40,8 @@ Usage:
  - Adjust Num_sweep to control number of devices (layout width)
 
 Example Parameter Sweeps:
- - Corrugation width: dW from 0 to 0.1 µm (20 devices)
- - Grating period: period from 0.310 to 0.324 µm
+ - Corrugation width: dW from 0 to 0.1 um (20 devices)
+ - Grating period: period from 0.310 to 0.324 um
  - Number of periods: N from 300 to 700
 """
 
@@ -93,24 +93,24 @@ def Bragg_Gratings_sweep():
         # Example: np.linspace(0.310, 0.324, 20) creates 20 values from 0.310 to 0.324
         
         N = np.linspace(950, 950, Num_sweep)           # Number of grating periods
-        period = np.linspace(.317, .317, Num_sweep)     # Grating period (µm)
-        w = np.linspace(.5, .5, Num_sweep)             # Waveguide width (µm)
-        dW = np.linspace(0.01, 0.1, Num_sweep)             # Corrugation width (µm) - sweep parameter
+        period = np.linspace(.317, .317, Num_sweep)     # Grating period (um)
+        w = np.linspace(.5, .5, Num_sweep)             # Waveguide width (um)
+        dW = np.linspace(0.01, 0.1, Num_sweep)             # Corrugation width (um) - sweep parameter
         sine = 1                                        # Sinusoidal grating (1) or rectangular (0)
-        misalignment = np.linspace(0, 0, Num_sweep)    # Misalignment offset (µm)
+        misalignment = np.linspace(0, 0, Num_sweep)    # Misalignment offset (um)
         
         # ===== Layout and Routing Parameters =====
-        device_spacing = 10.5       # Spacing between adjacent devices (µm)
-        GC_pitch = 127              # Vertical spacing between grating couplers (µm) - standard fiber array pitch
-        GC_offset = 80              # Horizontal spacing between GCs in array (µm)
-        GC_device_spacing = 23      # Spacing between GC array and device array (µm)
+        device_spacing = 10.5       # Spacing between adjacent devices (um)
+        GC_pitch = 127              # Vertical spacing between grating couplers (um) - standard fiber array pitch
+        GC_offset = 80              # Horizontal spacing between GCs in array (um)
+        GC_device_spacing = 23      # Spacing between GC array and device array (um)
         
         # Waveguide routing parameters
-        wg_bend_radius = 5         # Waveguide route bend radius (µm)
-        wg_width = .5               # Waveguide route width (µm)
-        wg_pitch = 5                # Spacing between adjacent waveguides (µm) - keep > 3 µm to minimize crosstalk
-        route_up = 330              # Y-space from top GC for upward routing (µm)
-        route_down = -2*wg_bend_radius  # Y-space from bottom GC for downward routing (µm)
+        wg_bend_radius = 5         # Waveguide route bend radius (um)
+        wg_width = .5               # Waveguide route width (um)
+        wg_pitch = 5                # Spacing between adjacent waveguides (um) - keep > 3 um to minimize crosstalk
+        route_up = 330              # Y-space from top GC for upward routing (um)
+        route_down = -2*wg_bend_radius  # Y-space from bottom GC for downward routing (um)
         
         # ===== Device Naming and Technology =====
         name = 'BraggSweep'         # Device name prefix for measurement labels
@@ -118,8 +118,8 @@ def Bragg_Gratings_sweep():
         PDK = 'EBeam'               # PDK library name
         
         # ===== Layout Size Limits =====
-        max_width = 605e3           # Maximum layout width (µm) - standard die width
-        max_height = 410e3          # Maximum layout height (µm) - standard die height
+        max_width = 605e3           # Maximum layout width (um) - standard die width
+        max_height = 410e3          # Maximum layout height (um) - standard die height
 
     # ===== Layout Generation Class =====
     
@@ -356,25 +356,25 @@ def Bragg_Gratings_sweep():
     layout_height = bbox.height() * ly.dbu  # Convert to microns
     
     print(f"  Layout bounding box: {bbox}")
-    print(f"  Layout size: {layout_width:.1f} µm (width) x {layout_height:.1f} µm (height)")
-    print(f"  Size limits: {params.max_width/1e3:.1f} µm (width) x {params.max_height/1e3:.1f} µm (height)")
+    print(f"  Layout size: {layout_width:.1f} um (width) x {layout_height:.1f} um (height)")
+    print(f"  Size limits: {params.max_width/1e3:.1f} um (width) x {params.max_height/1e3:.1f} um (height)")
     
     # Check if layout exceeds size limits
     if layout_width > params.max_width/1e3 or layout_height > params.max_height/1e3:
         error_msg = f"\nERROR: Layout exceeds size limits!\n"
-        error_msg += f"  Current size: {layout_width:.1f} µm x {layout_height:.1f} µm\n"
-        error_msg += f"  Maximum size: {params.max_width/1e3:.1f} µm x {params.max_height/1e3:.1f} µm\n"
+        error_msg += f"  Current size: {layout_width:.1f} um x {layout_height:.1f} um\n"
+        error_msg += f"  Maximum size: {params.max_width/1e3:.1f} um x {params.max_height/1e3:.1f} um\n"
         if layout_width > params.max_width/1e3:
-            error_msg += f"  Width exceeds limit by {layout_width - params.max_width/1e3:.1f} µm\n"
+            error_msg += f"  Width exceeds limit by {layout_width - params.max_width/1e3:.1f} um\n"
         if layout_height > params.max_height/1e3:
-            error_msg += f"  Height exceeds limit by {layout_height - params.max_height/1e3:.1f} µm\n"
+            error_msg += f"  Height exceeds limit by {layout_height - params.max_height/1e3:.1f} um\n"
         error_msg += "\nSuggestions:\n"
         error_msg += "  - Reduce Num_sweep (number of devices)\n"
         error_msg += "  - Reduce device_spacing\n"
         error_msg += "  - Reduce GC_offset or GC_device_spacing\n"
         raise Exception(error_msg)
     else:
-        print(f"  ✓ Layout size is within limits")
+        print(f"  - Layout size is within limits")
 
 
     print("SiEPIC_EBeam_PDK: Bragg_Gratings_sweep.py - done")
