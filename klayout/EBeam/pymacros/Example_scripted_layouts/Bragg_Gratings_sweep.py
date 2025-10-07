@@ -1,4 +1,4 @@
-# $description: Bragg gratings sweep (EBeam)
+# $description: Bragg gratings sweep (openEBL EBeam)
 # $show-in-menu
 # $group-name: Examples_EBeam
 # $menu-path: siepic_menu.exlayout.begin
@@ -27,16 +27,17 @@ The layout includes:
    - 127µm pitch matching standard fiber arrays
    - TE or TM polarization support
 
-3. Interleaved waveguide routing
-   - Compact routing for even/odd device numbering
+3. Simple waveguide routing
+   - Each device has its own column of 3 GCs (bottom, middle, top)
    - Automated measurement labels for each device
    - Supports reflection and transmission measurements
+   - Compact layout fits within standard die size constraints
 
 Usage:
  - Requires the SiEPIC-EBeam-PDK
  - Generates a layout with Bragg grating devices and automated test structures
- - Number of devices MUST BE EVEN for interleaved routing configuration
  - Modify Parameters class to customize sweep ranges
+ - Adjust Num_sweep to control number of devices (layout width)
 
 Example Parameter Sweeps:
  - Corrugation width: dW from 0 to 0.1 µm (20 devices)
@@ -54,7 +55,7 @@ def Bragg_Gratings_sweep():
 
     import SiEPIC
     from SiEPIC._globals import Python_Env
-    from SiEPIC.scripts import zoom_out, export_layout
+    from SiEPIC.scripts import zoom_out, export_layout, connect_pins_with_waveguide
     from SiEPIC.extend import to_itype
     from SiEPIC.utils.layout import new_layout, floorplan
     from SiEPIC.utils import create_cell2
@@ -84,28 +85,28 @@ def Bragg_Gratings_sweep():
         """Configuration parameters for Bragg grating device array"""
         
         # ===== Sweep Configuration =====
-        # Number of devices MUST BE EVEN for interleaved routing!
-        Num_sweep = 10
+        # Number of devices in the sweep array
+        Num_sweep = 2
         
         # ===== Bragg Grating Device Parameters =====
         # Use np.linspace(start, stop, num) to create parameter sweeps
         # Example: np.linspace(0.310, 0.324, 20) creates 20 values from 0.310 to 0.324
         
-        N = np.linspace(500, 500, Num_sweep)           # Number of grating periods
+        N = np.linspace(950, 950, Num_sweep)           # Number of grating periods
         period = np.linspace(.317, .317, Num_sweep)     # Grating period (µm)
         w = np.linspace(.5, .5, Num_sweep)             # Waveguide width (µm)
-        dW = np.linspace(0, .1, Num_sweep)             # Corrugation width (µm) - sweep parameter
-        sine = 0                                        # Sinusoidal grating (1) or rectangular (0)
+        dW = np.linspace(0.01, 0.1, Num_sweep)             # Corrugation width (µm) - sweep parameter
+        sine = 1                                        # Sinusoidal grating (1) or rectangular (0)
         misalignment = np.linspace(0, 0, Num_sweep)    # Misalignment offset (µm)
         
         # ===== Layout and Routing Parameters =====
         device_spacing = 10.5       # Spacing between adjacent devices (µm)
         GC_pitch = 127              # Vertical spacing between grating couplers (µm) - standard fiber array pitch
         GC_offset = 80              # Horizontal spacing between GCs in array (µm)
-        GC_device_spacing = 50      # Spacing between GC array and device array (µm)
+        GC_device_spacing = 23      # Spacing between GC array and device array (µm)
         
         # Waveguide routing parameters
-        wg_bend_radius = 15         # Waveguide route bend radius (µm)
+        wg_bend_radius = 5         # Waveguide route bend radius (µm)
         wg_width = .5               # Waveguide route width (µm)
         wg_pitch = 5                # Spacing between adjacent waveguides (µm) - keep > 3 µm to minimize crosstalk
         route_up = 330              # Y-space from top GC for upward routing (µm)
@@ -144,6 +145,9 @@ def Bragg_Gratings_sweep():
                 cell (pya.Cell): Cell to insert the device into
                 ly (pya.Layout): Layout object
                 dbu (float): Database unit
+                
+            Returns:
+                Instance of the Y-branch splitter (for waveguide connections)
             """
             p = self.p
             
@@ -159,20 +163,21 @@ def Bragg_Gratings_sweep():
             pcell_bragg = ly.create_cell("ebeam_bragg_te1550", p.PDK, pcell_params)
             
             L_ybranch = 14.8
-            H_ybranch = 5.5    
             
             # Place Bragg grating
             x_pos = pos[0]
             y_pos = L_ybranch + pos[1]
             t = Trans(Trans.R90, to_itype(x_pos, dbu), to_itype(y_pos, dbu))
-            cell.insert(CellInstArray(pcell_bragg.cell_index(), t))
+            inst_bragg = cell.insert(CellInstArray(pcell_bragg.cell_index(), t))
             
             # Y-branch splitter PCell using create_cell2
             pcell_y = create_cell2(ly, "ebeam_y_1550", p.PDK)
             x_pos = pos[0]
             y_pos = L_ybranch/2 + pos[1]
             t = Trans(Trans.R270, to_itype(x_pos, dbu), to_itype(y_pos, dbu))
-            cell.insert(CellInstArray(pcell_y.cell_index(), t))
+            inst_y = cell.insert(CellInstArray(pcell_y.cell_index(), t))
+            
+            return inst_y, inst_bragg
             
         def draw_device_array(self, cell, ly):
             """
@@ -200,159 +205,96 @@ def Bragg_Gratings_sweep():
             TextLayerN = ly.layer(TECHNOLOGY['Text'])
             
             # Clean all cells within the present cell
-            ly.prune_subcells(cell.cell_index(), 100)
+            #ly.prune_subcells(cell.cell_index(), 100)
             
             # Create a sub-cell for the device array
             top_cell = cell
             cell = ly.create_cell(p.name)
-            t = Trans(Trans.R0, 0, 0)
+            t = Trans(Trans.R0, 42e3, 19e3)
             top_cell.insert(CellInstArray(cell.cell_index(), t))    
             
-            # Draw grating coupler array using create_cell2
-            cell_gc = create_cell2(ly, "ebeam_gc_%s1550" % p.pol, p.PDK)
-            GC_imported = cell_gc.cell_index()
+            # Create grating coupler cell
+            cell_gc = create_cell2(ly, "GC_TE_1550_8degOxide_BB", p.PDK)
             
-            # Instantiate GC array (6 rows x Num_sweep/2 columns)
-            x = p.GC_offset
-            t = Trans(Trans.R0, 0, 0)
-            cell.insert(CellInstArray(
-                GC_imported, t, 
-                DPoint(0, p.GC_pitch/2).to_itype(dbu), 
-                DPoint(p.GC_offset, 0).to_itype(dbu), 
-                6, int(p.Num_sweep/2)
-            ))
+            # Waveguide type for routing
+            waveguide_type = 'Strip TE 1550 nm, w=500 nm'
             
             L_ybranch = 14.8
             H_ybranch = 5.5
             
-            # Draw devices and routing
+            # Draw devices and routing (simplified - no interleaving)
             for i in range(p.Num_sweep):
-                device_xpos = ((p.Num_sweep-2)/2)*p.GC_offset + p.GC_device_spacing + i*p.device_spacing
-                device_ypos = 0 
-                device_ypos_top = L_ybranch + p.N[i]*p.period[i]
-
-                self.draw_device(i, [device_xpos, device_ypos], cell, ly, dbu)
+                # Calculate GC x position (each device has its own column of GCs)
+                GC_xpos = i * p.GC_offset
                 
-                # Routing for even-indexed devices
-                if i % 2 == 0:
-                    GC_xpos = p.GC_offset*(p.Num_sweep-2-i)/2
+                # Calculate device x position
+                device_xpos = GC_xpos + p.GC_device_spacing
+                device_ypos = 0
 
-                    # 1st waveguide: bottom GC to reflection port
-                    GC_ypos = 0
-                    route_ypos = p.route_down - 2*p.wg_pitch*(i+1) + p.wg_pitch
-                    
-                    pts = [
-                        DPoint(GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, route_ypos), 
-                        DPoint(device_xpos+H_ybranch/2, route_ypos), 
-                        DPoint(device_xpos+H_ybranch/2, device_ypos)
-                    ]
-                    dpath = DPath(pts, p.wg_width)
-                    cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-                    
-                    # 2nd waveguide: middle GC to input port (with measurement label)
-                    GC_ypos += p.GC_pitch
-                    route_ypos = p.route_down - 2*p.wg_pitch*(i) 
-                    
-                    pts = [
-                        DPoint(GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos, route_ypos), 
-                        DPoint(device_xpos-H_ybranch/2, route_ypos), 
-                        DPoint(device_xpos-H_ybranch/2, device_ypos)
-                    ]
-                    dpath = DPath(pts, p.wg_width)
-                    cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-                    
-                    # Automated measurement label (laser on Port 2, detectors on Ports 1, 3)
-                    t = Trans(Trans.R0, to_itype(GC_xpos, dbu), to_itype(GC_ypos, dbu))
-                    polarization = (p.pol).upper()
-                    text = Text(
-                        "opt_in_%s_1550_%s%dN%dperiod%dw%ddw%dsine%dmisalign" % (
-                            polarization, p.name, p.N[i], 1000*p.period[i], 
-                            1000*p.w[i], 1000*p.dW[i], p.sine, 1000*p.misalignment[i]
-                        ), t
-                    )
-                    shape = cell.shapes(TextLayerN).insert(text)
-                    shape.text_size = 1.5/dbu
-
-                    # 3rd waveguide: top GC to transmission port
-                    GC_ypos += p.GC_pitch
-                    route_ypos = p.route_up + p.wg_pitch*(i) 
-                    
-                    pts = [
-                        DPoint(GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+p.wg_pitch+GC_xpos, route_ypos), 
-                        DPoint(device_xpos, route_ypos), 
-                        DPoint(device_xpos, device_ypos_top)
-                    ]
-                    dpath = DPath(pts, p.wg_width)
-                    cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-                    
-                # Routing for odd-indexed devices
-                else:  # i % 2 != 0
-                    GC_xpos = p.GC_offset*(p.Num_sweep-1-i)/2
-
-                    # 1st waveguide: bottom GC to reflection port
-                    GC_ypos = p.GC_pitch/2
-                    route_ypos = p.route_down - 2*p.wg_pitch*(i+1) + 2*p.wg_pitch
-                    
-                    pts = [
-                        DPoint(GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, GC_ypos-p.GC_pitch/4), 
-                        DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+3*p.wg_pitch, GC_ypos-p.GC_pitch/4), 
-                        DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+3*p.wg_pitch, route_ypos),
-                        DPoint(device_xpos-H_ybranch/2, route_ypos), 
-                        DPoint(device_xpos-H_ybranch/2, device_ypos)
-                    ]
-                    dpath = DPath(pts, p.wg_width)
-                    cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-                    
-                    # 2nd waveguide: middle GC to input port (with measurement label)
-                    GC_ypos += p.GC_pitch
-                    route_ypos = p.route_down - 2*p.wg_pitch*(i) - p.wg_pitch
-                    
-                    pts = [
-                        DPoint(GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, GC_ypos-p.GC_pitch/4), 
-                        DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+2*p.wg_pitch, GC_ypos-p.GC_pitch/4), 
-                        DPoint(GC_xpos-p.GC_offset+p.wg_bend_radius+2*p.wg_pitch, route_ypos),
-                        DPoint(device_xpos+H_ybranch/2, route_ypos), 
-                        DPoint(device_xpos+H_ybranch/2, device_ypos)
-                    ]
-                    dpath = DPath(pts, p.wg_width)
-                    cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-                    
-                    # Automated measurement label
-                    t = Trans(Trans.R0, to_itype(GC_xpos, dbu), to_itype(GC_ypos, dbu))
-                    polarization = (p.pol).upper()
-                    text = Text(
-                        "opt_in_%s_1550_%s%dN%dperiod%dw%ddw%dsine%dmisalign" % (
-                            polarization, p.name, p.N[i], 1000*p.period[i], 
-                            1000*p.w[i], 1000*p.dW[i], p.sine, 1000*p.misalignment[i]
-                        ), t
-                    )
-                    shape = cell.shapes(TextLayerN).insert(text)
-                    shape.text_size = 1.5/dbu
-                    
-                    # 3rd waveguide: top GC to transmission port
-                    GC_ypos += p.GC_pitch
-                    route_ypos = p.route_up + p.wg_pitch*(i) 
-                    
-                    pts = [
-                        DPoint(GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, GC_ypos), 
-                        DPoint(p.wg_bend_radius+GC_xpos, route_ypos), 
-                        DPoint(device_xpos, route_ypos), 
-                        DPoint(device_xpos, device_ypos_top)
-                    ]
-                    dpath = DPath(pts, p.wg_width)
-                    cell.shapes(LayerSiN).insert(dpath.to_itype(dbu))
-                    
+                # Draw the device and get instances
+                inst_y, inst_bragg = self.draw_device(i, [device_xpos, device_ypos], cell, ly, dbu)
+                
+                # Create 3 grating couplers for this device
+                # Bottom GC (row 0) - for reflection port
+                t = Trans(Trans.R0, to_itype(GC_xpos, dbu), 0)
+                inst_gc_bottom = cell.insert(CellInstArray(cell_gc.cell_index(), t))
+                
+                # Middle GC (row 1) - for input port (with measurement label)
+                t = Trans(Trans.R0, to_itype(GC_xpos, dbu), to_itype(p.GC_pitch, dbu))
+                inst_gc_middle = cell.insert(CellInstArray(cell_gc.cell_index(), t))
+                
+                # Top GC (row 2) - for transmission port  
+                t = Trans(Trans.R0, to_itype(GC_xpos, dbu), to_itype(2 * p.GC_pitch, dbu))
+                inst_gc_top = cell.insert(CellInstArray(cell_gc.cell_index(), t))
+                
+                # Routing using connect_pins_with_waveguide with turtle commands
+                # Turtle format: [distance, angle, distance, angle, ...]
+                # Angles: positive = counterclockwise, negative = clockwise
+                
+                # 1st waveguide: Bottom GC to reflection port (opt3 - right output of Y-branch)
+                # From GC: go right, turn down, go to device height, turn right, go to device
+                connect_pins_with_waveguide(
+                    inst_gc_bottom, 'opt1', 
+                    inst_y, 'opt2',
+                    waveguide_type=waveguide_type,
+                    turtle_A=[p.wg_bend_radius, -90, 0,0],  # From GC: go radius, turn right
+                    turtle_B=[p.wg_bend_radius * 2, -90]  # From Y: go radius, turn right
+                )
+                
+                # 2nd waveguide: Middle GC to input port (opt1 - input of Y-branch)
+                # From GC: go right (with offset), turn down, go to device height
+                connect_pins_with_waveguide(
+                    inst_gc_middle, 'opt1', 
+                    inst_y, 'opt3',
+                    waveguide_type=waveguide_type,
+                    turtle_A=[p.wg_bend_radius + p.wg_pitch, -90, 0,0],  # From GC: go radius+pitch, turn right
+                    turtle_B=[p.wg_bend_radius, -90]  # From Y: go radius, turn right
+                )
+                
+                # 3rd waveguide: Top GC to transmission port (Bragg grating output)
+                # From GC: go right to device x, then down to Bragg top
+                # Calculate the horizontal distance
+                horizontal_dist = device_xpos - GC_xpos
+                connect_pins_with_waveguide(
+                    inst_gc_top, 'opt1', 
+                    inst_bragg, 'pin2',
+                    waveguide_type=waveguide_type,
+                    turtle_A=[p.wg_bend_radius, 90, 0,0],  # From GC: go radius, turn left (up)
+                    turtle_B=[p.wg_bend_radius, 90, 1,90]  # From Y: go radius, turn right
+                )
+                
+                # Automated measurement label (laser on middle GC, detectors on bottom and top)
+                t = Trans(Trans.R0, to_itype(GC_xpos, dbu), to_itype(p.GC_pitch, dbu))
+                polarization = (p.pol).upper()
+                text = Text(
+                    "opt_in_%s_1550_%s%dN%dperiod%dw%ddw%dsine%dmisalign" % (
+                        polarization, p.name, int(p.N[i]), int(1000*p.period[i]), 
+                        int(1000*p.w[i]), int(1000*p.dW[i]), p.sine, int(1000*p.misalignment[i])
+                    ), t
+                )
+                shape = cell.shapes(TextLayerN).insert(text)
+                shape.text_size = 1.5/dbu
+                
             return cell
 
     # ===== Main Layout Generation =====
@@ -399,10 +341,13 @@ def Bragg_Gratings_sweep():
     print(f"  Layout verification complete: {num_errors} error(s) found")
 
     # Show in KLayout Live viewer if running from external Python
+    '''
     if Python_Env == 'Script':
         from SiEPIC.utils import klive
         klive.show(file_out, lyrdb_filename=file_lyrdb, technology=tech_name)
-
+    '''
+    cell.show()
+    
     # ===== Layout Size Verification =====
     
     # Measure the bounding box of the entire layout
