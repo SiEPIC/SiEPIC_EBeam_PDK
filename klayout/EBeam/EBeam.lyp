@@ -344,6 +344,24 @@
   </group-members>
   
   <group-members>
+    <frame-color>#c0e0c0</frame-color>
+    <fill-color>#c0e0c0</fill-color>
+    <frame-brightness>0</frame-brightness>
+    <fill-brightness>0</fill-brightness>
+    <dither-pattern>I6</dither-pattern>
+    <line-style/>
+    <valid>true</valid>
+    <visible>true</visible>
+    <transparent>true</transparent>
+    <width>0</width>
+    <marked>false</marked>
+    <xfill>false</xfill>
+    <animation>0</animation>
+    <name>Shelf Etch</name>
+    <source>205/0@1</source>
+  </group-members>
+  
+  <group-members>
     <frame-color>#303030</frame-color>
     <fill-color>#a0a0c0</fill-color>
     <frame-brightness>0</frame-brightness>
