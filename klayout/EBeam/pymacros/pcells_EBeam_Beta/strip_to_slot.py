@@ -1,3 +1,4 @@
+#%%
 import os
 from pya import (
     PCellDeclarationHelper,
@@ -91,7 +92,7 @@ class strip_to_slot(PCellDeclarationHelper):
 
         # Draw the **curved arc** for the slot converter
         x = 0
-        y = r + rails / 2 + w + slot
+        y = r + rails / 2 + w + slot - w / 2
         theta = (acos((r - offset) / r) / (2 * pi)) * 360
         arc_width = sqrt(r**2 - (r - offset) ** 2)
         self.cell.shapes(LayerSiN).insert(
@@ -100,50 +101,50 @@ class strip_to_slot(PCellDeclarationHelper):
 
         # **Taper polygon**
         pts = [
-            Point.from_dpoint(DPoint(0, w)),
-            Point.from_dpoint(DPoint(0, 0)),
-            Point.from_dpoint(DPoint(-taper, w - rails)),
-            Point.from_dpoint(DPoint(-taper, w)),
+            Point.from_dpoint(DPoint(0, w - w / 2)),
+            Point.from_dpoint(DPoint(0, 0 - w / 2)),
+            Point.from_dpoint(DPoint(-taper, -rails-slot/2)),
+            Point.from_dpoint(DPoint(-taper, -slot/2)),
         ]
         shapes(LayerSiN).insert(Polygon(pts))
 
         # **Top left half waveguide** (slot side)
         wg1 = Polygon(
             [
-                Point.from_dpoint(DPoint(-taper, w + slot)),
-                Point.from_dpoint(DPoint(-taper, w + slot + rails)),
-                Point.from_dpoint(DPoint(0, w + slot + wt)),
-                Point.from_dpoint(DPoint(0, w + slot)),
+                Point.from_dpoint(DPoint(-taper, slot/2)),
+                Point.from_dpoint(DPoint(-taper, slot/2 + rails)),
+                Point.from_dpoint(DPoint(0, w + slot + wt - w / 2)),
+                Point.from_dpoint(DPoint(0, w + slot - w / 2)),
             ]
         )
         shapes(LayerSiN).insert(wg1)
 
         # **Bus waveguide**
-        wg2 = Box(0, 0, arc_width + wt, w)
+        wg2 = Box(0, 0 - w / 2, arc_width + wt, w - w / 2)
         shapes(LayerSiN).insert(wg2)
 
         # **Pins**
         pin_path1 = Path(
             [
-                Point(-taper + pin_length, w + slot / 2),
-                Point(-taper - pin_length, w + slot / 2),
+                Point(-taper + pin_length, w / 2 - w / 2),
+                Point(-taper - pin_length, w / 2 - w / 2),
             ],
             2 * rails + slot,
         )
         shapes(LayerPinRecN).insert(pin_path1)
-        text1 = Text("opt1", Trans(Trans.R0, -taper, w))
+        text1 = Text("opt1", Trans(Trans.R0, -taper, w / 2 - w / 2))
         text1.text_size = 0.5 / dbu
         shapes(LayerPinRecN).insert(text1)
 
         pin_path2 = Path(
             [
-                Point(arc_width + wt - pin_length, w / 2),
-                Point(arc_width + wt + pin_length, w / 2),
+                Point(arc_width + wt - pin_length, w / 2 - w / 2),
+                Point(arc_width + wt + pin_length, w / 2 - w / 2),
             ],
             w,
         )
         shapes(LayerPinRecN).insert(pin_path2)
-        text2 = Text("opt2", Trans(Trans.R0, arc_width + wt, w / 2))
+        text2 = Text("opt2", Trans(Trans.R0, arc_width + wt, w / 2 - w / 2))
         text2.text_size = 0.5 / dbu
         shapes(LayerPinRecN).insert(text2)
 
@@ -194,3 +195,5 @@ if __name__ == "__main__":
         from SiEPIC.utils import klive
 
         klive.show(file_out, technology=tech)
+
+# %%
