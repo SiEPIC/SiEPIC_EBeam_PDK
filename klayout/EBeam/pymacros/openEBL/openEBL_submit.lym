@@ -15,15 +15,458 @@
  <menu-path>siepic_menu.openEBL&gt;begin("openEBL").begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text>'''
-Information for design submission to SiEPICfab openEBL
+ <text><![CDATA['''
+SiEPIC-EBeam-PDK
+Submit design to SiEPICfab openEBL via GitHub Pull Request
 https://siepic.ca/openebl/
+
+Automatically determines the current semester repository:
+  Jan-Mar  -> openEBL-YYYY-02
+  Apr-Jun  -> openEBL-YYYY-05
+  Sep-Nov  -> openEBL-YYYY-10
+
+No local git installation required. All GitHub operations are performed
+via the GitHub REST API over HTTPS using a Personal Access Token (PAT).
+The layout must pass SiEPIC functional verification before it is submitted.
+The saved token is checked with GitHub first; if it has expired or been
+revoked, it is cleared and the user is prompted for a new one.
 '''
 
 import pya
+import datetime
+import urllib.request
+import urllib.error
+import json
+import base64
+import os
+import tempfile
+import time
+import webbrowser
+import ssl
 
-pya.MessageBox.info("Information", 
-    "Please upload your design to &lt;a href=https://siepic.ca/openebl/&gt;SiEPICfab openEBL&lt;/a&gt;, at https://siepic.ca/openebl", 
-    pya.MessageBox.Ok)
-</text>
+BASE_ORG   = "SiEPIC"
+GITHUB_API = "https://api.github.com"
+CONFIG_PATH = os.path.expanduser("~/.klayout/openebl_config.json")
+
+# KLayout's bundled Python often lacks a configured certificate store.
+# This builds a working SSL context across Windows, macOS, and Linux.
+_SSL_CERT_CANDIDATES = [
+    "/etc/ssl/cert.pem",                          # macOS
+    "/etc/ssl/certs/ca-certificates.crt",         # Debian / Ubuntu
+    "/etc/pki/tls/certs/ca-bundle.crt",           # RHEL / CentOS / Fedora
+    "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",  # Fedora (alt)
+    "/usr/local/etc/openssl/cert.pem",            # Homebrew OpenSSL
+    "/usr/local/etc/openssl@3/cert.pem",          # Homebrew OpenSSL 3
+]
+
+def _make_ssl_context():
+    import sys
+    ctx = ssl.create_default_context()
+    # Windows: Python's ssl module uses the Windows certificate store natively
+    if sys.platform == "win32":
+        return ctx
+    # macOS / Linux: load from the first cert file found on disk
+    for cert_path in _SSL_CERT_CANDIDATES:
+        if os.path.exists(cert_path):
+            ctx.load_verify_locations(cert_path)
+            return ctx
+    # Fallback: certifi (may be installed alongside KLayout or via pip)
+    try:
+        import certifi
+        ctx.load_verify_locations(certifi.where())
+    except ImportError:
+        pass
+    return ctx
+
+_SSL_CTX = _make_ssl_context()
+
+
+def get_semester_repo():
+    now   = datetime.datetime.now()
+    year  = now.year
+    month = now.month
+    if 1 <= month <= 3:
+        tag = "02"
+    elif 4 <= month <= 6:
+        tag = "05"
+    elif 9 <= month <= 11:
+        tag = "10"
+    else:
+        return None
+    return "openEBL-{}-{}".format(year, tag)
+
+
+def gh_api(endpoint, token, method="GET", body=None):
+    url = GITHUB_API + endpoint
+    headers = {
+        "Authorization":        "Bearer " + token,
+        "Accept":               "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent":           "SiEPIC-EBeam-PDK/1.0",
+    }
+    req = urllib.request.Request(url, headers=headers, method=method)
+    if body is not None:
+        req.data = json.dumps(body).encode("utf-8")
+        req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, context=_SSL_CTX) as resp:
+            return json.loads(resp.read().decode("utf-8")), resp.status
+    except urllib.error.HTTPError as e:
+        try:
+            return json.loads(e.read().decode("utf-8")), e.code
+        except Exception:
+            return {}, e.code
+
+
+def load_config():
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_config(cfg):
+    try:
+        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(cfg, f, indent=2)
+    except Exception:
+        pass
+
+
+PAT_URL = "https://github.com/settings/tokens/new?scopes=repo&description=openEBL"
+
+
+def check_token(token):
+    '''Ask GitHub who owns this token.
+    Returns (True, login) if valid, (False, reason) if GitHub rejects it,
+    or (None, reason) for any other problem (network, GitHub outage).'''
+    if not token:
+        return False, ""
+    try:
+        data, status = gh_api("/user", token)
+    except Exception as ex:
+        return None, "Could not reach GitHub:\n{}".format(ex)
+    if status == 200:
+        return True, data.get("login", "")
+    if status == 401:
+        return False, ("GitHub rejected your saved token ({}).\n"
+                       "It has probably expired or been revoked.".format(
+                           data.get("message", "Bad credentials")))
+    return None, "GitHub returned HTTP {} while checking your token:\n{}".format(
+        status, data.get("message", ""))
+
+
+def get_valid_token(cfg):
+    '''Return a working token. If the saved token is missing, expired or
+    revoked, clear it, open the token page and prompt for a new one.
+    Returns None if the user cancels.'''
+    token = cfg.get("github_token", "")
+    ok, info = check_token(token)
+    if ok:
+        return token
+    if ok is None:
+        pya.MessageBox.warning("GitHub Error", info, pya.MessageBox.Ok)
+        return None
+
+    # Missing or rejected: forget the old token so it is never reused
+    if token:
+        cfg.pop("github_token", None)
+        save_config(cfg)
+    note = info + "\n\n" if info else ""
+
+    webbrowser.open(PAT_URL)
+    while True:
+        # Qt hides a single '&' in dialog text, so show it as '&&'
+        label = (
+            "Enter a GitHub Personal Access Token (PAT) with 'repo' scope.\n\n"
+            "Your browser has been opened to the token creation page.\n"
+            "If it did not open, go to:\n"
+            "  {}\n\n"
+            "Tick 'repo', click Generate token, then paste it here.\n\n"
+            "Your token is stored locally in:\n  {}".format(
+                PAT_URL.replace("&", "&&"), CONFIG_PATH)
+        )
+        token = pya.InputDialog.get_string(
+            "GitHub Personal Access Token", note + label, "")
+        if token is None:
+            return None
+        token = str(token).strip()
+        if not token:
+            return None
+        ok, info = check_token(token)
+        if ok:
+            cfg["github_token"] = token
+            save_config(cfg)
+            return token
+        if ok is None:
+            pya.MessageBox.warning("GitHub Error", info, pya.MessageBox.Ok)
+            return None
+        note = "GitHub rejected that token. Make sure you copied all of it.\n\n"
+
+
+def run_verification(layout):
+    '''Run SiEPIC functional verification on every top cell: the same check
+    as pressing V in KLayout, and the one the openEBL GitHub Action runs.
+    Returns (num_errors, message); num_errors is None if the check could not run.'''
+    try:
+        from SiEPIC.verification import layout_check
+    except Exception as ex:
+        return None, "SiEPIC-Tools verification is not available:\n{}".format(ex)
+
+    top_cells = layout.top_cells()
+    if not top_cells:
+        return None, "The layout has no cells."
+    total = 0
+    for cell in top_cells:
+        try:
+            result = layout_check(cell=cell, verbose=False, GUI=True)
+        except Exception as ex:
+            return None, "Verification failed to run on cell '{}':\n{}".format(cell.name, ex)
+        if isinstance(result, int):
+            total += result
+        else:
+            # Older SiEPIC-Tools may not return a count: read it from the marker database
+            lv = pya.Application.instance().main_window().current_view()
+            n = lv.num_rdbs() if lv else 0
+            if n == 0:
+                return None, "Could not read the verification results."
+            total += lv.rdb(n - 1).num_items()
+    return total, ""
+
+
+def submit():
+    repo_name = get_semester_repo()
+    if repo_name is None:
+        pya.MessageBox.warning(
+            "Off Season",
+            "No active openEBL submission period right now.\n\n"
+            "Active periods:\n"
+            "  Jan-Mar  ->  openEBL-YYYY-02\n"
+            "  Apr-Jun  ->  openEBL-YYYY-05\n"
+            "  Sep-Nov  ->  openEBL-YYYY-10",
+            pya.MessageBox.Ok,
+        )
+        return
+
+    mw   = pya.Application.instance().main_window()
+    view = mw.current_view()
+    if view is None:
+        pya.MessageBox.warning("No Layout", "Please open a layout first.", pya.MessageBox.Ok)
+        return
+    cv = view.active_cellview()
+    if not cv.is_valid():
+        pya.MessageBox.warning("No Cell", "No active cell selected.", pya.MessageBox.Ok)
+        return
+
+    # Block the submission if the layout fails verification
+    num_errors, msg = run_verification(cv.layout())
+    if num_errors is None:
+        pya.MessageBox.warning(
+            "Verification Could Not Run",
+            msg + "\n\nSubmission cancelled.",
+            pya.MessageBox.Ok,
+        )
+        return
+    if num_errors > 0:
+        pya.MessageBox.warning(
+            "Verification Failed",
+            "Your layout has {} verification error(s), so it was not submitted.\n\n"
+            "The errors are listed in the Marker Database Browser.\n"
+            "Fix them, then run Submit again.".format(num_errors),
+            pya.MessageBox.Ok,
+        )
+        return
+
+    cfg = load_config()
+
+    # Prompt: GitHub username
+    username = pya.InputDialog.get_string(
+        "GitHub Username",
+        "Enter your GitHub username.\n"
+        "Your design will be submitted to:\n"
+        "  github.com/{}/{}/submissions/\n\n"
+        "Don't have an account? Create one free at github.com".format(BASE_ORG, repo_name),
+        cfg.get("github_username", ""),
+    )
+    if username is None:
+        return
+    username = str(username).strip()
+    if not username:
+        return
+
+    # Token: reuse the saved one if GitHub accepts it, otherwise prompt for a new one
+    token = get_valid_token(cfg)
+    if token is None:
+        return
+
+    # Prompt: filename
+    default_filename = cfg.get("last_filename", "EBeam_{}.gds".format(username))
+    filename = pya.InputDialog.get_string(
+        "Submission Filename",
+        "Filename for your submission (will be placed in 'submissions/' folder):",
+        default_filename,
+    )
+    if filename is None:
+        return
+    filename = str(filename).strip()
+    if not filename:
+        return
+    if not filename.endswith(".gds"):
+        filename += ".gds"
+
+    save_config({"github_username": username, "github_token": token, "last_filename": filename})
+
+    # Export current layout to a temporary GDS file
+    tmp_path = os.path.join(tempfile.gettempdir(), filename)
+    try:
+        cv.layout().write(tmp_path)
+    except Exception as ex:
+        pya.MessageBox.warning("Export Error", "Could not export layout:\n{}".format(ex), pya.MessageBox.Ok)
+        return
+
+    with open(tmp_path, "rb") as f:
+        gds_b64 = base64.b64encode(f.read()).decode("utf-8")
+
+    # 1. Verify the upstream semester repo exists
+    repo_info, status = gh_api("/repos/{}/{}".format(BASE_ORG, repo_name), token)
+    if status != 200:
+        pya.MessageBox.warning(
+            "Repository Not Found",
+            "Could not access github.com/{}/{}\n"
+            "HTTP {}: {}\n\n"
+            "The semester repository may not be open yet.".format(
+                BASE_ORG, repo_name, status, repo_info.get("message", "unknown")
+            ),
+            pya.MessageBox.Ok,
+        )
+        return
+    default_branch = repo_info.get("default_branch", "main")
+
+    # 2. Fork the upstream repo into the user's account (idempotent)
+    _, status = gh_api("/repos/{}/{}/forks".format(BASE_ORG, repo_name), token, "POST", {})
+    if status not in (200, 202):
+        pya.MessageBox.warning(
+            "Fork Error",
+            "Could not fork the repository (HTTP {}).\n"
+            "Check that your token has 'repo' scope.".format(status),
+            pya.MessageBox.Ok,
+        )
+        return
+
+    # 3. Wait for GitHub to finish creating the fork (async on GitHub's side)
+    fork_ready = False
+    for _ in range(8):
+        _, s = gh_api("/repos/{}/{}".format(username, repo_name), token)
+        if s == 200:
+            fork_ready = True
+            break
+        time.sleep(3)
+    if not fork_ready:
+        pya.MessageBox.warning(
+            "Fork Not Ready",
+            "Your fork is still being created by GitHub.\n"
+            "Please wait a moment and try again.",
+            pya.MessageBox.Ok,
+        )
+        return
+
+    # 4. Sync fork's main with upstream so we build on the latest state.
+    gh_api(
+        "/repos/{}/{}/merge-upstream".format(username, repo_name),
+        token, "POST", {"branch": default_branch},
+    )
+
+    # 5. Get the file's existing blob SHA from the fork's main (if it exists).
+    #    Because the fork is now synced with upstream this SHA is authoritative —
+    #    providing it on PUT tells GitHub "replace this blob" rather than "add new
+    #    file", which is a clean fast-forward with no conflict possible.
+    fork_file_path = "/repos/{}/{}/contents/submissions/{}".format(username, repo_name, filename)
+    existing, s = gh_api("{}?ref={}".format(fork_file_path, default_branch), token)
+    file_sha = existing.get("sha") if s == 200 else None
+
+    # 6. Upload the GDS directly onto the fork's main branch.
+    put_body = {
+        "message": "Submit {} for {}".format(filename, repo_name),
+        "content": gds_b64,
+        "branch":  default_branch,
+    }
+    if file_sha:
+        put_body["sha"] = file_sha
+
+    _, status = gh_api(fork_file_path, token, "PUT", put_body)
+    if status not in (200, 201):
+        pya.MessageBox.warning(
+            "Upload Error",
+            "Could not upload {} to GitHub (HTTP {}).".format(filename, status),
+            pya.MessageBox.Ok,
+        )
+        return
+
+    # 7. Open a PR from fork:main → upstream:main, or find the existing open one
+    #    and report its URL (resubmission silently updates the same PR).
+    pr_data, status = gh_api(
+        "/repos/{}/{}/pulls".format(BASE_ORG, repo_name),
+        token, "POST",
+        {
+            "title": "Submission: {}".format(filename),
+            "body":  "Automated submission of `{}` to **{}**.\n\n"
+                     "Submitted via SiEPIC-EBeam-PDK KLayout macro.".format(filename, repo_name),
+            "head":  "{}:{}".format(username, default_branch),
+            "base":  default_branch,
+        },
+    )
+
+    if status in (200, 201):
+        pr_url = pr_data.get("html_url", "https://github.com/{}/{}/pulls".format(BASE_ORG, repo_name))
+        webbrowser.open(pr_url)
+        pya.MessageBox.info(
+            "Submission Successful!",
+            "Your design has been submitted.\n\n"
+            "Pull request created:\n{}".format(pr_url),
+            pya.MessageBox.Ok,
+        )
+    elif status == 422:
+        # 422 means a PR from this head already exists — find and show it.
+        existing_prs, s2 = gh_api(
+            "/repos/{}/{}/pulls?state=open&head={}:{}&base={}".format(
+                BASE_ORG, repo_name, username, default_branch, default_branch
+            ),
+            token,
+        )
+        if s2 == 200 and existing_prs:
+            pr_url = existing_prs[0].get("html_url", "https://github.com/{}/{}/pulls".format(BASE_ORG, repo_name))
+            webbrowser.open(pr_url)
+            pya.MessageBox.info(
+                "Submission Updated!",
+                "Your existing pull request has been updated with the new design.\n\n"
+                "Pull request:\n{}".format(pr_url),
+                pya.MessageBox.Ok,
+            )
+        else:
+            fallback_url = "https://github.com/{}/{}/pulls".format(BASE_ORG, repo_name)
+            webbrowser.open(fallback_url)
+            pya.MessageBox.info(
+                "Submission Updated!",
+                "Your design was uploaded. An open pull request already exists:\n"
+                "{}".format(fallback_url),
+                pya.MessageBox.Ok,
+            )
+    else:
+        errors = pr_data.get("errors", [])
+        detail = "\n".join(str(e) for e in errors)
+        pya.MessageBox.warning(
+            "Pull Request Error",
+            "Could not create pull request (HTTP {}):\n{}\n{}".format(
+                status, pr_data.get("message", "unknown error"), detail
+            ),
+            pya.MessageBox.Ok,
+        )
+
+
+submit()
+]]></text>
 </klayout-macro>

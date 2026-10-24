@@ -15,15 +15,341 @@
  <menu-path>siepic_menu.openEBL&gt;end("openEBL").end</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
- <text>'''
-Information for design submission to SiEPICfab openEBL
+ <text><![CDATA['''
+SiEPIC-EBeam-PDK
+Download the merged layout from SiEPICfab openEBL and open it in KLayout.
 https://siepic.ca/openebl/
+
+Automatically determines the current semester repository:
+  Jan 1  - Apr 14  -> openEBL-YYYY-02
+  Apr 15 - Aug 31  -> openEBL-YYYY-05
+  Sep 1  - Dec 31  -> openEBL-YYYY-10
+
+Finds the latest "merge-files" GitHub Actions artifact, downloads and
+extracts it, then opens the layout in KLayout.
 '''
 
 import pya
+import datetime
+import urllib.request
+import urllib.error
+import urllib.parse
+import json
+import base64
+import os
+import ssl
+import tempfile
+import zipfile
+import io
+import webbrowser
 
-pya.MessageBox.info("Information", 
-    "Please download the merged designs from &lt;a href=https://siepic.ca/openebl/&gt;SiEPICfab openEBL&lt;/a&gt;, at https://siepic.ca/openebl.\nThen inspect the merged layout, find your design, and make sure it is correct.", 
-    pya.MessageBox.Ok)
-</text>
+BASE_ORG    = "SiEPIC"
+GITHUB_API  = "https://api.github.com"
+CONFIG_PATH = os.path.expanduser("~/.klayout/openebl_config.json")
+ARTIFACT_NAME = "merge-files"
+
+_SSL_CERT_CANDIDATES = [
+    "/etc/ssl/cert.pem",
+    "/etc/ssl/certs/ca-certificates.crt",
+    "/etc/pki/tls/certs/ca-bundle.crt",
+    "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+    "/usr/local/etc/openssl/cert.pem",
+    "/usr/local/etc/openssl@3/cert.pem",
+]
+
+def _make_ssl_context():
+    import sys
+    ctx = ssl.create_default_context()
+    if sys.platform == "win32":
+        return ctx
+    for cert_path in _SSL_CERT_CANDIDATES:
+        if os.path.exists(cert_path):
+            ctx.load_verify_locations(cert_path)
+            return ctx
+    try:
+        import certifi
+        ctx.load_verify_locations(certifi.where())
+    except ImportError:
+        pass
+    return ctx
+
+_SSL_CTX = _make_ssl_context()
+
+
+def get_semester_repo():
+    now  = datetime.datetime.now()
+    year = now.year
+    md   = (now.month, now.day)
+    if (1, 1) <= md <= (4, 14):
+        tag = "02"
+    elif (4, 15) <= md <= (8, 31):
+        tag = "05"
+    elif (9, 1) <= md <= (12, 31):
+        tag = "10"
+    else:
+        return None
+    return "openEBL-{}-{}".format(year, tag)
+
+
+def gh_api(endpoint, token, method="GET", body=None):
+    url = GITHUB_API + endpoint
+    headers = {
+        "Authorization":        "Bearer " + token,
+        "Accept":               "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent":           "SiEPIC-EBeam-PDK/1.0",
+    }
+    req = urllib.request.Request(url, headers=headers, method=method)
+    if body is not None:
+        req.data = json.dumps(body).encode("utf-8")
+        req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, context=_SSL_CTX) as resp:
+            return json.loads(resp.read().decode("utf-8")), resp.status
+    except urllib.error.HTTPError as e:
+        try:
+            return json.loads(e.read().decode("utf-8")), e.code
+        except Exception:
+            return {}, e.code
+
+
+def load_config():
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_config(cfg):
+    try:
+        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(cfg, f, indent=2)
+    except Exception:
+        pass
+
+
+PAT_URL = "https://github.com/settings/tokens/new?scopes=repo&description=openEBL"
+
+
+def check_token(token):
+    '''Ask GitHub who owns this token.
+    Returns (True, login) if valid, (False, reason) if GitHub rejects it,
+    or (None, reason) for any other problem (network, GitHub outage).'''
+    if not token:
+        return False, ""
+    try:
+        data, status = gh_api("/user", token)
+    except Exception as ex:
+        return None, "Could not reach GitHub:\n{}".format(ex)
+    if status == 200:
+        return True, data.get("login", "")
+    if status == 401:
+        return False, ("GitHub rejected your saved token ({}).\n"
+                       "It has probably expired or been revoked.".format(
+                           data.get("message", "Bad credentials")))
+    return None, "GitHub returned HTTP {} while checking your token:\n{}".format(
+        status, data.get("message", ""))
+
+
+def get_valid_token(cfg):
+    '''Return a working token. If the saved token is missing, expired or
+    revoked, clear it, open the token page and prompt for a new one.
+    Returns None if the user cancels.'''
+    token = cfg.get("github_token", "")
+    ok, info = check_token(token)
+    if ok:
+        return token
+    if ok is None:
+        pya.MessageBox.warning("GitHub Error", info, pya.MessageBox.Ok)
+        return None
+
+    # Missing or rejected: forget the old token so it is never reused
+    if token:
+        cfg.pop("github_token", None)
+        save_config(cfg)
+    note = info + "\n\n" if info else ""
+
+    webbrowser.open(PAT_URL)
+    while True:
+        # Qt hides a single '&' in dialog text, so show it as '&&'
+        label = (
+            "Enter a GitHub Personal Access Token (PAT) with 'repo' scope.\n\n"
+            "Your browser has been opened to the token creation page.\n"
+            "If it did not open, go to:\n"
+            "  {}\n\n"
+            "Tick 'repo', click Generate token, then paste it here.\n\n"
+            "Your token is stored locally in:\n  {}".format(
+                PAT_URL.replace("&", "&&"), CONFIG_PATH)
+        )
+        token = pya.InputDialog.get_string(
+            "GitHub Personal Access Token", note + label, "")
+        if token is None:
+            return None
+        token = str(token).strip()
+        if not token:
+            return None
+        ok, info = check_token(token)
+        if ok:
+            cfg["github_token"] = token
+            save_config(cfg)
+            return token
+        if ok is None:
+            pya.MessageBox.warning("GitHub Error", info, pya.MessageBox.Ok)
+            return None
+        note = "GitHub rejected that token. Make sure you copied all of it.\n\n"
+
+
+def download_merged():
+    repo_name = get_semester_repo()
+    if repo_name is None:
+        pya.MessageBox.warning(
+            "Off Season",
+            "No active openEBL semester right now.\n\n"
+            "Active periods:\n"
+            "  Jan 1  - Apr 14  ->  openEBL-YYYY-02\n"
+            "  Apr 15 - Aug 31  ->  openEBL-YYYY-05\n"
+            "  Sep 1  - Dec 31  ->  openEBL-YYYY-10",
+            pya.MessageBox.Ok,
+        )
+        return
+
+    cfg = load_config()
+
+    # Token: reuse the saved one if GitHub accepts it, otherwise prompt for a new one
+    token = get_valid_token(cfg)
+    if token is None:
+        return
+
+    # Find the latest non-expired "merge-files" artifact
+    page = 1
+    target_artifact = None
+    while True:
+        data, status = gh_api(
+            "/repos/{}/{}/actions/artifacts?per_page=100&page={}".format(BASE_ORG, repo_name, page),
+            token,
+        )
+        if status != 200:
+            pya.MessageBox.warning(
+                "API Error",
+                "Could not list artifacts (HTTP {}): {}\n"
+                "Check your token has 'repo' scope.".format(status, data.get("message", "")),
+                pya.MessageBox.Ok,
+            )
+            return
+        artifacts = data.get("artifacts", [])
+        if not artifacts:
+            break
+        for art in artifacts:
+            if art.get("name") == ARTIFACT_NAME and not art.get("expired", False):
+                target_artifact = art
+                break
+        if target_artifact:
+            break
+        if len(artifacts) < 100:
+            break
+        page += 1
+
+    if target_artifact is None:
+        pya.MessageBox.warning(
+            "No Merged Layout Found",
+            "No '{}' artifact was found in {}/{}.\n\n"
+            "The merged layout may not have been generated yet.".format(
+                ARTIFACT_NAME, BASE_ORG, repo_name
+            ),
+            pya.MessageBox.Ok,
+        )
+        return
+
+    created = target_artifact.get("created_at", "unknown time")
+    size_mb = target_artifact.get("size_in_bytes", 0) / 1024 / 1024
+    download_url = target_artifact["archive_download_url"]
+
+    # GitHub artifact downloads redirect to a pre-signed S3 URL.
+    # We must NOT send the Authorization header to S3 (it conflicts with
+    # S3's own query-string auth and causes a 400 error).
+    # Strategy: fetch the redirect location first, then download from S3 cleanly.
+    auth_headers = {
+        "Authorization":        "Bearer " + token,
+        "Accept":               "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent":           "SiEPIC-EBeam-PDK/1.0",
+    }
+
+    # Step 1: get the S3 redirect URL without following it
+    class _NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
+    opener = urllib.request.build_opener(_NoRedirect, urllib.request.HTTPSHandler(context=_SSL_CTX))
+    req = urllib.request.Request(download_url, headers=auth_headers)
+    try:
+        opener.open(req)
+        s3_url = None  # no redirect happened (unexpected)
+    except urllib.error.HTTPError as e:
+        if e.code in (301, 302, 303, 307, 308):
+            s3_url = e.headers.get("Location")
+        else:
+            pya.MessageBox.warning(
+                "Download Error",
+                "Could not get download URL (HTTP {}).".format(e.code),
+                pya.MessageBox.Ok,
+            )
+            return
+
+    if not s3_url:
+        pya.MessageBox.warning("Download Error", "Could not resolve artifact download URL.", pya.MessageBox.Ok)
+        return
+
+    # Step 2: download the zip from S3 (no auth header)
+    s3_req = urllib.request.Request(s3_url, headers={"User-Agent": "SiEPIC-EBeam-PDK/1.0"})
+    try:
+        with urllib.request.urlopen(s3_req, context=_SSL_CTX) as resp:
+            zip_data = resp.read()
+    except Exception as ex:
+        pya.MessageBox.warning("Download Error", "Could not download artifact:\n{}".format(ex), pya.MessageBox.Ok)
+        return
+
+    # Step 3: extract layout file (.oas or .gds) from the zip
+    save_path = None
+    try:
+        with zipfile.ZipFile(io.BytesIO(zip_data)) as zf:
+            layout_files = [n for n in zf.namelist() if n.endswith(".oas") or n.endswith(".gds")]
+            if not layout_files:
+                pya.MessageBox.warning(
+                    "No Layout Found",
+                    "The artifact zip did not contain a .oas or .gds file.\n\n"
+                    "Files found: {}".format(", ".join(zf.namelist())),
+                    pya.MessageBox.Ok,
+                )
+                return
+            # Prefer .oas, fall back to .gds
+            layout_name = next((f for f in layout_files if f.endswith(".oas")), layout_files[0])
+            file_data   = zf.read(layout_name)
+            save_path   = os.path.join(tempfile.gettempdir(), os.path.basename(layout_name))
+            with open(save_path, "wb") as f:
+                f.write(file_data)
+    except Exception as ex:
+        pya.MessageBox.warning("Extract Error", "Could not extract layout:\n{}".format(ex), pya.MessageBox.Ok)
+        return
+
+    # Step 4: open in KLayout
+    mw = pya.Application.instance().main_window()
+    mw.load_layout(save_path, 0)
+    pya.MessageBox.info(
+        "Merged Layout Opened",
+        "Opened merged layout from {}:\n  {}\n\n"
+        "Artifact created: {}\nSize: {:.1f} MB\n\n"
+        "Find your design and verify it is correct.".format(
+            repo_name, os.path.basename(save_path), created, size_mb
+        ),
+        pya.MessageBox.Ok,
+    )
+
+
+download_merged()
+]]></text>
 </klayout-macro>
