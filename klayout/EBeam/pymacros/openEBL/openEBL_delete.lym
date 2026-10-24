@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Delete my submission from SiEPICfab openEBL</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>openEBL</group-name>
+ <menu-path>siepic_menu.openEBL&gt;begin("openEBL").end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text><![CDATA['''
+SiEPIC-EBeam-PDK
+Delete a previously submitted design from SiEPICfab openEBL via GitHub Pull Request
+https://siepic.ca/openebl/
+'''
+
+import pya
+import datetime
+import urllib.request
+import urllib.error
+import json
+import base64
+import os
+import ssl
+import time
+import webbrowser
+
+BASE_ORG    = "SiEPIC"
+GITHUB_API  = "https://api.github.com"
+CONFIG_PATH = os.path.expanduser("~/.klayout/openebl_config.json")
+
+_SSL_CERT_CANDIDATES = [
+    "/etc/ssl/cert.pem",
+    "/etc/ssl/certs/ca-certificates.crt",
+    "/etc/pki/tls/certs/ca-bundle.crt",
+    "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+    "/usr/local/etc/openssl/cert.pem",
+    "/usr/local/etc/openssl@3/cert.pem",
+]
+
+def _make_ssl_context():
+    import sys
+    ctx = ssl.create_default_context()
+    if sys.platform == "win32":
+        return ctx
+    for cert_path in _SSL_CERT_CANDIDATES:
+        if os.path.exists(cert_path):
+            ctx.load_verify_locations(cert_path)
+            return ctx
+    try:
+        import certifi
+        ctx.load_verify_locations(certifi.where())
+    except ImportError:
+        pass
+    return ctx
+
+_SSL_CTX = _make_ssl_context()
+
+
+def get_semester_repo():
+    now   = datetime.datetime.now()
+    year  = now.year
+    month = now.month
+    if 1 <= month <= 3:
+        tag = "02"
+    elif 4 <= month <= 6:
+        tag = "05"
+    elif 9 <= month <= 11:
+        tag = "10"
+    else:
+        return None
+    return "openEBL-{}-{}".format(year, tag)
+
+
+def gh_api(endpoint, token, method="GET", body=None):
+    url = GITHUB_API + endpoint
+    headers = {
+        "Authorization":        "Bearer " + token,
+        "Accept":               "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent":           "SiEPIC-EBeam-PDK/1.0",
+    }
+    req = urllib.request.Request(url, headers=headers, method=method)
+    if body is not None:
+        req.data = json.dumps(body).encode("utf-8")
+        req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, context=_SSL_CTX) as resp:
+            return json.loads(resp.read().decode("utf-8")), resp.status
+    except urllib.error.HTTPError as e:
+        try:
+            return json.loads(e.read().decode("utf-8")), e.code
+        except Exception:
+            return {}, e.code
+
+
+def load_config():
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_config(cfg):
+    try:
+        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(cfg, f, indent=2)
+    except Exception:
+        pass
+
+
+PAT_URL = "https://github.com/settings/tokens/new?scopes=repo&description=openEBL"
+
+
+def check_token(token):
+    '''Ask GitHub who owns this token.
+    Returns (True, login) if valid, (False, reason) if GitHub rejects it,
+    or (None, reason) for any other problem (network, GitHub outage).'''
+    if not token:
+        return False, ""
+    try:
+        data, status = gh_api("/user", token)
+    except Exception as ex:
+        return None, "Could not reach GitHub:\n{}".format(ex)
+    if status == 200:
+        return True, data.get("login", "")
+    if status == 401:
+        return False, ("GitHub rejected your saved token ({}).\n"
+                       "It has probably expired or been revoked.".format(
+                           data.get("message", "Bad credentials")))
+    return None, "GitHub returned HTTP {} while checking your token:\n{}".format(
+        status, data.get("message", ""))
+
+
+def get_valid_token(cfg):
+    '''Return a working token. If the saved token is missing, expired or
+    revoked, clear it, open the token page and prompt for a new one.
+    Returns None if the user cancels.'''
+    token = cfg.get("github_token", "")
+    ok, info = check_token(token)
+    if ok:
+        return token
+    if ok is None:
+        pya.MessageBox.warning("GitHub Error", info, pya.MessageBox.Ok)
+        return None
+
+    # Missing or rejected: forget the old token so it is never reused
+    if token:
+        cfg.pop("github_token", None)
+        save_config(cfg)
+    note = info + "\n\n" if info else ""
+
+    webbrowser.open(PAT_URL)
+    while True:
+        # Qt hides a single '&' in dialog text, so show it as '&&'
+        label = (
+            "Enter a GitHub Personal Access Token (PAT) with 'repo' scope.\n\n"
+            "Your browser has been opened to the token creation page.\n"
+            "If it did not open, go to:\n"
+            "  {}\n\n"
+            "Tick 'repo', click Generate token, then paste it here.\n\n"
+            "Your token is stored locally in:\n  {}".format(
+                PAT_URL.replace("&", "&&"), CONFIG_PATH)
+        )
+        token = pya.InputDialog.get_string(
+            "GitHub Personal Access Token", note + label, "")
+        if token is None:
+            return None
+        token = str(token).strip()
+        if not token:
+            return None
+        ok, info = check_token(token)
+        if ok:
+            cfg["github_token"] = token
+            save_config(cfg)
+            return token
+        if ok is None:
+            pya.MessageBox.warning("GitHub Error", info, pya.MessageBox.Ok)
+            return None
+        note = "GitHub rejected that token. Make sure you copied all of it.\n\n"
+
+
+def delete_submission():
+    repo_name = get_semester_repo()
+    if repo_name is None:
+        pya.MessageBox.warning(
+            "Off Season",
+            "No active openEBL submission period right now.",
+            pya.MessageBox.Ok,
+        )
+        return
+
+    cfg = load_config()
+
+    username = pya.InputDialog.get_string(
+        "GitHub Username",
+        "Enter your GitHub username:",
+        cfg.get("github_username", ""),
+    )
+    if username is None:
+        return
+    username = str(username).strip()
+    if not username:
+        return
+
+    # Token: reuse the saved one if GitHub accepts it, otherwise prompt for a new one
+    token = get_valid_token(cfg)
+    if token is None:
+        return
+
+    default_filename = cfg.get("last_filename", "EBeam_{}.gds".format(username))
+    filename = pya.InputDialog.get_string(
+        "Submission Filename to Delete",
+        "Enter the exact filename you want to delete from submissions/:",
+        default_filename,
+    )
+    if filename is None:
+        return
+    filename = str(filename).strip()
+    if not filename:
+        return
+    if not filename.endswith(".gds"):
+        filename += ".gds"
+
+    # Confirm
+    answer = pya.MessageBox.warning(
+        "Confirm Deletion",
+        "This will open a Pull Request to DELETE:\n\n"
+        "  submissions/{}\n\n"
+        "from your fork: {}/{}\n\nContinue?".format(
+            filename, username, repo_name
+        ),
+        pya.MessageBox.Yes + pya.MessageBox.No,
+    )
+    if answer != pya.MessageBox.Yes:
+        return
+
+    # Verify upstream repo
+    repo_info, status = gh_api("/repos/{}/{}".format(BASE_ORG, repo_name), token)
+    if status != 200:
+        pya.MessageBox.warning(
+            "Repository Not Found",
+            "Could not access github.com/{}/{} (HTTP {}).".format(BASE_ORG, repo_name, status),
+            pya.MessageBox.Ok,
+        )
+        return
+    default_branch = repo_info.get("default_branch", "main")
+
+    # Check that the file actually exists in upstream
+    upstream_file_path = "/repos/{}/{}/contents/submissions/{}".format(BASE_ORG, repo_name, filename)
+    existing, status = gh_api("{}?ref={}".format(upstream_file_path, default_branch), token)
+    if status != 200:
+        pya.MessageBox.warning(
+            "File Not Found",
+            "submissions/{} was not found in {}/{}.\n\n"
+            "It may not have been merged yet, or the name may be different.".format(
+                filename, BASE_ORG, repo_name
+            ),
+            pya.MessageBox.Ok,
+        )
+        return
+    file_sha = existing["sha"]
+
+    # Server-side ownership check: verify the file was committed by this GitHub user.
+    commits_data, c_status = gh_api(
+        "/repos/{}/{}/commits?path=submissions/{}&per_page=1".format(BASE_ORG, repo_name, filename),
+        token,
+    )
+    if c_status == 200 and isinstance(commits_data, list) and len(commits_data) > 0:
+        committer_login = (
+            (commits_data[0].get("committer") or {}).get("login", "") or
+            (commits_data[0].get("author")    or {}).get("login", "")
+        )
+        bot_logins = {"github-actions[bot]", "web-flow", "dependabot[bot]"}
+        if (
+            committer_login
+            and committer_login.lower() != username.lower()
+            and committer_login not in bot_logins
+            and "[bot]" not in committer_login
+        ):
+            pya.MessageBox.warning(
+                "Ownership Check Failed",
+                "The last commit on '{}' was made by '{}'.\n\n"
+                "You may only delete files you submitted yourself.".format(
+                    filename, committer_login
+                ),
+                pya.MessageBox.Ok,
+            )
+            return
+
+    # Fork (idempotent) and wait for it to be ready
+    gh_api("/repos/{}/{}/forks".format(BASE_ORG, repo_name), token, "POST", {})
+    fork_ready = False
+    for _ in range(8):
+        _, s = gh_api("/repos/{}/{}".format(username, repo_name), token)
+        if s == 200:
+            fork_ready = True
+            break
+        time.sleep(3)
+    if not fork_ready:
+        pya.MessageBox.warning("Fork Not Ready", "Fork is still being created. Try again in a moment.", pya.MessageBox.Ok)
+        return
+
+    # Sync fork's main with upstream (same as submit flow)
+    gh_api(
+        "/repos/{}/{}/merge-upstream".format(username, repo_name),
+        token, "POST", {"branch": default_branch},
+    )
+
+    # Get the file's blob SHA from the fork's main (post-sync)
+    fork_file_path = "/repos/{}/{}/contents/submissions/{}".format(username, repo_name, filename)
+    existing_fork, s_f = gh_api("{}?ref={}".format(fork_file_path, default_branch), token)
+    fork_file_sha = existing_fork.get("sha") if s_f == 200 else file_sha  # fall back to upstream SHA
+
+    # Delete the file directly on the fork's main branch
+    _, status = gh_api(
+        fork_file_path, token, "DELETE",
+        {
+            "message": "Delete {} from {}".format(filename, repo_name),
+            "sha":     fork_file_sha,
+            "branch":  default_branch,
+        },
+    )
+    if status not in (200, 201):
+        pya.MessageBox.warning("Delete Error", "Could not delete file from fork (HTTP {}).".format(status), pya.MessageBox.Ok)
+        return
+
+    # Open PR from yourfork:main → SiEPIC:main (mirrors submit flow)
+    pr_data, status = gh_api(
+        "/repos/{}/{}/pulls".format(BASE_ORG, repo_name),
+        token, "POST",
+        {
+            "title": "Delete submission: {}".format(filename),
+            "body":  "Request to delete `submissions/{}` from **{}**.\n\n"
+                     "Submitted via SiEPIC-EBeam-PDK KLayout macro.".format(filename, repo_name),
+            "head":  "{}:{}".format(username, default_branch),
+            "base":  default_branch,
+        },
+    )
+    if status in (200, 201):
+        pr_url = pr_data.get("html_url", "https://github.com/{}/{}/pulls".format(BASE_ORG, repo_name))
+        webbrowser.open(pr_url)
+        pya.MessageBox.info(
+            "Deletion Request Submitted",
+            "Your file has been deleted from your fork and a pull request has been automatically opened.\n\n{}".format(pr_url),
+            pya.MessageBox.Ok,
+        )
+    elif status == 422:
+        # PR from this head already exists
+        existing_prs, s2 = gh_api(
+            "/repos/{}/{}/pulls?state=open&head={}:{}&base={}".format(
+                BASE_ORG, repo_name, username, default_branch, default_branch
+            ),
+            token,
+        )
+        if s2 == 200 and existing_prs:
+            pr_url = existing_prs[0].get("html_url", "https://github.com/{}/{}/pulls".format(BASE_ORG, repo_name))
+            webbrowser.open(pr_url)
+            pya.MessageBox.info(
+                "Deletion Request Updated",
+                "Your deletion pull request has been updated.\n\n"
+                "Pull request:\n{}".format(pr_url),
+                pya.MessageBox.Ok,
+            )
+    else:
+        pya.MessageBox.warning(
+            "PR Error",
+            "Could not create deletion PR (HTTP {}):\n{}".format(status, pr_data.get("message", "")),
+            pya.MessageBox.Ok,
+        )
+
+
+delete_submission()
+]]></text>
+</klayout-macro>
